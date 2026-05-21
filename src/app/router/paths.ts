@@ -1,3 +1,1 @@
-export const paths = {
-  home: '/',
-} as const
+export { paths } from '@shared/config'
