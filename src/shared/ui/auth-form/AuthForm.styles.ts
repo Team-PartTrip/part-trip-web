@@ -10,7 +10,7 @@ export const AuthPage = styled.main`
   min-height: 100vh;
   align-items: center;
   justify-content: center;
-  padding: 136px 48px 48px;
+  padding: 136px 48px 180px;
   background: #ffffff;
 
   @media (max-width: 640px) {

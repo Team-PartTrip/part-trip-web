@@ -1,6 +1,12 @@
 import { apiClient } from './client'
 
 type VerificationPurpose = 'sign-up' | 'change-password'
+type HttpMethod = 'delete' | 'get' | 'patch' | 'post' | 'put'
+
+type ApiEndpoint = {
+  method: HttpMethod
+  path: string
+}
 
 type EmptySuccessResponse = {
   ok: true
@@ -41,58 +47,63 @@ export type ResetPasswordRequest = {
 }
 
 const authEndpoints = {
-  login: '',
-  resetPassword: '',
-  sendVerificationCode: '',
-  signUp: '/auth',
-  verifyCode: '',
-} as const
+  login: {
+    method: 'post',
+    path: '',
+  },
+  resetPassword: {
+    method: 'post',
+    path: '',
+  },
+  sendVerificationCode: {
+    method: 'post',
+    path: '',
+  },
+  signUp: {
+    method: 'post',
+    path: '/auth',
+  },
+  verifyCode: {
+    method: 'post',
+    path: '',
+  },
+} as const satisfies Record<string, ApiEndpoint>
 
-async function postOrMock<TResponse>(
-  endpoint: string,
-  payload: unknown,
-  mockResponse: TResponse,
-) {
-  if (!endpoint) {
-    return mockResponse
+async function request<TResponse>(endpoint: ApiEndpoint, payload: unknown) {
+  if (!endpoint.path) {
+    throw new Error('API endpoint path is not configured.')
   }
 
-  const { data } = await apiClient.post<TResponse>(endpoint, payload)
+  const { data } = await apiClient.request<TResponse>({
+    data: endpoint.method === 'get' ? undefined : payload,
+    method: endpoint.method,
+    params: endpoint.method === 'get' ? payload : undefined,
+    url: endpoint.path,
+  })
   return data
 }
 
 export async function login(payload: LoginRequest) {
-  return postOrMock<LoginResponse>(authEndpoints.login, payload, {
-    accessToken: '',
-  })
+  return request<LoginResponse>(authEndpoints.login, payload)
 }
 
 export async function sendVerificationCode(
   payload: SendVerificationCodeRequest,
 ) {
-  return postOrMock<EmptySuccessResponse>(
+  return request<EmptySuccessResponse>(
     authEndpoints.sendVerificationCode,
     payload,
-    { ok: true },
   )
 }
 
 export async function verifyCode(payload: VerifyCodeRequest) {
-  return postOrMock<EmptySuccessResponse>(authEndpoints.verifyCode, payload, {
-    ok: true,
-  })
+  return request<EmptySuccessResponse>(authEndpoints.verifyCode, payload)
 }
 
 export async function signUp(payload: SignUpRequest) {
-  return postOrMock<EmptySuccessResponse>(authEndpoints.signUp, payload, {
-    ok: true,
-  })
+  return request<EmptySuccessResponse>(authEndpoints.signUp, payload)
 }
 
 export async function resetPassword(payload: ResetPasswordRequest) {
-  return postOrMock<EmptySuccessResponse>(
-    authEndpoints.resetPassword,
-    payload,
-    { ok: true },
-  )
+  return request<EmptySuccessResponse>(authEndpoints.resetPassword, payload)
 }
