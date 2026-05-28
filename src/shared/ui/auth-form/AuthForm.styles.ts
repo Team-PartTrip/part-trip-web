@@ -20,7 +20,7 @@ export const AuthPage = styled.main`
 
 export const Container = styled.section`
   display: flex;
-  width: min(100%, 500px);
+  width: min(100%, 450px);
   flex-direction: column;
   align-items: center;
   justify-content: center;
