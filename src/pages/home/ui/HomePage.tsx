@@ -1,330 +1,172 @@
 import type { ComponentType, SVGProps } from 'react'
-import styled, { css } from 'styled-components'
 
-import logoUrl from '@shared/assets/logo.svg'
+import * as S from './HomePage.styles'
 
 type MenuItem = {
   active?: boolean
   icon: ComponentType<SVGProps<SVGSVGElement>>
-  iconHeight: number
-  iconWidth: number
+  iconSize: number
   label: string
 }
 
-function HomeIcon(props: SVGProps<SVGSVGElement>) {
+function DashboardIcon(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 15 17" fill="none" aria-hidden="true" {...props}>
-      <path
-        d="M1.5 8.2L7.5 2.5L13.5 8.2V15.5H9.4V10.4H5.6V15.5H1.5V8.2Z"
-        fill="currentColor"
-      />
+    <svg viewBox="0 0 44 44" fill="none" aria-hidden="true" {...props}>
+      <rect x="7" y="7" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="3" />
+      <rect x="25" y="7" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="3" />
+      <rect x="7" y="25" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="3" />
+      <rect x="25" y="25" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="3" />
     </svg>
   )
 }
 
-function CommunityIcon(props: SVGProps<SVGSVGElement>) {
+function CalendarIcon(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 18 17" fill="none" aria-hidden="true" {...props}>
-      <path
-        d="M3 3.5H15C15.8284 3.5 16.5 4.17157 16.5 5V9.4C16.5 10.2284 15.8284 10.9 15 10.9H9.2L6.2 13.5V10.9H3C2.17157 10.9 1.5 10.2284 1.5 9.4V5C1.5 4.17157 2.17157 3.5 3 3.5Z"
-        fill="currentColor"
-      />
-      <circle cx="6" cy="7.2" r="0.8" fill="#fafafa" />
-      <circle cx="9" cy="7.2" r="0.8" fill="#fafafa" />
-      <circle cx="12" cy="7.2" r="0.8" fill="#fafafa" />
-    </svg>
-  )
-}
-
-function RecordIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 19 19" fill="none" aria-hidden="true" {...props}>
-      <path
-        d="M4 2.5H11.5L15 6V16.5H4C3.17157 16.5 2.5 15.8284 2.5 15V4C2.5 3.17157 3.17157 2.5 4 2.5Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M11.5 2.5V6H15"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M5.5 9.5H12.5M5.5 12H10.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
+    <svg viewBox="0 0 44 44" fill="none" aria-hidden="true" {...props}>
+      <rect x="8" y="10" width="28" height="28" rx="4" stroke="currentColor" strokeWidth="3" />
+      <path d="M15 6V14" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      <path d="M29 6V14" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      <path d="M9 19H35" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      <path d="M15 26H17M22 26H24M29 26H31M15 32H17M22 32H24" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
     </svg>
   )
 }
 
 function MissionIcon(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 21 21" fill="none" aria-hidden="true" {...props}>
-      <circle cx="6" cy="7" r="1.6" fill="currentColor" />
-      <circle cx="10.5" cy="4.8" r="1.6" fill="currentColor" />
-      <circle cx="15" cy="7" r="1.6" fill="currentColor" />
-      <circle cx="8.2" cy="10.4" r="1.6" fill="currentColor" />
-      <path
-        d="M10.5 12.3C8.2 12.3 6.6 13.7 6.6 15.4C6.6 17.1 8.3 18.5 10.5 18.5C12.7 18.5 14.4 17.1 14.4 15.4C14.4 13.7 12.8 12.3 10.5 12.3Z"
-        fill="currentColor"
-      />
+    <svg viewBox="0 0 44 44" fill="none" aria-hidden="true" {...props}>
+      <circle cx="15" cy="15" r="5" stroke="currentColor" strokeWidth="3" />
+      <circle cx="29" cy="15" r="5" stroke="currentColor" strokeWidth="3" />
+      <circle cx="22" cy="26" r="5" stroke="currentColor" strokeWidth="3" />
+      <path d="M5 34C6.8 28.8 10.4 26 15 26" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      <path d="M39 34C37.2 28.8 33.6 26 29 26" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      <path d="M14 39C15.7 34.6 18.3 32 22 32C25.7 32 28.3 34.6 30 39" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
     </svg>
   )
 }
 
-function ProfileIcon(props: SVGProps<SVGSVGElement>) {
+function TravelRecordIcon(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 21 21" fill="none" aria-hidden="true" {...props}>
-      <circle cx="10.5" cy="6.4" r="3.2" stroke="currentColor" strokeWidth="1.5" />
-      <path
-        d="M4.6 17.2C5.8 14.2 8 12.8 10.5 12.8C13 12.8 15.2 14.2 16.4 17.2"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
+    <svg viewBox="0 0 44 44" fill="none" aria-hidden="true" {...props}>
+      <path d="M9 8H27C31.4 8 35 11.6 35 16V36H17C12.6 36 9 32.4 9 28V8Z" stroke="currentColor" strokeWidth="3" strokeLinejoin="round" />
+      <path d="M17 8V26C17 31.5 21.5 36 27 36" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      <path d="M23 17H30M23 24H29" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
     </svg>
   )
 }
 
-function LogoutIcon(props: SVGProps<SVGSVGElement>) {
+function CommunityIcon(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 17 17" fill="none" aria-hidden="true" {...props}>
-      <path
-        d="M7 4.5H11.5C12.3284 4.5 13 5.17157 13 6V11C13 11.8284 12.3284 12.5 11.5 12.5H7"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M9.5 8.5H2.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M5.5 6.5L2.5 8.5L5.5 10.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg viewBox="0 0 44 44" fill="none" aria-hidden="true" {...props}>
+      <path d="M7 12L17 8L27 12L37 8V32L27 36L17 32L7 36V12Z" stroke="currentColor" strokeWidth="3" strokeLinejoin="round" />
+      <path d="M17 8V32" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      <path d="M27 12V36" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      <circle cx="22" cy="20" r="3" fill="currentColor" />
+      <path d="M16.5 28C17.6 24.8 19.5 23.2 22 23.2C24.5 23.2 26.4 24.8 27.5 28" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
     </svg>
   )
 }
 
-const menuItems: MenuItem[] = [
+function AnnouncementIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 44 44" fill="none" aria-hidden="true" {...props}>
+      <path d="M9 19H14L31 11V33L14 25H9C7.3 25 6 23.7 6 22C6 20.3 7.3 19 9 19Z" stroke="currentColor" strokeWidth="3" strokeLinejoin="round" />
+      <path d="M14 25L18 36H24L20 28" stroke="currentColor" strokeWidth="3" strokeLinejoin="round" />
+      <path d="M35 17C36.8 18.2 38 20 38 22C38 24 36.8 25.8 35 27" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function SettingIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 44 44" fill="none" aria-hidden="true" {...props}>
+      <circle cx="22" cy="22" r="5" stroke="currentColor" strokeWidth="3" />
+      <path d="M22 7V12M22 32V37M7 22H12M32 22H37" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      <path d="M11.4 11.4L15 15M29 29L32.6 32.6M32.6 11.4L29 15M15 29L11.4 32.6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+const primaryMenuItems: MenuItem[] = [
   {
     active: true,
-    icon: HomeIcon,
-    iconHeight: 17,
-    iconWidth: 15,
-    label: '홈',
+    icon: DashboardIcon,
+    iconSize: 44,
+    label: '대시보드',
   },
   {
-    icon: CommunityIcon,
-    iconHeight: 17,
-    iconWidth: 18,
-    label: '커뮤니티',
-  },
-  {
-    icon: RecordIcon,
-    iconHeight: 19,
-    iconWidth: 19,
-    label: '기록',
+    icon: CalendarIcon,
+    iconSize: 44,
+    label: '여행 계획',
   },
   {
     icon: MissionIcon,
-    iconHeight: 21,
-    iconWidth: 21,
+    iconSize: 44,
     label: '미션',
   },
   {
-    icon: ProfileIcon,
-    iconHeight: 21,
-    iconWidth: 21,
-    label: '마이페이지',
+    icon: TravelRecordIcon,
+    iconSize: 43,
+    label: '여행기록',
+  },
+  {
+    icon: CommunityIcon,
+    iconSize: 40,
+    label: '커뮤니티',
+  },
+]
+
+const secondaryMenuItems: MenuItem[] = [
+  {
+    icon: AnnouncementIcon,
+    iconSize: 43,
+    label: '공지사항',
+  },
+  {
+    icon: SettingIcon,
+    iconSize: 43,
+    label: '설정',
   },
 ]
 
 export function HomePage() {
   return (
-    <PageShell>
-      <Sidebar aria-label="홈 사이드바">
-        <Brand>
-          <BrandLogo src={logoUrl} alt="PartTrip" />
-        </Brand>
+    <S.PageShell>
+      <S.Sidebar aria-label="홈 사이드바">
+        <S.PrimaryNav aria-label="주요 메뉴">
+          <S.PrimaryNavList>
+            {primaryMenuItems.map((item) => (
+              <S.NavItemButton
+                key={item.label}
+                $active={item.active}
+                $gap={24}
+                type="button"
+                aria-current={item.active ? 'page' : undefined}
+              >
+                <S.NavIcon $size={item.iconSize}>
+                  <item.icon />
+                </S.NavIcon>
+                <S.NavLabel>{item.label}</S.NavLabel>
+              </S.NavItemButton>
+            ))}
+          </S.PrimaryNavList>
+        </S.PrimaryNav>
 
-        <SidebarBody>
-          <Nav aria-label="주요 메뉴">
-            <NavList>
-              {menuItems.map((item) => (
-                <NavItemButton
-                  key={item.label}
-                  $active={item.active}
-                  type="button"
-                >
-                  <NavIcon $height={item.iconHeight} $width={item.iconWidth}>
-                    <item.icon />
-                  </NavIcon>
-                  <NavLabel>{item.label}</NavLabel>
-                </NavItemButton>
-              ))}
-            </NavList>
-          </Nav>
+        <S.SecondaryNav aria-label="보조 메뉴">
+          <S.SecondaryNavList>
+            {secondaryMenuItems.map((item) => (
+              <S.NavItemButton key={item.label} $gap={16} type="button">
+                <S.NavIcon $size={item.iconSize}>
+                  <item.icon />
+                </S.NavIcon>
+                <S.NavLabel>{item.label}</S.NavLabel>
+              </S.NavItemButton>
+            ))}
+          </S.SecondaryNavList>
+        </S.SecondaryNav>
+      </S.Sidebar>
 
-          <LogoutButton type="button">
-            <LogoutLabel>Log out</LogoutLabel>
-            <LogoutIconWrap>
-              <LogoutIcon />
-            </LogoutIconWrap>
-          </LogoutButton>
-        </SidebarBody>
-      </Sidebar>
-
-      <MainArea aria-label="홈 콘텐츠" />
-    </PageShell>
+      <S.MainArea aria-label="홈 콘텐츠" />
+    </S.PageShell>
   )
 }
-
-const PageShell = styled.main`
-  display: flex;
-  min-height: 100vh;
-  width: 100%;
-  overflow-x: hidden;
-  background: #ffffff;
-
-  @media (max-width: 720px) {
-    min-height: 100dvh;
-  }
-`
-
-const Sidebar = styled.aside`
-  display: flex;
-  width: 241px;
-  flex: 0 0 241px;
-  flex-direction: column;
-  background: #fafafa;
-`
-
-const Brand = styled.div`
-  display: flex;
-  padding: 31px 30px 0;
-`
-
-const BrandLogo = styled.img`
-  width: 181px;
-  height: 43px;
-  object-fit: contain;
-`
-
-const SidebarBody = styled.div`
-  display: flex;
-  min-height: 0;
-  flex: 1;
-  flex-direction: column;
-`
-
-const Nav = styled.nav`
-  padding: 69px 0 0 41px;
-`
-
-const NavList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`
-
-const navButtonStyles = css`
-  display: flex;
-  width: 183px;
-  height: 56px;
-  align-items: center;
-  gap: 10px;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: #111111;
-  font: inherit;
-  font-size: 18px;
-  font-weight: 400;
-  line-height: 1;
-  letter-spacing: -0.9px;
-  text-align: left;
-  cursor: pointer;
-  outline: none;
-
-  &:hover {
-    color: #1a6ebf;
-  }
-`
-
-const NavItemButton = styled.button<{ $active?: boolean }>`
-  ${navButtonStyles}
-  color: ${({ $active }) => ($active ? '#1a6ebf' : '#111111')};
-`
-
-const NavLabel = styled.span`
-  color: inherit;
-`
-
-const NavIcon = styled.span<{ $height: number; $width: number }>`
-  display: inline-flex;
-  width: ${({ $width }) => $width}px;
-  height: ${({ $height }) => $height}px;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  color: inherit;
-
-  svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-`
-
-const LogoutButton = styled.button`
-  ${navButtonStyles}
-  margin-top: auto;
-  width: 100%;
-  height: 57px;
-  justify-content: space-between;
-  padding: 0 14px 0 14px;
-  border-radius: 0;
-  box-shadow: 0 -4px 4px rgb(0 0 0 / 25%);
-  color: #111111;
-
-  &:hover {
-    color: #1a6ebf;
-  }
-`
-
-const LogoutLabel = styled.span`
-  color: inherit;
-`
-
-const LogoutIconWrap = styled.span`
-  display: inline-flex;
-  width: 17px;
-  height: 17px;
-  align-items: center;
-  justify-content: center;
-  color: inherit;
-
-  svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-`
-
-const MainArea = styled.section`
-  flex: 1;
-  min-width: 0;
-  background: #ffffff;
-`

@@ -1,6 +1,5 @@
 import { apiClient } from './client'
 
-type VerificationPurpose = 'sign-up' | 'change-password'
 type HttpMethod = 'delete' | 'get' | 'patch' | 'post' | 'put'
 
 type ApiEndpoint = {
@@ -23,13 +22,11 @@ export type LoginRequest = {
 
 export type SendVerificationCodeRequest = {
   email: string
-  purpose: VerificationPurpose
 }
 
 export type VerifyCodeRequest = {
   code: string
   email: string
-  purpose: VerificationPurpose
 }
 
 export type SignUpRequest = {
@@ -57,15 +54,15 @@ const authEndpoints = {
   },
   sendVerificationCode: {
     method: 'post',
-    path: '',
+    path: '/auth/email/send',
   },
   signUp: {
     method: 'post',
-    path: '/auth',
+    path: '/auth/sign-up',
   },
   verifyCode: {
     method: 'post',
-    path: '',
+    path: '/auth/email/verify',
   },
 } as const satisfies Record<string, ApiEndpoint>
 
@@ -74,12 +71,20 @@ async function request<TResponse>(endpoint: ApiEndpoint, payload: unknown) {
     throw new Error('API endpoint path is not configured.')
   }
 
-  const { data } = await apiClient.request<TResponse>({
-    data: endpoint.method === 'get' ? undefined : payload,
-    method: endpoint.method,
-    params: endpoint.method === 'get' ? payload : undefined,
-    url: endpoint.path,
-  })
+  const { data } = await (async () => {
+    switch (endpoint.method) {
+      case 'delete':
+        return apiClient.delete<TResponse>(endpoint.path, { data: payload })
+      case 'get':
+        return apiClient.get<TResponse>(endpoint.path, { params: payload })
+      case 'patch':
+        return apiClient.patch<TResponse>(endpoint.path, payload)
+      case 'post':
+        return apiClient.post<TResponse>(endpoint.path, payload)
+      case 'put':
+        return apiClient.put<TResponse>(endpoint.path, payload)
+    }
+  })()
   return data
 }
 

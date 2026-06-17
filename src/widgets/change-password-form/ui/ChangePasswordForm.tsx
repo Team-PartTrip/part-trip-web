@@ -139,7 +139,6 @@ export function ChangePasswordForm() {
       setIsSendingCode(true)
       await sendVerificationCode({
         email,
-        purpose: 'change-password',
       })
       setMessage({
         text: '인증코드를 발송했습니다.',
@@ -163,7 +162,6 @@ export function ChangePasswordForm() {
       await verifyCode({
         code: verificationCode,
         email,
-        purpose: 'change-password',
       })
       setResetContext({
         code: verificationCode,
@@ -250,6 +248,7 @@ export function ChangePasswordForm() {
           <S.Form
             key="change-password-verification"
             aria-label="비밀번호 찾기 인증"
+            method="post"
             noValidate
             onSubmit={verificationForm.handleSubmit(
               handleVerificationSubmit,
@@ -305,6 +304,7 @@ export function ChangePasswordForm() {
           <S.Form
             key="change-password-password"
             aria-label="비밀번호 변경"
+            method="post"
             noValidate
             onSubmit={passwordForm.handleSubmit(
               handlePasswordSubmit,

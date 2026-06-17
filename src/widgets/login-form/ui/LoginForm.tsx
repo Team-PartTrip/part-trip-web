@@ -128,6 +128,7 @@ export function LoginForm() {
       <S.Body>
         <S.Form
           aria-label="로그인"
+          method="post"
           noValidate
           onSubmit={loginForm.handleSubmit(handleSubmit, handleInvalid)}
         >

@@ -7,7 +7,7 @@ import {
   type SubmitHandler,
   type UseFormRegisterReturn,
 } from 'react-hook-form'
-import { sendVerificationCode, signUp, verifyCode } from '@shared/api'
+import { sendVerificationCode, verifyCode } from '@shared/api'
 import logoUrl from '@shared/assets/logo.svg'
 import { paths } from '@shared/config'
 import {
@@ -21,14 +21,11 @@ import { AuthForm as S } from '@shared/ui'
 
 type SignUpStep = 'credentials' | 'verification'
 
-type SignUpCredentials = {
+type CredentialsFormValues = {
   id: string
   password: string
-  phoneNumber: string
-}
-
-type CredentialsFormValues = SignUpCredentials & {
   passwordConfirm: string
+  phoneNumber: string
 }
 
 type VerificationFormValues = {
@@ -83,7 +80,6 @@ const createSanitizedChangeHandler =
 
 export function SignUpForm() {
   const [step, setStep] = useState<SignUpStep>('credentials')
-  const [credentials, setCredentials] = useState<SignUpCredentials | null>(null)
   const [isSendingCode, setIsSendingCode] = useState(false)
   const [message, setMessage] = useState<FormMessage | null>(null)
 
@@ -134,10 +130,8 @@ export function SignUpForm() {
   })
 
   const handleCredentialsSubmit: SubmitHandler<CredentialsFormValues> = ({
-    id,
     password,
     passwordConfirm,
-    phoneNumber,
   }) => {
     if (password !== passwordConfirm) {
       setMessage({
@@ -147,11 +141,6 @@ export function SignUpForm() {
       return
     }
 
-    setCredentials({
-      id,
-      password,
-      phoneNumber,
-    })
     setMessage(null)
     setStep('verification')
   }
@@ -181,7 +170,6 @@ export function SignUpForm() {
       setIsSendingCode(true)
       await sendVerificationCode({
         email,
-        purpose: 'sign-up',
       })
       setMessage({
         text: '인증코드를 발송했습니다.',
@@ -201,28 +189,13 @@ export function SignUpForm() {
     email,
     verificationCode,
   }) => {
-    if (!credentials) {
-      setMessage({
-        text: '회원가입 정보를 다시 입력해주세요.',
-        tone: 'error',
-      })
-      setStep('credentials')
-      return
-    }
-
     try {
       await verifyCode({
         code: verificationCode,
         email,
-        purpose: 'sign-up',
-      })
-      await signUp({
-        ...credentials,
-        code: verificationCode,
-        email,
       })
       setMessage({
-        text: '회원가입이 완료되었습니다.',
+        text: '인증코드가 확인되었습니다.',
         tone: 'success',
       })
     } catch (error) {
@@ -256,6 +229,7 @@ export function SignUpForm() {
         <S.Body>
           <S.Form
             aria-label="회원가입 인증"
+            method="post"
             noValidate
             onSubmit={verificationForm.handleSubmit(
               handleVerificationSubmit,
@@ -302,7 +276,7 @@ export function SignUpForm() {
 
             <S.Actions>
               <S.PrimaryButton type="submit" disabled={isVerificationSubmitting}>
-                {isVerificationSubmitting ? '처리 중' : '회원가입'}
+                {isVerificationSubmitting ? '확인 중' : '인증코드 확인'}
               </S.PrimaryButton>
               <S.SecondaryButton to={paths.login}>로그인 하기</S.SecondaryButton>
             </S.Actions>
@@ -322,6 +296,7 @@ export function SignUpForm() {
       <S.Body>
         <S.Form
           aria-label="회원가입"
+          method="post"
           noValidate
           onSubmit={credentialsForm.handleSubmit(
             handleCredentialsSubmit,
