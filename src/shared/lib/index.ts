@@ -5,3 +5,4 @@ export {
   sanitizeId,
   sanitizePassword,
 } from './authValidation'
+export { getErrorMessage } from './errorMessage'

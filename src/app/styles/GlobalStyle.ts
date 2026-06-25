@@ -2,11 +2,9 @@ import { createGlobalStyle } from 'styled-components'
 
 export const GlobalStyle = createGlobalStyle`
   :root {
-    color: #111827;
-    background: #ffffff;
-    font-family:
-      Pretendard, Inter, ui-sans-serif, system-ui, -apple-system,
-      BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: ${({ theme }) => theme.colors.text.default};
+    background: ${({ theme }) => theme.colors.background.default};
+    font-family: ${({ theme }) => theme.typography.fontFamily};
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;

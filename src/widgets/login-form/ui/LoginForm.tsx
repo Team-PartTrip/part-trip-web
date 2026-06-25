@@ -7,11 +7,13 @@ import {
   type SubmitHandler,
   type UseFormRegisterReturn,
 } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 import { login } from '@shared/api'
 import logoUrl from '@shared/assets/logo.svg'
 import { paths } from '@shared/config'
 import {
   authValidationRules,
+  getErrorMessage,
   getIdValidationError,
   getPasswordValidationError,
   sanitizeId,
@@ -25,16 +27,8 @@ type FormMessage = {
 }
 
 type LoginFormValues = {
-  id: string
-  password: string
-}
-
-const getErrorMessage = (error: unknown) => {
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  return '요청 처리 중 오류가 발생했습니다.'
+  userId: string
+  userPwd: string
 }
 
 const trimFormValue = (value: unknown) =>
@@ -68,39 +62,37 @@ const createSanitizedChangeHandler =
   }
 
 export function LoginForm() {
+  const navigate = useNavigate()
   const [message, setMessage] = useState<FormMessage | null>(null)
 
   const loginForm = useForm<LoginFormValues>({
     defaultValues: {
-      id: '',
-      password: '',
+      userId: '',
+      userPwd: '',
     },
   })
 
-  const idField = loginForm.register('id', {
+  const userIdField = loginForm.register('userId', {
     required: '아이디를 입력해주세요.',
     setValueAs: (value) => sanitizeId(trimFormValue(value)),
     validate: (value) => getIdValidationError(value) ?? true,
   })
-  const passwordField = loginForm.register('password', {
+  const userPwdField = loginForm.register('userPwd', {
     required: '비밀번호를 입력해주세요.',
     setValueAs: (value) => sanitizePassword(trimFormValue(value)),
     validate: (value) => getPasswordValidationError(value) ?? true,
   })
 
   const handleSubmit: SubmitHandler<LoginFormValues> = async ({
-    id,
-    password,
+    userId,
+    userPwd,
   }) => {
     try {
       await login({
-        id,
-        password,
+        userId,
+        userPwd,
       })
-      setMessage({
-        text: '로그인 요청이 완료되었습니다.',
-        tone: 'success',
-      })
+      navigate(paths.home, { replace: true })
     } catch (error) {
       setMessage({
         text: getErrorMessage(error),
@@ -133,7 +125,7 @@ export function LoginForm() {
           onSubmit={loginForm.handleSubmit(handleSubmit, handleInvalid)}
         >
           <S.Input
-            {...idField}
+            {...userIdField}
             aria-label="아이디"
             type="text"
             autoComplete="username"
@@ -142,13 +134,13 @@ export function LoginForm() {
             maxLength={authValidationRules.id.maxLength}
             pattern={authValidationRules.id.pattern}
             title="아이디는 영문과 숫자만 입력해주세요."
-            onChange={createSanitizedChangeHandler(idField, sanitizeId)}
+            onChange={createSanitizedChangeHandler(userIdField, sanitizeId)}
             disabled={isSubmitting}
             required
           />
 
           <S.Input
-            {...passwordField}
+            {...userPwdField}
             aria-label="비밀번호"
             type="password"
             autoComplete="current-password"
@@ -158,7 +150,7 @@ export function LoginForm() {
             pattern={authValidationRules.password.pattern}
             title={`비밀번호는 영문, 숫자, 특수문자(${authValidationRules.password.allowedSpecialCharacters})만 입력해주세요.`}
             onChange={createSanitizedChangeHandler(
-              passwordField,
+              userPwdField,
               sanitizePassword,
             )}
             disabled={isSubmitting}

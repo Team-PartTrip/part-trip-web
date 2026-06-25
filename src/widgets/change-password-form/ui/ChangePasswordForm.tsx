@@ -7,20 +7,24 @@ import {
   type SubmitHandler,
   type UseFormRegisterReturn,
 } from 'react-hook-form'
-import { resetPassword, sendVerificationCode, verifyCode } from '@shared/api'
+import {
+  resetPassword,
+  sendPasswordResetCode,
+  verifyPasswordResetCode,
+} from '@shared/api'
 import logoUrl from '@shared/assets/logo.svg'
 import { paths } from '@shared/config'
 import {
   authValidationRules,
+  getErrorMessage,
   getPasswordValidationError,
   sanitizePassword,
 } from '@shared/lib'
 import { AuthForm as S } from '@shared/ui'
 
-type ChangePasswordStep = 'verification' | 'password'
+type ChangePasswordStep = 'email' | 'verification' | 'password'
 
 type ResetPasswordContext = {
-  code: string
   email: string
 }
 
@@ -37,14 +41,6 @@ type VerificationFormValues = {
 type PasswordFormValues = {
   newPassword: string
   newPasswordConfirm: string
-}
-
-const getErrorMessage = (error: unknown) => {
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  return '요청 처리 중 오류가 발생했습니다.'
 }
 
 const trimFormValue = (value: unknown) =>
@@ -80,7 +76,7 @@ const createSanitizedChangeHandler =
   }
 
 export function ChangePasswordForm() {
-  const [step, setStep] = useState<ChangePasswordStep>('verification')
+  const [step, setStep] = useState<ChangePasswordStep>('email')
   const [resetContext, setResetContext] =
     useState<ResetPasswordContext | null>(null)
   const [isSendingCode, setIsSendingCode] = useState(false)
@@ -107,6 +103,14 @@ export function ChangePasswordForm() {
   })
   const verificationCodeField = verificationForm.register('verificationCode', {
     required: '인증코드를 입력해주세요.',
+    minLength: {
+      value: 6,
+      message: '인증코드는 6자리로 입력해주세요.',
+    },
+    pattern: {
+      value: /^\d{6}$/,
+      message: '인증코드는 숫자 6자리로 입력해주세요.',
+    },
     setValueAs: trimFormValue,
   })
   const newPasswordField = passwordForm.register('newPassword', {
@@ -137,13 +141,12 @@ export function ChangePasswordForm() {
 
     try {
       setIsSendingCode(true)
-      await sendVerificationCode({
+      await sendPasswordResetCode({
         email,
       })
-      setMessage({
-        text: '인증코드를 발송했습니다.',
-        tone: 'success',
-      })
+      verificationForm.resetField('verificationCode')
+      setMessage(null)
+      setStep('verification')
     } catch (error) {
       setMessage({
         text: getErrorMessage(error),
@@ -159,12 +162,11 @@ export function ChangePasswordForm() {
     verificationCode,
   }) => {
     try {
-      await verifyCode({
-        code: verificationCode,
+      await verifyPasswordResetCode({
         email,
+        code: verificationCode,
       })
       setResetContext({
-        code: verificationCode,
         email,
       })
       setMessage(null)
@@ -195,7 +197,7 @@ export function ChangePasswordForm() {
         text: '인증을 다시 진행해주세요.',
         tone: 'error',
       })
-      setStep('verification')
+      setStep('email')
       return
     }
 
@@ -210,6 +212,7 @@ export function ChangePasswordForm() {
     try {
       await resetPassword({
         ...resetContext,
+        confirmPassword: newPasswordConfirm,
         newPassword,
       })
       setMessage({
@@ -235,6 +238,7 @@ export function ChangePasswordForm() {
 
   const isVerificationSubmitting = verificationForm.formState.isSubmitting
   const isPasswordSubmitting = passwordForm.formState.isSubmitting
+  const email = verificationForm.getValues('email')
 
   return (
     <S.Container>
@@ -244,16 +248,16 @@ export function ChangePasswordForm() {
       </S.Header>
 
       <S.Body>
-        {step === 'verification' ? (
+        {step === 'email' ? (
           <S.Form
-            key="change-password-verification"
-            aria-label="비밀번호 찾기 인증"
+            key="change-password-email"
+            aria-label="비밀번호 찾기 이메일 인증 요청"
             method="post"
             noValidate
-            onSubmit={verificationForm.handleSubmit(
-              handleVerificationSubmit,
-              handleVerificationInvalid,
-            )}
+            onSubmit={(event) => {
+              event.preventDefault()
+              void handleSendVerificationCode()
+            }}
           >
             <S.VerificationField>
               <S.Input
@@ -275,18 +279,6 @@ export function ChangePasswordForm() {
               </S.CodeSendButton>
             </S.VerificationField>
 
-            <S.Input
-              {...verificationCodeField}
-              $compact
-              aria-label="인증코드"
-              type="text"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              placeholder="인증코드를 입력하세요."
-              disabled={isVerificationSubmitting}
-              required
-            />
-
             {message ? (
               <S.Message $tone={message.tone} aria-live="polite">
                 {message.text}
@@ -294,12 +286,79 @@ export function ChangePasswordForm() {
             ) : null}
 
             <S.Actions>
-              <S.PrimaryButton type="submit" disabled={isVerificationSubmitting}>
-                {isVerificationSubmitting ? '확인 중' : '다음'}
+              <S.PrimaryButton type="submit" disabled={isSendingCode}>
+                {isSendingCode ? '발송 중' : '다음'}
               </S.PrimaryButton>
               <S.SecondaryButton to={paths.login}>로그인 하기</S.SecondaryButton>
             </S.Actions>
           </S.Form>
+        ) : step === 'verification' ? (
+          <S.VerificationPanel>
+            <S.VerificationIllustration aria-hidden>
+              <S.EnvelopeIcon>
+                <span>•••••</span>
+                <strong>✓</strong>
+              </S.EnvelopeIcon>
+            </S.VerificationIllustration>
+
+            <S.VerificationContent>
+              <S.VerificationTitle>Verify email</S.VerificationTitle>
+              <S.VerificationDescription>
+                A verification code has been sent to
+                <br />
+                <strong>{email}</strong>.
+                <br />
+                Please enter the code to continue.
+              </S.VerificationDescription>
+
+              <S.Form
+                key="change-password-verification"
+                aria-label="비밀번호 찾기 인증"
+                method="post"
+                noValidate
+                onSubmit={verificationForm.handleSubmit(
+                  handleVerificationSubmit,
+                  handleVerificationInvalid,
+                )}
+              >
+                <S.CodeInput
+                  {...verificationCodeField}
+                  aria-label="인증코드"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  placeholder="000000"
+                  disabled={isVerificationSubmitting}
+                  required
+                />
+
+                {message ? (
+                  <S.Message $tone={message.tone} aria-live="polite">
+                    {message.text}
+                  </S.Message>
+                ) : null}
+
+                <S.VerificationActions>
+                  <S.BackButton
+                    type="button"
+                    onClick={() => {
+                      setMessage(null)
+                      setStep('email')
+                    }}
+                  >
+                    BACK
+                  </S.BackButton>
+                  <S.PrimaryButton
+                    type="submit"
+                    disabled={isVerificationSubmitting}
+                  >
+                    {isVerificationSubmitting ? '확인 중' : 'SUBMIT'}
+                  </S.PrimaryButton>
+                </S.VerificationActions>
+              </S.Form>
+            </S.VerificationContent>
+          </S.VerificationPanel>
         ) : (
           <S.Form
             key="change-password-password"

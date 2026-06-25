@@ -16,8 +16,8 @@ type LoginResponse = {
 }
 
 export type LoginRequest = {
-  id: string
-  password: string
+  userId: string
+  userPwd: string
 }
 
 export type SendVerificationCodeRequest = {
@@ -30,15 +30,21 @@ export type VerifyCodeRequest = {
 }
 
 export type SignUpRequest = {
-  code: string
   email: string
   id: string
   password: string
-  phoneNumber: string
+}
+
+type SignUpPayload = {
+  myCountry: string
+  signUpDivision: string
+  userId: string
+  userMail: string
+  userPwd: string
 }
 
 export type ResetPasswordRequest = {
-  code: string
+  confirmPassword: string
   email: string
   newPassword: string
 }
@@ -46,11 +52,15 @@ export type ResetPasswordRequest = {
 const authEndpoints = {
   login: {
     method: 'post',
-    path: '',
+    path: '/auth/login',
   },
   resetPassword: {
     method: 'post',
-    path: '',
+    path: '/auth/password/reset',
+  },
+  sendPasswordResetCode: {
+    method: 'post',
+    path: '/auth/password/send-code',
   },
   sendVerificationCode: {
     method: 'post',
@@ -58,11 +68,15 @@ const authEndpoints = {
   },
   signUp: {
     method: 'post',
-    path: '/auth/sign-up',
+    path: '/auth/signup',
   },
   verifyCode: {
     method: 'post',
     path: '/auth/email/verify',
+  },
+  verifyPasswordResetCode: {
+    method: 'post',
+    path: '/auth/password/verify-code',
   },
 } as const satisfies Record<string, ApiEndpoint>
 
@@ -105,8 +119,32 @@ export async function verifyCode(payload: VerifyCodeRequest) {
   return request<EmptySuccessResponse>(authEndpoints.verifyCode, payload)
 }
 
+export async function sendPasswordResetCode(
+  payload: SendVerificationCodeRequest,
+) {
+  return request<EmptySuccessResponse>(
+    authEndpoints.sendPasswordResetCode,
+    payload,
+  )
+}
+
+export async function verifyPasswordResetCode(payload: VerifyCodeRequest) {
+  return request<EmptySuccessResponse>(
+    authEndpoints.verifyPasswordResetCode,
+    payload,
+  )
+}
+
 export async function signUp(payload: SignUpRequest) {
-  return request<EmptySuccessResponse>(authEndpoints.signUp, payload)
+  const { email, id, password } = payload
+
+  return request<EmptySuccessResponse>(authEndpoints.signUp, {
+    myCountry: 'KR',
+    signUpDivision: 'USER',
+    userId: id,
+    userMail: email,
+    userPwd: password,
+  } satisfies SignUpPayload)
 }
 
 export async function resetPassword(payload: ResetPasswordRequest) {

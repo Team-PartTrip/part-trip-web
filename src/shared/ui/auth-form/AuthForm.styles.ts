@@ -11,7 +11,7 @@ export const AuthPage = styled.main`
   align-items: center;
   justify-content: center;
   padding: 136px 48px 180px;
-  background: #ffffff;
+  background: ${({ theme }) => theme.colors.background.default};
 
   @media (max-width: 640px) {
     padding: 96px 20px 40px;
@@ -20,7 +20,7 @@ export const AuthPage = styled.main`
 
 export const Container = styled.section`
   display: flex;
-  width: min(100%, 450px);
+  width: min(100%, 600px);
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -42,7 +42,7 @@ export const Logo = styled.img`
 
 export const Title = styled.h1`
   margin: 0;
-  color: #1b1b1b;
+  color: ${({ theme }) => theme.colors.text.default};
   font-size: 48px;
   font-weight: 600;
   line-height: 1;
@@ -72,12 +72,12 @@ export const Input = styled.input<InputProps>`
   width: 100%;
   height: ${({ $compact }) => ($compact ? '36px' : '44px')};
   min-width: 0;
-  border: 0.2px solid #e6e6e6;
-  border-radius: 14px;
+  border: 0.2px solid ${({ theme }) => theme.colors.border.default};
+  border-radius: ${({ theme }) => theme.radii.input};
   padding: ${({ $compact }) => ($compact ? '0 16px' : '0 16px')};
-  background: #ffffff;
-  box-shadow: 0 1px 5px 1px rgb(0 0 0 / 5%);
-  color: #1b1b1b;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.input};
+  color: ${({ theme }) => theme.colors.text.default};
   font: inherit;
   font-size: ${({ $compact }) => ($compact ? '16px' : '20px')};
   font-weight: ${({ $compact }) => ($compact ? 600 : 500)};
@@ -86,15 +86,13 @@ export const Input = styled.input<InputProps>`
   outline: none;
 
   &::placeholder {
-    color: #adadad;
+    color: ${({ theme }) => theme.colors.text.placeholder};
     opacity: 1;
   }
 
   &:focus {
-    border-color: #5587f6;
-    box-shadow:
-      0 1px 5px 1px rgb(0 0 0 / 5%),
-      0 0 0 3px rgb(85 135 246 / 18%);
+    border-color: ${({ theme }) => theme.colors.border.interactive};
+    box-shadow: ${({ theme }) => theme.shadows.inputFocus};
   }
 `
 
@@ -105,11 +103,11 @@ export const PhoneField = styled.div`
   align-items: center;
   gap: 8px;
   overflow: hidden;
-  border: 0.2px solid #e6e6e6;
-  border-radius: 14px;
+  border: 0.2px solid ${({ theme }) => theme.colors.border.default};
+  border-radius: ${({ theme }) => theme.radii.input};
   padding: 0 16px;
-  background: #ffffff;
-  box-shadow: 0 1px 5px 1px rgb(0 0 0 / 5%);
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.input};
 `
 
 export const CountryButton = styled.button`
@@ -136,7 +134,7 @@ export const FlagText = styled.span`
 export const Chevron = styled.span`
   width: 0;
   height: 0;
-  border-top: 6px solid #777777;
+  border-top: 6px solid ${({ theme }) => theme.colors.text.muted};
   border-right: 5px solid transparent;
   border-left: 5px solid transparent;
 `
@@ -146,7 +144,7 @@ export const PhoneInput = styled.input`
   min-width: 0;
   border: 0;
   padding: 0;
-  color: #1b1b1b;
+  color: ${({ theme }) => theme.colors.text.default};
   font: inherit;
   font-size: 20px;
   font-weight: 500;
@@ -155,7 +153,7 @@ export const PhoneInput = styled.input`
   outline: none;
 
   &::placeholder {
-    color: #adadad;
+    color: ${({ theme }) => theme.colors.text.placeholder};
     opacity: 1;
   }
 `
@@ -163,9 +161,13 @@ export const PhoneInput = styled.input`
 export const VerificationField = styled.div`
   display: grid;
   width: 100%;
-  grid-template-columns: minmax(0, 1fr) 85px;
+  grid-template-columns: minmax(0, 1fr) 96px;
   align-items: center;
   gap: 8px;
+
+  @media (max-width: 420px) {
+    grid-template-columns: 1fr;
+  }
 `
 
 const buttonStyles = css`
@@ -174,7 +176,7 @@ const buttonStyles = css`
   height: 50px;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  border-radius: ${({ theme }) => theme.radii.button};
   padding: 0 34px;
   cursor: pointer;
   font: inherit;
@@ -194,22 +196,22 @@ const buttonStyles = css`
 export const PrimaryButton = styled.button`
   ${buttonStyles}
   border: 0;
-  background: #5587f6;
-  color: #fafafa;
+  background: ${({ theme }) => theme.colors.brand.primary};
+  color: ${({ theme }) => theme.colors.text.inverse};
 
   &:hover {
-    background: #4b79df;
+    background: ${({ theme }) => theme.colors.brand.primaryHover};
   }
 `
 
 export const SecondaryButton = styled(Link)`
   ${buttonStyles}
-  border: 1px solid #5587f6;
-  background: #ffffff;
-  color: #5587f6;
+  border: 1px solid ${({ theme }) => theme.colors.brand.primary};
+  background: ${({ theme }) => theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.brand.primary};
 
   &:hover {
-    background: #f8fbff;
+    background: ${({ theme }) => theme.colors.background.muted};
   }
 
   &:disabled {
@@ -224,11 +226,11 @@ export const CodeSendButton = styled.button`
   height: 35px;
   align-items: center;
   justify-content: center;
-  border: 0.5px solid #1a6ebf;
-  border-radius: 10px;
+  border: 0.5px solid ${({ theme }) => theme.colors.brand.strong};
+  border-radius: ${({ theme }) => theme.radii.button};
   padding: 0 8px;
-  background: #ffffff;
-  color: #1a6ebf;
+  background: ${({ theme }) => theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.brand.strong};
   cursor: pointer;
   font: inherit;
   font-size: 12px;
@@ -238,7 +240,12 @@ export const CodeSendButton = styled.button`
   white-space: nowrap;
 
   &:hover {
-    background: #f8fbff;
+    background: ${({ theme }) => theme.colors.background.muted};
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
   }
 `
 
@@ -253,7 +260,7 @@ export const HintRow = styled.div`
   display: flex;
   width: 100%;
   justify-content: flex-end;
-  color: #adadad;
+  color: ${({ theme }) => theme.colors.text.placeholder};
   font-size: 16px;
   font-weight: 500;
   line-height: 1;
@@ -261,7 +268,7 @@ export const HintRow = styled.div`
 `
 
 export const InlineLink = styled(Link)`
-  color: #5587f6;
+  color: ${({ theme }) => theme.colors.brand.primary};
   font-weight: 600;
   text-decoration: none;
 
@@ -272,9 +279,182 @@ export const InlineLink = styled(Link)`
 
 export const Message = styled.p<{ $tone?: 'error' | 'success' }>`
   margin: 0;
-  color: ${({ $tone }) => ($tone === 'error' ? '#dc2626' : '#5587f6')};
+  color: ${({ $tone, theme }) =>
+    $tone === 'error' ? theme.colors.status.error : theme.colors.status.success};
   font-size: 14px;
   font-weight: 500;
   line-height: 1.3;
   letter-spacing: 0;
+`
+
+export const VerificationPanel = styled.div`
+  display: grid;
+  width: min(100%, 560px);
+  grid-template-columns: 168px minmax(0, 1fr);
+  align-items: center;
+  gap: 34px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 24px;
+  }
+`
+
+export const VerificationIllustration = styled.div`
+  display: flex;
+  width: 148px;
+  height: 148px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: ${({ theme }) => theme.colors.background.subtle};
+`
+
+export const EnvelopeIcon = styled.div`
+  position: relative;
+  display: flex;
+  width: 96px;
+  height: 68px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px 8px 18px 18px;
+  background:
+    linear-gradient(
+        145deg,
+        transparent 49%,
+        ${({ theme }) => theme.colors.brand.accent} 50%
+      )
+      left bottom / 50% 44% no-repeat,
+    linear-gradient(
+        215deg,
+        transparent 49%,
+        ${({ theme }) => theme.colors.brand.accent} 50%
+      )
+      right bottom / 50% 44% no-repeat,
+    ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 24px;
+  letter-spacing: 2px;
+
+  strong {
+    position: absolute;
+    top: 14px;
+    right: 12px;
+    color: ${({ theme }) => theme.colors.brand.successStrong};
+    font-size: 30px;
+    line-height: 1;
+  }
+`
+
+export const VerificationContent = styled.div`
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+`
+
+export const VerificationTitle = styled.h2`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.default};
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0;
+  text-align: center;
+`
+
+export const VerificationDescription = styled.p`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0;
+  text-align: center;
+
+  strong {
+    color: ${({ theme }) => theme.colors.brand.success};
+  }
+`
+
+export const CodeInput = styled.input`
+  width: min(100%, 522px);
+  height: 84px;
+  border: 0;
+  padding: 0 0 0 27px;
+  background:
+    linear-gradient(
+        ${({ theme }) => theme.colors.background.soft},
+        ${({ theme }) => theme.colors.background.soft}
+      )
+      0 0 / calc((100% - 90px) / 6) 100% no-repeat,
+    linear-gradient(
+        ${({ theme }) => theme.colors.background.soft},
+        ${({ theme }) => theme.colors.background.soft}
+      )
+      calc((100% - 90px) / 6 + 18px) 0 / calc((100% - 90px) / 6) 100%
+      no-repeat,
+    linear-gradient(
+        ${({ theme }) => theme.colors.background.soft},
+        ${({ theme }) => theme.colors.background.soft}
+      )
+      calc(((100% - 90px) / 6 + 18px) * 2) 0 / calc((100% - 90px) / 6) 100%
+      no-repeat,
+    linear-gradient(
+        ${({ theme }) => theme.colors.background.soft},
+        ${({ theme }) => theme.colors.background.soft}
+      )
+      calc(((100% - 90px) / 6 + 18px) * 3) 0 / calc((100% - 90px) / 6) 100%
+      no-repeat,
+    linear-gradient(
+        ${({ theme }) => theme.colors.background.soft},
+        ${({ theme }) => theme.colors.background.soft}
+      )
+      calc(((100% - 90px) / 6 + 18px) * 4) 0 / calc((100% - 90px) / 6) 100%
+      no-repeat,
+    linear-gradient(
+        ${({ theme }) => theme.colors.background.soft},
+        ${({ theme }) => theme.colors.background.soft}
+      )
+      calc(((100% - 90px) / 6 + 18px) * 5) 0 / calc((100% - 90px) / 6) 100%
+      no-repeat;
+  color: ${({ theme }) => theme.colors.text.default};
+  font: inherit;
+  font-size: 48px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.9ch;
+  line-height: 1;
+  outline: none;
+  text-align: left;
+
+  &::placeholder {
+    color: transparent;
+  }
+
+  &:focus {
+    filter: drop-shadow(0 0 0 rgb(85 135 246 / 0%));
+  }
+`
+
+export const VerificationActions = styled.div`
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+`
+
+export const BackButton = styled.button`
+  ${buttonStyles}
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  background: ${({ theme }) => theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.text.default};
+  font-weight: 700;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.background.muted};
+  }
 `
