@@ -1,12 +1,5 @@
 import { apiClient } from './client'
 
-type HttpMethod = 'delete' | 'get' | 'patch' | 'post' | 'put'
-
-type ApiEndpoint = {
-  method: HttpMethod
-  path: string
-}
-
 type EmptySuccessResponse = {
   ok: true
 }
@@ -49,96 +42,56 @@ export type ResetPasswordRequest = {
   newPassword: string
 }
 
-const authEndpoints = {
-  login: {
-    method: 'post',
-    path: '/auth/login',
+const AUTH_API_PATHS = {
+  email: {
+    sendCode: '/auth/email/send',
+    verifyCode: '/auth/email/verify',
   },
-  resetPassword: {
-    method: 'post',
-    path: '/auth/password/reset',
+  password: {
+    reset: '/auth/password/reset',
+    sendCode: '/auth/password/send-code',
+    verifyCode: '/auth/password/verify-code',
   },
-  sendPasswordResetCode: {
-    method: 'post',
-    path: '/auth/password/send-code',
+  session: {
+    login: '/auth/login',
   },
-  sendVerificationCode: {
-    method: 'post',
-    path: '/auth/email/send',
-  },
-  signUp: {
-    method: 'post',
-    path: '/auth/signup',
-  },
-  verifyCode: {
-    method: 'post',
-    path: '/auth/email/verify',
-  },
-  verifyPasswordResetCode: {
-    method: 'post',
-    path: '/auth/password/verify-code',
-  },
-} as const satisfies Record<string, ApiEndpoint>
+  signUp: '/auth/signup',
+} as const
 
-async function request<TResponse>(endpoint: ApiEndpoint, payload: unknown) {
-  if (!endpoint.path) {
-    throw new Error('API endpoint path is not configured.')
-  }
+async function post<TResponse>(path: string, payload: unknown) {
+  const { data } = await apiClient.post<TResponse>(path, payload)
 
-  const { data } = await (async () => {
-    switch (endpoint.method) {
-      case 'delete':
-        return apiClient.delete<TResponse>(endpoint.path, { data: payload })
-      case 'get':
-        return apiClient.get<TResponse>(endpoint.path, { params: payload })
-      case 'patch':
-        return apiClient.patch<TResponse>(endpoint.path, payload)
-      case 'post':
-        return apiClient.post<TResponse>(endpoint.path, payload)
-      case 'put':
-        return apiClient.put<TResponse>(endpoint.path, payload)
-    }
-  })()
   return data
 }
 
 export async function login(payload: LoginRequest) {
-  return request<LoginResponse>(authEndpoints.login, payload)
+  return post<LoginResponse>(AUTH_API_PATHS.session.login, payload)
 }
 
 export async function sendVerificationCode(
   payload: SendVerificationCodeRequest,
 ) {
-  return request<EmptySuccessResponse>(
-    authEndpoints.sendVerificationCode,
-    payload,
-  )
+  return post<EmptySuccessResponse>(AUTH_API_PATHS.email.sendCode, payload)
 }
 
 export async function verifyCode(payload: VerifyCodeRequest) {
-  return request<EmptySuccessResponse>(authEndpoints.verifyCode, payload)
+  return post<EmptySuccessResponse>(AUTH_API_PATHS.email.verifyCode, payload)
 }
 
 export async function sendPasswordResetCode(
   payload: SendVerificationCodeRequest,
 ) {
-  return request<EmptySuccessResponse>(
-    authEndpoints.sendPasswordResetCode,
-    payload,
-  )
+  return post<EmptySuccessResponse>(AUTH_API_PATHS.password.sendCode, payload)
 }
 
 export async function verifyPasswordResetCode(payload: VerifyCodeRequest) {
-  return request<EmptySuccessResponse>(
-    authEndpoints.verifyPasswordResetCode,
-    payload,
-  )
+  return post<EmptySuccessResponse>(AUTH_API_PATHS.password.verifyCode, payload)
 }
 
 export async function signUp(payload: SignUpRequest) {
   const { email, id, password } = payload
 
-  return request<EmptySuccessResponse>(authEndpoints.signUp, {
+  return post<EmptySuccessResponse>(AUTH_API_PATHS.signUp, {
     myCountry: 'KR',
     signUpDivision: 'USER',
     userId: id,
@@ -148,5 +101,5 @@ export async function signUp(payload: SignUpRequest) {
 }
 
 export async function resetPassword(payload: ResetPasswordRequest) {
-  return request<EmptySuccessResponse>(authEndpoints.resetPassword, payload)
+  return post<EmptySuccessResponse>(AUTH_API_PATHS.password.reset, payload)
 }

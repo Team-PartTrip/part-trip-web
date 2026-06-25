@@ -1,20 +1,32 @@
 import { Link } from 'react-router-dom'
-import styled, { css } from 'styled-components'
+import styled, { css, keyframes } from 'styled-components'
 
 type InputProps = {
   $compact?: boolean
 }
 
+const codeCaretBlink = keyframes`
+  0%,
+  49% {
+    opacity: 1;
+  }
+
+  50%,
+  100% {
+    opacity: 0;
+  }
+`
+
 export const AuthPage = styled.main`
   display: flex;
-  min-height: 100vh;
+  min-height: 100dvh;
   align-items: center;
   justify-content: center;
   padding: 136px 48px 180px;
   background: ${({ theme }) => theme.colors.background.default};
 
   @media (max-width: 640px) {
-    padding: 96px 20px 40px;
+    padding: 40px 20px;
   }
 `
 
@@ -24,7 +36,11 @@ export const Container = styled.section`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 64px;
+  gap: 48px;
+
+  @media (max-width: 640px) {
+    gap: 36px;
+  }
 `
 
 export const Header = styled.header`
@@ -46,7 +62,7 @@ export const Title = styled.h1`
   font-size: 48px;
   font-weight: 600;
   line-height: 1;
-  letter-spacing: 0;
+  letter-spacing: -2.4px;
   text-align: center;
 
   @media (max-width: 640px) {
@@ -58,14 +74,23 @@ export const Body = styled.div`
   display: flex;
   width: 100%;
   flex-direction: column;
-  gap: 32px;
+  gap: 48px;
 `
 
 export const Form = styled.form`
   display: flex;
+  align-items: center;
   width: 100%;
   flex-direction: column;
   gap: 12px;
+`
+
+export const VerificationCodeForm = styled.form`
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
 `
 
 export const Input = styled.input<InputProps>`
@@ -183,7 +208,7 @@ const buttonStyles = css`
   font-size: 20px;
   font-weight: 500;
   line-height: 1;
-  letter-spacing: 0;
+  letter-spacing: -0.6px;
   text-align: center;
   text-decoration: none;
 
@@ -382,9 +407,9 @@ export const VerificationDescription = styled.p`
 
 export const CodeInput = styled.input`
   width: min(100%, 522px);
-  height: 84px;
+  height: 76px;
   border: 0;
-  padding: 0 0 0 27px;
+  border-radius: 0;
   background:
     linear-gradient(
         ${({ theme }) => theme.colors.background.soft},
@@ -422,11 +447,13 @@ export const CodeInput = styled.input`
       calc(((100% - 90px) / 6 + 18px) * 5) 0 / calc((100% - 90px) / 6) 100%
       no-repeat;
   color: ${({ theme }) => theme.colors.text.default};
-  font: inherit;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    monospace;
   font-size: 48px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.9ch;
+  letter-spacing: 0.72ch;
   line-height: 1;
   outline: none;
   text-align: left;
@@ -437,6 +464,124 @@ export const CodeInput = styled.input`
 
   &:focus {
     filter: drop-shadow(0 0 0 rgb(85 135 246 / 0%));
+  }
+
+  @media (max-width: 640px) {
+    height: 62px;
+    padding-left: 14px;
+    background:
+      linear-gradient(
+          ${({ theme }) => theme.colors.background.soft},
+          ${({ theme }) => theme.colors.background.soft}
+        )
+        0 0 / calc((100% - 40px) / 6) 100% no-repeat,
+      linear-gradient(
+          ${({ theme }) => theme.colors.background.soft},
+          ${({ theme }) => theme.colors.background.soft}
+        )
+        calc((100% - 40px) / 6 + 8px) 0 / calc((100% - 40px) / 6) 100%
+        no-repeat,
+      linear-gradient(
+          ${({ theme }) => theme.colors.background.soft},
+          ${({ theme }) => theme.colors.background.soft}
+        )
+        calc(((100% - 40px) / 6 + 8px) * 2) 0 / calc((100% - 40px) / 6) 100%
+        no-repeat,
+      linear-gradient(
+          ${({ theme }) => theme.colors.background.soft},
+          ${({ theme }) => theme.colors.background.soft}
+        )
+        calc(((100% - 40px) / 6 + 8px) * 3) 0 / calc((100% - 40px) / 6) 100%
+        no-repeat,
+      linear-gradient(
+          ${({ theme }) => theme.colors.background.soft},
+          ${({ theme }) => theme.colors.background.soft}
+        )
+        calc(((100% - 40px) / 6 + 8px) * 4) 0 / calc((100% - 40px) / 6) 100%
+        no-repeat,
+      linear-gradient(
+          ${({ theme }) => theme.colors.background.soft},
+          ${({ theme }) => theme.colors.background.soft}
+        )
+        calc(((100% - 40px) / 6 + 8px) * 5) 0 / calc((100% - 40px) / 6) 100%
+        no-repeat;
+    font-size: 38px;
+    letter-spacing: 0.45ch;
+  }
+`
+
+export const CodeInputGroup = styled.div`
+  position: relative;
+  display: grid;
+  width: min(100%, 522px);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 18px;
+  cursor: text;
+
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
+
+  @media (max-width: 640px) {
+    gap: 8px;
+  }
+`
+
+export const CodeHiddenInput = styled.input`
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  caret-color: transparent;
+  color: transparent;
+  font-size: 16px;
+  opacity: 0;
+  outline: none;
+`
+
+export const CodeSlot = styled.span<{ $active?: boolean }>`
+  position: relative;
+  display: grid;
+  height: 84px;
+  place-items: center;
+  background: ${({ theme }) => theme.colors.background.default};
+  border: 1.5px solid #d8dddd;
+  color: ${({ theme }) => theme.colors.text.default};
+  box-sizing: border-box;
+  border-radius: 25px;
+
+  font-size: 48px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -2.4px;
+  text-align: center;
+
+  ${({ $active, theme }) =>
+    $active &&
+    css`
+      &::after {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 3px;
+        height: 57px;
+        border-radius: 999px;
+        background: ${theme.colors.text.default};
+        content: '';
+        transform: translate(-50%, -50%);
+        animation: ${codeCaretBlink} 1s steps(1, end) infinite;
+      }
+    `}
+
+  @media (max-width: 640px) {
+    height: 62px;
+    font-size: 38px;
   }
 `
 

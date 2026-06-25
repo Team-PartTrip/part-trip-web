@@ -1,4 +1,4 @@
-import * as S from '../../home/ui/HomePage.styles'
+import * as S from './MainPage.styles'
 import logoUrl from '@shared/assets/logo.svg'
 import mainHeroUrl from '@shared/assets/main-hero.png'
 

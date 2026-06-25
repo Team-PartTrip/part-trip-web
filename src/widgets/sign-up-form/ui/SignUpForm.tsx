@@ -1,6 +1,7 @@
-import { useState, type ChangeEvent } from 'react'
+import { useRef, useState, type ChangeEvent } from 'react'
 import {
   useForm,
+  useWatch,
   type FieldErrors,
   type FieldValues,
   type SubmitErrorHandler,
@@ -74,8 +75,10 @@ const createSanitizedChangeHandler =
 
 export function SignUpForm() {
   const navigate = useNavigate()
+  const codeInputRef = useRef<HTMLInputElement | null>(null)
   const [step, setStep] = useState<SignUpStep>('credentials')
   const [message, setMessage] = useState<FormMessage | null>(null)
+  const [isCodeInputFocused, setIsCodeInputFocused] = useState(false)
 
   const credentialsForm = useForm<CredentialsFormValues>({
     defaultValues: {
@@ -203,6 +206,29 @@ export function SignUpForm() {
 
   const isCredentialsSubmitting = credentialsForm.formState.isSubmitting
   const isVerificationSubmitting = verificationForm.formState.isSubmitting
+  const verificationCode =
+    useWatch({
+      control: verificationForm.control,
+      name: 'verificationCode',
+    }) ?? ''
+  const verificationCodeDigits = verificationCode.padEnd(6, '').slice(0, 6)
+  const activeCodeSlotIndex = Math.min(verificationCode.length, 5)
+
+  const handleVerificationCodeChange = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const nextCode = event.currentTarget.value.replace(/\D/g, '').slice(0, 6)
+
+    verificationForm.setValue('verificationCode', nextCode, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: false,
+    })
+  }
+
+  const focusCodeInput = () => {
+    codeInputRef.current?.focus()
+  }
 
   if (step === 'verification') {
     return (
@@ -213,7 +239,7 @@ export function SignUpForm() {
         </S.Header>
 
         <S.Body>
-          <S.Form
+          <S.VerificationCodeForm
             aria-label="회원가입 인증"
             method="post"
             noValidate
@@ -222,17 +248,43 @@ export function SignUpForm() {
               handleVerificationInvalid,
             )}
           >
-            <S.CodeInput
-              {...verificationCodeField}
-              aria-label="인증코드"
-              type="text"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              maxLength={6}
-              placeholder="000000"
-              disabled={isVerificationSubmitting}
-              required
-            />
+            <S.CodeInputGroup
+              aria-label="인증코드 입력"
+              aria-disabled={isVerificationSubmitting}
+              onClick={focusCodeInput}
+            >
+              <S.CodeHiddenInput
+                {...verificationCodeField}
+                ref={(element) => {
+                  verificationCodeField.ref(element)
+                  codeInputRef.current = element
+                }}
+                aria-label="인증코드"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                value={verificationCode}
+                onChange={handleVerificationCodeChange}
+                onFocus={() => setIsCodeInputFocused(true)}
+                onBlur={() => setIsCodeInputFocused(false)}
+                disabled={isVerificationSubmitting}
+                required
+              />
+              {Array.from({ length: 6 }, (_, index) => (
+                <S.CodeSlot
+                  key={index}
+                  aria-hidden="true"
+                  $active={
+                    isCodeInputFocused &&
+                    verificationCode.length < 6 &&
+                    index === activeCodeSlotIndex
+                  }
+                >
+                  {verificationCodeDigits[index]}
+                </S.CodeSlot>
+              ))}
+            </S.CodeInputGroup>
 
             {message ? (
               <S.Message $tone={message.tone} aria-live="polite">
@@ -246,7 +298,7 @@ export function SignUpForm() {
               </S.PrimaryButton>
               <S.SecondaryButton to={paths.login}>로그인 하기</S.SecondaryButton>
             </S.Actions>
-          </S.Form>
+          </S.VerificationCodeForm>
         </S.Body>
       </S.Container>
     )

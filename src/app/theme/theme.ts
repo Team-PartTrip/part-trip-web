@@ -9,6 +9,7 @@ export const appTheme = {
     border: {
       default: '#e6e6e6',
       interactive: '#5587f6',
+      soft: '#D8DDDD',
       subtle: '#eeeeee',
     },
     brand: {

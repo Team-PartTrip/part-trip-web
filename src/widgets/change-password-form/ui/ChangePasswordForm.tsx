@@ -7,6 +7,7 @@ import {
   type SubmitHandler,
   type UseFormRegisterReturn,
 } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 import {
   resetPassword,
   sendPasswordResetCode,
@@ -76,6 +77,7 @@ const createSanitizedChangeHandler =
   }
 
 export function ChangePasswordForm() {
+  const navigate = useNavigate()
   const [step, setStep] = useState<ChangePasswordStep>('email')
   const [resetContext, setResetContext] =
     useState<ResetPasswordContext | null>(null)
@@ -215,10 +217,7 @@ export function ChangePasswordForm() {
         confirmPassword: newPasswordConfirm,
         newPassword,
       })
-      setMessage({
-        text: '비밀번호 변경 요청이 완료되었습니다.',
-        tone: 'success',
-      })
+      navigate(paths.login, { replace: true })
     } catch (error) {
       setMessage({
         text: getErrorMessage(error),
@@ -286,9 +285,6 @@ export function ChangePasswordForm() {
             ) : null}
 
             <S.Actions>
-              <S.PrimaryButton type="submit" disabled={isSendingCode}>
-                {isSendingCode ? '발송 중' : '다음'}
-              </S.PrimaryButton>
               <S.SecondaryButton to={paths.login}>로그인 하기</S.SecondaryButton>
             </S.Actions>
           </S.Form>
