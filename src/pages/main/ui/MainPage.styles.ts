@@ -5,11 +5,10 @@ const cardShadow = '2px 2px 4px rgb(0 0 0 / 25%)'
 export const Logo = styled.div`
   display: inline-flex;
   align-items: flex-start;
-  color: #050505;
-  font-size: 36px;
-  font-weight: 800;
-  letter-spacing: 0;
-  line-height: 1.15;
+
+  img {
+    display: block;
+  }
 `
 
 export const LogoMark = styled.span`
@@ -231,36 +230,60 @@ export const RecordBody = styled.div`
 `
 
 export const DashboardPage = styled.main`
+  position: fixed;
+  inset: 0;
   display: flex;
   width: 100%;
-  min-height: 100vh;
-  overflow-x: auto;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  overflow-x: hidden;
   background: #f4f8fc;
   color: #111827;
 `
 
-export const Sidebar = styled.aside`
-  position: sticky;
-  top: 0;
+export const DashboardCanvas = styled.div`
   display: flex;
-  width: 200px;
-  min-height: 100vh;
-  flex: 0 0 200px;
+  width: 100%;
+  height: 100%;
+  flex: 1 1 auto;
+  overflow: hidden;
+
+  @media (max-width: 760px) {
+    flex-direction: column;
+  }
+`
+
+export const Sidebar = styled.aside`
+  display: flex;
+  width: clamp(168px, 10.2vw, 200px);
+  height: 100%;
+  flex: 0 0 clamp(168px, 10.2vw, 200px);
   flex-direction: column;
   overflow: hidden;
-  border-radius: 0 18px 18px 0;
   background: #ffffff;
-  padding: 12px;
+  padding: clamp(24px, 3.2vh, 44px) 20px 24px 28px;
 
   ${Logo} {
-    width: 146px;
-    height: 35px;
-    margin-bottom: 8px;
+    width: 102px;
+    height: 24px;
+    margin-bottom: 26px;
   }
 
   ${Logo} img {
-    width: 146px;
+    width: 102px;
     height: auto;
+  }
+
+  @media (max-width: 760px) {
+    width: 100%;
+    min-height: auto;
+    flex: 0 0 auto;
+    padding: 18px 20px;
+
+    ${Logo} {
+      margin-bottom: 14px;
+    }
   }
 `
 
@@ -268,42 +291,69 @@ export const SidebarNav = styled.nav`
   display: flex;
   width: 100%;
   flex-direction: column;
-  gap: 8px;
+  gap: 14px;
+
+  @media (max-width: 760px) {
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
 `
 
 export const SidebarItem = styled.button<{ $active?: boolean }>`
   display: flex;
   width: 100%;
-  height: 48px;
+  height: 34px;
   align-items: center;
-  gap: 0;
+  gap: 10px;
   border: 0;
-  border-radius: 18px;
-  padding: 0;
-  background: transparent;
-  color: ${({ $active }) => ($active ? '#0b73ce' : '#0f0f10')};
+  border-radius: 12px;
+  padding: 0 12px;
+  background: ${({ $active }) => ($active ? '#0c96f5' : 'transparent')};
+  color: ${({ $active }) => ($active ? '#ffffff' : '#0f0f10')};
   cursor: pointer;
   font: inherit;
-  font-size: 20px;
-  font-weight: ${({ $active }) => ($active ? 700 : 400)};
+  font-size: 13px;
+  font-weight: 700;
   letter-spacing: 0;
-`
 
+  @media (max-width: 760px) {
+    width: max-content;
+    flex: 0 0 auto;
+    padding: 0 14px;
+  }
+`
+export const SiderbarIconWrapper = styled.div`
+/* Item */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 10px 13px;
+gap: 10px;
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+`
 export const SidebarIcon = styled.span`
   display: grid;
-  width: 48px;
-  height: 48px;
+  width: 18px;
+  height: 18px;
   flex: 0 0 auto;
   place-items: center;
-  color: ${({ theme }) => theme.colors.brand.strong};
-  font-size: 22px;
+  color: currentcolor;
+  font-size: 15px;
   line-height: 1;
 `
 
 export const SidebarFooter = styled.button`
   display: flex;
-  width: 100%;
-  height: 36px;
+  width: 150px;
+  height: 30px;
   align-items: center;
   gap: 8px;
   border: 0;
@@ -313,30 +363,41 @@ export const SidebarFooter = styled.button`
   color: #0f0f10;
   cursor: pointer;
   font: inherit;
-  font-size: 20px;
+  font-size: 12px;
+  font-weight: 700;
   letter-spacing: 0;
+
+  @media (max-width: 760px) {
+    display: none;
+  }
 `
 
 export const LogoutIcon = styled.span`
   display: grid;
-  width: 36px;
-  height: 36px;
+  width: 24px;
+  height: 24px;
   place-items: center;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #ff3e3e;
   color: #ffffff;
-  font-size: 20px;
+  font-size: 13px;
 `
 
 export const DashboardContent = styled.section`
-  display: flex;
-  width: min(100%, 1304px);
-  min-width: 980px;
-  flex: 1;
-  flex-direction: column;
-  justify-content: center;
-  gap: 44px;
-  padding: 45px 36px;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 0;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: clamp(12px, 1.4vh, 20px);
+  padding: clamp(14px, 1.8vh, 24px) clamp(24px, 2.4vw, 36px);
+  overflow: hidden;
+
+  @media (max-width: 760px) {
+    padding: 20px;
+  }
 `
 
 const dashboardCard = css`
@@ -351,17 +412,29 @@ export const TopArea = styled.section`
   display: grid;
   width: 100%;
   align-items: center;
-  gap: 50px;
-  grid-template-columns: minmax(620px, 895px) 260px;
+  gap: clamp(24px, 3.4vw, 50px);
+  grid-template-columns: minmax(720px, 1fr) clamp(220px, 17vw, 260px);
+
+  @media (max-width: 1180px) {
+    grid-template-columns: minmax(0, 1fr) clamp(220px, 17vw, 260px);
+  }
+
+  @media (max-width: 980px) {
+    grid-template-columns: 1fr;
+  }
 `
 
 export const HeroImage = styled.div<{ $imageUrl: string }>`
   position: relative;
-  height: 382px;
+  width: 100%;
+  aspect-ratio: 895 / 313;
+  height: clamp(150px, 23dvh, 240px);
+  min-height: 0;
+  max-height: none;
   overflow: hidden;
-  border-radius: 32px;
+  border-radius: 24px;
   background:
-    linear-gradient(180deg, rgb(0 0 0 / 40%) 0%, rgb(0 0 0 / 0%) 42%, rgb(0 0 0 / 70%) 100%),
+    linear-gradient(180deg, rgb(0 0 0 / 22%) 0%, rgb(0 0 0 / 0%) 42%, rgb(0 0 0 / 62%) 100%),
     url('${({ $imageUrl }) => $imageUrl}') center 38% / cover;
   box-shadow: 0 16px 16px rgb(13 31 64 / 16%);
 `
@@ -370,12 +443,21 @@ export const InfoStack = styled.aside`
   display: flex;
   flex-direction: column;
   gap: 14px;
+
+  @media (max-width: 980px) {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
 `
 
 export const CompactCard = styled.article`
   ${dashboardCard}
   display: flex;
-  width: 260px;
+  width: 100%;
   height: 92px;
   flex-direction: column;
   align-items: center;
@@ -402,7 +484,7 @@ export const CompactCard = styled.article`
 export const WordCard = styled.article`
   ${dashboardCard}
   display: flex;
-  width: 260px;
+  width: 100%;
   height: 104px;
   align-items: center;
   gap: 18px;
@@ -467,31 +549,48 @@ export const CardTitle = styled.h2`
 export const BottomArea = styled.section`
   display: grid;
   width: 100%;
+  min-height: 0;
   align-items: start;
-  gap: 24px;
-  grid-template-columns: minmax(590px, 658px) minmax(420px, 523px);
+  gap: clamp(16px, 1.8vw, 24px);
+  grid-template-columns: minmax(620px, 1.15fr) minmax(420px, 0.85fr);
+
+  @media (max-width: 1180px) {
+    grid-template-columns: minmax(0, 1.15fr) minmax(380px, 0.85fr);
+  }
+
+  @media (max-width: 1100px) {
+    grid-template-columns: 1fr;
+  }
 `
 
 export const LeftColumn = styled.div`
   display: flex;
+  height: 100%;
+  min-height: 0;
   flex-direction: column;
-  gap: 22px;
+  gap: clamp(12px, 1.8vh, 18px);
 `
 
 export const TravelInfoCard = styled.article`
   ${dashboardCard}
   display: grid;
+  flex: 0 1 42%;
+  min-height: 0;
   align-items: center;
-  gap: 28px;
-  padding: 24px 28px;
-  grid-template-columns: 220px minmax(260px, 1fr);
+  gap: clamp(18px, 2vw, 28px);
+  padding: clamp(18px, 2.2vh, 24px) 28px;
+  grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
 `
 
 export const PopulationBox = styled.div`
   display: flex;
-  height: 188px;
+  height: auto;
   flex-direction: column;
-  gap: 12px;
+  gap: clamp(8px, 1.1vh, 12px);
 `
 
 export const PopulationItem = styled.div`
@@ -526,13 +625,13 @@ export const ProgressFill = styled.span<{ $color: string }>`
 
 export const CultureSummary = styled.div`
   display: flex;
-  min-height: 126px;
+  min-height: 0;
   flex-direction: column;
   justify-content: center;
   gap: 10px;
   border: 1px solid #eef2f7;
   border-radius: 22px;
-  padding: 22px;
+  padding: clamp(16px, 2vh, 22px);
   background: #f7f7f8;
 
   strong {
@@ -552,18 +651,24 @@ export const CultureSummary = styled.div`
 export const CharacterRankingCard = styled.article`
   ${dashboardCard}
   display: grid;
-  min-height: 206px;
+  flex: 1 1 0;
+  min-height: 0;
   align-items: center;
   gap: 22px;
-  padding: 22px 24px;
-  grid-template-columns: 192px 1fr;
+  padding: clamp(16px, 2vh, 22px) 24px;
+  grid-template-columns: clamp(132px, 10vw, 172px) 1fr;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
 `
 
 export const CharacterArt = styled.div`
   position: relative;
   display: grid;
-  width: 192px;
-  height: 162px;
+  width: clamp(124px, 10vw, 168px);
+  height: clamp(104px, 12vh, 138px);
   place-items: center;
   color: #111827;
   font-size: 76px;
@@ -572,14 +677,14 @@ export const CharacterArt = styled.div`
     position: absolute;
     top: 13px;
     color: #111827;
-    font-size: 64px;
+    font-size: clamp(44px, 4vw, 58px);
     transform: scaleX(1.5);
   }
 
   strong {
     display: grid;
-    width: 104px;
-    height: 104px;
+    width: clamp(82px, 6.5vw, 96px);
+    height: clamp(82px, 6.5vw, 96px);
     place-items: center;
     border: 2px solid #211b16;
     border-radius: 48% 48% 42% 42%;
@@ -626,25 +731,26 @@ export const RankingRow = styled.div`
 export const FestivalCard = styled.article`
   ${dashboardCard}
   display: flex;
-  min-height: 458px;
+  height: 100%;
+  min-height: 0;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 24px;
+  justify-content: space-between;
+  gap: clamp(8px, 1.3vh, 12px);
+  padding: clamp(16px, 2vh, 24px);
 `
 
 export const FestivalHeader = styled.div`
   display: flex;
-  width: 428px;
-  height: 37px;
+  width: min(100%, 428px);
+  height: auto;
   align-items: center;
   justify-content: space-between;
 
   h2 {
     margin: 0;
     color: #111827;
-    font-size: 24px;
+    font-size: clamp(18px, 1.25vw, 22px);
     font-weight: 800;
     letter-spacing: -1px;
   }
@@ -663,10 +769,10 @@ export const FestivalHeader = styled.div`
 `
 
 export const CalendarWidget = styled.div`
-  width: 392px;
+  width: min(100%, 330px);
   border: 1px solid #e4e2e2;
   border-radius: 24px;
-  padding: 17px;
+  padding: clamp(10px, 1.2vh, 14px);
   background: #ffffff;
   box-shadow: 0 8px 15px rgb(0 93 166 / 8%);
 `
@@ -675,7 +781,7 @@ export const CalendarTop = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 8px 16px;
+  padding: 0 8px clamp(8px, 1vh, 12px);
   color: #1b1c1c;
   font-size: 14px;
 
@@ -688,7 +794,7 @@ export const CalendarTop = styled.div`
 
 export const CalendarGrid = styled.div`
   display: grid;
-  gap: 8px;
+  gap: clamp(4px, 0.8vh, 8px);
   grid-template-columns: repeat(7, minmax(0, 1fr));
 `
 
@@ -707,7 +813,7 @@ export const CalendarDay = styled.div<{
 }>`
   position: relative;
   display: grid;
-  height: 36px;
+  height: clamp(20px, 2.6vh, 30px);
   place-items: center;
   border-radius: 8px;
   background: ${({ $selected }) =>
@@ -735,20 +841,20 @@ export const CalendarDay = styled.div<{
 
 export const EventPreview = styled.article`
   display: grid;
-  width: 392px;
+  width: min(100%, 330px);
   align-items: center;
   gap: 16px;
   border: 1px solid rgb(228 226 226 / 20%);
   border-radius: 24px;
-  padding: 11px 17px;
+  padding: 9px 14px;
   background: #ffffff;
-  grid-template-columns: 96px 1fr;
+  grid-template-columns: clamp(62px, 5.6vw, 78px) 1fr;
   box-shadow: 0 1px 1px rgb(0 0 0 / 5%);
 `
 
 export const EventImage = styled.div`
-  width: 96px;
-  height: 96px;
+  width: clamp(62px, 5.6vw, 78px);
+  height: clamp(62px, 5.6vw, 78px);
   border-radius: 16px;
   background:
     radial-gradient(circle, transparent 0 13px, #c8922d 14px 15px, transparent 16px),

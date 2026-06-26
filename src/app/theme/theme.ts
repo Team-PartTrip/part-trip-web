@@ -17,6 +17,7 @@ export const appTheme = {
       primaryHover: '#4b79df',
       accent: '#0c96f5',
       strong: '#1a6ebf',
+      secondary: '727780',
       success: '#17b978',
       successStrong: '#16d382',
     },

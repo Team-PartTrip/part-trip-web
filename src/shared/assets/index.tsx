@@ -1,0 +1,11 @@
+export { default as HomeIcon } from "./Home.svg?react"
+export { default as RecordIcon } from "./Record.svg?react"
+export { default as ProfileIcon } from "./Profile.svg?react"
+export { default as MissionIcon } from "./Mission.svg?react"
+export { default as CommunityIcon } from "./Community.svg?react"
+export { default as SidebarDashboardIcon } from './sidebar-dashboard.svg?react'
+export { default as SidebarPlanIcon } from './sidebar-plan.svg?react'
+export { default as SidebarMissionIcon } from './sidebar-mission.svg?react'
+export { default as SidebarRecordIcon } from './sidebar-record.svg?react'
+export { default as SidebarCommunityIcon } from './sidebar-community.svg?react'
+export { default as SidebarLogoPinIcon } from './sidebar-logo-pin.svg?react'

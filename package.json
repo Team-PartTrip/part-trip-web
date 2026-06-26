@@ -10,7 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@b1nd/dodam-design-system": "^1.0.11",
     "axios": "^1.16.1",
+    "framer-motion": "^12.42.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-hook-form": "^7.76.0",
@@ -29,6 +31,7 @@
     "globals": "^17.6.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
-    "vite": "^8.0.12"
+    "vite": "^8.0.12",
+    "vite-plugin-svgr": "^5.2.0"
   }
 }
