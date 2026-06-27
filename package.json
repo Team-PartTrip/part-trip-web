@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@b1nd/dodam-design-system": "^1.0.11",
+    "@react-oauth/google": "^0.13.5",
     "axios": "^1.16.1",
     "framer-motion": "^12.42.0",
     "react": "^19.2.6",

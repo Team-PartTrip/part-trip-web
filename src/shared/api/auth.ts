@@ -54,6 +54,7 @@ const AUTH_API_PATHS = {
   },
   session: {
     login: '/auth/login',
+    google: '/auth/google',
   },
   signUp: '/auth/signup',
 } as const
@@ -66,6 +67,14 @@ async function post<TResponse>(path: string, payload: unknown) {
 
 export async function login(payload: LoginRequest) {
   return post<LoginResponse>(AUTH_API_PATHS.session.login, payload)
+}
+
+export type GoogleLoginRequest = {
+  code: string
+}
+
+export async function googleLogin(payload: GoogleLoginRequest) {
+  return post<LoginResponse>(AUTH_API_PATHS.session.google, payload)
 }
 
 export async function sendVerificationCode(
