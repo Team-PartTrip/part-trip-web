@@ -4,7 +4,8 @@ export const Card = styled.article`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  width: 23.75rem;
+  width: 100%;
+  min-width: 0;
   height: 27.8125rem;
   border: 0.0625rem solid #e7edf7;
   border-radius: 1.5rem;
@@ -12,6 +13,19 @@ export const Card = styled.article`
   gap: 1.375rem;
   background: #ffffff;
   box-shadow: 0 0.5rem 1.5rem rgb(13 31 64 / 8%);
+
+  @media (max-width: 74.9375rem) {
+    height: 100%;
+    min-height: 0;
+    gap: clamp(0.625rem, 1.7vh, 1.25rem);
+    padding: clamp(0.875rem, 2vw, 1.25rem);
+  }
+
+  @media (max-width: 47.9375rem) {
+    justify-content: space-between;
+    border-radius: 1.125rem;
+    padding: 0.875rem 1rem;
+  }
 `;
 
 export const TitleRow = styled.div`
@@ -38,6 +52,11 @@ export const Tabs = styled.div`
   align-items: center;
   padding: 0px;
   gap: 0.375rem;
+
+  @media (max-width: 74.9375rem) {
+    width: 100%;
+    gap: 0.25rem;
+  }
 `;
 
 export const Tab = styled.button<{ $active?: boolean }>`
@@ -61,6 +80,14 @@ export const Tab = styled.button<{ $active?: boolean }>`
   border: ${({ $active }) => ($active ? "0" : "0.0625rem solid #BEBEBE")};
   background: ${({ $active }) => ($active ? "#0061aa" : "#F0EDED")};
   color: ${({ $active }) => ($active ? "#ffffff" : "#404752")};
+
+  @media (max-width: 74.9375rem) {
+    width: auto;
+    min-width: 0;
+    flex: 1;
+    padding-inline: 0.2rem;
+    font-size: clamp(0.5rem, 1vw, 0.625rem);
+  }
 `;
 
 export const PopulationList = styled.div`
@@ -68,7 +95,7 @@ export const PopulationList = styled.div`
   flex-direction: column;
   gap: 0.75rem;
   align-items: flex-start;
-  width: 18.9375rem;
+  width: 100%;
   padding: 0px;
 `;
 
@@ -124,6 +151,12 @@ export const CultureSummary = styled.div`
 
   background: #f7f7f8;
   border: 1px solid #eef2f7;
+
+  @media (max-width: 47.9375rem) {
+    width: 100%;
+    padding: 0.875rem;
+    gap: 0.375rem;
+  }
 
   strong {
     font-size: 1.125rem;

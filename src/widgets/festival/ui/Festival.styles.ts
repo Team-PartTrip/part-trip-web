@@ -1,13 +1,20 @@
 import styled, { css } from 'styled-components'
 
 export const Card = styled.article`
-  width: 27.5rem;
+  width: 100%;
+  min-width: 0;
   height: 20.375rem;
   border: 0.0625rem solid #e7edf7;
   border-radius: 1.5rem;
   padding: 1.375rem 0.375rem 0.5rem;
   background: #ffffff;
   box-shadow: 0 0.5rem 1.5rem rgb(13 31 64 / 8%);
+
+  @media (max-width: 74.9375rem) {
+    height: 100%;
+    min-height: 0;
+    padding-top: clamp(0.875rem, 1.8vh, 1.375rem);
+  }
 `
 
 export const Header = styled.div`
@@ -21,13 +28,19 @@ export const Header = styled.div`
 `
 
 export const Calendar = styled.div`
-  width: 26.75rem;
+  width: 100%;
   height: 14.25rem;
   margin-top: 0.875rem;
   border-radius: 1.5rem;
   padding: 1rem;
   background: #ffffff;
   box-shadow: 0 0.5rem 1.5rem rgb(13 31 64 / 8%);
+
+  @media (max-width: 74.9375rem) {
+    height: calc(100% - 2.5rem);
+    min-height: 0;
+    padding: clamp(0.625rem, 1.5vw, 1rem);
+  }
 `
 
 export const CalendarTop = styled.div`

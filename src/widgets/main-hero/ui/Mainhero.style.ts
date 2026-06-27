@@ -9,6 +9,18 @@ export const Hero = styled.section<{ $imageUrl: string }>`
   background:
     linear-gradient(180deg, rgb(0 0 0 / 4%) 45%, rgb(0 0 0 / 70%) 100%),
     url('${({ $imageUrl }) => $imageUrl}') center / cover no-repeat;
+
+  @media (max-width: 74.9375rem) {
+    height: clamp(12rem, 34vh, 18rem);
+    flex: 0 0 clamp(12rem, 34vh, 18rem);
+    border-radius: clamp(1.25rem, 2.5vw, 2rem);
+  }
+
+  @media (max-width: 47.9375rem) {
+    height: clamp(8.25rem, 21vh, 10rem);
+    flex-basis: clamp(8.25rem, 21vh, 10rem);
+    border-radius: 1.25rem;
+  }
 `
 
 export const DDay = styled.span`
@@ -28,6 +40,14 @@ export const DDay = styled.span`
   font-weight: 500;
   letter-spacing: -0.025rem;
   line-height: 1;
+
+  @media (max-width: 47.9375rem) {
+    top: 0.875rem;
+    left: 1rem;
+    min-width: 5rem;
+    height: 1.75rem;
+    font-size: 0.875rem;
+  }
 `
 
 export const Destination = styled.h1`
@@ -40,6 +60,12 @@ export const Destination = styled.h1`
   font-weight: 600;
   letter-spacing: -0.125rem;
   line-height: 1;
+
+  @media (max-width: 47.9375rem) {
+    bottom: 1rem;
+    left: 1rem;
+    font-size: 1.75rem;
+  }
 `
 
 export const ChangeButton = styled.button`
@@ -57,4 +83,9 @@ export const ChangeButton = styled.button`
   font: inherit;
   font-size: 0.75rem;
   font-weight: 700;
+
+  @media (max-width: 47.9375rem) {
+    right: 1rem;
+    bottom: 1rem;
+  }
 `
