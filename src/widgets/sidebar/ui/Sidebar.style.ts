@@ -1,109 +1,83 @@
 import styled from 'styled-components'
 
 export const SidebarWrapper = styled.div`
-  display: flex;
-  width: clamp(14rem, 17vw, 16.125rem);
-  height: 100dvh;
-  flex: 0 0 clamp(14rem, 17vw, 16.125rem);
-  padding: clamp(2.75rem, 6vh, 3.875rem) clamp(1rem, 2vw, 1.4375rem);
-  z-index: 10;
-
-  @media (max-width: 48rem) {
-    width: 100%;
-    height: auto;
-    flex: 0 0 auto;
-    padding: 1rem;
-  }
+  width: 15.0625rem;
+  height: 100%;
+  min-height: 38rem;
+  flex: 0 0 15.0625rem;
+  background: #ffffff;
 `
 
 export const Aside = styled.aside`
   display: flex;
   width: 100%;
-  min-height: 100%;
+  height: 100%;
   flex-direction: column;
-  overflow: hidden;
-  border-radius: clamp(1.25rem, 2vw, 1.5rem);
-  background: ${({ theme }) => theme.colors.background.default};
-
-  @media (max-width: 48rem) {
-    min-height: auto;
-  }
+  background: #ffffff;
 `
 
 export const LogoSection = styled.div`
   display: flex;
-  align-items: center;
-  padding: clamp(1rem, 2vh, 1.1875rem) clamp(1.125rem, 2vw, 1.375rem) 0;
+  height: 4.625rem;
+  align-items: flex-start;
+  padding: 1.9375rem 1.875rem 0;
 
   a {
     display: inline-flex;
-    max-width: 100%;
     align-items: center;
     text-decoration: none;
   }
 
   img {
     display: block;
-    width: min(100%, 11.5rem);
-    height: auto;
+    width: 11.3125rem;
+    height: 2.6875rem;
+    object-fit: contain;
   }
 `
 
 export const MenuList = styled.nav`
   display: flex;
   flex-direction: column;
-  gap: clamp(1.55rem, 3.4vh, 2.1875rem);
-  padding: clamp(1.65rem, 3.5vh, 2.0625rem) clamp(1rem, 2vw, 1.75rem) 0;
+  gap: 2.1875rem;
+  padding: 4.3125rem 2.5625rem 0;
 `
 
 export const Footer = styled.div`
-  margin-top: auto;
-  padding: 0 clamp(1rem, 2vw, 1rem) clamp(1rem, 2.3vh, 1.25rem);
+  margin: auto 1.9375rem 1.5625rem;
+  border-top: 0.0625rem solid #b8bdc5;
+  padding-top: 1.25rem;
 `
 
 export const LogoutButton = styled.button`
   display: flex;
-  width: 100%;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.625rem;
   border: 0;
   padding: 0;
   background: transparent;
-  color: ${({ theme }) => theme.colors.text.default};
+  color: #727780;
   cursor: pointer;
   font: inherit;
 
   span {
-    font-size: clamp(1.25rem, 1.75vw, 1.5rem);
-    font-weight: 400;
-    letter-spacing: 0;
-    line-height: 1.2;
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.3;
   }
 `
 
 export const LogoutIconBox = styled.span`
   display: flex;
-  width: clamp(2.55rem, 3.2vw, 2.9375rem);
-  height: clamp(2.55rem, 3.2vw, 2.9375rem);
-  flex: 0 0 clamp(2.55rem, 3.2vw, 2.9375rem);
+  width: 1.0625rem;
+  height: 1.0625rem;
+  flex: 0 0 1.0625rem;
   align-items: center;
   justify-content: center;
-  border-radius: 0.625rem;
-  background: #ff4545;
-  color: ${({ theme }) => theme.colors.text.inverse};
+  color: #727780;
 
   svg {
-    width: 60%;
-    height: 60%;
-    color: currentColor;
-  }
-
-  svg path,
-  svg rect,
-  svg line,
-  svg polyline,
-  svg polygon {
-    fill: currentColor;
-    stroke: currentColor;
+    width: 100%;
+    height: 100%;
   }
 `

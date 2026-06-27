@@ -3,6 +3,7 @@ export { default as RecordIcon } from "./Record.svg?react"
 export { default as ProfileIcon } from "./Profile.svg?react"
 export { default as MissionIcon } from "./Mission.svg?react"
 export { default as CommunityIcon } from "./Community.svg?react"
+export { default as GroupIcon } from "./Group.svg?react"
 export { default as SidebarDashboardIcon } from './sidebar-dashboard.svg?react'
 export { default as SidebarPlanIcon } from './sidebar-plan.svg?react'
 export { default as SidebarMissionIcon } from './sidebar-mission.svg?react'

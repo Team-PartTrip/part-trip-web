@@ -57,7 +57,7 @@ const Sidebar = ({ logo, menus }: Props) => {
             <S.LogoutIconBox>
               <DoorOpen aria-hidden="true" />
             </S.LogoutIconBox>
-            <span>로그아웃</span>
+            <span>Log out</span>
           </S.LogoutButton>
         </S.Footer>
       </S.Aside>
