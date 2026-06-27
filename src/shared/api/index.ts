@@ -1,2 +1,2 @@
 export * from './auth'
-export { apiClient } from './client'
+export { apiClient, ACCESS_TOKEN_KEY } from './client'

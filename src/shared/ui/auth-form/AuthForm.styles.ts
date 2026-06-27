@@ -281,6 +281,44 @@ export const Actions = styled.div`
   gap: 16px;
 `
 
+export const Divider = styled.div`
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+  color: ${({ theme }) => theme.colors.text.placeholder};
+  font-size: 14px;
+  font-weight: 500;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: ${({ theme }) => theme.colors.border.default};
+  }
+`
+
+export const GoogleButton = styled.button`
+  ${buttonStyles}
+  position: relative;
+  gap: 8px;
+  border: 1px solid ${({ theme }) => theme.colors.brand.primary};
+  background: ${({ theme }) => theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.brand.primary};
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.background.muted};
+  }
+
+  svg {
+    position: absolute;
+    left: 24px;
+    width: 24px;
+    height: 24px;
+  }
+`
+
 export const HintRow = styled.div`
   display: flex;
   width: 100%;
