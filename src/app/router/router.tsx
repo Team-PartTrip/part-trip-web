@@ -5,6 +5,8 @@ import { DiagnosisResultPage } from '@pages/diagnosis-result'
 import { LoginPage } from '@pages/login'
 import { SignUpPage } from '@pages/sign-up'
 import { MainPage } from '@pages/main'
+import { ProfilePage } from '@pages/profile'
+import { ProfileEditPage } from '@pages/profile-edit'
 
 import { paths } from './paths'
 
@@ -36,5 +38,13 @@ export const router = createBrowserRouter([
   {
     path: paths.main,
     element: <MainPage />,
+  },
+  {
+    path: paths.profile,
+    element: <ProfilePage />,
+  },
+  {
+    path: paths.profileEdit,
+    element: <ProfileEditPage />,
   },
 ])
