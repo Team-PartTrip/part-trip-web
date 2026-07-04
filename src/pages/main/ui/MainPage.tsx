@@ -4,6 +4,7 @@ import { getSelectedDestinationMock, type Destination } from '@shared/api'
 import logoUrl from '@shared/assets/logo.svg'
 import mainHeroUrl from '@shared/assets/main-hero-redesign.png'
 import { paths } from '@shared/config'
+import { useLockBodyScroll } from '@shared/lib'
 import { Festival } from '@widgets/festival'
 import { MainHero } from '@widgets/main-hero'
 import { MENUS, Sidebar } from '@widgets/sidebar'
@@ -23,6 +24,7 @@ function Logo() {
 export function MainPage() {
   const navigate = useNavigate()
   const [destination, setDestination] = useState<Destination | null>(null)
+  useLockBodyScroll()
 
   useEffect(() => {
     let isMounted = true
@@ -30,19 +32,6 @@ export function MainPage() {
       if (isMounted) setDestination(selected)
     })
     return () => { isMounted = false }
-  }, [])
-
-  useEffect(() => {
-    const previousBodyOverflow = document.body.style.overflow
-    const previousRootOverflow = document.documentElement.style.overflow
-
-    document.body.style.overflow = 'hidden'
-    document.documentElement.style.overflow = 'hidden'
-
-    return () => {
-      document.body.style.overflow = previousBodyOverflow
-      document.documentElement.style.overflow = previousRootOverflow
-    }
   }, [])
 
   return (
