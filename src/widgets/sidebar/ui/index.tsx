@@ -1,5 +1,6 @@
 import { useState, type ReactElement } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { paths } from '@shared/config'
 
 import type { SidebarMenuType } from '../types/sidebar-item/sidebar-item'
 import LogoutDialog from './logout-dialog'
@@ -35,7 +36,7 @@ const Sidebar = ({ logo, menus }: Props) => {
     <S.SidebarWrapper>
       <S.Aside>
         <S.LogoSection>
-          <Link to="/">{logo}</Link>
+          <Link to={paths.main}>{logo}</Link>
         </S.LogoSection>
 
         <S.MenuList aria-label="메인 메뉴">
@@ -44,7 +45,7 @@ const Sidebar = ({ logo, menus }: Props) => {
               key={item.text}
               Icon={item.icon}
               text={item.text}
-              herf={item.herf}
+              href={item.href}
             />
           ))}
         </S.MenuList>
@@ -65,7 +66,7 @@ const Sidebar = ({ logo, menus }: Props) => {
       {isLogoutDialogOpen ? (
         <LogoutDialog
           onClose={closeLogoutDialog}
-          moveToLogin={() => navigate('/login')}
+          moveToLogin={() => navigate(paths.login, { replace: true })}
         />
       ) : null}
     </S.SidebarWrapper>

@@ -6,24 +6,24 @@ import * as S from './SidebarItem.style'
 interface Props {
   Icon?: FC<SVGProps<SVGSVGElement>>
   text: string
-  herf: string
+  href: string
   onClick?: () => void
 }
 
 const SidebarItem = ({
   Icon,
   text,
-  herf,
+  href,
   onClick,
 }: Props) => {
   const { pathname } = useLocation()
 
   const isParentActive =
-    pathname === herf || (herf !== '/' && pathname.startsWith(herf))
+    pathname === href || (href !== '/' && pathname.startsWith(href))
 
   return (
     <S.ItemLink
-      to={herf}
+      to={href}
       onClick={onClick}
       $isParentActive={isParentActive}
     >

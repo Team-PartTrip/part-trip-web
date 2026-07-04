@@ -140,7 +140,7 @@ export const LogoutButton = styled.button`
   font: inherit;
 
   span {
-    font-size: 1rem;
+    font-size: 1.125rem;
     font-weight: 500;
     line-height: 1.3;
   }

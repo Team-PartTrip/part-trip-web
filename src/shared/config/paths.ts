@@ -1,5 +1,6 @@
 export const paths = {
   changePassword: '/change-password',
+  community: '/community',
   diagnosis: '/diagnosis',
   diagnosisResult: '/result',
   home: '/',
@@ -7,6 +8,8 @@ export const paths = {
   main: '/main',
   profile: '/profile',
   profileEdit: '/profile/edit',
+  mission: '/mission',
+  record: '/record',
   signUp: '/sign-up',
   travelSelect: '/travel/select',
 } as const

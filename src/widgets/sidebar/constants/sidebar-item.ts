@@ -6,31 +6,32 @@ import {
   ProfileIcon,
   RecordIcon,
 } from '@shared/assets'
+import { paths } from '@shared/config'
 
 export const MENUS: SidebarMenuType[] = [
   {
     text: '홈',
-    herf: '/',
+    href: paths.main,
     icon: HomeIcon,
   },
   {
     text: '커뮤니티',
-    herf: '/community',
+    href: paths.community,
     icon: CommunityIcon,
   },
   {
     text: '기록',
-    herf: '/record',
+    href: paths.record,
     icon: RecordIcon,
   },
   {
     text: '미션',
-    herf: '/mission',
+    href: paths.mission,
     icon: MissionIcon,
   },
   {
     text: '프로필',
-    herf: '/profile',
+    href: paths.profile,
     icon: ProfileIcon,
   },
 ]
