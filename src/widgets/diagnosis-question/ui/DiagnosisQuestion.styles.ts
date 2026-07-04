@@ -7,6 +7,37 @@ export const Container = styled.section`
   align-items: center;
 `
 
+export const ProgressHeader = styled.div`
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 0.875rem;
+
+  strong {
+    color: ${({ theme }) => theme.colors.brand.strong};
+  }
+`
+
+export const ProgressTrack = styled.div`
+  width: 100%;
+  height: 0.5rem;
+  margin-bottom: 3rem;
+  overflow: hidden;
+  border-radius: ${({ theme }) => theme.radii.round};
+  background: ${({ theme }) => theme.colors.background.subtle};
+`
+
+export const ProgressBar = styled.span<{ $value: number }>`
+  display: block;
+  width: ${({ $value }) => `${$value}%`};
+  height: 100%;
+  border-radius: inherit;
+  background: ${({ theme }) => theme.colors.brand.primary};
+  transition: width 180ms ease;
+`
+
 export const Title = styled.h1`
   margin: 0 0 3.875rem;
   color: #1a3d5c;
@@ -60,15 +91,19 @@ export const OptionButton = styled.button<{ $selected: boolean }>`
   }
 `
 
-export const NextButton = styled.button`
+export const Actions = styled.div`
+  display: grid;
   width: 100%;
-  min-height: 3.125rem;
+  grid-template-columns: 0.7fr 1.3fr;
+  gap: 0.75rem;
   margin-top: 3.5rem;
+`
+
+const ActionButton = styled.button`
+  min-height: 3.125rem;
   padding: 0.625rem 2.125rem;
   border: 0;
   border-radius: ${({ theme }) => theme.radii.button};
-  background: ${({ theme }) => theme.colors.brand.primary};
-  color: ${({ theme }) => theme.colors.text.inverse};
   cursor: pointer;
   font: inherit;
   font-size: 1.25rem;
@@ -76,12 +111,27 @@ export const NextButton = styled.button`
   letter-spacing: -0.0375rem;
   line-height: 1.5;
 
-  &:hover {
-    background: ${({ theme }) => theme.colors.brand.primaryHover};
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 
   &:focus-visible {
     outline: 0.1875rem solid ${({ theme }) => theme.colors.shadow.focus};
     outline-offset: 0.125rem;
+  }
+`
+
+export const PreviousButton = styled(ActionButton)`
+  background: ${({ theme }) => theme.colors.background.subtle};
+  color: ${({ theme }) => theme.colors.text.muted};
+`
+
+export const NextButton = styled(ActionButton)`
+  background: ${({ theme }) => theme.colors.brand.primary};
+  color: ${({ theme }) => theme.colors.text.inverse};
+
+  &:hover:not(:disabled) {
+    background: ${({ theme }) => theme.colors.brand.primaryHover};
   }
 `

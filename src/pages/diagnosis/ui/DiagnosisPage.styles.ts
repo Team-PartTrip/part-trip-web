@@ -3,8 +3,8 @@ import styled from 'styled-components'
 export const Page = styled.main`
   display: flex;
   min-height: 100vh;
-  align-items: flex-start;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   padding: clamp(7rem, 31.8vh, 19.5625rem) 1rem 3rem;
   background: ${({ theme }) => theme.colors.background.default};
 
@@ -17,4 +17,10 @@ export const Page = styled.main`
     align-items: center;
     padding-block: 2rem;
   }
+`
+
+export const ErrorMessage = styled.p`
+  margin: 1rem 0 0;
+  color: ${({ theme }) => theme.colors.status.error};
+  font-size: 0.875rem;
 `
