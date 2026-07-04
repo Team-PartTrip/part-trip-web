@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom'
 import { useGoogleLogin } from '@react-oauth/google'
 import { ACCESS_TOKEN_KEY, googleLogin, login } from '@shared/api'
 import logoUrl from '@shared/assets/logo.svg'
-import { paths } from '@shared/config'
+import { paths, runtimeConfig } from '@shared/config'
 import {
   authValidationRules,
   getErrorMessage,
@@ -88,6 +88,7 @@ function GoogleGlyph() {
 export function LoginForm() {
   const navigate = useNavigate()
   const [message, setMessage] = useState<FormMessage | null>(null)
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
 
   const loginForm = useForm<LoginFormValues>({
     defaultValues: {
@@ -117,7 +118,7 @@ export function LoginForm() {
         userPwd,
       })
       localStorage.setItem(ACCESS_TOKEN_KEY, accessToken)
-      navigate(paths.home, { replace: true })
+      navigate(paths.diagnosis, { replace: true })
     } catch (error) {
       setMessage({
         text: getErrorMessage(error),
@@ -139,7 +140,7 @@ export function LoginForm() {
       try {
         const { accessToken } = await googleLogin({ code })
         localStorage.setItem(ACCESS_TOKEN_KEY, accessToken)
-        navigate(paths.home, { replace: true })
+        navigate(paths.diagnosis, { replace: true })
       } catch (error) {
         setMessage({ text: getErrorMessage(error), tone: 'error' })
       }
@@ -148,7 +149,25 @@ export function LoginForm() {
       setMessage({ text: 'Google 로그인에 실패했습니다.', tone: 'error' }),
   })
 
-  const isSubmitting = loginForm.formState.isSubmitting
+  const handleGoogleLogin = async () => {
+    if (!runtimeConfig.useMockApi) {
+      requestGoogleLogin()
+      return
+    }
+
+    try {
+      setIsGoogleSubmitting(true)
+      const { accessToken } = await googleLogin({ code: 'demo-google-code' })
+      localStorage.setItem(ACCESS_TOKEN_KEY, accessToken)
+      navigate(paths.diagnosis, { replace: true })
+    } catch (error) {
+      setMessage({ text: getErrorMessage(error), tone: 'error' })
+    } finally {
+      setIsGoogleSubmitting(false)
+    }
+  }
+
+  const isSubmitting = loginForm.formState.isSubmitting || isGoogleSubmitting
 
   return (
     <S.Container>
@@ -215,11 +234,11 @@ export function LoginForm() {
             <S.Divider>또는</S.Divider>
             <S.GoogleButton
               type="button"
-              onClick={() => requestGoogleLogin()}
+              onClick={() => void handleGoogleLogin()}
               disabled={isSubmitting}
             >
               <GoogleGlyph />
-              Google로 계속하기
+              {isGoogleSubmitting ? 'Google 로그인 중' : 'Google로 계속하기'}
             </S.GoogleButton>
             <S.SecondaryButton to={paths.signUp}>회원가입 하기</S.SecondaryButton>
           </S.Actions>
