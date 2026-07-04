@@ -7,6 +7,7 @@ import { SignUpPage } from '@pages/sign-up'
 import { MainPage } from '@pages/main'
 import { ProfilePage } from '@pages/profile'
 import { ProfileEditPage } from '@pages/profile-edit'
+import { TravelSelectPage } from '@pages/travel-select'
 
 import { paths } from './paths'
 
@@ -46,5 +47,9 @@ export const router = createBrowserRouter([
   {
     path: paths.profileEdit,
     element: <ProfileEditPage />,
+  },
+  {
+    path: paths.travelSelect,
+    element: <TravelSelectPage />,
   },
 ])

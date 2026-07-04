@@ -7,7 +7,7 @@ export const Hero = styled.section<{ $imageUrl: string }>`
   overflow: hidden;
   border-radius: 2rem;
   background:
-    linear-gradient(180deg, rgb(0 0 0 / 4%) 45%, rgb(0 0 0 / 70%) 100%),
+    linear-gradient(180deg, rgb(0 0 0 / 40%) 0%, rgb(0 0 0 / 0%) 40%, rgb(0 0 0 / 70%) 100%),
     url('${({ $imageUrl }) => $imageUrl}') center / cover no-repeat;
 
   @media (max-width: 74.9375rem) {
@@ -81,7 +81,7 @@ export const ChangeButton = styled.button`
   color: #1a3d5c;
   cursor: pointer;
   font: inherit;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 700;
 
   @media (max-width: 47.9375rem) {

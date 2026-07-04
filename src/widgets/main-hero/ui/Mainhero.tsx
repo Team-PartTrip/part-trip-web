@@ -3,14 +3,15 @@ import * as S from './Mainhero.style'
 interface Props {
   imageSrc: string
   'aria-label'?: string
+  onChangeDestination?: () => void
 }
 
-const MainHero = ({ imageSrc, 'aria-label': ariaLabel = '싱가포르 야경' }: Props) => {
+const MainHero = ({ imageSrc, 'aria-label': ariaLabel = '싱가포르 야경', onChangeDestination }: Props) => {
   return (
     <S.Hero $imageUrl={imageSrc} aria-label={ariaLabel}>
       <S.DDay>D - 1488</S.DDay>
       <S.Destination>싱가포르</S.Destination>
-      <S.ChangeButton type="button">여행지 변경 &gt;</S.ChangeButton>
+      <S.ChangeButton type="button" onClick={onChangeDestination}>여행지 변경 &gt;</S.ChangeButton>
     </S.Hero>
   )
 }

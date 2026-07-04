@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import logoUrl from '@shared/assets/logo.svg'
 import mainHeroUrl from '@shared/assets/main-hero-redesign.png'
+import { paths } from '@shared/config'
 import { Festival } from '@widgets/festival'
 import { MainHero } from '@widgets/main-hero'
 import { MENUS, Sidebar } from '@widgets/sidebar'
@@ -18,6 +20,8 @@ function Logo() {
 }
 
 export function MainPage() {
+  const navigate = useNavigate()
+
   useEffect(() => {
     const previousBodyOverflow = document.body.style.overflow
     const previousRootOverflow = document.documentElement.style.overflow
@@ -36,7 +40,11 @@ export function MainPage() {
       <Sidebar logo={<Logo />} menus={MENUS} />
 
       <S.Content>
-        <MainHero imageSrc={mainHeroUrl} aria-label="싱가포르 야경" />
+        <MainHero
+          imageSrc={mainHeroUrl}
+          aria-label="싱가포르 야경"
+          onChangeDestination={() => navigate(paths.travelSelect)}
+        />
 
         <S.BottomArea>
           <TravelInfo />
