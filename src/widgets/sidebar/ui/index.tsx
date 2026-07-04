@@ -1,8 +1,5 @@
-import { DoorOpen } from '@b1nd/dodam-design-system/icons'
-import { useOverlay } from '@b1nd/dodam-design-system/components'
-import { Link } from 'react-router-dom'
-import { useNavigate } from 'react-router-dom'
-import { type ReactElement } from 'react'
+import { useState, type ReactElement } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 
 import type { SidebarMenuType } from '../types/sidebar-item/sidebar-item'
 import LogoutDialog from './logout-dialog'
@@ -14,25 +11,25 @@ interface Props {
   menus: SidebarMenuType[]
 }
 
+function DoorOpenIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M14 8V5.5A1.5 1.5 0 0 0 12.5 4h-6A1.5 1.5 0 0 0 5 5.5v13A1.5 1.5 0 0 0 6.5 20h6a1.5 1.5 0 0 0 1.5-1.5V16M10 12h9m0 0-3-3m3 3-3 3"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
 const Sidebar = ({ logo, menus }: Props) => {
-  const overlay = useOverlay()
   const navigate = useNavigate()
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false)
 
-  const openLogoutDialog = () => {
-    overlay.open(({ close, exit }) => {
-      const onClose = () => {
-        close()
-        exit()
-      }
-
-      return (
-        <LogoutDialog
-          onClose={onClose}
-          moveToLogin={() => navigate('/login')}
-        />
-      )
-    })
-  }
+  const closeLogoutDialog = () => setIsLogoutDialogOpen(false)
 
   return (
     <S.SidebarWrapper>
@@ -53,14 +50,24 @@ const Sidebar = ({ logo, menus }: Props) => {
         </S.MenuList>
 
         <S.Footer>
-          <S.LogoutButton type="button" onClick={openLogoutDialog}>
+          <S.LogoutButton
+            type="button"
+            onClick={() => setIsLogoutDialogOpen(true)}
+          >
             <S.LogoutIconBox>
-              <DoorOpen aria-hidden="true" />
+              <DoorOpenIcon />
             </S.LogoutIconBox>
             <span>Log out</span>
           </S.LogoutButton>
         </S.Footer>
       </S.Aside>
+
+      {isLogoutDialogOpen ? (
+        <LogoutDialog
+          onClose={closeLogoutDialog}
+          moveToLogin={() => navigate('/login')}
+        />
+      ) : null}
     </S.SidebarWrapper>
   )
 }

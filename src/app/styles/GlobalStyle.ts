@@ -1,5 +1,4 @@
 import { createGlobalStyle } from 'styled-components'
-import "@b1nd/dodam-design-system/colors/colors.css";
 
 export const GlobalStyle = createGlobalStyle`
   :root {
