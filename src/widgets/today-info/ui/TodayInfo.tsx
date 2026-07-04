@@ -1,15 +1,24 @@
+import {
+  DashboardArrowIcon,
+  DashboardExchangeIcon,
+  DashboardSpeakerIcon,
+  DashboardTranslateIcon,
+  DashboardWeatherIcon,
+} from '@shared/assets'
+import { todayTravelInfo } from '@shared/api'
+
 import * as S from './TodayInfo.styles'
 
 export function PhraseOfDay() {
   return (
     <S.PhraseCard>
-      <S.SoundIcon aria-hidden="true">⌕</S.SoundIcon>
+      <S.SoundIcon aria-hidden="true"><DashboardSpeakerIcon /></S.SoundIcon>
       <S.PhraseText>
-        <small>Day 1</small>
-        <strong>Hello</strong>
-        <span>안녕하세요</span>
+        <small>Day {todayTravelInfo.phrase.day}</small>
+        <strong>{todayTravelInfo.phrase.local}</strong>
+        <span>{todayTravelInfo.phrase.translated}</span>
       </S.PhraseText>
-      <S.TranslateIcon aria-hidden="true">文<sup>A</sup></S.TranslateIcon>
+      <S.TranslateIcon aria-hidden="true"><DashboardTranslateIcon /></S.TranslateIcon>
     </S.PhraseCard>
   )
 }
@@ -18,18 +27,18 @@ export function TodayStats() {
   return (
     <S.Stats>
       <S.ExchangeCard>
-        <h2>♻ 오늘의 환율</h2>
-        <p><span>🇸🇬 1 SGD</span><b>→</b><strong>1200 KRW</strong><span>🇰🇷</span></p>
+        <h2><DashboardExchangeIcon aria-hidden="true" />오늘의 환율</h2>
+        <p><span>🇸🇬 {todayTravelInfo.exchange.base}</span><DashboardArrowIcon aria-hidden="true" /><strong>{todayTravelInfo.exchange.converted}</strong><span>🇰🇷</span></p>
       </S.ExchangeCard>
 
       <S.WeatherCard>
         <S.WeatherHeader>
-          <h2>☼ 현지 날씨</h2>
-          <small>Singapore</small>
+          <h2><DashboardWeatherIcon aria-hidden="true" />현지 날씨</h2>
+          <small>{todayTravelInfo.weather.city}</small>
         </S.WeatherHeader>
         <S.WeatherBody>
-          <strong>29°C</strong>
-          <span>Partly<br />Cloudy<small>Feels like 32°C</small></span>
+          <strong>{todayTravelInfo.weather.temperature}°C</strong>
+          <span>{todayTravelInfo.weather.condition}<small>Feels like {todayTravelInfo.weather.feelsLike}°C</small></span>
         </S.WeatherBody>
         <time dateTime="2026-06-09">2026년 6월 9일</time>
       </S.WeatherCard>

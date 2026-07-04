@@ -1,14 +1,19 @@
+import { useState } from 'react'
+import { travelInfoSections, type TravelInfoSection } from '@shared/api'
 import { GroupIcon } from '@shared/assets'
 
 import * as S from './TravelInfo.styles'
 
 const populationItems = [
-  { flag: '🇨🇳', group: '중국계', value: 75, color: '#1478c8' },
-  { flag: '🇲🇾', group: '말레이계', value: 14, color: '#eadde1' },
-  { flag: '🇮🇳', group: '인도계', value: 9, color: '#17ad8b' },
+  { flag: '🇨🇳', group: '중국계', value: 75, barValue: 67.33, color: '#0b73ce' },
+  { flag: '🇲🇲', group: '말레이계', value: 14, barValue: 16.63, color: '#e9d9dd' },
+  { flag: '🇮🇳', group: '인도계', value: 9, barValue: 10.69, color: '#11a987' },
 ]
 
 const TravelInfo = () => {
+  const [activeSectionId, setActiveSectionId] = useState<TravelInfoSection['id']>('population')
+  const activeSection = travelInfoSections.find((section) => section.id === activeSectionId) ?? travelInfoSections[0]
+
   return (
     <S.Card>
       <S.TitleRow>
@@ -17,13 +22,20 @@ const TravelInfo = () => {
       </S.TitleRow>
 
       <S.Tabs aria-label="여행지 정보 분류">
-        <S.Tab type="button" $active>인구 구성</S.Tab>
-        <S.Tab type="button">관광 장소</S.Tab>
-        <S.Tab type="button">대표 음식</S.Tab>
-        <S.Tab type="button">현지 에티켓</S.Tab>
+        {travelInfoSections.map((section) => (
+          <S.Tab
+            key={section.id}
+            type="button"
+            $active={section.id === activeSectionId}
+            aria-pressed={section.id === activeSectionId}
+            onClick={() => setActiveSectionId(section.id)}
+          >
+            {section.title}
+          </S.Tab>
+        ))}
       </S.Tabs>
 
-      <S.PopulationList>
+      {activeSectionId === 'population' ? <S.PopulationList>
         {populationItems.map((item) => (
           <S.PopulationItem key={item.group}>
             <S.PopulationMeta>
@@ -31,18 +43,17 @@ const TravelInfo = () => {
               <span>{item.value}%</span>
             </S.PopulationMeta>
             <S.ProgressTrack>
-              <S.ProgressFill $color={item.color} $value={item.value} />
+              <S.ProgressFill $color={item.color} $value={item.barValue} />
             </S.ProgressTrack>
           </S.PopulationItem>
         ))}
-      </S.PopulationList>
+      </S.PopulationList> : null}
 
       <S.CultureSummary>
-        <strong>문화 요약</strong>
+        <strong>{activeSection.title}</strong>
         <p>
-          중국계가 75%, 말레이계 14%, 인도계는 9%로<br />
-          중국계가 주류 구성되어 있으며<br />
-          여러 문화가 공존하는 다문화 국가입니다.
+          {activeSection.items.join(' · ')}<br />
+          {activeSection.summary}
         </p>
       </S.CultureSummary>
     </S.Card>

@@ -1,3 +1,9 @@
+import {
+  DashboardCalendarIcon,
+  DashboardChevronLeftIcon,
+  DashboardChevronRightIcon,
+} from '@shared/assets'
+
 import * as S from './Festival.styles'
 
 const calendarDays = [
@@ -7,16 +13,22 @@ const calendarDays = [
 ]
 
 const Festival = () => {
+  const [monthOffset, setMonthOffset] = useState(0)
+  const month = 6 + monthOffset
+
   return (
     <S.Card>
       <S.Header>
-        <span aria-hidden="true">▣</span>
+        <DashboardCalendarIcon aria-hidden="true" />
         <h2>축제 캘린더</h2>
       </S.Header>
       <S.Calendar>
         <S.CalendarTop>
-          <strong>2026년 6월</strong>
-          <div><button type="button" aria-label="이전 달">‹</button><button type="button" aria-label="다음 달">›</button></div>
+          <strong>2026년 {month}월</strong>
+          <div>
+            <button type="button" aria-label="이전 달" onClick={() => setMonthOffset((value) => Math.max(-1, value - 1))}><DashboardChevronLeftIcon /></button>
+            <button type="button" aria-label="다음 달" onClick={() => setMonthOffset((value) => Math.min(1, value + 1))}><DashboardChevronRightIcon /></button>
+          </div>
         </S.CalendarTop>
         <S.Grid>
           {['일', '월', '화', '수', '목', '금', '토'].map((day) => (
@@ -34,3 +46,4 @@ const Festival = () => {
 }
 
 export default Festival
+import { useState } from 'react'

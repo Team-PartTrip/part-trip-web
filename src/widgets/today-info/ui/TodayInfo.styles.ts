@@ -15,7 +15,7 @@ export const PhraseCard = styled.article`
   align-items: center;
   grid-template-columns: 2.5rem 1fr auto;
   gap: 1.25rem;
-  border-color: #4d91f3;
+  border-color: rgb(26 110 191 / 67%);
   padding: 1.1875rem;
 
   @media (max-width: 74.9375rem) {
@@ -37,9 +37,14 @@ export const SoundIcon = styled.span`
   height: 2.5rem;
   place-items: center;
   border-radius: 50%;
-  background: #dceafb;
+  background: rgb(26 110 191 / 23%);
   color: #1478c8;
   font-weight: 700;
+
+  svg {
+    width: 0.9375rem;
+    height: 0.9375rem;
+  }
 `
 
 export const PhraseText = styled.div`
@@ -51,8 +56,8 @@ export const PhraseText = styled.div`
     width: fit-content;
     border-radius: 0.125rem;
     padding: 0.125rem 0.25rem;
-    background: #b9d8fa;
-    color: #174b7f;
+    background: #cadef0;
+    color: #0d4a84;
     font-size: 0.6875rem;
   }
 
@@ -71,6 +76,12 @@ export const PhraseText = styled.div`
 export const TranslateIcon = styled.span`
   color: #b8bdc5;
   font-size: 1.25rem;
+
+  svg {
+    display: block;
+    width: 1.38125rem;
+    height: 1.25rem;
+  }
 `
 
 export const Stats = styled.aside`
@@ -98,10 +109,18 @@ export const ExchangeCard = styled.article`
   }
 
   h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
     margin: 0;
     color: #555b64;
-    font-size: 0.9375rem;
+    font-size: 1rem;
     font-weight: 600;
+
+    svg {
+      width: 1.03125rem;
+      height: 1.03125rem;
+    }
   }
 
   p {
@@ -110,11 +129,11 @@ export const ExchangeCard = styled.article`
     gap: 0.75rem;
     margin: 1.25rem 0 0;
     color: #20242a;
-    font-size: 0.875rem;
+    font-size: 1rem;
     white-space: nowrap;
 
-    b { color: #727780; font-size: 1.125rem; }
-    strong { color: #0969c5; font-size: 0.9375rem; }
+    > svg { width: 1.1875rem; height: 0.5625rem; flex: 0 0 auto; }
+    strong { color: #0058bc; font-size: 1rem; }
   }
 
   @media (max-width: 74.9375rem) {
@@ -123,7 +142,6 @@ export const ExchangeCard = styled.article`
       margin-top: 1rem;
       font-size: clamp(0.6875rem, 1.2vw, 0.8125rem);
 
-      b { font-size: 1rem; }
       strong { font-size: clamp(0.75rem, 1.3vw, 0.875rem); }
     }
   }
@@ -145,7 +163,7 @@ export const WeatherCard = styled.article`
     display: block;
     margin-top: 1.625rem;
     color: #555b64;
-    font-size: 0.9375rem;
+    font-size: 1rem;
   }
 `
 
@@ -155,10 +173,18 @@ export const WeatherHeader = styled.div`
   justify-content: space-between;
 
   h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
     margin: 0;
     color: #555b64;
-    font-size: 0.9375rem;
+    font-size: 1rem;
     font-weight: 600;
+
+    svg {
+      width: 1.03125rem;
+      height: 0.9375rem;
+    }
   }
 
   small { color: #8d939d; font-size: 0.5625rem; }
@@ -172,13 +198,13 @@ export const WeatherBody = styled.div`
 
   > strong {
     color: #181b20;
-    font-size: 2.625rem;
+    font-size: 2.5rem;
     line-height: 1;
   }
 
   > span {
     color: #505762;
-    font-size: 0.9375rem;
+    font-size: 1rem;
     line-height: 1.3;
 
     small {

@@ -12,7 +12,7 @@ export const Card = styled.article`
   padding: 1.25rem 1.9375rem;
   gap: 1.375rem;
   background: #ffffff;
-  box-shadow: 0 0.5rem 1.5rem rgb(13 31 64 / 8%);
+  box-shadow: 0 0.5rem 0.75rem rgb(13 31 64 / 8%);
 
   @media (max-width: 74.9375rem) {
     height: 100%;
@@ -95,8 +95,12 @@ export const PopulationList = styled.div`
   flex-direction: column;
   gap: 0.75rem;
   align-items: flex-start;
-  width: 100%;
+  width: 18.9375rem;
   padding: 0px;
+
+  @media (max-width: 74.9375rem) {
+    width: 100%;
+  }
 `;
 
 export const PopulationItem = styled.div`
@@ -128,7 +132,7 @@ export const ProgressTrack = styled.div`
   height: 0.625rem;
   overflow: hidden;
   border-radius: 999rem;
-  background: #eee9eb;
+  background: #f1ecee;
 `;
 
 export const ProgressFill = styled.span<{ $color: string; $value: number }>`

@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getSelectedDestinationMock, type Destination } from '@shared/api'
 import logoUrl from '@shared/assets/logo.svg'
 import mainHeroUrl from '@shared/assets/main-hero-redesign.png'
 import { paths } from '@shared/config'
@@ -21,6 +22,15 @@ function Logo() {
 
 export function MainPage() {
   const navigate = useNavigate()
+  const [destination, setDestination] = useState<Destination | null>(null)
+
+  useEffect(() => {
+    let isMounted = true
+    void getSelectedDestinationMock().then((selected) => {
+      if (isMounted) setDestination(selected)
+    })
+    return () => { isMounted = false }
+  }, [])
 
   useEffect(() => {
     const previousBodyOverflow = document.body.style.overflow
@@ -42,7 +52,8 @@ export function MainPage() {
       <S.Content>
         <MainHero
           imageSrc={mainHeroUrl}
-          aria-label="싱가포르 야경"
+          aria-label={`${destination?.name ?? '여행지'} 야경`}
+          destination={destination?.name ?? '여행지를 불러오는 중'}
           onChangeDestination={() => navigate(paths.travelSelect)}
         />
 
