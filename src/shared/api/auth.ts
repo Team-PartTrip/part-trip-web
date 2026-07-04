@@ -1,4 +1,13 @@
 import { apiClient } from './client'
+import { runtimeConfig } from '@shared/config'
+import {
+  googleLoginMock,
+  loginMock,
+  logoutMock,
+  resetPasswordMock,
+  signUpMock,
+  verifyCodeMock,
+} from './mock'
 
 type EmptySuccessResponse = {
   ok: true
@@ -66,6 +75,7 @@ async function post<TResponse>(path: string, payload: unknown) {
 }
 
 export async function login(payload: LoginRequest) {
+  if (runtimeConfig.useMockApi) return loginMock(payload)
   return post<LoginResponse>(AUTH_API_PATHS.session.login, payload)
 }
 
@@ -74,30 +84,36 @@ export type GoogleLoginRequest = {
 }
 
 export async function googleLogin(payload: GoogleLoginRequest) {
+  if (runtimeConfig.useMockApi) return googleLoginMock()
   return post<LoginResponse>(AUTH_API_PATHS.session.google, payload)
 }
 
 export async function sendVerificationCode(
   payload: SendVerificationCodeRequest,
 ) {
+  if (runtimeConfig.useMockApi) return { ok: true as const }
   return post<EmptySuccessResponse>(AUTH_API_PATHS.email.sendCode, payload)
 }
 
 export async function verifyCode(payload: VerifyCodeRequest) {
+  if (runtimeConfig.useMockApi) return verifyCodeMock(payload)
   return post<EmptySuccessResponse>(AUTH_API_PATHS.email.verifyCode, payload)
 }
 
 export async function sendPasswordResetCode(
   payload: SendVerificationCodeRequest,
 ) {
+  if (runtimeConfig.useMockApi) return { ok: true as const }
   return post<EmptySuccessResponse>(AUTH_API_PATHS.password.sendCode, payload)
 }
 
 export async function verifyPasswordResetCode(payload: VerifyCodeRequest) {
+  if (runtimeConfig.useMockApi) return verifyCodeMock(payload)
   return post<EmptySuccessResponse>(AUTH_API_PATHS.password.verifyCode, payload)
 }
 
 export async function signUp(payload: SignUpRequest) {
+  if (runtimeConfig.useMockApi) return signUpMock(payload)
   const { email, id, password } = payload
 
   return post<EmptySuccessResponse>(AUTH_API_PATHS.signUp, {
@@ -110,5 +126,11 @@ export async function signUp(payload: SignUpRequest) {
 }
 
 export async function resetPassword(payload: ResetPasswordRequest) {
+  if (runtimeConfig.useMockApi) return resetPasswordMock(payload)
   return post<EmptySuccessResponse>(AUTH_API_PATHS.password.reset, payload)
+}
+
+export async function logout() {
+  if (runtimeConfig.useMockApi) return logoutMock()
+  return post<EmptySuccessResponse>('/auth/logout', {})
 }
