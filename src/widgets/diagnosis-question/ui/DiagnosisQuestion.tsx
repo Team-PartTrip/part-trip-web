@@ -8,20 +8,11 @@ export function DiagnosisQuestion({
   selectedOptionId,
   isLastQuestion = false,
   isSubmitting = false,
-  onPrevious,
   onSelect,
   onNext,
-  totalQuestions = 9,
 }: DiagnosisQuestionProps) {
   return (
     <S.Container aria-labelledby="diagnosis-question-title">
-      <S.ProgressHeader>
-        <span>여행 성향 진단</span>
-        <strong>{questionNumber} / {totalQuestions}</strong>
-      </S.ProgressHeader>
-      <S.ProgressTrack aria-hidden="true">
-        <S.ProgressBar $value={(questionNumber / totalQuestions) * 100} />
-      </S.ProgressTrack>
       <S.Title id="diagnosis-question-title">
         Q{questionNumber}. {question}
       </S.Title>
@@ -45,9 +36,6 @@ export function DiagnosisQuestion({
       </S.Options>
 
       <S.Actions>
-        <S.PreviousButton type="button" onClick={onPrevious} disabled={!onPrevious || isSubmitting}>
-          이전
-        </S.PreviousButton>
         <S.NextButton type="button" onClick={onNext} disabled={isSubmitting}>
           {isSubmitting ? '결과 확인 중' : isLastQuestion ? '결과 보기' : '다음'}
         </S.NextButton>

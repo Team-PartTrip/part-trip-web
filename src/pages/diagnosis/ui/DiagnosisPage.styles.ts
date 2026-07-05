@@ -5,7 +5,7 @@ export const Page = styled.main`
   min-height: 100vh;
   flex-direction: column;
   align-items: center;
-  padding: clamp(7rem, 31.8vh, 19.5625rem) 1rem 3rem;
+  padding: 313px 1rem 3rem;
   background: ${({ theme }) => theme.colors.background.default};
 
   @media (max-height: 50rem) {

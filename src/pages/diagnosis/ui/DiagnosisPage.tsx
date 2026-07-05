@@ -51,11 +51,6 @@ export function DiagnosisPage() {
     setCurrentQuestionIndex((index) => index + 1)
   }
 
-  const handlePrevious = () => {
-    setErrorMessage(null)
-    setCurrentQuestionIndex((index) => Math.max(0, index - 1))
-  }
-
   return (
     <S.Page>
       <DiagnosisQuestion
@@ -65,10 +60,8 @@ export function DiagnosisPage() {
         selectedOptionId={answers[currentQuestion.id]}
         isLastQuestion={currentQuestionIndex === DIAGNOSIS_QUESTIONS.length - 1}
         isSubmitting={isSubmitting}
-        onPrevious={currentQuestionIndex > 0 ? handlePrevious : undefined}
         onSelect={handleSelect}
         onNext={() => void handleNext()}
-        totalQuestions={DIAGNOSIS_QUESTIONS.length}
       />
       {errorMessage ? <S.ErrorMessage role="alert">{errorMessage}</S.ErrorMessage> : null}
     </S.Page>

@@ -10,8 +10,6 @@ export type DiagnosisQuestionProps = {
   selectedOptionId: string
   isLastQuestion?: boolean
   isSubmitting?: boolean
-  onPrevious?: () => void
   onSelect: (optionId: string) => void
-  onNext?: () => void
-  totalQuestions?: number
+  onNext: () => void
 }
