@@ -218,25 +218,30 @@ const buttonStyles = css`
   }
 `
 
-export const PrimaryButton = styled.button`
+export const PrimaryButton = styled.button<{ $strong?: boolean }>`
   ${buttonStyles}
   border: 0;
-  background: ${({ theme }) => theme.colors.brand.primary};
+  background: ${({ $strong, theme }) =>
+    $strong ? theme.colors.brand.strong : theme.colors.brand.primary};
   color: ${({ theme }) => theme.colors.text.inverse};
 
   &:hover {
-    background: ${({ theme }) => theme.colors.brand.primaryHover};
+    background: ${({ $strong, theme }) =>
+      $strong ? '#155fa7' : theme.colors.brand.primaryHover};
   }
 `
 
-export const SecondaryButton = styled(Link)`
+export const SecondaryButton = styled(Link)<{ $filled?: boolean }>`
   ${buttonStyles}
   border: 1px solid ${({ theme }) => theme.colors.brand.primary};
-  background: ${({ theme }) => theme.colors.background.default};
-  color: ${({ theme }) => theme.colors.brand.primary};
+  background: ${({ $filled, theme }) =>
+    $filled ? theme.colors.brand.primary : theme.colors.background.default};
+  color: ${({ $filled, theme }) =>
+    $filled ? theme.colors.text.inverse : theme.colors.brand.primary};
 
   &:hover {
-    background: ${({ theme }) => theme.colors.background.muted};
+    background: ${({ $filled, theme }) =>
+      $filled ? theme.colors.brand.primaryHover : theme.colors.background.muted};
   }
 
   &:disabled {

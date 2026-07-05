@@ -186,7 +186,7 @@ export function LoginForm() {
           ) : null}
 
           <S.Actions>
-            <S.PrimaryButton type="submit" disabled={isSubmitting}>
+            <S.PrimaryButton type="submit" disabled={isSubmitting} $strong>
               {isSubmitting ? '로그인 중' : '로그인 하기'}
             </S.PrimaryButton>
             <S.Divider>또는</S.Divider>
@@ -196,7 +196,9 @@ export function LoginForm() {
               onError={() => setMessage({ text: 'Google 로그인에 실패했습니다.', tone: 'error' })}
               onLogin={handleGoogleLogin}
             />
-            <S.SecondaryButton to={paths.signUp}>회원가입 하기</S.SecondaryButton>
+            <S.SecondaryButton to={paths.signUp} $filled>
+              회원가입 하기
+            </S.SecondaryButton>
           </S.Actions>
         </S.Form>
       </S.Body>
