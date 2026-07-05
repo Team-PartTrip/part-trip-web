@@ -4,8 +4,16 @@ export const Page = styled.main`
   position: relative;
   display: flex;
   width: 100%;
-  min-height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   background: #f4f8fc;
+
+  @media (max-width: 58rem) {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
   @media (max-width: 47.9375rem) { flex-direction: column; }
 `
 
@@ -21,9 +29,17 @@ export const Logo = styled.div`
 `
 
 export const Content = styled.section`
+  display: flex;
+  height: 100%;
   min-width: 0;
   flex: 1;
-  padding: 52px 58px;
+  justify-content: center;
+  padding: clamp(20px, 5.3vh, 52px) clamp(24px, 3.8vw, 58px);
+
+  @media (max-width: 58rem) {
+    height: auto;
+    padding: 28px 24px 48px;
+  }
 `
 
 export const State = styled.div`
