@@ -136,14 +136,29 @@ export const BadgeGrid = styled.div`
   grid-template-rows: repeat(3, minmax(0, 1fr));
   gap: clamp(8px, 1.43vh, 14px) 20px;
   margin-top: clamp(18px, 2.65vh, 26px);
-  img { width: 100%; height: 100%; min-height: 0; object-fit: contain; }
 
   @media (max-width: 58rem) {
     height: auto;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-rows: none;
-    img { aspect-ratio: 1; }
   }
+`
+
+export const BadgeItem = styled.div<{ $cropRight: boolean }>`
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+
+  img {
+    display: block;
+    width: ${({ $cropRight }) => ($cropRight ? '112%' : '100%')};
+    height: 100%;
+    min-height: 0;
+    object-fit: ${({ $cropRight }) => ($cropRight ? 'fill' : 'contain')};
+    object-position: left center;
+  }
+
+  @media (max-width: 58rem) { aspect-ratio: 1; }
 `
 
 export const TypePanel = styled.section`
