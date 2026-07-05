@@ -12,10 +12,11 @@ import { paths } from '@shared/config'
 import * as S from './ProfileCard.styles'
 
 type ProfileCardProps = {
+  onEdit?: () => void
   profile: UserProfile
 }
 
-export function ProfileCard({ profile }: ProfileCardProps) {
+export function ProfileCard({ onEdit, profile }: ProfileCardProps) {
   const navigate = useNavigate()
   const badges = [badge1Url, badge2Url, badge1Url, badge2Url, badge3Url, badge4Url, badge3Url, badge4Url, badge5Url, badge6Url, badge5Url, badge6Url]
 
@@ -24,7 +25,10 @@ export function ProfileCard({ profile }: ProfileCardProps) {
       <S.ProfileLine>
         <S.Avatar aria-hidden="true" />
         <S.BasicInfo><h1>{profile.name}</h1><p>{profile.travelStyle}</p></S.BasicInfo>
-        <S.EditButton type="button" onClick={() => navigate(paths.profileEdit)}>
+        <S.EditButton
+          type="button"
+          onClick={() => onEdit ? onEdit() : navigate(paths.profileEdit)}
+        >
           프로필 수정
         </S.EditButton>
       </S.ProfileLine>

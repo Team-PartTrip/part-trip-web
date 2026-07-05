@@ -7,10 +7,12 @@ import { paths } from '@shared/config'
 import * as S from './ProfileForm.styles'
 
 type ProfileFormProps = {
+  onCancel?: () => void
+  onSaved?: (profile: UserProfile) => void
   profile: UserProfile
 }
 
-export function ProfileForm({ profile }: ProfileFormProps) {
+export function ProfileForm({ onCancel, onSaved, profile }: ProfileFormProps) {
   const navigate = useNavigate()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const { register, handleSubmit, formState, control } = useForm<UserProfile>({
@@ -21,8 +23,12 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   const onSubmit: SubmitHandler<UserProfile> = async (values) => {
     try {
       setErrorMessage(null)
-      await updateProfileMock(values)
-      navigate(paths.profile, { replace: true })
+      const updatedProfile = await updateProfileMock(values)
+      if (onSaved) {
+        onSaved(updatedProfile)
+      } else {
+        navigate(paths.profile, { replace: true })
+      }
     } catch {
       setErrorMessage('프로필을 저장하지 못했습니다. 다시 시도해주세요.')
     }
@@ -32,7 +38,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     <S.Form onSubmit={handleSubmit(onSubmit)} noValidate>
       <S.Header>
         <h1>프로필 수정</h1>
-        <S.CloseButton type="button" onClick={() => navigate(paths.profile)} aria-label="닫기">×</S.CloseButton>
+        <S.CloseButton type="button" onClick={() => onCancel ? onCancel() : navigate(paths.profile)} aria-label="닫기">×</S.CloseButton>
       </S.Header>
       <S.Body>
         <S.FieldGrid>
@@ -46,7 +52,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
         <S.Preview><h2>미리보기</h2><S.PreviewAvatar /><h3>{previewName}</h3><p>{profile.travelStyle}</p></S.Preview>
       </S.Body>
       <S.Actions>
-        <S.CancelButton type="button" onClick={() => navigate(paths.profile)} disabled={formState.isSubmitting}>취소</S.CancelButton>
+        <S.CancelButton type="button" onClick={() => onCancel ? onCancel() : navigate(paths.profile)} disabled={formState.isSubmitting}>취소</S.CancelButton>
         <S.SaveButton type="submit" disabled={formState.isSubmitting}>{formState.isSubmitting ? '저장 중' : '저장하기'}</S.SaveButton>
       </S.Actions>
     </S.Form>

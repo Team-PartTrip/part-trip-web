@@ -1,11 +1,19 @@
 import styled from 'styled-components'
 
 export const Page = styled.main`
+  position: relative;
   display: flex;
   width: 100%;
   min-height: 100vh;
   background: #f4f8fc;
   @media (max-width: 47.9375rem) { flex-direction: column; }
+`
+
+export const Backdrop = styled.div`
+  position: absolute;
+  z-index: 10;
+  inset: 0;
+  background: rgb(0 0 0 / 20%);
 `
 
 export const Logo = styled.div`
