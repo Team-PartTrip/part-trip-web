@@ -77,12 +77,12 @@ export const Body = styled.div`
   gap: 48px;
 `
 
-export const Form = styled.form`
+export const Form = styled.form<{ $spacious?: boolean }>`
   display: flex;
   align-items: center;
   width: 100%;
   flex-direction: column;
-  gap: 12px;
+  gap: ${({ $spacious }) => ($spacious ? '32px' : '12px')};
 `
 
 export const VerificationCodeForm = styled.form`
@@ -276,6 +276,17 @@ export const CodeSendButton = styled.button`
   &:disabled {
     cursor: not-allowed;
     opacity: 0.65;
+  }
+`
+
+export const OutlineButton = styled.button`
+  ${buttonStyles}
+  border: 1px solid ${({ theme }) => theme.colors.brand.primary};
+  background: ${({ theme }) => theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.brand.primary};
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.background.muted};
   }
 `
 

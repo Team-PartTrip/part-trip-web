@@ -250,6 +250,7 @@ export function ChangePasswordForm() {
         {step === 'email' ? (
           <S.Form
             key="change-password-email"
+            $spacious
             aria-label="비밀번호 찾기 이메일 인증 요청"
             method="post"
             noValidate
@@ -258,25 +259,22 @@ export function ChangePasswordForm() {
               void handleSendVerificationCode()
             }}
           >
-            <S.VerificationField>
-              <S.Input
-                {...emailField}
-                $compact
-                aria-label="이메일"
-                type="email"
-                autoComplete="email"
-                placeholder="이메일을 입력하세요."
-                disabled={isVerificationSubmitting || isSendingCode}
-                required
-              />
-              <S.CodeSendButton
-                type="button"
-                disabled={isVerificationSubmitting || isSendingCode}
-                onClick={handleSendVerificationCode}
-              >
-                {isSendingCode ? '발송 중' : '인증코드 보내기'}
-              </S.CodeSendButton>
-            </S.VerificationField>
+            <S.Input
+              {...emailField}
+              aria-label="이메일"
+              type="email"
+              autoComplete="email"
+              placeholder="이메일을 입력하세요."
+              disabled={isVerificationSubmitting || isSendingCode}
+              required
+            />
+
+            <S.OutlineButton
+              type="submit"
+              disabled={isVerificationSubmitting || isSendingCode}
+            >
+              {isSendingCode ? '발송 중' : '인증코드 보내기'}
+            </S.OutlineButton>
 
             {message ? (
               <S.Message $tone={message.tone} aria-live="polite">
@@ -284,9 +282,6 @@ export function ChangePasswordForm() {
               </S.Message>
             ) : null}
 
-            <S.Actions>
-              <S.SecondaryButton to={paths.login}>로그인 하기</S.SecondaryButton>
-            </S.Actions>
           </S.Form>
         ) : step === 'verification' ? (
           <S.VerificationPanel>
