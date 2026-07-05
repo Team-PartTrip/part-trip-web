@@ -1,9 +1,11 @@
 import styled from 'styled-components'
 
 export const SidebarWrapper = styled.div`
+  position: sticky;
+  top: 0;
   width: 15.0625rem;
-  height: 100%;
-  min-height: 38rem;
+  height: 100dvh;
+  min-height: 0;
   flex: 0 0 15.0625rem;
   background: #ffffff;
 
@@ -18,6 +20,7 @@ export const SidebarWrapper = styled.div`
   }
 
   @media (max-width: 47.9375rem) {
+    position: static;
     width: 100%;
     height: 3.5rem;
     min-height: 0;
