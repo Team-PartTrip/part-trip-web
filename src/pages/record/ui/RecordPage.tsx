@@ -1,12 +1,10 @@
 import { useNavigate } from 'react-router-dom'
-import { seedTravelRecords } from '@shared/api'
+import { seedTravelLogEntries } from '@shared/api'
 import logoUrl from '@shared/assets/logo.png'
 import { createRecordDetailPath, paths } from '@shared/config'
 import { MENUS, Sidebar } from '@widgets/sidebar'
 
 import * as S from './RecordPage.styles'
-
-const formatDate = (value: string) => value.replaceAll('-', '.')
 
 export function RecordPage() {
   const navigate = useNavigate()
@@ -15,26 +13,38 @@ export function RecordPage() {
     <S.Page>
       <Sidebar logo={<S.Logo src={logoUrl} alt="PartTrip" />} menus={MENUS} />
       <S.Content>
-        <S.SearchBar aria-label="여행 기록 검색">
-          <S.SearchIcon aria-hidden="true" />
-          <span>어디로 여행을 떠나시나요?</span>
-        </S.SearchBar>
-        <S.RecordCard>
-          <S.CardHeader>
-            <div><h1>여행별 기록</h1><p>최근 작성한 여행 기록 4개</p></div>
-            <S.HeaderActions><strong>총 7개</strong><button type="button" onClick={() => navigate(paths.recordWrite)}>새 기록 작성</button></S.HeaderActions>
-          </S.CardHeader>
-          <S.RecordList>
-            {seedTravelRecords.map((record) => (
-              <S.RecordRow key={record.title}>
-                <img src={record.imageUrl} alt="" />
-                <S.RecordText><h2>{record.title}</h2><p>{formatDate(record.startDate)} ~ {formatDate(record.endDate)}</p></S.RecordText>
-                <S.ViewButton type="button" onClick={() => navigate(createRecordDetailPath(record.id))}>보기</S.ViewButton>
-              </S.RecordRow>
-            ))}
-          </S.RecordList>
-          <S.MoreButton type="button">더 많은 기록 보기</S.MoreButton>
-        </S.RecordCard>
+        <S.TopBar>
+          <S.TripTitle type="button" onClick={() => navigate(paths.main)}>
+            <span aria-hidden="true">‹</span>
+            2026 여름의 싱가포르 🇸🇬
+          </S.TripTitle>
+          <S.SearchBar aria-label="여행 기록 검색">
+            <S.SearchIcon aria-hidden="true" />
+            <span>어디로 여행을 떠나시나요?</span>
+          </S.SearchBar>
+        </S.TopBar>
+        <S.Workspace>
+          <S.RecordCard>
+            <S.RecordList>
+              {seedTravelLogEntries.map((record) => (
+                <S.RecordRow key={record.id}>
+                  <img src={record.imageUrl} alt="" />
+                  <S.RecordText>
+                    <h2>{record.title}</h2>
+                    <p>{record.description}</p>
+                    <span>{record.recordedAt}</span>
+                  </S.RecordText>
+                  <S.RowActions>
+                    <S.MenuButton type="button" aria-label={`${record.title} 메뉴`}>⋮</S.MenuButton>
+                    <S.ViewButton type="button" onClick={() => navigate(createRecordDetailPath('singapore-2026'))}>보기</S.ViewButton>
+                  </S.RowActions>
+                </S.RecordRow>
+              ))}
+            </S.RecordList>
+            <S.MoreButton type="button">더 많은 기록 보기</S.MoreButton>
+          </S.RecordCard>
+          <S.CreateButton type="button" onClick={() => navigate(paths.recordWrite)}>+ 기록 작성</S.CreateButton>
+        </S.Workspace>
       </S.Content>
     </S.Page>
   )

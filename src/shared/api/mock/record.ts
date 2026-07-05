@@ -15,6 +15,14 @@ export type TravelRecordSchedule = {
   items: readonly string[]
 }
 
+export type TravelLogEntry = {
+  description: string
+  id: string
+  imageUrl: string
+  recordedAt: string
+  title: string
+}
+
 export type TravelRecord = {
   destination: string
   endDate: string
@@ -75,6 +83,33 @@ export const seedTravelRecords: readonly TravelRecord[] = [
     schedule: [{ day: 'DAY 1', items: ['시부야', '오모테산도', '도쿄역'] }],
     startDate: '2025-12-30',
     title: '혼자 일본 당일치기',
+  },
+]
+
+export const seedTravelLogEntries: readonly TravelLogEntry[] = [
+  {
+    description:
+      '멋있는 싱가포르의 라이트쇼를 보았다. 내가 아는 익숙한 해리포터 노래가 나와서 굉장히 흥미로웠다...',
+    id: 'supertree-lightshow',
+    imageUrl: recordSingaporeUrl,
+    recordedAt: '오후 19:40 · 2024.05.12',
+    title: '슈퍼트리 라이트쇼',
+  },
+  {
+    description:
+      '보드 등 다양한 수상레저를 즐겼다. 아무리 더운 나라여도 바다는 시원했다...',
+    id: 'singapore-blue-sea',
+    imageUrl: recordSingaporeUrl,
+    recordedAt: '오후 19:40 · 2024.05.12',
+    title: '싱가포르의 푸른 바다가',
+  },
+  {
+    description:
+      '이렇게 높은 대관람차는 처음이다. 엄청 높았고, 야경이 훌륭했다...',
+    id: 'flyer-review',
+    imageUrl: recordSingaporeUrl,
+    recordedAt: '오후 19:40 · 2024.05.12',
+    title: '플라이어 탑승 후기',
   },
 ]
 
