@@ -106,11 +106,10 @@ export const Workspace = styled.section`
 
 export const RecordCard = styled.div`
   width: min(1148px, 100%);
-  min-height: 659px;
   margin: 0 auto;
   border: 1px solid #e7edf7;
   border-radius: 24px;
-  padding: 22px 24px;
+  padding: 22px 24px 18px;
   background: #fff;
   box-shadow: 0 8px 16px rgb(13 31 64 / 8%);
 
@@ -188,7 +187,7 @@ export const ViewButton = styled.button`
 export const MoreButton = styled.button`
   width: 100%;
   height: 42px;
-  margin-top: 48px;
+  margin-top: 24px;
   border: 1px solid #d7e3f2;
   border-radius: 10px;
   background: #fff;
