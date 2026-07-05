@@ -2,6 +2,8 @@ import { lazy } from 'react'
 
 export const ChangePasswordPage = lazy(() => import('@pages/change-password').then((module) => ({ default: module.ChangePasswordPage })))
 export const CommunityPage = lazy(() => import('@pages/community').then((module) => ({ default: module.CommunityPage })))
+export const CommunityDetailPage = lazy(() => import('@pages/community-detail').then((module) => ({ default: module.CommunityDetailPage })))
+export const CommunityWritePage = lazy(() => import('@pages/community-write').then((module) => ({ default: module.CommunityWritePage })))
 export const DiagnosisPage = lazy(() => import('@pages/diagnosis').then((module) => ({ default: module.DiagnosisPage })))
 export const DiagnosisResultPage = lazy(() => import('@pages/diagnosis-result').then((module) => ({ default: module.DiagnosisResultPage })))
 export const LoginPage = lazy(() => import('@pages/login').then((module) => ({ default: module.LoginPage })))

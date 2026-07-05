@@ -1,2 +1,2 @@
-export { paths } from './paths'
+export { createCommunityDetailPath, paths } from './paths'
 export { runtimeConfig } from './runtime'

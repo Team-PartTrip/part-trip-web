@@ -6,6 +6,11 @@ export const Page = styled.main`
   align-items: flex-start;
   background: #f4f8fc;
   color: #191c1e;
+
+  @media (max-width: 47.9375rem) {
+    min-height: 100dvh;
+    flex-direction: column;
+  }
 `
 
 export const Logo = styled.img`display: block;`
@@ -16,6 +21,21 @@ export const Content = styled.section`
   padding: 28px 41px 80px 79px;
 
   > h1 { margin: 0; font-size: 32px; font-weight: 500; line-height: 48px; letter-spacing: -0.8px; }
+
+  @media (max-width: 74.9375rem) {
+    width: calc(100% - 160px);
+    padding: 28px 32px 64px;
+  }
+
+  @media (max-width: 63.9375rem) {
+    width: calc(100% - 80px);
+    padding-inline: 24px;
+  }
+
+  @media (max-width: 47.9375rem) {
+    width: 100%;
+    padding: 24px 18px 48px;
+  }
 `
 
 export const Tabs = styled.div`
@@ -35,13 +55,35 @@ export const Layout = styled.div`
   grid-template-columns: minmax(680px, 768px) 320px;
   gap: 23px;
   align-items: start;
+
+  @media (max-width: 81.25rem) {
+    grid-template-columns: 1fr;
+  }
 `
 
 export const Feed = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 350px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 46px;
   padding: 0 20px;
+
+  @media (max-width: 63.9375rem) {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 0;
+  }
+`
+
+export const PostButton = styled.button`
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
 `
 
 export const Column = styled.div`
@@ -132,10 +174,21 @@ export const Aside = styled.aside`
   flex-direction: column;
   gap: 24px;
   margin-top: -16px;
+
+  @media (max-width: 81.25rem) {
+    display: grid;
+    grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+    margin: 0 20px;
+  }
+
+  @media (max-width: 47.9375rem) {
+    grid-template-columns: 1fr;
+    margin: 0;
+  }
 `
 
 export const CreateButton = styled.button`
-  width: 320px;
+  width: 100%;
   height: 56px;
   border: 0;
   border-radius: 24px;

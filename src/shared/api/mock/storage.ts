@@ -1,5 +1,6 @@
 export const MOCK_STORAGE_KEYS = {
   diagnosisResult: 'parttrip.demo.diagnosis-result',
+  communityPosts: 'parttrip.demo.community-posts',
   profile: 'parttrip.demo.profile',
   selectedDestination: 'parttrip.demo.selected-destination',
   session: 'parttrip.demo.session',

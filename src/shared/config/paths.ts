@@ -1,6 +1,8 @@
 export const paths = {
   changePassword: '/change-password',
   community: '/community',
+  communityDetail: '/community/:postId',
+  communityWrite: '/community/write',
   diagnosis: '/diagnosis',
   diagnosisResult: '/result',
   home: '/',
@@ -13,3 +15,6 @@ export const paths = {
   signUp: '/sign-up',
   travelSelect: '/travel/select',
 } as const
+
+export const createCommunityDetailPath = (postId: string) =>
+  `/community/${encodeURIComponent(postId)}`
