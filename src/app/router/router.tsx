@@ -17,6 +17,8 @@ import {
   ProfileEditPage,
   ProfilePage,
   RecordPage,
+  RecordDetailPage,
+  RecordWritePage,
   SignUpPage,
   TravelSelectPage,
 } from './lazyPages'
@@ -40,6 +42,8 @@ export const router = createBrowserRouter([
   { path: paths.communityWrite, element: withFallback(<CommunityWritePage />) },
   { path: paths.communityDetail, element: withFallback(<CommunityDetailPage />) },
   { path: paths.record, element: withFallback(<RecordPage />) },
+  { path: paths.recordWrite, element: withFallback(<RecordWritePage />) },
+  { path: paths.recordDetail, element: withFallback(<RecordDetailPage />) },
   { path: paths.mission, element: withFallback(<MissionPage />) },
   { path: '*', element: withFallback(<NotFoundPage />) },
 ])

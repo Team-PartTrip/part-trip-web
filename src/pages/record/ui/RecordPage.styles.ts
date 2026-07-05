@@ -5,6 +5,8 @@ export const Page = styled.main`
   min-height: 100dvh;
   background: #f4f8fc;
   color: #111827;
+
+  @media (max-width: 47.9375rem) { flex-direction: column; }
 `
 
 export const Logo = styled.img`
@@ -15,6 +17,9 @@ export const Content = styled.section`
   flex: 1;
   min-width: 0;
   padding: 0 60px 40px 63px;
+
+  @media (max-width: 74.9375rem) { padding-inline: 36px; }
+  @media (max-width: 47.9375rem) { padding: 20px 18px 48px; }
 `
 
 export const SearchBar = styled.div`
@@ -29,6 +34,8 @@ export const SearchBar = styled.div`
   color: #727780;
   font-size: 16px;
   font-weight: 500;
+
+  @media (max-width: 47.9375rem) { margin: 0 0 24px; }
 `
 
 export const SearchIcon = styled.span`
@@ -59,6 +66,8 @@ export const RecordCard = styled.div`
   padding: 22px 24px 18px;
   background: #fff;
   box-shadow: 0 8px 16px rgb(13 31 64 / 8%);
+
+  @media (max-width: 47.9375rem) { min-height: 0; border-radius: 18px; padding: 20px 16px; }
 `
 
 export const CardHeader = styled.header`
@@ -69,7 +78,15 @@ export const CardHeader = styled.header`
 
   h1 { margin: 0; font-size: 24px; line-height: 32px; letter-spacing: -0.96px; }
   p { margin: 0; color: #727780; font-size: 13px; font-weight: 500; }
-  strong { padding-top: 12px; color: #1a6ebf; font-size: 14px; }
+  @media (max-width: 34rem) { height: auto; flex-direction: column; gap: 14px; }
+`
+
+export const HeaderActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  strong { color: #1a6ebf; font-size: 14px; }
+  button { height: 36px; border: 0; border-radius: 10px; padding: 0 14px; background: #1a6ebf; color: #fff; cursor: pointer; font-weight: 700; }
 `
 
 export const RecordList = styled.div`
@@ -77,6 +94,8 @@ export const RecordList = styled.div`
   flex-direction: column;
   gap: 10px;
   margin-top: 26px;
+
+  @media (max-width: 34rem) { margin-top: 20px; }
 `
 
 export const RecordRow = styled.article`
@@ -89,6 +108,13 @@ export const RecordRow = styled.article`
   padding: 14px 16px;
 
   > img { width: 86px; height: 84px; border-radius: 16px; object-fit: cover; }
+
+  @media (max-width: 40rem) {
+    height: auto;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    > img { width: 72px; height: 72px; }
+  }
 `
 
 export const RecordText = styled.div`
@@ -109,6 +135,8 @@ export const ViewButton = styled.button`
   cursor: pointer;
   font-size: 15px;
   font-weight: 600;
+
+  @media (max-width: 40rem) { width: 100%; }
 `
 
 export const MoreButton = styled.button`

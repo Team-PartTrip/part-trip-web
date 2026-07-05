@@ -12,9 +12,14 @@ export const paths = {
   profileEdit: '/profile/edit',
   mission: '/mission',
   record: '/record',
+  recordDetail: '/record/:recordId',
+  recordWrite: '/record/write',
   signUp: '/sign-up',
   travelSelect: '/travel/select',
 } as const
 
 export const createCommunityDetailPath = (postId: string) =>
   `/community/${encodeURIComponent(postId)}`
+
+export const createRecordDetailPath = (recordId: string) =>
+  `/record/${encodeURIComponent(recordId)}`
