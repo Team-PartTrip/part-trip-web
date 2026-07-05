@@ -124,7 +124,15 @@ export const Footer = styled.div`
   }
 
   @media (max-width: 47.9375rem) {
-    display: none;
+    display: flex;
+    width: 3rem;
+    height: 100%;
+    flex: 0 0 3rem;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    border-top: 0;
+    padding: 0;
   }
 `
 
@@ -140,7 +148,7 @@ export const LogoutButton = styled.button`
   font: inherit;
 
   span {
-    font-size: 1rem;
+    font-size: 1.125rem;
     font-weight: 500;
     line-height: 1.3;
   }

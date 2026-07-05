@@ -1,5 +1,5 @@
-import { apiClient } from "@shared/api/client"
+import { logout as logoutRequest } from '@shared/api'
 
 export const logout = async () => {
-  return await apiClient.post(`/auth/logout`);
+  return logoutRequest()
 }

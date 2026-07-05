@@ -1,8 +1,15 @@
 export const paths = {
   changePassword: '/change-password',
+  community: '/community',
   diagnosis: '/diagnosis',
+  diagnosisResult: '/result',
   home: '/',
   login: '/login',
-  signUp: '/sign-up',
   main: '/main',
+  profile: '/profile',
+  profileEdit: '/profile/edit',
+  mission: '/mission',
+  record: '/record',
+  signUp: '/sign-up',
+  travelSelect: '/travel/select',
 } as const

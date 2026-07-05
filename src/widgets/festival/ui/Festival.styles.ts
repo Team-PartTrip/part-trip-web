@@ -8,7 +8,7 @@ export const Card = styled.article`
   border-radius: 1.5rem;
   padding: 1.375rem 0.375rem 0.5rem;
   background: #ffffff;
-  box-shadow: 0 0.5rem 1.5rem rgb(13 31 64 / 8%);
+  box-shadow: 0 0.5rem 0.75rem rgb(13 31 64 / 8%);
 
   @media (max-width: 74.9375rem) {
     height: 100%;
@@ -23,7 +23,7 @@ export const Header = styled.div`
   gap: 0.4375rem;
   padding-inline: 1.6875rem;
 
-  span { color: #1478c8; font-size: 1.25rem; }
+  > svg { width: 1.5rem; height: 1.5rem; flex: 0 0 auto; }
   h2 { margin: 0; color: #111111; font-size: 1.375rem; font-weight: 700; }
 `
 
@@ -50,7 +50,7 @@ export const CalendarTop = styled.div`
   justify-content: space-between;
   padding-inline: 0.5rem;
   color: #20242a;
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
 
   button {
     border: 0;
@@ -60,6 +60,12 @@ export const CalendarTop = styled.div`
     cursor: pointer;
     font: inherit;
     font-size: 1.25rem;
+
+    svg {
+      display: block;
+      width: 0.4625rem;
+      height: 0.75rem;
+    }
   }
 `
 
@@ -86,7 +92,7 @@ export const Day = styled.div<{ $muted?: boolean; $event?: boolean; $selected?: 
   border-radius: 0.5rem;
   background: ${({ $selected }) => ($selected ? '#e6f0fb' : 'transparent')};
   color: ${({ $event, $muted }) => ($event ? '#e51f35' : $muted ? '#c9cbd0' : '#20242a')};
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
 
   ${({ $selected }) => $selected && css`
     &::after {

@@ -14,7 +14,7 @@ export const Page = styled.main`
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: #f4f8fd;
+  background: #f4f8fc;
 
   @media (max-width: 47.9375rem) {
     flex-direction: column;

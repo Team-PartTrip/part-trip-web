@@ -10,7 +10,7 @@ import {
 } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { signUp, verifyCode } from '@shared/api'
-import logoUrl from '@shared/assets/logo.svg'
+import logoUrl from '@shared/assets/logo.png'
 import { paths } from '@shared/config'
 import {
   authValidationRules,

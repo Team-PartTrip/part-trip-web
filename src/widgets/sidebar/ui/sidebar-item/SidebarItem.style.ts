@@ -46,7 +46,7 @@ export const IconWrapper = styled.span`
 
 export const Text = styled.span<{ $isParentActive: boolean }>`
   color: currentColor;
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: ${({ $isParentActive }) => ($isParentActive ? 600 : 400)};
   letter-spacing: -0.02rem;
   line-height: 1.3;

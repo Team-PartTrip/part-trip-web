@@ -32,6 +32,13 @@ export const Description = styled.p`
   line-height: 1.5;
 `
 
+export const ErrorMessage = styled.p`
+  margin: -0.75rem 0 1rem;
+  color: ${({ theme }) => theme.colors.status.error};
+  font-size: 0.8125rem;
+  line-height: 1.4;
+`
+
 export const Actions = styled.div`
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -45,6 +52,11 @@ const Button = styled.button`
   cursor: pointer;
   font: inherit;
   font-weight: 700;
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.55;
+  }
 
   &:focus-visible {
     outline: 0.1875rem solid ${({ theme }) => theme.colors.shadow.focus};

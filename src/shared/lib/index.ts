@@ -6,3 +6,4 @@ export {
   sanitizePassword,
 } from './authValidation'
 export { getErrorMessage } from './errorMessage'
+export { useLockBodyScroll } from './hooks/useLockBodyScroll'
