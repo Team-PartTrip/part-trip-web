@@ -1,5 +1,6 @@
 export * from './auth'
 export * from './community'
+export * from './mission'
 export * from './diagnosis'
 export * from './profile'
 export * from './record'

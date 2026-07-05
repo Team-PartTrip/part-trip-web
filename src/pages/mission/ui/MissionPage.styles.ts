@@ -5,6 +5,8 @@ export const Page = styled.main`
   min-height: 100dvh;
   background: #f4f8fc;
   color: #111827;
+
+  @media (max-width: 47.9375rem) { flex-direction: column; }
 `
 
 export const Logo = styled.img`display: block;`
@@ -16,6 +18,18 @@ export const Content = styled.section`
   gap: 100px;
   align-items: start;
   padding: 31px 38px 40px 64px;
+
+  @media (max-width: 74.9375rem) {
+    gap: 40px;
+    padding-inline: 36px;
+  }
+
+  @media (max-width: 67.5rem) {
+    grid-template-columns: 1fr;
+    padding: 32px;
+  }
+
+  @media (max-width: 47.9375rem) { padding: 24px 18px 48px; }
 `
 
 export const CharacterCard = styled.div`
@@ -32,6 +46,14 @@ export const CharacterCard = styled.div`
   box-shadow: 0 4px 30px rgb(0 0 0 / 15%);
 
   > img { width: 216px; height: 256px; margin-top: 30px; object-fit: contain; }
+
+  @media (max-width: 67.5rem) {
+    height: 440px;
+    margin-top: 0;
+    > img { width: 180px; height: 220px; margin-top: 18px; }
+  }
+
+  @media (max-width: 37.5rem) { height: 400px; padding-top: 46px; }
 `
 
 export const CardActions = styled.div`
@@ -71,7 +93,15 @@ export const Progress = styled.div`
   border: 1px solid #1a6ebf;
   border-radius: 999px;
   padding: 2px;
-  span { display: block; width: 64%; height: 100%; border-radius: inherit; background: #1a6ebf; }
+  span { display: block; height: 100%; border-radius: inherit; background: #1a6ebf; transition: width 220ms ease; }
+
+  @media (max-width: 37.5rem) { width: min(302px, calc(100% - 40px)); }
+`
+
+export const ProgressText = styled.span`
+  margin-top: 8px;
+  color: #727780;
+  font-size: 12px;
 `
 
 export const MissionPanel = styled.section`min-width: 0;`
@@ -88,14 +118,45 @@ export const Title = styled.h1`
 
 export const MissionList = styled.div`display: flex; flex-direction: column; gap: 16px;`
 
-export const MissionCard = styled.article`
-  height: 110px;
+export const MissionCard = styled.article<{ $completed: boolean }>`
+  display: flex;
+  min-height: 110px;
+  align-items: center;
+  gap: 16px;
   border: 1px solid #e7edf7;
   border-radius: 18px;
   padding: 17px 20px;
-  background: #fff;
+  background: ${({ $completed }) => ($completed ? '#f1f8ff' : '#fff')};
   box-shadow: 0 3px 10px rgb(13 31 64 / 4%);
+
+  @media (max-width: 37.5rem) { align-items: stretch; flex-direction: column; }
+`
+
+export const MissionCopy = styled.div`
+  min-width: 0;
+  flex: 1;
   small { color: #8ca0b8; font-size: 12px; font-weight: 600; }
   h2 { margin: 4px 0 3px; font-size: 21px; line-height: 25px; letter-spacing: -0.7px; }
   p { margin: 0; color: #727780; font-size: 12px; line-height: 15px; white-space: pre-line; }
+`
+
+export const CompleteButton = styled.button`
+  width: 92px;
+  height: 38px;
+  flex: 0 0 92px;
+  border: 1px solid #1a6ebf;
+  border-radius: 10px;
+  background: #fff;
+  color: #1a6ebf;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  &:disabled { cursor: not-allowed; opacity: 0.7; }
+  @media (max-width: 37.5rem) { width: 100%; flex-basis: 42px; }
+`
+
+export const ErrorMessage = styled.p`
+  margin: -6px 0 14px;
+  color: #dc2626;
+  font-size: 13px;
 `
