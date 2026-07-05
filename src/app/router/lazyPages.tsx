@@ -1,7 +1,7 @@
 import { lazy } from 'react'
 
 export const ChangePasswordPage = lazy(() => import('@pages/change-password').then((module) => ({ default: module.ChangePasswordPage })))
-export const DemoSectionPage = lazy(() => import('@pages/demo-section').then((module) => ({ default: module.DemoSectionPage })))
+export const CommunityPage = lazy(() => import('@pages/community').then((module) => ({ default: module.CommunityPage })))
 export const DiagnosisPage = lazy(() => import('@pages/diagnosis').then((module) => ({ default: module.DiagnosisPage })))
 export const DiagnosisResultPage = lazy(() => import('@pages/diagnosis-result').then((module) => ({ default: module.DiagnosisResultPage })))
 export const LoginPage = lazy(() => import('@pages/login').then((module) => ({ default: module.LoginPage })))

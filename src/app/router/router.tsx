@@ -5,7 +5,7 @@ import { paths } from './paths'
 import { RouteFallback } from './RouteFallback'
 import {
   ChangePasswordPage,
-  DemoSectionPage,
+  CommunityPage,
   DiagnosisPage,
   DiagnosisResultPage,
   LoginPage,
@@ -34,10 +34,7 @@ export const router = createBrowserRouter([
   { path: paths.profile, element: withFallback(<ProfilePage />) },
   { path: paths.profileEdit, element: withFallback(<ProfileEditPage />) },
   { path: paths.travelSelect, element: withFallback(<TravelSelectPage />) },
-  {
-    path: paths.community,
-    element: withFallback(<DemoSectionPage title="커뮤니티" description="여행자들과 현지 정보와 경험을 나누는 공간입니다." items={['싱가포르 첫 여행 체크리스트', '호커 센터 추천 메뉴', '야경 명소 후기']} />),
-  },
+  { path: paths.community, element: withFallback(<CommunityPage />) },
   { path: paths.record, element: withFallback(<RecordPage />) },
   { path: paths.mission, element: withFallback(<MissionPage />) },
   { path: '*', element: withFallback(<NotFoundPage />) },
