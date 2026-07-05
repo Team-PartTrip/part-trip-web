@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getSelectedDestinationMock, type Destination } from '@shared/api'
-import logoUrl from '@shared/assets/logo.svg'
+import logoUrl from '@shared/assets/logo.png'
 import mainHeroUrl from '@shared/assets/main-hero-redesign.jpg'
 import { paths } from '@shared/config'
 import { useLockBodyScroll } from '@shared/lib'

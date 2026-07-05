@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import logoUrl from '@shared/assets/logo.svg'
+import logoUrl from '@shared/assets/logo.png'
 import { getProfileMock, type UserProfile } from '@shared/api'
 import { ProfileCard } from '@widgets/profile-card'
 import { MENUS, Sidebar } from '@widgets/sidebar'

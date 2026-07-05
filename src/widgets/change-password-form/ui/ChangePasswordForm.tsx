@@ -13,7 +13,7 @@ import {
   sendPasswordResetCode,
   verifyPasswordResetCode,
 } from '@shared/api'
-import logoUrl from '@shared/assets/logo.svg'
+import logoUrl from '@shared/assets/logo.png'
 import { paths } from '@shared/config'
 import {
   authValidationRules,
