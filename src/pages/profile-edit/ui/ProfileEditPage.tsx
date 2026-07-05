@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import logoUrl from '@shared/assets/logo.png'
 import { getProfileMock, type UserProfile } from '@shared/api'
+import { ProfileCard } from '@widgets/profile-card'
 import { ProfileForm } from '@widgets/profile-form'
 import { MENUS, Sidebar } from '@widgets/sidebar'
 
@@ -24,8 +25,9 @@ export function ProfileEditPage() {
       <S.Content>
         {hasError ? <S.State role="alert">프로필 정보를 불러오지 못했습니다.</S.State> : null}
         {!hasError && !profile ? <S.State aria-busy="true">수정할 정보를 준비하고 있습니다.</S.State> : null}
-        {profile ? <ProfileForm profile={profile} /> : null}
+        {profile ? <ProfileCard profile={profile} /> : null}
       </S.Content>
+      {profile ? <><S.Backdrop /><ProfileForm profile={profile} /></> : null}
     </S.Page>
   )
 }

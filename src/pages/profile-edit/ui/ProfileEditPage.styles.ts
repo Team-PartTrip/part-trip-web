@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 
 export const Page = styled.main`
+  position: relative;
   display: flex;
   width: 100%;
   min-height: 100vh;
@@ -13,11 +14,16 @@ export const Logo = styled.div`
 `
 
 export const Content = styled.section`
-  display: grid;
   min-width: 0;
   flex: 1;
-  place-items: center;
-  padding: clamp(1rem, 5vw, 4rem);
+  padding: 52px 58px;
+`
+
+export const Backdrop = styled.div`
+  position: absolute;
+  z-index: 10;
+  inset: 0;
+  background: rgb(0 0 0 / 20%);
 `
 
 export const State = styled.p`

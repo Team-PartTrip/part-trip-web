@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useForm, type SubmitHandler } from 'react-hook-form'
+import { useForm, useWatch, type SubmitHandler } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { updateProfileMock, type UserProfile } from '@shared/api'
 import { paths } from '@shared/config'
@@ -13,9 +13,10 @@ type ProfileFormProps = {
 export function ProfileForm({ profile }: ProfileFormProps) {
   const navigate = useNavigate()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const { register, handleSubmit, formState } = useForm<UserProfile>({
+  const { register, handleSubmit, formState, control } = useForm<UserProfile>({
     defaultValues: profile,
   })
+  const previewName = useWatch({ control, name: 'name' })
 
   const onSubmit: SubmitHandler<UserProfile> = async (values) => {
     try {
@@ -30,20 +31,20 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   return (
     <S.Form onSubmit={handleSubmit(onSubmit)} noValidate>
       <S.Header>
-        <div><span>PROFILE EDIT</span><h1>프로필 수정</h1></div>
-        <p>시연 중 수정한 정보는 현재 브라우저에 저장됩니다.</p>
+        <h1>프로필 수정</h1>
+        <S.CloseButton type="button" onClick={() => navigate(paths.profile)} aria-label="닫기">×</S.CloseButton>
       </S.Header>
-      <S.FieldGrid>
-        <S.Field><span>이름</span><input {...register('name', { required: true, minLength: 2 })} /></S.Field>
-        <S.Field><span>아이디</span><input {...register('id', { required: true, minLength: 6 })} /></S.Field>
-        <S.Field><span>이메일</span><input type="email" {...register('email', { required: true })} /></S.Field>
-        <S.Field><span>전화번호</span><input {...register('phone', { required: true })} /></S.Field>
-        <S.Field><span>거주 국가</span><input {...register('country', { required: true })} /></S.Field>
-        <S.Field><span>여행 성향</span><input {...register('travelStyle', { required: true })} /></S.Field>
-        <S.Field $wide><span>한 줄 소개</span><textarea rows={4} {...register('bio', { required: true, maxLength: 120 })} /></S.Field>
-      </S.FieldGrid>
-      {Object.keys(formState.errors).length > 0 ? <S.ErrorMessage>모든 항목을 올바르게 입력해주세요.</S.ErrorMessage> : null}
-      {errorMessage ? <S.ErrorMessage role="alert">{errorMessage}</S.ErrorMessage> : null}
+      <S.Body>
+        <S.FieldGrid>
+          <S.Field><span>닉네임</span><input {...register('name', { required: true, minLength: 2 })} /></S.Field>
+          <S.Field><span>이메일</span><input type="email" {...register('email', { required: true })} /></S.Field>
+          <S.Field><span>전화번호</span><input {...register('phone', { required: true })} /></S.Field>
+          <S.Field><span>비밀번호</span><input type="password" defaultValue="password1" /></S.Field>
+          {Object.keys(formState.errors).length > 0 ? <S.ErrorMessage>모든 항목을 올바르게 입력해주세요.</S.ErrorMessage> : null}
+          {errorMessage ? <S.ErrorMessage role="alert">{errorMessage}</S.ErrorMessage> : null}
+        </S.FieldGrid>
+        <S.Preview><h2>미리보기</h2><S.PreviewAvatar /><h3>{previewName}</h3><p>{profile.travelStyle}</p></S.Preview>
+      </S.Body>
       <S.Actions>
         <S.CancelButton type="button" onClick={() => navigate(paths.profile)} disabled={formState.isSubmitting}>취소</S.CancelButton>
         <S.SaveButton type="submit" disabled={formState.isSubmitting}>{formState.isSubmitting ? '저장 중' : '저장하기'}</S.SaveButton>
