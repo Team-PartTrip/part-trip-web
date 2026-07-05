@@ -27,6 +27,16 @@ export const ProfileLine = styled.header`
   align-items: center;
   gap: 24px;
   padding: 28px 28px 28px 34px;
+
+  @media (max-width: 40rem) {
+    display: grid;
+    height: auto;
+    min-height: 250px;
+    flex-basis: auto;
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 18px;
+    padding: 22px;
+  }
 `
 
 export const Avatar = styled.div`
@@ -36,6 +46,12 @@ export const Avatar = styled.div`
   border: 1px solid #d8dddd;
   border-radius: 50%;
   background: #e6ecf3;
+
+  @media (max-width: 40rem) {
+    width: 96px;
+    height: 96px;
+    flex-basis: 96px;
+  }
 `
 
 export const BasicInfo = styled.div`
@@ -48,11 +64,19 @@ export const BasicInfo = styled.div`
 
   h1 { margin: 0; color: #111827; font-size: 34px; line-height: 46px; letter-spacing: -1.36px; }
   p { margin: 0; color: #1a6ebf; font-size: 16px; font-weight: 600; line-height: 22px; }
+
+  @media (max-width: 40rem) {
+    width: auto;
+    height: auto;
+    min-width: 0;
+    h1 { font-size: 28px; line-height: 36px; }
+  }
 `
 
 export const EditButton = styled.button`
   width: 118px;
   height: 48px;
+  flex: 0 0 118px;
   border: 0;
   border-radius: 10px;
   background: #1a6ebf;
@@ -60,6 +84,13 @@ export const EditButton = styled.button`
   cursor: pointer;
   font-size: 15px;
   font-weight: 600;
+  white-space: nowrap;
+
+  @media (max-width: 40rem) {
+    width: 100%;
+    height: 44px;
+    grid-column: 1 / -1;
+  }
 `
 
 export const Body = styled.div`
@@ -88,7 +119,14 @@ export const PanelTitle = styled.header`
   justify-content: space-between;
   h2 { margin: 0; font-size: 24px; line-height: 32px; }
   p { margin: 2px 0 0; color: #727780; font-size: 13px; }
-  > strong { padding-top: 12px; color: #1a6ebf; font-size: 14px; }
+  > strong { flex: 0 0 auto; padding-top: 12px; color: #1a6ebf; font-size: 14px; white-space: nowrap; }
+
+  @media (max-width: 40rem) {
+    height: auto;
+    flex-direction: column;
+    gap: 6px;
+    > strong { padding-top: 0; }
+  }
 `
 
 export const BadgeGrid = styled.div`
