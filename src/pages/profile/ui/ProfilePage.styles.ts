@@ -13,11 +13,9 @@ export const Logo = styled.div`
 `
 
 export const Content = styled.section`
-  display: grid;
   min-width: 0;
   flex: 1;
-  place-items: center;
-  padding: clamp(1rem, 5vw, 4rem);
+  padding: 52px 58px;
 `
 
 export const State = styled.div`
