@@ -145,6 +145,8 @@ export const ProgressFill = styled.span<{ $color: string; $value: number }>`
 
 export const CultureSummary = styled.div`
   display: flex;
+  width: 100%;
+  flex-shrink: 0;
   flex-direction: column;
   align-items: flex-start;
   padding: 1.375rem;
@@ -173,11 +175,12 @@ export const CultureSummary = styled.div`
   }
 
   p {
+    margin: 0;
     font-family: "Pretendard";
     font-style: normal;
     font-weight: 500;
     font-size: 0.875rem;
-    line-height: 0.875rem;
+    line-height: 1.25rem;
     color: #1a1b1f;
   }
 `;
