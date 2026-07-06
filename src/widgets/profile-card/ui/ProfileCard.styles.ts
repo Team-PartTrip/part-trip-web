@@ -46,6 +46,9 @@ export const Avatar = styled.div`
   border: 1px solid #d8dddd;
   border-radius: 50%;
   background: #e6ecf3;
+  overflow: hidden;
+
+  img { display: block; width: 100%; height: 100%; object-fit: cover; }
 
   @media (max-width: 40rem) {
     width: 96px;

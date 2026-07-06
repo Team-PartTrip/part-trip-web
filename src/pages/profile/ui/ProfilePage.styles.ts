@@ -18,10 +18,10 @@ export const Page = styled.main`
 `
 
 export const Backdrop = styled.div`
-  position: absolute;
-  z-index: 10;
+  position: fixed;
+  z-index: 1000;
   inset: 0;
-  background: rgb(0 0 0 / 20%);
+  background: rgb(15 23 42 / 48%);
 `
 
 export const Logo = styled.div`

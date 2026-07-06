@@ -1,6 +1,7 @@
 import { MOCK_STORAGE_KEYS, readMockStorage, waitForMock, writeMockStorage } from './storage'
 
 export type UserProfile = {
+  avatarUrl?: string
   bio: string
   country: string
   email: string
@@ -28,4 +29,14 @@ export async function getProfileMock() {
 export async function updateProfileMock(profile: UserProfile) {
   await waitForMock()
   return writeMockStorage(MOCK_STORAGE_KEYS.profile, profile)
+}
+
+export async function resetProfilePasswordMock(newPassword: string) {
+  await waitForMock()
+
+  if (!newPassword) {
+    throw new Error('새 비밀번호를 입력해주세요.')
+  }
+
+  return { updatedAt: new Date().toISOString() }
 }

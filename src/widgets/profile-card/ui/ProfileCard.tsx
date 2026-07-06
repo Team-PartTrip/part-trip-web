@@ -36,7 +36,9 @@ export function ProfileCard({ onEdit, profile }: ProfileCardProps) {
   return (
     <S.Card>
       <S.ProfileLine>
-        <S.Avatar aria-hidden="true" />
+        <S.Avatar aria-label={`${profile.name} 프로필 사진`}>
+          {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : null}
+        </S.Avatar>
         <S.BasicInfo><h1>{profile.name}</h1><p>{profile.travelStyle}</p></S.BasicInfo>
         <S.EditButton
           type="button"
