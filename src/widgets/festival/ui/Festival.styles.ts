@@ -29,7 +29,7 @@ export const Header = styled.div`
 
 export const Calendar = styled.div`
   width: 100%;
-  height: 14.25rem;
+  height: auto;
   margin-top: 0.875rem;
   border-radius: 1.5rem;
   padding: 1rem;
