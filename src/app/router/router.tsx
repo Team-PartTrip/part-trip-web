@@ -2,6 +2,7 @@ import { Suspense, type ReactNode } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 
 import { paths } from './paths'
+import { RequireAuth } from './RequireAuth'
 import { RouteFallback } from './RouteFallback'
 import {
   ChangePasswordPage,
@@ -27,23 +28,24 @@ const withFallback = (element: ReactNode) => (
   <Suspense fallback={<RouteFallback />}>{element}</Suspense>
 )
 
+const requireAuth = (element: ReactNode) => withFallback(<RequireAuth>{element}</RequireAuth>)
+
 export const router = createBrowserRouter([
-  { path: paths.home, element: withFallback(<MainPage />) },
   { path: paths.signUp, element: withFallback(<SignUpPage />) },
   { path: paths.login, element: withFallback(<LoginPage />) },
   { path: paths.changePassword, element: withFallback(<ChangePasswordPage />) },
-  { path: paths.diagnosis, element: withFallback(<DiagnosisPage />) },
-  { path: paths.diagnosisResult, element: withFallback(<DiagnosisResultPage />) },
-  { path: paths.main, element: withFallback(<MainPage />) },
-  { path: paths.profile, element: withFallback(<ProfilePage />) },
-  { path: paths.profileEdit, element: withFallback(<ProfileEditPage />) },
-  { path: paths.travelSelect, element: withFallback(<TravelSelectPage />) },
-  { path: paths.community, element: withFallback(<CommunityPage />) },
-  { path: paths.communityWrite, element: withFallback(<CommunityWritePage />) },
-  { path: paths.communityDetail, element: withFallback(<CommunityDetailPage />) },
-  { path: paths.record, element: withFallback(<RecordPage />) },
-  { path: paths.recordWrite, element: withFallback(<RecordWritePage />) },
-  { path: paths.recordDetail, element: withFallback(<RecordDetailPage />) },
-  { path: paths.mission, element: withFallback(<MissionPage />) },
+  { path: paths.diagnosis, element: requireAuth(<DiagnosisPage />) },
+  { path: paths.diagnosisResult, element: requireAuth(<DiagnosisResultPage />) },
+  { path: paths.main, element: requireAuth(<MainPage />) },
+  { path: paths.profile, element: requireAuth(<ProfilePage />) },
+  { path: paths.profileEdit, element: requireAuth(<ProfileEditPage />) },
+  { path: paths.travelSelect, element: requireAuth(<TravelSelectPage />) },
+  { path: paths.community, element: requireAuth(<CommunityPage />) },
+  { path: paths.communityWrite, element: requireAuth(<CommunityWritePage />) },
+  { path: paths.communityDetail, element: requireAuth(<CommunityDetailPage />) },
+  { path: paths.record, element: requireAuth(<RecordPage />) },
+  { path: paths.recordWrite, element: requireAuth(<RecordWritePage />) },
+  { path: paths.recordDetail, element: requireAuth(<RecordDetailPage />) },
+  { path: paths.mission, element: requireAuth(<MissionPage />) },
   { path: '*', element: withFallback(<NotFoundPage />) },
 ])
