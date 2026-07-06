@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react'
 import { DestinationBackIcon, DestinationSearchIcon } from '@shared/assets'
 import {
+  deleteRecentSearch,
   getCountries,
+  getPopularPlaces,
+  getProfile,
+  getRecentSearches,
+  saveRecentSearch,
   saveTravelPlan,
   type Destination,
 } from '@shared/api'
@@ -59,6 +64,7 @@ const DestinationSelector = ({ onBack }: Props) => {
   const [recentDestinations, setRecentDestinations] = useState<readonly Destination[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectingId, setSelectingId] = useState<string | null>(null)
+  const [userId, setUserId] = useState<number>()
   const [errorMessage, setErrorMessage] = useState('')
   const keyword = query.trim().toLocaleLowerCase()
   const results = keyword
@@ -70,8 +76,8 @@ const DestinationSelector = ({ onBack }: Props) => {
   useEffect(() => {
     let isMounted = true
 
-    void getCountries()
-      .then((countries) => {
+    void Promise.all([getCountries(), getPopularPlaces(), getProfile()])
+      .then(async ([countries, popularPlaces, profile]) => {
         if (!isMounted) return
         const nextDestinations = countries.map((country, index) => ({
           country: country.countryName ?? '여행지',
@@ -81,8 +87,24 @@ const DestinationSelector = ({ onBack }: Props) => {
           imageUrl: country.imageUrl,
           name: country.cityName || country.countryName || '여행지',
         }))
-        setDestinations(nextDestinations)
-        setRecentDestinations(nextDestinations.slice(0, 1))
+        const popularIds = new Set(popularPlaces.map((place) => place.countryInfoId))
+        setDestinations([...nextDestinations].sort((a, b) => Number(popularIds.has(b.countryInfoId)) - Number(popularIds.has(a.countryInfoId))))
+
+        const userId = Number(profile.userId)
+        if (Number.isInteger(userId)) {
+          setUserId(userId)
+          const recentSearches = await getRecentSearches(userId)
+          if (isMounted) {
+            setRecentDestinations(recentSearches.map((item, index) => ({
+              country: item.countryName ?? '여행지',
+              currency: currencyByCountry[item.countryName ?? ''] ?? '',
+              id: `recent-${item.recentSearchId ?? index}`,
+              imageUrl: item.imageUrl,
+              name: item.cityName || item.countryName || '여행지',
+              recentSearchId: item.recentSearchId,
+            })))
+          }
+        }
       })
       .catch(() => {
         if (isMounted) setErrorMessage('여행지 목록을 불러오지 못했습니다.')
@@ -105,11 +127,25 @@ const DestinationSelector = ({ onBack }: Props) => {
         endDate: addDays(today, 34),
         startDate: addDays(today, 30),
       })
+      if (userId != null && destination.countryInfoId != null) {
+        await saveRecentSearch({ userId, countryInfoId: destination.countryInfoId })
+      }
       onBack()
     } catch {
       setErrorMessage('여행지를 저장하지 못했습니다. 다시 시도해주세요.')
       setSelectingId(null)
     }
+  }
+
+  const handleDeleteRecent = async (destination: Destination) => {
+    if (destination.recentSearchId == null) return
+    await deleteRecentSearch(destination.recentSearchId)
+    setRecentDestinations((current) => current.filter((item) => item.id !== destination.id))
+  }
+
+  const handleDeleteAllRecent = async () => {
+    await Promise.all(recentDestinations.flatMap((item) => item.recentSearchId == null ? [] : [deleteRecentSearch(item.recentSearchId)]))
+    setRecentDestinations([])
   }
 
   return (
@@ -126,7 +162,6 @@ const DestinationSelector = ({ onBack }: Props) => {
             type="search"
             value={query}
             onChange={(event) => {
-              setIsLoading(true)
               setQuery(event.target.value)
             }}
             placeholder="어디로 여행을 떠나시나요?"
@@ -139,13 +174,13 @@ const DestinationSelector = ({ onBack }: Props) => {
         <S.RecentSection>
           <S.SectionHeader>
             <h2>최근 검색</h2>
-            <button type="button" onClick={() => setRecentDestinations([])} disabled={recentDestinations.length === 0}>모두 지우기</button>
+            <button type="button" onClick={() => void handleDeleteAllRecent()} disabled={recentDestinations.length === 0}>모두 지우기</button>
           </S.SectionHeader>
           {recentDestinations.length === 0 ? <S.EmptyRecent>최근 검색한 여행지가 없습니다.</S.EmptyRecent> : recentDestinations.map((destination) => (
             <S.RecentChip key={destination.id}>
               <span aria-hidden="true"><img src={getDestinationImage(destination)} alt="" /></span>
               <span><strong>{destination.name}</strong><small>{destination.currency}</small></span>
-              <button type="button" aria-label={`${destination.name} 최근 검색 삭제`} onClick={() => setRecentDestinations((current) => current.filter((item) => item.id !== destination.id))}><CloseIcon /></button>
+              <button type="button" aria-label={`${destination.name} 최근 검색 삭제`} onClick={() => void handleDeleteRecent(destination)}><CloseIcon /></button>
             </S.RecentChip>
           ))}
         </S.RecentSection>

@@ -1,6 +1,8 @@
 import styled from 'styled-components'
 
 export const Root = styled.section`
+  display: flex;
+  flex-direction: column;
   width: calc(100% - 15.0625rem);
   min-width: 0;
   height: 100%;
@@ -118,6 +120,10 @@ export const SearchLabel = styled.label`
 `
 
 export const Body = styled.div`
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
   width: min(60rem, calc(100% - 4rem));
   margin: 1.25rem auto 0;
 
@@ -231,6 +237,10 @@ export const RecentChip = styled.div`
 `
 
 export const PopularSection = styled.section`
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
   margin-top: 1.5625rem;
 
   > h2 {
@@ -253,6 +263,9 @@ export const PopularSection = styled.section`
 
 export const DestinationGrid = styled.div`
   display: grid;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 1.25rem;
   gap: 1.25rem;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 
