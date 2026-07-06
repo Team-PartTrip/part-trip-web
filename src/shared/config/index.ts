@@ -3,4 +3,3 @@ export {
   createRecordDetailPath,
   paths,
 } from './paths'
-export { runtimeConfig } from './runtime'

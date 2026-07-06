@@ -1,13 +1,4 @@
 import { apiClient } from './client'
-import { runtimeConfig } from '@shared/config'
-import {
-  googleLoginMock,
-  loginMock,
-  logoutMock,
-  resetPasswordMock,
-  signUpMock,
-  verifyCodeMock,
-} from './mock'
 
 // === Swagger DTO Types ===
 
@@ -123,72 +114,30 @@ async function post<TResponse>(path: string, payload: unknown) {
 // === API Functions ===
 
 export async function login(payload: LoginRequestDto): Promise<TokenResponseDto> {
-  if (runtimeConfig.useMockApi) {
-    const mockRes = await loginMock(payload)
-    return {
-      accessToken: mockRes.accessToken,
-      refreshToken: 'mock-refresh-token',
-    }
-  }
   return post<TokenResponseDto>(AUTH_API_PATHS.session.login, payload)
 }
 
 export async function googleLogin(payload: GoogleLoginRequestDto): Promise<TokenResponseDto> {
-  if (runtimeConfig.useMockApi) {
-    const mockRes = await googleLoginMock()
-    return {
-      accessToken: mockRes.accessToken,
-      refreshToken: 'mock-refresh-token',
-    }
-  }
   return post<TokenResponseDto>(AUTH_API_PATHS.session.google, payload)
 }
 
 export async function sendVerificationCode(payload: EmailSendRequestDto): Promise<string> {
-  if (runtimeConfig.useMockApi) return 'success'
   return post<string>(AUTH_API_PATHS.email.sendCode, payload)
 }
 
 export async function verifyCode(payload: EmailVerifyRequestDto): Promise<UserEntity> {
-  if (runtimeConfig.useMockApi) {
-    await verifyCodeMock(payload)
-    return {
-      userId: 'mock-user',
-      userMail: payload.email,
-      signUpDivision: 'USER',
-      myCountry: 'KR',
-    }
-  }
   return post<UserEntity>(AUTH_API_PATHS.email.verifyCode, payload)
 }
 
 export async function sendPasswordResetCode(payload: EmailSendRequestDto): Promise<string> {
-  if (runtimeConfig.useMockApi) return 'success'
   return post<string>(AUTH_API_PATHS.password.sendCode, payload)
 }
 
 export async function verifyPasswordResetCode(payload: EmailVerifyRequestDto): Promise<string> {
-  if (runtimeConfig.useMockApi) {
-    await verifyCodeMock(payload)
-    return 'success'
-  }
   return post<string>(AUTH_API_PATHS.password.verifyCode, payload)
 }
 
 export async function signUp(payload: SignUpRequest | SignUpRequestDto): Promise<string> {
-  if (runtimeConfig.useMockApi) {
-    if ('id' in payload) {
-      await signUpMock(payload)
-    } else {
-      await signUpMock({
-        email: payload.userMail,
-        id: payload.userId,
-        password: payload.userPwd,
-      })
-    }
-    return 'success'
-  }
-
   // DTO 형식인 경우 그대로 전송, Legacy 형식인 경우 변환해서 전송
   if ('userId' in payload) {
     return post<string>(AUTH_API_PATHS.signUp, payload)
@@ -205,27 +154,13 @@ export async function signUp(payload: SignUpRequest | SignUpRequestDto): Promise
 }
 
 export async function resetPassword(payload: PasswordResetRequestDto): Promise<string> {
-  if (runtimeConfig.useMockApi) {
-    await resetPasswordMock(payload)
-    return 'success'
-  }
   return post<string>(AUTH_API_PATHS.password.reset, payload)
 }
 
 export async function logout(payload?: LogoutRequestDto): Promise<string> {
-  if (runtimeConfig.useMockApi) {
-    await logoutMock()
-    return 'success'
-  }
   return post<string>(AUTH_API_PATHS.session.logout, payload ?? { refreshToken: '' })
 }
 
 export async function refresh(payload: RefreshRequestDto): Promise<TokenResponseDto> {
-  if (runtimeConfig.useMockApi) {
-    return {
-      accessToken: 'mock-new-access-token',
-      refreshToken: payload.refreshToken,
-    }
-  }
   return post<TokenResponseDto>(AUTH_API_PATHS.session.refresh, payload)
 }

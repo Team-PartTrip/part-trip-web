@@ -1,5 +1,4 @@
 import { useGoogleLogin } from '@react-oauth/google'
-import { runtimeConfig } from '@shared/config'
 import { AuthForm as S } from '@shared/ui'
 
 type GoogleLoginControlProps = {
@@ -20,16 +19,7 @@ function GoogleGlyph() {
   )
 }
 
-function MockGoogleLoginButton({ disabled, isSubmitting, onLogin }: Omit<GoogleLoginControlProps, 'onError'>) {
-  return (
-    <S.GoogleButton type="button" onClick={() => void onLogin('demo-google-code')} disabled={disabled}>
-      <GoogleGlyph />
-      {isSubmitting ? 'Google 로그인 중' : 'Google로 계속하기'}
-    </S.GoogleButton>
-  )
-}
-
-function RealGoogleLoginButton({ disabled, isSubmitting, onError, onLogin }: GoogleLoginControlProps) {
+export function GoogleLoginControl({ disabled, isSubmitting, onError, onLogin }: GoogleLoginControlProps) {
   const requestGoogleLogin = useGoogleLogin({
     flow: 'auth-code',
     onSuccess: ({ code }) => void onLogin(code),
@@ -42,10 +32,4 @@ function RealGoogleLoginButton({ disabled, isSubmitting, onError, onLogin }: Goo
       {isSubmitting ? 'Google 로그인 중' : 'Google로 계속하기'}
     </S.GoogleButton>
   )
-}
-
-export function GoogleLoginControl(props: GoogleLoginControlProps) {
-  return runtimeConfig.useMockApi
-    ? <MockGoogleLoginButton {...props} />
-    : <RealGoogleLoginButton {...props} />
 }

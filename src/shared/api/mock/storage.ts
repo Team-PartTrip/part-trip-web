@@ -1,10 +1,5 @@
 export const MOCK_STORAGE_KEYS = {
   diagnosisResult: 'parttrip.demo.diagnosis-result',
-  communityPosts: 'parttrip.demo.community-posts',
-  travelRecords: 'parttrip.demo.travel-records',
-  profile: 'parttrip.demo.profile',
-  selectedDestination: 'parttrip.demo.selected-destination',
-  session: 'parttrip.demo.session',
 } as const
 
 export function waitForMock(delay = 450) {

@@ -11,6 +11,19 @@ type CharacterSource = {
   imgUrl?: string
 }
 
+export type UserProfile = {
+  avatarUrl?: string
+  bio: string
+  characterImageUrl?: string
+  characterName?: string
+  country: string
+  email: string
+  id: string
+  name: string
+  phone: string
+  travelStyle: string
+}
+
 const fallbackProfile = {
   bio: '낯선 도시의 일상과 문화를 천천히 경험하는 여행을 좋아합니다.',
   country: '대한민국',
@@ -24,7 +37,7 @@ const fallbackProfile = {
 export function toUserProfile(
   profile: ProfileSource,
   character?: CharacterSource,
-) {
+): UserProfile {
   return {
     ...fallbackProfile,
     avatarUrl: profile.imgUrl || undefined,
