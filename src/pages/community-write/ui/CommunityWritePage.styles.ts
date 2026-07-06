@@ -45,10 +45,10 @@ export const Field = styled.div`
   flex-direction: column;
   gap: 9px;
   label, > span { font-size: 14px; font-weight: 700; }
-  input, textarea { width: 100%; border: 1px solid #dce5f0; border-radius: 12px; padding: 0 14px; color: #191c1e; font: inherit; outline: none; }
-  input { height: 48px; }
+  input, textarea, select { width: 100%; border: 1px solid #dce5f0; border-radius: 12px; padding: 0 14px; color: #191c1e; font: inherit; outline: none; }
+  input, select { height: 48px; }
   textarea { min-height: 220px; padding-block: 14px; line-height: 1.6; resize: vertical; }
-  input:focus, textarea:focus { border-color: #5587f6; box-shadow: 0 0 0 3px rgb(85 135 246 / 13%); }
+  input:focus, textarea:focus, select:focus { border-color: #5587f6; box-shadow: 0 0 0 3px rgb(85 135 246 / 13%); }
 `
 
 export const CategoryRow = styled.div`

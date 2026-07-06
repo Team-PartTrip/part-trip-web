@@ -58,6 +58,7 @@ export const Layout = styled.div`
 `
 
 export const Article = styled.article`
+  position: relative;
   border: 1px solid #e1e9f3;
   border-radius: 24px;
   padding: 28px;
@@ -68,6 +69,27 @@ export const Article = styled.article`
   > p { margin: 0; color: #424656; font-size: 17px; line-height: 1.8; white-space: pre-line; }
 
   @media (max-width: 47.9375rem) { border-radius: 18px; padding: 20px; }
+`
+
+export const OwnerActions = styled.div`
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  display: flex;
+  gap: 8px;
+  button { border: 0; background: transparent; color: #5f6670; cursor: pointer; }
+  button:last-child { color: #dc2626; }
+`
+
+export const EditForm = styled.form`
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+  input, textarea { width: 100%; border: 1px solid #dce6f2; border-radius: 10px; padding: 12px; font: inherit; }
+  textarea { min-height: 180px; resize: vertical; }
+  div { display: flex; justify-content: flex-end; gap: 8px; }
+  button { border: 0; border-radius: 8px; padding: 9px 16px; cursor: pointer; }
+  button[type='submit'] { background: #1a6ebf; color: #fff; }
 `
 
 export const Author = styled.div`
@@ -126,6 +148,16 @@ export const Comments = styled.aside`
   h2 { margin: 0 0 16px; font-size: 20px; }
 `
 
+export const CommentForm = styled.form`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+
+  input { min-width: 0; height: 40px; flex: 1; border: 1px solid #dce6f2; border-radius: 10px; padding: 0 12px; }
+  button { width: 64px; border: 0; border-radius: 10px; background: #1a6ebf; color: #fff; cursor: pointer; font-weight: 700; }
+  button:disabled { cursor: not-allowed; opacity: 0.5; }
+`
+
 export const Comment = styled.article`
   border-top: 1px solid #eef2f7;
   padding: 16px 0;
@@ -134,6 +166,23 @@ export const Comment = styled.article`
   strong { font-size: 14px; }
   span { color: #8a9099; font-size: 11px; }
   p { margin: 8px 0 0; color: #424656; font-size: 14px; line-height: 1.55; }
+`
+
+export const CommentEdit = styled.div`
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  input { min-width: 0; flex: 1; border: 1px solid #dce6f2; border-radius: 8px; padding: 8px; }
+  button { border: 0; border-radius: 8px; padding: 6px 9px; cursor: pointer; }
+`
+
+export const CommentActions = styled.div`
+  display: flex;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  margin-top: 6px;
+  button { border: 0; padding: 0; background: transparent; color: #727780; cursor: pointer; font-size: 12px; }
+  button:last-child { color: #dc2626; }
 `
 
 export const EmptyComment = styled.p`margin: 0; color: #8a9099; font-size: 14px;`

@@ -1,13 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import {
+  getBoards,
+  getMyBoards,
+  getMyReviews,
+  getReviews,
+  resolveApiAssetUrl,
+  listSharedTrips,
+} from '@shared/api'
 import catAvatarUrl from '@shared/assets/community-avatar-cat.png'
 import dogAvatarUrl from '@shared/assets/community-avatar-dog.png'
 import communityDaNangUrl from '@shared/assets/community-destination-danang.jpg'
 import communitySwissUrl from '@shared/assets/community-destination-swiss.jpg'
 import communityTokyoUrl from '@shared/assets/community-destination-tokyo.jpg'
-import italyUrl from '@shared/assets/community-italy.jpg'
-import swissUrl from '@shared/assets/community-swiss.jpg'
-import vietnamUrl from '@shared/assets/community-vietnam.jpg'
 import logoUrl from '@shared/assets/logo.png'
 import { createCommunityDetailPath, paths } from '@shared/config'
 import { MENUS, Sidebar } from '@widgets/sidebar'
@@ -15,47 +20,135 @@ import { MENUS, Sidebar } from '@widgets/sidebar'
 import * as S from './CommunityPage.styles'
 
 const categories = ['자유게시판', '여행 후기', '경로/일정 공유'] as const
+type Category = (typeof categories)[number]
 
-function QuestionPost({ onOpen }: { onOpen: () => void }) {
-  return (
-    <S.PostButton type="button" onClick={onOpen}>
-    <S.QuestionCard>
-      <S.Author><img src={catAvatarUrl} alt="" /><div><strong>계획적인 탐험가</strong><span>15분 전</span></div></S.Author>
-      <h2>일본 교토 숙소 추천 부탁드려요! ⛩️</h2>
-      <p>다음 달에 부모님 모시고 교토 3박 4일 여행 갑니다. 가와라마치 쪽이랑 교토역 근처 중에 어디가 더 이동하기 편할까요? 부모님이 걷는 걸 힘들어하셔서 위치 좋은 료칸이나 호텔 추천해주시면 감사하겠습니다!</p>
-      <S.Reactions><span>♡ <b>8</b></span><span>▢ <b>12</b></span></S.Reactions>
-    </S.QuestionCard>
-    </S.PostButton>
-  )
+type FeedPost = {
+  author: string
+  category: Category
+  commentCount: number
+  content: string
+  createdAt: string
+  id: string
+  imageUrls: string[]
+  likeCount: number
+  title: string
 }
 
-function PhotoPost({ onOpen }: { onOpen: () => void }) {
+function toDateLabel(value?: string) {
+  if (!value) return '방금 전'
+  return new Date(value).toLocaleDateString('ko-KR')
+}
+
+async function loadPosts(category: Category, mineOnly: boolean): Promise<FeedPost[]> {
+  if (category === '자유게시판') {
+    const page = await (mineOnly ? getMyBoards : getBoards)({ page: 0, size: 20 })
+    return (page.content ?? []).map((post) => ({
+      author: post.nickName ?? post.userId ?? '여행자',
+      category,
+      commentCount: post.commentCount ?? 0,
+      content: post.content ?? '',
+      createdAt: toDateLabel(post.createDate),
+      id: `board-${post.boardId}`,
+      imageUrls: post.images ?? [],
+      likeCount: post.likeCount ?? 0,
+      title: post.title ?? '제목 없는 게시글',
+    }))
+  }
+
+  if (category === '여행 후기') {
+    const page = await (mineOnly ? getMyReviews : getReviews)({ page: 0, size: 20 })
+    return (page.content ?? []).map((post) => ({
+      author: post.nickName ?? post.userId ?? '여행자',
+      category,
+      commentCount: post.commentCount ?? 0,
+      content: post.content ?? '',
+      createdAt: toDateLabel(post.createDate),
+      id: `review-${post.reviewId}`,
+      imageUrls: post.images ?? [],
+      likeCount: post.likeCount ?? 0,
+      title: post.title ?? '제목 없는 여행 후기',
+    }))
+  }
+
+  const page = await listSharedTrips({ page: 0, size: 20 })
+  return (page.content ?? []).map((post) => ({
+    author: post.nickName ?? post.userId ?? '여행자',
+    category,
+    commentCount: post.commentCount ?? 0,
+    content: post.content ?? '',
+    createdAt: toDateLabel(post.createDate),
+    id: `trip-${post.tripId}`,
+    imageUrls: post.images ?? [],
+    likeCount: post.likeCount ?? 0,
+    title: post.title ?? '공유 여행 일정',
+  }))
+}
+
+function PostCard({ onOpen, post }: { onOpen: () => void; post: FeedPost }) {
+  const avatarUrl = post.category === '자유게시판' ? catAvatarUrl : dogAvatarUrl
+  const content = (
+    <>
+      <S.Author><img src={avatarUrl} alt="" /><div><strong>{post.author}</strong><span>{post.createdAt} · {post.category}</span></div></S.Author>
+      {post.imageUrls.length > 0 ? (
+        <S.PhotoGrid>
+          {post.imageUrls.slice(0, 3).map((imageUrl) => <img key={imageUrl} src={resolveApiAssetUrl(imageUrl)} alt="여행 사진" />)}
+        </S.PhotoGrid>
+      ) : null}
+      <S.PhotoCopy><h2>{post.title}</h2><p>{post.content}</p></S.PhotoCopy>
+      <S.Reactions><span>♡ <b>{post.likeCount}</b></span><span>▢ <b>{post.commentCount}</b></span></S.Reactions>
+    </>
+  )
+
   return (
     <S.PostButton type="button" onClick={onOpen}>
-    <S.PhotoCard>
-      <S.Author><img src={dogAvatarUrl} alt="" /><div><strong>TRAVLR 에디터 ⎈</strong><span>어제 · 여행꿀팁</span></div></S.Author>
-      <S.PhotoGrid><img src={vietnamUrl} alt="베트남 풍경" /><img src={italyUrl} alt="이탈리아 골목" /><S.MorePhoto><img src={swissUrl} alt="스위스 알프스" /><span>+4</span></S.MorePhoto></S.PhotoGrid>
-      <S.PhotoCopy><h2>초보 여행자를 위한 짐 싸기 꿀팁 TOP 5 🎒</h2><p>설레는 첫 해외여행, 무엇을 챙겨야 할지 막막하시죠? 베테랑 여행 에디터가 알려주는 부피 1/2로 줄</p></S.PhotoCopy>
-      <S.Reactions><span className="heart">♡ <b>452</b></span><span>▢ <b>89</b></span></S.Reactions>
-    </S.PhotoCard>
+      {post.imageUrls.length > 0 ? <S.PhotoCard>{content}</S.PhotoCard> : <S.QuestionCard>{content}</S.QuestionCard>}
     </S.PostButton>
   )
 }
 
 export function CommunityPage() {
   const navigate = useNavigate()
-  const [category, setCategory] = useState<(typeof categories)[number]>('자유게시판')
+  const [category, setCategory] = useState<Category>('자유게시판')
+  const [posts, setPosts] = useState<FeedPost[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [mineOnly, setMineOnly] = useState(false)
+
+  useEffect(() => {
+    let isMounted = true
+    void loadPosts(category, mineOnly)
+      .then((nextPosts) => { if (isMounted) setPosts(nextPosts) })
+      .catch(() => { if (isMounted) setErrorMessage('게시글을 불러오지 못했습니다.') })
+      .finally(() => { if (isMounted) setIsLoading(false) })
+    return () => { isMounted = false }
+  }, [category, mineOnly])
+
+  const handleCategoryChange = (nextCategory: Category) => {
+    if (nextCategory === category) return
+    setCategory(nextCategory)
+    if (nextCategory === '경로/일정 공유') setMineOnly(false)
+    setIsLoading(true)
+    setErrorMessage('')
+  }
+
+  const columns = [posts.filter((_, index) => index % 2 === 0), posts.filter((_, index) => index % 2 === 1)]
 
   return (
     <S.Page>
       <Sidebar logo={<S.Logo src={logoUrl} alt="PartTrip" />} menus={MENUS} />
       <S.Content>
         <h1>커뮤니티</h1>
-        <S.Tabs>{categories.map((item) => <button type="button" key={item} className={category === item ? 'active' : ''} onClick={() => setCategory(item)}>{item}</button>)}</S.Tabs>
+        <S.Tabs>{categories.map((item) => <button type="button" key={item} className={category === item ? 'active' : ''} onClick={() => handleCategoryChange(item)}>{item}</button>)}{category !== '경로/일정 공유' ? <button type="button" className={mineOnly ? 'active' : ''} onClick={() => { setMineOnly((value) => !value); setIsLoading(true); setErrorMessage('') }}>내 글만</button> : null}</S.Tabs>
         <S.Layout>
           <S.Feed>
-            <S.Column><QuestionPost onOpen={() => navigate(createCommunityDetailPath('1'))} /><PhotoPost onOpen={() => navigate(createCommunityDetailPath('2'))} /><QuestionPost onOpen={() => navigate(createCommunityDetailPath('1'))} /></S.Column>
-            <S.Column><PhotoPost onOpen={() => navigate(createCommunityDetailPath('2'))} /><QuestionPost onOpen={() => navigate(createCommunityDetailPath('1'))} /><QuestionPost onOpen={() => navigate(createCommunityDetailPath('1'))} /></S.Column>
+            {isLoading ? <S.FeedStatus>게시글을 불러오는 중입니다.</S.FeedStatus> : null}
+            {errorMessage ? <S.FeedStatus role="alert">{errorMessage}</S.FeedStatus> : null}
+            {!isLoading && !errorMessage && posts.length === 0 ? <S.FeedStatus>등록된 게시글이 없습니다.</S.FeedStatus> : null}
+            {columns.map((column, columnIndex) => (
+              <S.Column key={columnIndex}>
+                {column.map((post) => <PostCard key={post.id} post={post} onOpen={() => navigate(createCommunityDetailPath(post.id))} />)}
+              </S.Column>
+            ))}
           </S.Feed>
           <S.Aside>
             <S.CreateButton type="button" onClick={() => navigate(paths.communityWrite)}>⊕ 게시글 작성하기</S.CreateButton>

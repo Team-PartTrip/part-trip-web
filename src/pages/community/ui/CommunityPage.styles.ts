@@ -74,6 +74,13 @@ export const Feed = styled.div`
   }
 `
 
+export const FeedStatus = styled.p`
+  grid-column: 1 / -1;
+  margin: 2rem 0;
+  color: #727780;
+  text-align: center;
+`
+
 export const PostButton = styled.button`
   display: block;
   width: 100%;
