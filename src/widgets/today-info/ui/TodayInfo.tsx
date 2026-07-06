@@ -6,17 +6,22 @@ import {
   DashboardWeatherIcon,
 } from '@shared/assets'
 import { todayTravelInfo } from '@shared/api'
+import type { TodayPhraseResponseDto } from '@shared/api'
 
 import * as S from './TodayInfo.styles'
 
-export function PhraseOfDay() {
+export function PhraseOfDay({ phrase }: { phrase?: TodayPhraseResponseDto }) {
+  const day = phrase?.dayNumber ?? todayTravelInfo.phrase.day
+  const local = phrase?.phrase ?? todayTravelInfo.phrase.local
+  const translated = phrase?.meaning ?? todayTravelInfo.phrase.translated
+
   return (
     <S.PhraseCard>
       <S.SoundIcon aria-hidden="true"><DashboardSpeakerIcon /></S.SoundIcon>
       <S.PhraseText>
-        <small>Day {todayTravelInfo.phrase.day}</small>
-        <strong>{todayTravelInfo.phrase.local}</strong>
-        <span>{todayTravelInfo.phrase.translated}</span>
+        <small>Day {day}</small>
+        <strong>{local}</strong>
+        <span>{translated}</span>
       </S.PhraseText>
       <S.TranslateIcon aria-hidden="true"><DashboardTranslateIcon /></S.TranslateIcon>
     </S.PhraseCard>

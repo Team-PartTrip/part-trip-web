@@ -1,18 +1,50 @@
 import { useState } from 'react'
-import { travelInfoSections, type TravelInfoSection } from '@shared/api'
+import type {
+  FoodInfoResponseDto,
+  PopulationInfoResponseDto,
+  TourPlaceResponseDto,
+  TravelInfoSection,
+} from '@shared/api'
 import { GroupIcon } from '@shared/assets'
 
 import * as S from './TravelInfo.styles'
 
-const populationItems = [
-  { flag: '🇨🇳', group: '중국계', value: 75, barValue: 67.33, color: '#0b73ce' },
-  { flag: '🇲🇲', group: '말레이계', value: 14, barValue: 16.63, color: '#e9d9dd' },
-  { flag: '🇮🇳', group: '인도계', value: 9, barValue: 10.69, color: '#11a987' },
-]
+type Props = {
+  countrySummary?: string
+  foodInfo?: FoodInfoResponseDto[]
+  populationInfo?: PopulationInfoResponseDto[]
+  tourPlaces?: TourPlaceResponseDto[]
+}
 
-const TravelInfo = () => {
+const TravelInfo = ({ countrySummary = '', foodInfo = [], populationInfo = [], tourPlaces = [] }: Props) => {
   const [activeSectionId, setActiveSectionId] = useState<TravelInfoSection['id']>('population')
-  const activeSection = travelInfoSections.find((section) => section.id === activeSectionId) ?? travelInfoSections[0]
+  const sections: readonly TravelInfoSection[] = [
+    {
+      id: 'population',
+      items: populationInfo.map((item) => `${item.nationName ?? '구성'} ${item.percent ?? 0}%`),
+      summary: populationInfo.length > 0 ? '서로 다른 문화가 함께 어우러져 있습니다.' : '인구 정보를 준비 중입니다.',
+      title: '인구 구성',
+    },
+    {
+      id: 'places',
+      items: tourPlaces.map((item) => item.placeName ?? '관광지'),
+      summary: tourPlaces[0]?.description ?? '관광지 정보를 준비 중입니다.',
+      title: '관광 장소',
+    },
+    {
+      id: 'food',
+      items: foodInfo.map((item) => item.foodName ?? '대표 음식'),
+      summary: foodInfo[0]?.description ?? '음식 정보를 준비 중입니다.',
+      title: '대표 음식',
+    },
+    {
+      id: 'etiquette',
+      items: [],
+      summary: countrySummary || '국가 정보를 준비 중입니다.',
+      title: '국가 정보',
+    },
+  ]
+  const activeSection = sections.find((section) => section.id === activeSectionId) ?? sections[0]
 
   return (
     <S.Card>
@@ -22,7 +54,7 @@ const TravelInfo = () => {
       </S.TitleRow>
 
       <S.Tabs aria-label="여행지 정보 분류">
-        {travelInfoSections.map((section) => (
+        {sections.map((section) => (
           <S.Tab
             key={section.id}
             type="button"
@@ -36,14 +68,14 @@ const TravelInfo = () => {
       </S.Tabs>
 
       {activeSectionId === 'population' ? <S.PopulationList>
-        {populationItems.map((item) => (
-          <S.PopulationItem key={item.group}>
+        {populationInfo.map((item, index) => (
+          <S.PopulationItem key={`${item.nationCode}-${index}`}>
             <S.PopulationMeta>
-              <S.PopulationCountry>{item.flag} {item.group}</S.PopulationCountry>
-              <span>{item.value}%</span>
+              <S.PopulationCountry>{item.nationName ?? item.nationCode ?? '구성'}</S.PopulationCountry>
+              <span>{item.percent ?? 0}%</span>
             </S.PopulationMeta>
             <S.ProgressTrack>
-              <S.ProgressFill $color={item.color} $value={item.barValue} />
+              <S.ProgressFill $color={['#0b73ce', '#e9d9dd', '#11a987'][index % 3]} $value={item.percent ?? 0} />
             </S.ProgressTrack>
           </S.PopulationItem>
         ))}
@@ -52,7 +84,7 @@ const TravelInfo = () => {
       <S.CultureSummary>
         <strong>{activeSection.title}</strong>
         <p>
-          {activeSection.items.join(' · ')}<br />
+          {activeSection.items.length > 0 ? <>{activeSection.items.join(' · ')}<br /></> : null}
           {activeSection.summary}
         </p>
       </S.CultureSummary>

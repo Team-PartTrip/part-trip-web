@@ -22,6 +22,7 @@ export const Page = styled.main`
 `;
 
 export const Content = styled.section`
+  position: relative;
   display: flex;
   flex-direction: column;
   width: calc(100% - 15.0625rem);
@@ -45,6 +46,19 @@ export const Content = styled.section`
     gap: 0.75rem;
     padding: 0.75rem;
   }
+`;
+
+export const ApiStatus = styled.p`
+  position: absolute;
+  z-index: 2;
+  top: 0.875rem;
+  right: 1.5rem;
+  margin: 0;
+  border-radius: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  background: rgb(255 255 255 / 92%);
+  color: #dc2626;
+  font-size: 0.75rem;
 `;
 
 export const BottomArea = styled.section`

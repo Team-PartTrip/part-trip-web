@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { saveDiagnosisResultMock } from '@shared/api'
+import { completeSurvey, saveDiagnosisResultMock } from '@shared/api'
 import { paths } from '@shared/config'
 import { DiagnosisQuestion } from '@widgets/diagnosis-question'
 
@@ -38,7 +38,7 @@ export function DiagnosisPage() {
       try {
         setIsSubmitting(true)
         setErrorMessage(null)
-        await saveDiagnosisResultMock()
+        await Promise.all([saveDiagnosisResultMock(), completeSurvey()])
         navigate(paths.diagnosisResult)
       } catch {
         setErrorMessage('진단 결과를 저장하지 못했습니다. 다시 시도해주세요.')

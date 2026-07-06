@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import {
   DashboardCalendarIcon,
   DashboardChevronLeftIcon,
   DashboardChevronRightIcon,
 } from '@shared/assets'
+import type { FestivalResponseDto } from '@shared/api'
 
 import * as S from './Festival.styles'
 
@@ -12,9 +14,18 @@ const calendarDays = [
   '10', '11', '12', '13', '14', '15', '16',
 ]
 
-const Festival = () => {
+type Props = {
+  festivals?: FestivalResponseDto[]
+}
+
+const Festival = ({ festivals = [] }: Props) => {
   const [monthOffset, setMonthOffset] = useState(0)
   const month = 6 + monthOffset
+  const eventDays = new Set(
+    festivals
+      .filter((festival) => Number(festival.startDate?.slice(5, 7)) === month)
+      .map((festival) => String(Number(festival.startDate?.slice(8, 10)))),
+  )
 
   return (
     <S.Card>
@@ -35,7 +46,7 @@ const Festival = () => {
             <S.Weekday key={day}>{day}</S.Weekday>
           ))}
           {calendarDays.map((day, index) => (
-            <S.Day key={`${day}-${index}`} $muted={index < 5} $event={day === '5'} $selected={day === '8'}>
+            <S.Day key={`${day}-${index}`} $muted={index < 5} $event={eventDays.has(day)} $selected={day === '8'}>
               {day}
             </S.Day>
           ))}
@@ -46,4 +57,3 @@ const Festival = () => {
 }
 
 export default Festival
-import { useState } from 'react'

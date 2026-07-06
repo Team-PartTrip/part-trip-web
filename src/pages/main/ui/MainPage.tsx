@@ -1,6 +1,22 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getSelectedDestinationMock, type Destination } from '@shared/api'
+import {
+  getAccessToken,
+  getCountryInfo,
+  getDday,
+  getFestivals,
+  getFoodInfo,
+  getPopulationInfo,
+  getTourPlace,
+  getTodayPhrase,
+  type CountryInfoResponseDto,
+  type DdayResponseDto,
+  type FestivalResponseDto,
+  type FoodInfoResponseDto,
+  type PopulationInfoResponseDto,
+  type TourPlaceResponseDto,
+  type TodayPhraseResponseDto,
+} from '@shared/api'
 import logoUrl from '@shared/assets/logo.png'
 import mainHeroUrl from '@shared/assets/main-hero-redesign.jpg'
 import { paths } from '@shared/config'
@@ -13,6 +29,30 @@ import { TravelInfo } from '@widgets/travel-info'
 
 import * as S from './MainPage.styles'
 
+type MainApiData = {
+  country?: CountryInfoResponseDto
+  festivals: FestivalResponseDto[]
+  foodInfo: FoodInfoResponseDto[]
+  plan?: DdayResponseDto
+  phrase?: TodayPhraseResponseDto
+  populationInfo: PopulationInfoResponseDto[]
+  tourPlaces: TourPlaceResponseDto[]
+}
+
+const initialData: MainApiData = {
+  festivals: [],
+  foodInfo: [],
+  populationInfo: [],
+  tourPlaces: [],
+}
+
+const DEFAULT_COUNTRY_NAME = '한국'
+
+function parseDday(value?: string) {
+  const matched = value?.match(/\d+/)
+  return matched ? Number(matched[0]) : undefined
+}
+
 function Logo() {
   return (
     <S.Logo>
@@ -23,35 +63,116 @@ function Logo() {
 
 export function MainPage() {
   const navigate = useNavigate()
-  const [destination, setDestination] = useState<Destination | null>(null)
+  const [data, setData] = useState<MainApiData>(initialData)
+  const [errorMessage, setErrorMessage] = useState('')
+
+  const isLoggedIn = !!getAccessToken()
+
   useLockBodyScroll()
 
   useEffect(() => {
+    // 비로그인 상태에서는 API 호출하지 않음
+    if (!isLoggedIn) {
+      return
+    }
+
     let isMounted = true
-    void getSelectedDestinationMock().then((selected) => {
-      if (isMounted) setDestination(selected)
-    })
-    return () => { isMounted = false }
-  }, [])
+
+    void (async () => {
+      setErrorMessage('')
+
+      try {
+        let plan: DdayResponseDto | undefined
+
+        // D-day는 실패해도 메인 정보는 불러오도록 처리
+        try {
+          plan = await getDday()
+        } catch (error) {
+          console.error('D-day 정보를 불러오지 못했습니다.', error)
+          plan = undefined
+        }
+
+        const countryName = plan?.countryName || DEFAULT_COUNTRY_NAME
+
+        const [country, populationInfo, tourPlaces, foodInfo, festivals, phrase] = await Promise.all([
+          getCountryInfo(countryName),
+          getPopulationInfo(countryName),
+          getTourPlace(countryName),
+          getFoodInfo(countryName),
+          getFestivals(countryName),
+          getTodayPhrase(countryName, 1).catch(() => undefined),
+        ])
+
+        if (isMounted) {
+          setData({
+            country,
+            festivals,
+            foodInfo,
+            plan,
+            phrase,
+            populationInfo,
+            tourPlaces,
+          })
+        }
+      } catch (error) {
+        console.error('메인 여행 정보 조회 실패:', error)
+
+        if (isMounted) {
+          setErrorMessage('여행 정보를 불러오지 못했습니다.')
+        }
+      }
+    })()
+
+    return () => {
+      isMounted = false
+    }
+  }, [isLoggedIn])
+
+  const pageData = isLoggedIn ? data : initialData
+
+  const handleChangeDestination = () => {
+    if (!isLoggedIn) {
+      navigate(paths.login)
+      return
+    }
+
+    navigate(paths.travelSelect)
+  }
+
+  const destination =
+    pageData.plan?.cityName ||
+    pageData.country?.cityName ||
+    pageData.country?.countryName
 
   return (
     <S.Page>
       <Sidebar logo={<Logo />} menus={MENUS} />
 
       <S.Content>
+        {isLoggedIn && errorMessage ? <S.ApiStatus role="alert">{errorMessage}</S.ApiStatus> : null}
+
         <MainHero
-          imageSrc={mainHeroUrl}
-          aria-label={`${destination?.name ?? '여행지'} 야경`}
-          destination={destination?.name ?? '여행지를 불러오는 중'}
-          onChangeDestination={() => navigate(paths.travelSelect)}
+          imageSrc={pageData.country?.imageUrl || mainHeroUrl}
+          aria-label={`${destination || '여행지'} 야경`}
+          dDay={parseDday(pageData.plan?.dday)}
+          destination={destination}
+          isLoggedIn={isLoggedIn}
+          onChangeDestination={handleChangeDestination}
         />
 
         <S.BottomArea>
-          <TravelInfo />
+          <TravelInfo
+            countrySummary={pageData.country?.summary}
+            foodInfo={pageData.foodInfo}
+            populationInfo={pageData.populationInfo}
+            tourPlaces={pageData.tourPlaces}
+          />
+
           <S.RightArea>
-            <PhraseOfDay />
+            <PhraseOfDay phrase={pageData.phrase} />
+
             <S.LowerRow>
-              <Festival />
+              <Festival festivals={pageData.festivals} />
               <TodayStats />
             </S.LowerRow>
           </S.RightArea>

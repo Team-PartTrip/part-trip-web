@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 import { DestinationBackIcon, DestinationSearchIcon } from '@shared/assets'
 import {
-  destinations,
-  getDestinationsMock,
-  selectDestinationMock,
+  getCountries,
+  saveTravelPlan,
   type Destination,
 } from '@shared/api'
 import {
@@ -19,11 +18,26 @@ interface Props {
   onBack: () => void
 }
 
-const destinationImages: Record<string, string> = {
-  bangkok: destinationBangkokUrl,
-  'da-nang': destinationDaNangUrl,
-  singapore: destinationSingaporeUrl,
-  tokyo: destinationTokyoUrl,
+const currencyByCountry: Record<string, string> = {
+  베트남: 'VND',
+  싱가포르: 'SGD',
+  일본: 'JPY',
+  태국: 'THB',
+}
+
+function addDays(date: Date, days: number) {
+  const nextDate = new Date(date)
+  nextDate.setDate(nextDate.getDate() + days)
+  return nextDate.toISOString().slice(0, 10)
+}
+
+function getDestinationImage(destination: Destination) {
+  if (destination.imageUrl) return destination.imageUrl
+  const value = `${destination.country} ${destination.name}`
+  if (value.includes('다낭') || value.includes('베트남')) return destinationDaNangUrl
+  if (value.includes('도쿄') || value.includes('일본')) return destinationTokyoUrl
+  if (value.includes('방콕') || value.includes('태국')) return destinationBangkokUrl
+  return destinationSingaporeUrl
 }
 
 function CloseIcon() {
@@ -41,26 +55,61 @@ function CloseIcon() {
 
 const DestinationSelector = ({ onBack }: Props) => {
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState<readonly Destination[]>(destinations)
-  const [recentDestinations, setRecentDestinations] = useState<readonly Destination[]>([destinations[0]])
+  const [destinations, setDestinations] = useState<readonly Destination[]>([])
+  const [recentDestinations, setRecentDestinations] = useState<readonly Destination[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectingId, setSelectingId] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState('')
+  const keyword = query.trim().toLocaleLowerCase()
+  const results = keyword
+    ? destinations.filter((destination) =>
+        `${destination.name} ${destination.country}`.toLocaleLowerCase().includes(keyword),
+      )
+    : destinations
 
   useEffect(() => {
     let isMounted = true
-    void getDestinationsMock(query).then((nextResults) => {
-      if (isMounted) {
-        setResults(nextResults)
-        setIsLoading(false)
-      }
-    })
+
+    void getCountries()
+      .then((countries) => {
+        if (!isMounted) return
+        const nextDestinations = countries.map((country, index) => ({
+          country: country.countryName ?? '여행지',
+          countryInfoId: country.countryInfoId,
+          currency: currencyByCountry[country.countryName ?? ''] ?? '',
+          id: String(country.countryInfoId ?? index),
+          imageUrl: country.imageUrl,
+          name: country.cityName || country.countryName || '여행지',
+        }))
+        setDestinations(nextDestinations)
+        setRecentDestinations(nextDestinations.slice(0, 1))
+      })
+      .catch(() => {
+        if (isMounted) setErrorMessage('여행지 목록을 불러오지 못했습니다.')
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false)
+      })
+
     return () => { isMounted = false }
-  }, [query])
+  }, [])
 
   const handleSelect = async (destination: Destination) => {
-    setSelectingId(destination.id)
-    await selectDestinationMock(destination)
-    onBack()
+    try {
+      setSelectingId(destination.id)
+      setErrorMessage('')
+      const today = new Date()
+      await saveTravelPlan({
+        cityName: destination.name,
+        countryName: destination.country,
+        endDate: addDays(today, 34),
+        startDate: addDays(today, 30),
+      })
+      onBack()
+    } catch {
+      setErrorMessage('여행지를 저장하지 못했습니다. 다시 시도해주세요.')
+      setSelectingId(null)
+    }
   }
 
   return (
@@ -94,7 +143,7 @@ const DestinationSelector = ({ onBack }: Props) => {
           </S.SectionHeader>
           {recentDestinations.length === 0 ? <S.EmptyRecent>최근 검색한 여행지가 없습니다.</S.EmptyRecent> : recentDestinations.map((destination) => (
             <S.RecentChip key={destination.id}>
-              <span aria-hidden="true"><img src={destinationImages[destination.id]} alt="" /></span>
+              <span aria-hidden="true"><img src={getDestinationImage(destination)} alt="" /></span>
               <span><strong>{destination.name}</strong><small>{destination.currency}</small></span>
               <button type="button" aria-label={`${destination.name} 최근 검색 삭제`} onClick={() => setRecentDestinations((current) => current.filter((item) => item.id !== destination.id))}><CloseIcon /></button>
             </S.RecentChip>
@@ -104,6 +153,7 @@ const DestinationSelector = ({ onBack }: Props) => {
         <S.PopularSection>
           <h2>인기 여행지</h2>
           {isLoading ? <S.ResultState aria-live="polite">여행지를 찾는 중입니다.</S.ResultState> : null}
+          {errorMessage ? <S.ResultState role="alert">{errorMessage}</S.ResultState> : null}
           {!isLoading && results.length === 0 ? <S.ResultState>검색 결과가 없습니다.</S.ResultState> : null}
           <S.DestinationGrid>
             {!isLoading && results.map((destination) => (
@@ -111,7 +161,7 @@ const DestinationSelector = ({ onBack }: Props) => {
                 key={destination.id}
                 type="button"
                 data-destination-card
-                $imageUrl={destinationImages[destination.id]}
+                $imageUrl={getDestinationImage(destination)}
                 onClick={() => void handleSelect(destination)}
                 disabled={selectingId !== null}
               >
