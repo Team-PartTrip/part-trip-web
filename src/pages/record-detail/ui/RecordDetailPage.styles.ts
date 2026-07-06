@@ -26,6 +26,37 @@ export const TopBar = styled.header`
   button:last-child { background: #1a6ebf; color: #fff; }
 `
 
+export const ErrorMessage = styled.p`
+  margin: 0 0 16px;
+  border-radius: 10px;
+  padding: 12px 16px;
+  background: #fff1f2;
+  color: #b42318;
+`
+
+export const EditForm = styled.form`
+  display: grid;
+  gap: 18px;
+  border: 1px solid #e1e9f3;
+  border-radius: 24px;
+  padding: 28px;
+  background: #fff;
+  h1 { margin: 0; }
+  label { display: grid; gap: 8px; font-weight: 700; }
+  input, textarea { width: 100%; border: 1px solid #dce6f2; border-radius: 10px; padding: 12px; font: inherit; }
+  textarea { min-height: 180px; resize: vertical; }
+  > div:last-child { display: flex; justify-content: flex-end; gap: 8px; }
+  button { border: 0; border-radius: 9px; padding: 10px 18px; cursor: pointer; }
+  button[type='submit'] { background: #1a6ebf; color: #fff; }
+`
+
+export const DateFields = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  @media (max-width: 36rem) { grid-template-columns: 1fr; }
+`
+
 export const Layout = styled.div`
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;

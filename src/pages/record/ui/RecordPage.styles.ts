@@ -124,6 +124,13 @@ export const RecordList = styled.div`
   gap: 10px;
 `
 
+export const StatusMessage = styled.p`
+  margin: 0;
+  padding: 48px 16px;
+  color: #717784;
+  text-align: center;
+`
+
 export const RecordRow = styled.article`
   display: flex;
   height: 145px;
