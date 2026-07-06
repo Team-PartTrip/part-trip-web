@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 import { logout } from '../../model/api'
 import * as S from './LogoutDialog.styles'
@@ -40,7 +41,7 @@ const LogoutDialog = ({ onClose, moveToLogin }: Props) => {
     }
   }
 
-  return (
+  return createPortal(
     <S.Dimmer
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
@@ -70,7 +71,8 @@ const LogoutDialog = ({ onClose, moveToLogin }: Props) => {
           </S.LogoutButton>
         </S.Actions>
       </S.Dialog>
-    </S.Dimmer>
+    </S.Dimmer>,
+    document.body
   )
 }
 
