@@ -63,7 +63,6 @@ const MAIN_API_PATHS = {
   food: '/main/food-info',
   festivals: '/main/festivals',
   countryInfo: '/main/country-info',
-  countries: '/main/countries',
 } as const
 
 // Mock 데이터 정의 (useMockApi가 true일 때 임시로 사용)
@@ -187,11 +186,7 @@ export async function getCountryInfo(countryName: string): Promise<CountryInfoRe
 }
 
 export async function getCountries(): Promise<CountryInfoResponseDto[]> {
-  if (runtimeConfig.useMockApi) {
-    return mockCountries
-  }
-  const { data } = await apiClient.get<CountryInfoResponseDto[]>(MAIN_API_PATHS.countries)
-  return data
+  return mockCountries
 }
 
 export async function getMainPage(): Promise<string> {
