@@ -5,15 +5,14 @@ import {
   DashboardTranslateIcon,
   DashboardWeatherIcon,
 } from '@shared/assets'
-import { todayTravelInfo } from '@shared/api'
-import type { TodayPhraseResponseDto } from '@shared/api'
+import type { ExchangeRateResponseDto, TodayPhraseResponseDto, WeatherResponseDto } from '@shared/api'
 
 import * as S from './TodayInfo.styles'
 
 export function PhraseOfDay({ phrase }: { phrase?: TodayPhraseResponseDto }) {
-  const day = phrase?.dayNumber ?? todayTravelInfo.phrase.day
-  const local = phrase?.phrase ?? todayTravelInfo.phrase.local
-  const translated = phrase?.meaning ?? todayTravelInfo.phrase.translated
+  const day = phrase?.dayNumber ?? 1
+  const local = phrase?.phrase ?? '-'
+  const translated = phrase?.meaning ?? '오늘의 회화를 불러오지 못했습니다.'
 
   return (
     <S.PhraseCard>
@@ -28,24 +27,34 @@ export function PhraseOfDay({ phrase }: { phrase?: TodayPhraseResponseDto }) {
   )
 }
 
-export function TodayStats() {
+export function TodayStats({
+  city,
+  exchangeRate,
+  weather,
+}: {
+  city?: string
+  exchangeRate?: ExchangeRateResponseDto
+  weather?: WeatherResponseDto
+}) {
+  const date = exchangeRate?.date ?? new Date().toISOString().slice(0, 10)
+
   return (
     <S.Stats>
       <S.ExchangeCard>
         <h2><DashboardExchangeIcon aria-hidden="true" />오늘의 환율</h2>
-        <p><span>🇸🇬 {todayTravelInfo.exchange.base}</span><DashboardArrowIcon aria-hidden="true" /><strong>{todayTravelInfo.exchange.converted}</strong><span>🇰🇷</span></p>
+        <p><span>{exchangeRate?.currencyCode ? `1 ${exchangeRate.currencyCode}` : '-'}</span><DashboardArrowIcon aria-hidden="true" /><strong>{exchangeRate?.krwRate != null ? `${exchangeRate.krwRate.toLocaleString()} KRW` : '-'}</strong><span>🇰🇷</span></p>
       </S.ExchangeCard>
 
       <S.WeatherCard>
         <S.WeatherHeader>
           <h2><DashboardWeatherIcon aria-hidden="true" />현지 날씨</h2>
-          <small>{todayTravelInfo.weather.city}</small>
+          <small>{city ?? '-'}</small>
         </S.WeatherHeader>
         <S.WeatherBody>
-          <strong>{todayTravelInfo.weather.temperature}°C</strong>
-          <span>{todayTravelInfo.weather.condition}<small>Feels like {todayTravelInfo.weather.feelsLike}°C</small></span>
+          <strong>{weather?.temperature != null ? `${weather.temperature}°C` : '-'}</strong>
+          <span>{weather?.description ?? '-'}<small>체감 {weather?.feelsLike != null ? `${weather.feelsLike}°C` : '-'}</small></span>
         </S.WeatherBody>
-        <time dateTime="2026-06-09">2026년 6월 9일</time>
+        <time dateTime={date}>{date}</time>
       </S.WeatherCard>
     </S.Stats>
   )

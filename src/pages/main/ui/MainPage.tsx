@@ -4,18 +4,22 @@ import {
   getAccessToken,
   getCountryInfo,
   getDday,
+  getExchangeRate,
   getFestivals,
   getFoodInfo,
   getPopulationInfo,
   getTourPlace,
   getTodayPhrase,
+  getWeather,
   type CountryInfoResponseDto,
   type DdayResponseDto,
+  type ExchangeRateResponseDto,
   type FestivalResponseDto,
   type FoodInfoResponseDto,
   type PopulationInfoResponseDto,
   type TourPlaceResponseDto,
   type TodayPhraseResponseDto,
+  type WeatherResponseDto,
 } from '@shared/api'
 import logoUrl from '@shared/assets/logo.png'
 import mainHeroUrl from '@shared/assets/main-hero-redesign.jpg'
@@ -31,12 +35,14 @@ import * as S from './MainPage.styles'
 
 type MainApiData = {
   country?: CountryInfoResponseDto
+  exchangeRate?: ExchangeRateResponseDto
   festivals: FestivalResponseDto[]
   foodInfo: FoodInfoResponseDto[]
   plan?: DdayResponseDto
   phrase?: TodayPhraseResponseDto
   populationInfo: PopulationInfoResponseDto[]
   tourPlaces: TourPlaceResponseDto[]
+  weather?: WeatherResponseDto
 }
 
 const initialData: MainApiData = {
@@ -94,24 +100,28 @@ export function MainPage() {
 
         const countryName = plan?.countryName || DEFAULT_COUNTRY_NAME
 
-        const [country, populationInfo, tourPlaces, foodInfo, festivals, phrase] = await Promise.all([
+        const [country, populationInfo, tourPlaces, foodInfo, festivals, phrase, weather, exchangeRate] = await Promise.all([
           getCountryInfo(countryName),
           getPopulationInfo(countryName),
           getTourPlace(countryName),
           getFoodInfo(countryName),
           getFestivals(countryName),
           getTodayPhrase(countryName, 1).catch(() => undefined),
+          getWeather(countryName).catch(() => undefined),
+          getExchangeRate(countryName).catch(() => undefined),
         ])
 
         if (isMounted) {
           setData({
             country,
+            exchangeRate,
             festivals,
             foodInfo,
             plan,
             phrase,
             populationInfo,
             tourPlaces,
+            weather,
           })
         }
       } catch (error) {
@@ -173,7 +183,7 @@ export function MainPage() {
 
             <S.LowerRow>
               <Festival festivals={pageData.festivals} />
-              <TodayStats />
+              <TodayStats city={destination} exchangeRate={pageData.exchangeRate} weather={pageData.weather} />
             </S.LowerRow>
           </S.RightArea>
         </S.BottomArea>
