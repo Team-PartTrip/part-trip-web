@@ -5,7 +5,6 @@ export const paths = {
   communityWrite: '/community/write',
   diagnosis: '/diagnosis',
   diagnosisResult: '/result',
-  home: '/',
   login: '/login',
   main: '/main',
   profile: '/profile',

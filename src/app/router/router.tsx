@@ -1,5 +1,5 @@
 import { Suspense, type ReactNode } from 'react'
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 
 import { paths } from './paths'
 import { RequireAuth } from './RequireAuth'
@@ -31,6 +31,7 @@ const withFallback = (element: ReactNode) => (
 const requireAuth = (element: ReactNode) => withFallback(<RequireAuth>{element}</RequireAuth>)
 
 export const router = createBrowserRouter([
+  { path: '/', element: <Navigate to={paths.main} replace /> },
   { path: paths.signUp, element: withFallback(<SignUpPage />) },
   { path: paths.login, element: withFallback(<LoginPage />) },
   { path: paths.changePassword, element: withFallback(<ChangePasswordPage />) },
