@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   getBoards,
-  getMyBoards,
-  getMyReviews,
   getReviews,
   resolveApiAssetUrl,
   listSharedTrips,
@@ -39,9 +37,9 @@ function toDateLabel(value?: string) {
   return new Date(value).toLocaleDateString('ko-KR')
 }
 
-async function loadPosts(category: Category, mineOnly: boolean): Promise<FeedPost[]> {
+async function loadPosts(category: Category): Promise<FeedPost[]> {
   if (category === '자유게시판') {
-    const page = await (mineOnly ? getMyBoards : getBoards)({ page: 0, size: 20 })
+    const page = await getBoards({ page: 0, size: 20 })
     return (page.content ?? []).map((post) => ({
       author: post.nickName ?? post.userId ?? '여행자',
       category,
@@ -56,7 +54,7 @@ async function loadPosts(category: Category, mineOnly: boolean): Promise<FeedPos
   }
 
   if (category === '여행 후기') {
-    const page = await (mineOnly ? getMyReviews : getReviews)({ page: 0, size: 20 })
+    const page = await getReviews({ page: 0, size: 20 })
     return (page.content ?? []).map((post) => ({
       author: post.nickName ?? post.userId ?? '여행자',
       category,
@@ -112,21 +110,19 @@ export function CommunityPage() {
   const [posts, setPosts] = useState<FeedPost[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
-  const [mineOnly, setMineOnly] = useState(false)
 
   useEffect(() => {
     let isMounted = true
-    void loadPosts(category, mineOnly)
+    void loadPosts(category)
       .then((nextPosts) => { if (isMounted) setPosts(nextPosts) })
       .catch(() => { if (isMounted) setErrorMessage('게시글을 불러오지 못했습니다.') })
       .finally(() => { if (isMounted) setIsLoading(false) })
     return () => { isMounted = false }
-  }, [category, mineOnly])
+  }, [category])
 
   const handleCategoryChange = (nextCategory: Category) => {
     if (nextCategory === category) return
     setCategory(nextCategory)
-    if (nextCategory === '경로/일정 공유') setMineOnly(false)
     setIsLoading(true)
     setErrorMessage('')
   }
@@ -138,7 +134,7 @@ export function CommunityPage() {
       <Sidebar logo={<S.Logo src={logoUrl} alt="PartTrip" />} menus={MENUS} />
       <S.Content>
         <h1>커뮤니티</h1>
-        <S.Tabs>{categories.map((item) => <button type="button" key={item} className={category === item ? 'active' : ''} onClick={() => handleCategoryChange(item)}>{item}</button>)}{category !== '경로/일정 공유' ? <button type="button" className={mineOnly ? 'active' : ''} onClick={() => { setMineOnly((value) => !value); setIsLoading(true); setErrorMessage('') }}>내 글만</button> : null}</S.Tabs>
+        <S.Tabs>{categories.map((item) => <button type="button" key={item} className={category === item ? 'active' : ''} onClick={() => handleCategoryChange(item)}>{item}</button>)}</S.Tabs>
         <S.Layout>
           <S.Feed>
             {isLoading ? <S.FeedStatus>게시글을 불러오는 중입니다.</S.FeedStatus> : null}
