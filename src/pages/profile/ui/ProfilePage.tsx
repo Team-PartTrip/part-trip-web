@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import logoUrl from '@shared/assets/logo.png'
-import { getProfileMock, type UserProfile } from '@shared/api'
+import { getCharacterInfo, getProfile, toUserProfile, type UserProfile } from '@shared/api'
 import { ProfileCard } from '@widgets/profile-card'
 import { ProfileForm } from '@widgets/profile-form'
 import { MENUS, Sidebar } from '@widgets/sidebar'
@@ -14,8 +14,11 @@ export function ProfilePage() {
 
   useEffect(() => {
     let isMounted = true
-    void getProfileMock()
-      .then((data) => { if (isMounted) setProfile(data) })
+    void getProfile()
+      .then(async (data) => {
+        const character = await getCharacterInfo().catch(() => undefined)
+        if (isMounted) setProfile(toUserProfile(data, character))
+      })
       .catch(() => { if (isMounted) setHasError(true) })
     return () => { isMounted = false }
   }, [])

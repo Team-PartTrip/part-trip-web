@@ -2,16 +2,15 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm, useWatch, type SubmitHandler } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import {
-  resetProfilePasswordMock,
-  updateProfileMock,
+  updateProfile,
+  uploadImage,
   type UserProfile,
 } from '@shared/api'
 import { paths } from '@shared/config'
-import { getPasswordValidationError, useLockBodyScroll } from '@shared/lib'
+import { useLockBodyScroll } from '@shared/lib'
 
 import {
   getNicknameError,
-  getPasswordPairError,
   isProfileImageSizeAllowed,
   isSupportedProfileImageType,
 } from '../model/profileForm'
@@ -25,8 +24,6 @@ type ProfileFormProps = {
 
 type ProfileFormValues = {
   name: string
-  newPassword: string
-  passwordConfirm: string
 }
 
 export function ProfileForm({ onCancel, onSaved, profile }: ProfileFormProps) {
@@ -34,13 +31,12 @@ export function ProfileForm({ onCancel, onSaved, profile }: ProfileFormProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [avatarPreview, setAvatarPreview] = useState(profile.avatarUrl ?? '')
+  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null)
   const [photoError, setPhotoError] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const { register, handleSubmit, formState, control, getValues } = useForm<ProfileFormValues>({
+  const { register, handleSubmit, formState, control } = useForm<ProfileFormValues>({
     defaultValues: {
       name: profile.name,
-      newPassword: '',
-      passwordConfirm: '',
     },
   })
   const previewName = useWatch({ control, name: 'name' })
@@ -88,10 +84,12 @@ export function ProfileForm({ onCancel, onSaved, profile }: ProfileFormProps) {
       setPhotoError('사진을 불러오지 못했습니다. 다시 선택해주세요.')
     })
     reader.readAsDataURL(file)
+    setSelectedPhoto(file)
   }
 
   const handleResetPhoto = () => {
     setAvatarPreview('')
+    setSelectedPhoto(null)
     setPhotoError(null)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
@@ -99,18 +97,18 @@ export function ProfileForm({ onCancel, onSaved, profile }: ProfileFormProps) {
   const onSubmit: SubmitHandler<ProfileFormValues> = async (values) => {
     try {
       setErrorMessage(null)
-      const updatedProfile = {
+      const uploaded = selectedPhoto ? await uploadImage(selectedPhoto) : null
+      const uploadedUrl = uploaded ? Object.values(uploaded)[0] : undefined
+      const response = await updateProfile({
+        imgUrl: selectedPhoto ? uploadedUrl : avatarPreview || undefined,
+        nickName: values.name.trim(),
+      })
+      const savedProfile: UserProfile = {
         ...profile,
-        avatarUrl: avatarPreview || undefined,
-        name: values.name.trim(),
+        avatarUrl: response.imgUrl || undefined,
+        id: response.userId || profile.id,
+        name: response.nickName || values.name.trim(),
       }
-      const updatePassword = values.newPassword
-        ? resetProfilePasswordMock(values.newPassword)
-        : Promise.resolve(null)
-      const [savedProfile] = await Promise.all([
-        updateProfileMock(updatedProfile),
-        updatePassword,
-      ])
 
       if (onSaved) onSaved(savedProfile)
       else navigate(paths.profile, { replace: true })
@@ -175,36 +173,11 @@ export function ProfileForm({ onCancel, onSaved, profile }: ProfileFormProps) {
           <S.Section>
             <S.SectionHeading>
               <strong>비밀번호 재설정</strong>
-              <span>변경하지 않으려면 비워두세요.</span>
+              <span>본인 확인을 위해 이메일 인증 후 변경합니다.</span>
             </S.SectionHeading>
-            <S.PasswordGrid>
-              <S.Field>
-                <span>새 비밀번호</span>
-                <input
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder="8자 이상 입력"
-                  {...register('newPassword', {
-                    validate: (value) => !value || (getPasswordValidationError(value) ?? true),
-                  })}
-                  aria-invalid={Boolean(formState.errors.newPassword)}
-                />
-                {formState.errors.newPassword ? <S.FieldError>{formState.errors.newPassword.message}</S.FieldError> : null}
-              </S.Field>
-              <S.Field>
-                <span>새 비밀번호 확인</span>
-                <input
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder="한 번 더 입력"
-                  {...register('passwordConfirm', {
-                    validate: (value) => getPasswordPairError(getValues('newPassword'), value) ?? true,
-                  })}
-                  aria-invalid={Boolean(formState.errors.passwordConfirm)}
-                />
-                {formState.errors.passwordConfirm ? <S.FieldError>{formState.errors.passwordConfirm.message}</S.FieldError> : null}
-              </S.Field>
-            </S.PasswordGrid>
+            <S.ResetPhotoButton type="button" onClick={() => navigate(paths.changePassword)}>
+              이메일 인증 후 비밀번호 변경
+            </S.ResetPhotoButton>
           </S.Section>
 
           {errorMessage ? <S.ErrorMessage role="alert">{errorMessage}</S.ErrorMessage> : null}

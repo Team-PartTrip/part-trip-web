@@ -63,10 +63,10 @@ export function ProfileCard({ onEdit, profile }: ProfileCardProps) {
         </S.BadgePanel>
         <S.TypePanel>
           <h2>여행 타입 상세</h2>
-          <img src={characterUrl} alt="마트 여행 캐릭터" />
-          <h3>마트</h3>
-          <span>즉흥 경험형 코알라</span>
-          <S.TypeDescription><strong>즉흥적일 때의 경험을 좋아하는 코알라 마트</strong><p>마트는 궁금증이 많은 친구예요!</p><p>“저건 뭐지?”라는 생각이 들면 바로 발걸음을 옮기는 행동파! 낯선 풍경과 새로운 이야기를 발견할 때 가장 행복해지는 여행 메이트랍니다.</p></S.TypeDescription>
+          <img src={profile.characterImageUrl || characterUrl} alt={`${profile.characterName || '여행'} 캐릭터`} />
+          <h3>{profile.characterName || '마트'}</h3>
+          <span>{profile.travelStyle}</span>
+          <S.TypeDescription><strong>{profile.characterName ? `${profile.characterName}의 여행 성향` : '즉흥적일 때의 경험을 좋아하는 코알라 마트'}</strong><p>{profile.bio}</p></S.TypeDescription>
         </S.TypePanel>
       </S.Body>
     </S.Card>
