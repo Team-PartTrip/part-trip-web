@@ -1,4 +1,6 @@
+import { isAxiosError } from 'axios'
 import { apiClient } from './client'
+import { isMissingTravelPlanResponse } from './mainError'
 import { runtimeConfig } from '@shared/config'
 
 export type TravelPlanRequestDto = {
@@ -92,13 +94,19 @@ export async function saveTravelPlan(payload: TravelPlanRequestDto): Promise<Dda
   return data
 }
 
-export async function getDday(): Promise<DdayResponseDto> {
+export async function getDday(): Promise<DdayResponseDto | undefined> {
   if (runtimeConfig.useMockApi) {
-    if (!mockActivePlan) throw new Error('Active travel plan not found')
-    return mockActivePlan
+    return mockActivePlan ?? undefined
   }
-  const { data } = await apiClient.get<DdayResponseDto>(MAIN_API_PATHS.dday)
-  return data
+  try {
+    const { data } = await apiClient.get<DdayResponseDto>(MAIN_API_PATHS.dday)
+    return data
+  } catch (error) {
+    if (isAxiosError(error) && isMissingTravelPlanResponse(error.response?.status, error.response?.data)) {
+      return undefined
+    }
+    throw error
+  }
 }
 
 export async function getTourPlace(countryName: string): Promise<TourPlaceResponseDto[]> {
