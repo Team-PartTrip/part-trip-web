@@ -8,7 +8,7 @@ import {
   type UseFormRegisterReturn,
 } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
-import { ACCESS_TOKEN_KEY, googleLogin, login } from '@shared/api'
+import { googleLogin, login, saveAuthTokens } from '@shared/api'
 import logoUrl from '@shared/assets/logo.png'
 import { paths } from '@shared/config'
 import {
@@ -91,11 +91,11 @@ export function LoginForm() {
     userPwd,
   }) => {
     try {
-      const { accessToken } = await login({
+      const tokens = await login({
         userId,
         userPwd,
       })
-      localStorage.setItem(ACCESS_TOKEN_KEY, accessToken)
+      saveAuthTokens(tokens)
       navigate(paths.diagnosis, { replace: true })
     } catch (error) {
       setMessage({
@@ -115,8 +115,8 @@ export function LoginForm() {
   const handleGoogleLogin = async (code: string) => {
     try {
       setIsGoogleSubmitting(true)
-      const { accessToken } = await googleLogin({ code })
-      localStorage.setItem(ACCESS_TOKEN_KEY, accessToken)
+      const tokens = await googleLogin({ code })
+      saveAuthTokens(tokens)
       navigate(paths.diagnosis, { replace: true })
     } catch (error) {
       setMessage({ text: getErrorMessage(error), tone: 'error' })

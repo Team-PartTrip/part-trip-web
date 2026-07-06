@@ -1,6 +1,12 @@
-import axios from 'axios'
+import axios, { type InternalAxiosRequestConfig } from 'axios'
 
-export const ACCESS_TOKEN_KEY = 'accessToken'
+import {
+  clearAuthTokens,
+  getAccessToken,
+  getRefreshToken,
+  saveAuthTokens,
+  type AuthTokens,
+} from './tokenStorage'
 
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? '',
@@ -14,7 +20,7 @@ export const apiClient = axios.create({
 
 // 저장된 accessToken을 모든 요청 헤더에 자동 첨부
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem(ACCESS_TOKEN_KEY)
+  const token = getAccessToken()
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
@@ -22,3 +28,55 @@ apiClient.interceptors.request.use((config) => {
 
   return config
 })
+
+type RetryableRequestConfig = InternalAxiosRequestConfig & {
+  _retry?: boolean
+}
+
+let refreshPromise: Promise<AuthTokens> | null = null
+
+async function requestNewTokens(refreshToken: string) {
+  if (!refreshPromise) {
+    const baseURL = apiClient.defaults.baseURL ?? ''
+    refreshPromise = axios
+      .post<AuthTokens>(`${baseURL}/auth/refresh`, { refreshToken })
+      .then(({ data }) => {
+        saveAuthTokens(data)
+        return data
+      })
+      .finally(() => {
+        refreshPromise = null
+      })
+  }
+
+  return refreshPromise
+}
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error: unknown) => {
+    if (!axios.isAxiosError(error) || error.response?.status !== 401 || !error.config) {
+      return Promise.reject(error)
+    }
+
+    const originalRequest = error.config as RetryableRequestConfig
+    const refreshToken = getRefreshToken()
+    const isRefreshRequest = originalRequest.url?.includes('/auth/refresh')
+
+    if (originalRequest._retry || !refreshToken || isRefreshRequest) {
+      clearAuthTokens()
+      return Promise.reject(error)
+    }
+
+    originalRequest._retry = true
+
+    try {
+      const tokens = await requestNewTokens(refreshToken)
+      originalRequest.headers.Authorization = `Bearer ${tokens.accessToken}`
+      return apiClient(originalRequest)
+    } catch (refreshError) {
+      clearAuthTokens()
+      return Promise.reject(refreshError)
+    }
+  },
+)

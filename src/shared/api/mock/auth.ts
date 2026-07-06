@@ -1,4 +1,4 @@
-import { ACCESS_TOKEN_KEY } from '../client'
+import { clearAuthTokens } from '../tokenStorage'
 import { MOCK_STORAGE_KEYS, waitForMock, writeMockStorage } from './storage'
 
 type LoginPayload = {
@@ -77,7 +77,7 @@ export async function resetPasswordMock({
 
 export async function logoutMock() {
   await waitForMock(250)
-  localStorage.removeItem(ACCESS_TOKEN_KEY)
+  clearAuthTokens()
   localStorage.removeItem(MOCK_STORAGE_KEYS.session)
   return { ok: true as const }
 }

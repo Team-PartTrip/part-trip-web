@@ -1,5 +1,15 @@
-import { logout as logoutRequest } from '@shared/api'
+import {
+  clearAuthTokens,
+  getRefreshToken,
+  logout as logoutRequest,
+} from '@shared/api'
 
 export const logout = async () => {
-  return logoutRequest()
+  const refreshToken = getRefreshToken()
+
+  try {
+    if (refreshToken) await logoutRequest({ refreshToken })
+  } finally {
+    clearAuthTokens()
+  }
 }
