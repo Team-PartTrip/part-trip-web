@@ -10,7 +10,7 @@ export const Card = styled.article`
   border: 0.0625rem solid #e7edf7;
   border-radius: 1.5rem;
   padding: 1.25rem 1.9375rem;
-  gap: 1.375rem;
+  gap: 0.8rem;
   background: #ffffff;
   box-shadow: 0 0.5rem 0.75rem rgb(13 31 64 / 8%);
 
