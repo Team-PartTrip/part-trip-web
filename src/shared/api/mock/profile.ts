@@ -3,6 +3,8 @@ import { MOCK_STORAGE_KEYS, readMockStorage, waitForMock, writeMockStorage } fro
 export type UserProfile = {
   avatarUrl?: string
   bio: string
+  characterImageUrl?: string
+  characterName?: string
   country: string
   email: string
   id: string

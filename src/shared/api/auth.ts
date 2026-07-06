@@ -26,6 +26,7 @@ export type RefreshRequestDto = {
 export type TokenResponseDto = {
   accessToken: string
   refreshToken: string
+  surveyCompleted?: boolean
 }
 
 export type EmailVerifyRequestDto = {
@@ -65,6 +66,11 @@ export type UserEntity = {
   nickName?: string
   myCountry: string
   createDate?: string
+  surveyCompleted?: boolean
+  imgUrl?: string
+  characterId?: string
+  userLevel?: number
+  characterPoint?: number
 }
 
 // === Legacy Type Aliases for Backward Compatibility ===

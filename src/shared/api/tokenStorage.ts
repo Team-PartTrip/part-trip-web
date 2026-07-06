@@ -4,6 +4,7 @@ export const REFRESH_TOKEN_KEY = 'refreshToken'
 export type AuthTokens = {
   accessToken: string
   refreshToken: string
+  surveyCompleted?: boolean
 }
 
 type TokenStorage = Pick<Storage, 'getItem' | 'removeItem' | 'setItem'>

@@ -2,8 +2,10 @@ import { MOCK_STORAGE_KEYS, readMockStorage, waitForMock, writeMockStorage } fro
 
 export type Destination = {
   country: string
+  countryInfoId?: number
   currency: string
   id: string
+  imageUrl?: string
   name: string
 }
 

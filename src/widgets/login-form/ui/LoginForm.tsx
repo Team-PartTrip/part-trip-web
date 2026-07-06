@@ -96,7 +96,7 @@ export function LoginForm() {
         userPwd,
       })
       saveAuthTokens(tokens)
-      navigate(paths.diagnosis, { replace: true })
+      navigate(tokens.surveyCompleted ? paths.main : paths.diagnosis, { replace: true })
     } catch (error) {
       setMessage({
         text: getErrorMessage(error),
@@ -117,7 +117,7 @@ export function LoginForm() {
       setIsGoogleSubmitting(true)
       const tokens = await googleLogin({ code })
       saveAuthTokens(tokens)
-      navigate(paths.diagnosis, { replace: true })
+      navigate(tokens.surveyCompleted ? paths.main : paths.diagnosis, { replace: true })
     } catch (error) {
       setMessage({ text: getErrorMessage(error), tone: 'error' })
     } finally {

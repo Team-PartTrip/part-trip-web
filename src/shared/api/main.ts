@@ -27,6 +27,7 @@ export type TourPlaceResponseDto = {
 }
 
 export type PopulationInfoResponseDto = {
+  populationInfoId?: number
   nationCode?: string
   nationName?: string
   percent?: number
@@ -39,6 +40,7 @@ export type FoodInfoResponseDto = {
 }
 
 export type FestivalResponseDto = {
+  festivalId?: number
   title?: string
   category?: string
   description?: string
@@ -56,6 +58,12 @@ export type CountryInfoResponseDto = {
   summary?: string
 }
 
+export type TodayPhraseResponseDto = {
+  dayNumber?: number
+  meaning?: string
+  phrase?: string
+}
+
 const MAIN_API_PATHS = {
   base: '/main',
   travelPlan: '/main/travel-plan',
@@ -65,6 +73,7 @@ const MAIN_API_PATHS = {
   food: '/main/food-info',
   festivals: '/main/festivals',
   countryInfo: '/main/country-info',
+  todayPhrase: '/main/today-phrase',
 } as const
 
 // Mock 데이터 정의 (useMockApi가 true일 때 임시로 사용)
@@ -195,6 +204,16 @@ export async function getCountryInfo(countryName: string): Promise<CountryInfoRe
 
 export async function getCountries(): Promise<CountryInfoResponseDto[]> {
   return mockCountries
+}
+
+export async function getTodayPhrase(countryName: string, dayNumber: number): Promise<TodayPhraseResponseDto> {
+  if (runtimeConfig.useMockApi) {
+    return { dayNumber, meaning: '안녕하세요', phrase: 'Hello' }
+  }
+  const { data } = await apiClient.get<TodayPhraseResponseDto>(MAIN_API_PATHS.todayPhrase, {
+    params: { countryName, dayNumber },
+  })
+  return data
 }
 
 export async function getMainPage(): Promise<string> {
