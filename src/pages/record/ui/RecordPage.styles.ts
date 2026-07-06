@@ -96,9 +96,11 @@ export const SearchIcon = styled.span`
 export const Workspace = styled.section`
   display: flex;
   width: 100%;
+  min-height: 0;
+  flex: 1;
   flex-direction: column;
   align-items: flex-end;
-  padding: 28px 60px 40px 63px;
+  padding: clamp(48px, 7vh, 72px) 60px 40px 63px;
 
   @media (max-width: 74.9375rem) { padding-inline: 36px; }
   @media (max-width: 47.9375rem) { padding: 20px 18px 48px; }
@@ -208,5 +210,5 @@ export const CreateButton = styled.button`
   font-size: 15px;
   font-weight: 700;
 
-  @media (max-width: 47.9375rem) { width: 100%; }
+  @media (max-width: 47.9375rem) { width: 100%; margin-top: 10px; }
 `

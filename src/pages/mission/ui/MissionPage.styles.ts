@@ -58,12 +58,40 @@ export const CharacterCard = styled.div`
 
 export const CardActions = styled.div`
   position: absolute;
-  top: 17px;
-  right: 23px;
+  top: 14px;
+  right: 18px;
   display: flex;
-  gap: 18px;
+  gap: 14px;
   color: #1a6ebf;
-  font-size: 18px;
+
+  button {
+    display: grid;
+    width: 26px;
+    height: 26px;
+    border: 0;
+    padding: 0;
+    place-items: center;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  svg {
+    width: 26px;
+    height: 26px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  button:last-child circle {
+    fill: currentColor;
+    stroke: currentColor;
+  }
+
+  button:last-child path { stroke: #fff; }
 `
 
 export const Speech = styled.div`
