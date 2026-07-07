@@ -55,10 +55,15 @@ export function MissionPage() {
       try {
         setIsLoading(true)
         setErrorMessage('')
-        const [missionList, completedMissionList] = await Promise.all([
-          getMissions(),
-          getCompletedMissions(),
-        ])
+        const missionList = await getMissions()
+        let completedMissionList = missionList.filter((mission) => mission.completed)
+        console.log('missionList', missionList)
+        try {
+          completedMissionList = await getCompletedMissions()
+        } catch {
+          // 완료 목록 API가 실패해도 전체 미션 목록은 보여준다.
+        }
+
         if (!ignore) {
           setMissions(missionList)
           setCompletedMissions(completedMissionList)
