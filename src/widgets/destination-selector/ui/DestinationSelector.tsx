@@ -75,7 +75,7 @@ const DestinationSelector = ({ onBack }: Props) => {
   >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectingId, setSelectingId] = useState<string | null>(null);
-  const [userId, setUserId] = useState<String>();
+  const [userId, setUserId] = useState<string>();
   const [errorMessage, setErrorMessage] = useState("");
   const keyword = query.trim().toLocaleLowerCase();
   const results = keyword

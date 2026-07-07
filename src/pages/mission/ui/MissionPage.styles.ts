@@ -211,6 +211,12 @@ export const ErrorMessage = styled.p`
   font-size: 13px;
 `
 
+export const StateMessage = styled.p`
+  margin: 24px 0 0;
+  color: #64748b;
+  font-size: 14px;
+`
+
 export const DialogDimmer = styled.div`
   position: fixed;
   z-index: 1200;

@@ -11,4 +11,7 @@ export const REQUIRED_NEW_API_CLIENTS = [
   'GET /api/main/search/recent',
   'POST /api/main/search/recent',
   'DELETE /api/main/search/recent/{recentSearchId}',
+  'GET /api/mission',
+  'GET /api/mission/completed',
+  'PATCH /api/mission/{missionId}',
 ] as const

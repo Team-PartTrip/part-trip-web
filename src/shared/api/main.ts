@@ -85,7 +85,7 @@ export type RecentSearchResponseDto = {
 }
 
 export type RecentSearchRequestDto = {
-  userId: String
+  userId: string
   countryInfoId: number
 }
 
@@ -201,7 +201,7 @@ export async function getPopularPlaces(): Promise<PopularPlaceResponseDto[]> {
   return data
 }
 
-export async function getRecentSearches(userId: String | undefined): Promise<RecentSearchResponseDto[]> {
+export async function getRecentSearches(userId: string | undefined): Promise<RecentSearchResponseDto[]> {
   const { data } = await apiClient.get<RecentSearchResponseDto[]>(MAIN_API_PATHS.recent, { params: { userId } })
   return data
 }

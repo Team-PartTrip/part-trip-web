@@ -1,12 +1,16 @@
-import { useState } from 'react'
-import { completeMissionMock } from '@shared/api'
+import { useEffect, useState } from 'react'
+import {
+  completeMission,
+  getCompletedMissions,
+  getMissions,
+  type MissionResponseDto,
+} from '@shared/api'
 import logoUrl from '@shared/assets/logo.png'
 import missionCharacterUrl from '@shared/assets/mission-character.png'
 import { MENUS, Sidebar } from '@widgets/sidebar'
 
 import { CalendarDialog, CompletedMissionDialog, MissionDetailDialog } from './MissionDialogs'
 import * as S from './MissionPage.styles'
-import { missions } from './missionData'
 
 function CalendarIcon() {
   return (
@@ -27,27 +31,64 @@ function CheckIcon() {
 }
 
 export function MissionPage() {
-  const [completedMissionIds, setCompletedMissionIds] = useState<Set<string>>(
-    () => new Set(['chili-crab', 'merlion', 'universal']),
-  )
+  const [missions, setMissions] = useState<MissionResponseDto[]>([])
+  const [completedMissions, setCompletedMissions] = useState<MissionResponseDto[]>([])
   const [activeDialog, setActiveDialog] = useState<'calendar' | 'completed' | null>(null)
-  const [selectedMissionId, setSelectedMissionId] = useState<string | null>(null)
-  const [pendingMissionId, setPendingMissionId] = useState<string | null>(null)
+  const [selectedMissionId, setSelectedMissionId] = useState<number | null>(null)
+  const [pendingMissionId, setPendingMissionId] = useState<number | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+  const completedMissionIds = new Set(
+    completedMissions
+      .map((mission) => mission.missionId)
+      .filter((id): id is number => typeof id === 'number'),
+  )
   const completedCount = completedMissionIds.size
-  const progress = Math.round((completedCount / missions.length) * 100)
-  const isAllCompleted = completedCount === missions.length
-  const selectedMission = missions.find((mission) => mission.id === selectedMissionId) ?? null
-  const completedMissions = missions.filter((mission) => completedMissionIds.has(mission.id))
+  const progress = missions.length > 0 ? Math.round((completedCount / missions.length) * 100) : 0
+  const isAllCompleted = missions.length > 0 && completedCount === missions.length
+  const selectedMission = missions.find((mission) => mission.missionId === selectedMissionId) ?? null
 
-  const handleComplete = async (missionId: string) => {
+  useEffect(() => {
+    let ignore = false
+
+    async function loadMissions() {
+      try {
+        setIsLoading(true)
+        setErrorMessage('')
+        const [missionList, completedMissionList] = await Promise.all([
+          getMissions(),
+          getCompletedMissions(),
+        ])
+        if (!ignore) {
+          setMissions(missionList)
+          setCompletedMissions(completedMissionList)
+        }
+      } catch {
+        if (!ignore) setErrorMessage('미션 목록을 불러오지 못했습니다. 다시 시도해주세요.')
+      } finally {
+        if (!ignore) setIsLoading(false)
+      }
+    }
+
+    void loadMissions()
+
+    return () => {
+      ignore = true
+    }
+  }, [])
+
+  const handleComplete = async (missionId: number) => {
     if (completedMissionIds.has(missionId) || pendingMissionId) return
 
     try {
       setPendingMissionId(missionId)
       setErrorMessage('')
-      const result = await completeMissionMock(missionId)
-      setCompletedMissionIds((current) => new Set(current).add(result.missionId))
+      await completeMission(missionId)
+      const completedMissionList = await getCompletedMissions()
+      setCompletedMissions(completedMissionList)
+      setMissions((current) => current.map((mission) => (
+        mission.missionId === missionId ? { ...mission, completed: true } : mission
+      )))
     } catch {
       setErrorMessage('미션 완료 상태를 저장하지 못했습니다. 다시 시도해주세요.')
     } finally {
@@ -66,25 +107,36 @@ export function MissionPage() {
           </S.CardActions>
           <S.Speech>{isAllCompleted ? '모든 미션 완료!' : '나랑 놀자'}</S.Speech>
           <img src={missionCharacterUrl} alt="까미 캐릭터" />
-          <S.CharacterName><small>알</small> 까미</S.CharacterName>
+          <S.CharacterName>까미</S.CharacterName>
           <S.Progress aria-label={`미션 진행률 ${progress}%`}><span style={{ width: `${progress}%` }} /></S.Progress>
           <S.ProgressText aria-live="polite">{completedCount} / {missions.length} 완료</S.ProgressText>
         </S.CharacterCard>
         <S.MissionPanel>
           <S.Title>미션 <span>{isAllCompleted ? 'Complete' : 'New'}</span></S.Title>
           {errorMessage ? <S.ErrorMessage role="alert">{errorMessage}</S.ErrorMessage> : null}
-          <S.MissionList>
-            {missions.map((mission) => {
-              return (
-              <S.MissionCard key={mission.id}>
-                <S.MissionCopy><small>{mission.category}</small><h2>{mission.title} {mission.emoji}</h2><p>{mission.description}</p></S.MissionCopy>
-                <S.CompleteButton type="button" onClick={() => setSelectedMissionId(mission.id)}>
-                  자세히 보기 <span>›</span>
-                </S.CompleteButton>
-              </S.MissionCard>
-              )
-            })}
-          </S.MissionList>
+          {isLoading ? <S.StateMessage>미션을 불러오는 중입니다.</S.StateMessage> : null}
+          {!isLoading && missions.length === 0 ? <S.StateMessage>진행할 미션이 없습니다.</S.StateMessage> : null}
+          {!isLoading && missions.length > 0 ? (
+            <S.MissionList>
+              {missions.map((mission) => {
+                const missionId = mission.missionId
+                if (typeof missionId !== 'number') return null
+
+                return (
+                  <S.MissionCard key={missionId}>
+                    <S.MissionCopy>
+                      <small>{mission.missionCategory ?? mission.missionCountry ?? '미션'}</small>
+                      <h2>{mission.missionTitle ?? '이름 없는 미션'}</h2>
+                      <p>{mission.missionDescription ?? ''}</p>
+                    </S.MissionCopy>
+                    <S.CompleteButton type="button" onClick={() => setSelectedMissionId(missionId)}>
+                      자세히 보기 <span>›</span>
+                    </S.CompleteButton>
+                  </S.MissionCard>
+                )
+              })}
+            </S.MissionList>
+          ) : null}
         </S.MissionPanel>
       </S.Content>
       {activeDialog === 'calendar' ? <CalendarDialog onClose={() => setActiveDialog(null)} /> : null}
@@ -94,10 +146,12 @@ export function MissionPage() {
       {selectedMission ? (
         <MissionDetailDialog
           mission={selectedMission}
-          isCompleted={completedMissionIds.has(selectedMission.id)}
-          isPending={pendingMissionId === selectedMission.id}
+          isCompleted={selectedMission.completed === true || completedMissionIds.has(selectedMission.missionId ?? -1)}
+          isPending={pendingMissionId === selectedMission.missionId}
           onClose={() => setSelectedMissionId(null)}
-          onComplete={() => void handleComplete(selectedMission.id)}
+          onComplete={() => {
+            if (typeof selectedMission.missionId === 'number') void handleComplete(selectedMission.missionId)
+          }}
         />
       ) : null}
     </S.Page>

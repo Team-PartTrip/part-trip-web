@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-import type { Mission } from './missionData'
+import type { MissionResponseDto } from '@shared/api'
 import * as S from './MissionPage.styles'
 
 type DialogShellProps = {
@@ -91,7 +91,7 @@ export function CalendarDialog({ onClose }: CalendarDialogProps) {
 }
 
 type CompletedMissionDialogProps = {
-  completedMissions: Mission[]
+  completedMissions: MissionResponseDto[]
   onClose: () => void
 }
 
@@ -103,10 +103,10 @@ export function CompletedMissionDialog({ completedMissions, onClose }: Completed
         {completedMissions.length > 0 ? (
           <S.CompletedList>
             {completedMissions.map((mission) => (
-              <S.CompletedCard key={mission.id}>
-                <small>{mission.category}</small>
-                <h3>{mission.title} {mission.emoji}</h3>
-                <p>{mission.description}</p>
+              <S.CompletedCard key={mission.missionId}>
+                <small>{mission.missionCategory ?? mission.missionCountry ?? '미션'}</small>
+                <h3>{mission.missionTitle ?? '이름 없는 미션'}</h3>
+                <p>{mission.missionDescription ?? ''}</p>
               </S.CompletedCard>
             ))}
           </S.CompletedList>
@@ -124,7 +124,7 @@ export function CompletedMissionDialog({ completedMissions, onClose }: Completed
 type MissionDetailDialogProps = {
   isCompleted: boolean
   isPending: boolean
-  mission: Mission
+  mission: MissionResponseDto
   onClose: () => void
   onComplete: () => void
 }
@@ -133,9 +133,9 @@ export function MissionDetailDialog({ isCompleted, isPending, mission, onClose, 
   return (
     <DialogShell labelledBy="mission-detail-title" onClose={onClose}>
       <S.DetailContent>
-        <small>{mission.category}</small>
-        <S.DialogTitle id="mission-detail-title">{mission.title} {mission.emoji}</S.DialogTitle>
-        <p>{mission.description}</p>
+        <small>{mission.missionCategory ?? mission.missionCountry ?? '미션'}</small>
+        <S.DialogTitle id="mission-detail-title">{mission.missionTitle ?? '이름 없는 미션'}</S.DialogTitle>
+        <p>{mission.missionDescription ?? ''}</p>
         <S.AttendanceButton type="button" onClick={onComplete} disabled={isCompleted || isPending}>
           {isCompleted ? '완료한 미션' : isPending ? '저장 중' : '미션 완료하기'}
         </S.AttendanceButton>
