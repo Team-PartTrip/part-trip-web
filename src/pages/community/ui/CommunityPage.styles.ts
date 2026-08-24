@@ -1,39 +1,29 @@
 import styled from 'styled-components'
 
 export const Page = styled.main`
-  display: flex;
-  min-height: 1590px;
-  align-items: flex-start;
-  background: #f4f8fc;
+  min-height: 100%;
+  background: transparent;
   color: #191c1e;
-
-  @media (max-width: 47.9375rem) {
-    min-height: 100dvh;
-    flex-direction: column;
-  }
 `
 
 export const Logo = styled.img`display: block;`
 
 export const Content = styled.section`
-  width: min(1271px, calc(100% - 241px));
+  width: 100%;
   min-width: 0;
-  padding: 28px 41px 80px 79px;
+  padding: 0 0 80px;
 
   > h1 { margin: 0; font-size: 32px; font-weight: 500; line-height: 48px; letter-spacing: -0.8px; }
 
   @media (max-width: 74.9375rem) {
-    width: calc(100% - 160px);
     padding: 28px 32px 64px;
   }
 
   @media (max-width: 63.9375rem) {
-    width: calc(100% - 80px);
     padding-inline: 24px;
   }
 
   @media (max-width: 47.9375rem) {
-    width: 100%;
     padding: 24px 18px 48px;
   }
 `

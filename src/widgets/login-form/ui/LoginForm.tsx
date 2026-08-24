@@ -9,7 +9,6 @@ import {
 } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { googleLogin, login, saveAuthTokens } from '@shared/api'
-import logoUrl from '@shared/assets/logo.png'
 import { paths } from '@shared/config'
 import {
   authValidationRules,
@@ -130,7 +129,7 @@ export function LoginForm() {
   return (
     <S.Container>
       <S.Header>
-        <S.Logo src={logoUrl} alt="PartTrip" />
+        <S.Brand>PartTrip</S.Brand>
         <S.Title>로그인</S.Title>
       </S.Header>
 
@@ -175,7 +174,6 @@ export function LoginForm() {
           />
 
           <S.HintRow>
-            <span>비밀 번호를 잊으셨나요? </span>
             <S.InlineLink to={paths.changePassword}>비밀번호 찾기</S.InlineLink>
           </S.HintRow>
 
@@ -187,7 +185,7 @@ export function LoginForm() {
 
           <S.Actions>
             <S.PrimaryButton type="submit" disabled={isSubmitting} $strong>
-              {isSubmitting ? '로그인 중' : '로그인 하기'}
+              {isSubmitting ? '로그인 중' : '로그인'}
             </S.PrimaryButton>
             <S.Divider>또는</S.Divider>
             <GoogleLoginControl
@@ -197,7 +195,7 @@ export function LoginForm() {
               onLogin={handleGoogleLogin}
             />
             <S.SecondaryButton to={paths.signUp} $filled>
-              회원가입 하기
+              회원가입
             </S.SecondaryButton>
           </S.Actions>
         </S.Form>

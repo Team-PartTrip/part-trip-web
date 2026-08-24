@@ -11,9 +11,8 @@ import dogAvatarUrl from '@shared/assets/community-avatar-dog.png'
 import communityDaNangUrl from '@shared/assets/community-destination-danang.jpg'
 import communitySwissUrl from '@shared/assets/community-destination-swiss.jpg'
 import communityTokyoUrl from '@shared/assets/community-destination-tokyo.jpg'
-import logoUrl from '@shared/assets/logo.png'
 import { createCommunityDetailPath, paths } from '@shared/config'
-import { MENUS, Sidebar } from '@widgets/sidebar'
+import { AppShell } from '@widgets/app-shell'
 
 import * as S from './CommunityPage.styles'
 
@@ -130,8 +129,8 @@ export function CommunityPage() {
   const columns = [posts.filter((_, index) => index % 2 === 0), posts.filter((_, index) => index % 2 === 1)]
 
   return (
-    <S.Page>
-      <Sidebar logo={<S.Logo src={logoUrl} alt="PartTrip" />} menus={MENUS} />
+    <AppShell>
+      <S.Page>
       <S.Content>
         <h1>커뮤니티</h1>
         <S.Tabs>{categories.map((item) => <button type="button" key={item} className={category === item ? 'active' : ''} onClick={() => handleCategoryChange(item)}>{item}</button>)}</S.Tabs>
@@ -157,6 +156,7 @@ export function CommunityPage() {
           </S.Aside>
         </S.Layout>
       </S.Content>
-    </S.Page>
+      </S.Page>
+    </AppShell>
   )
 }

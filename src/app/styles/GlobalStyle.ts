@@ -19,6 +19,23 @@ export const GlobalStyle = createGlobalStyle`
     min-width: 320px;
     min-height: 100vh;
     margin: 0;
+    background: ${({ theme }) => theme.colors.background.subtle};
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 3px solid ${({ theme }) => theme.colors.shadow.focus};
+    outline-offset: 2px;
   }
 
   #root {

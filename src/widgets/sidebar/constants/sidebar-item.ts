@@ -1,10 +1,9 @@
 import type { SidebarMenuType } from '../types/sidebar-item/sidebar-item'
 import {
-  CommunityIcon,
-  HomeIcon,
-  MissionIcon,
-  ProfileIcon,
-  RecordIcon,
+  figmaHomeIcon,
+  figmaPlannerIcon,
+  figmaProfileIcon,
+  figmaRecordsIcon,
 } from '@shared/assets'
 import { paths } from '@shared/config'
 
@@ -12,26 +11,21 @@ export const MENUS: SidebarMenuType[] = [
   {
     text: '홈',
     href: paths.main,
-    icon: HomeIcon,
+    iconSrc: figmaHomeIcon,
   },
   {
-    text: '커뮤니티',
-    href: paths.community,
-    icon: CommunityIcon,
+    text: '플래너',
+    href: paths.planner,
+    iconSrc: figmaPlannerIcon,
   },
   {
-    text: '기록',
+    text: '여행기록',
     href: paths.record,
-    icon: RecordIcon,
+    iconSrc: figmaRecordsIcon,
   },
   {
-    text: '미션',
-    href: paths.mission,
-    icon: MissionIcon,
-  },
-  {
-    text: '프로필',
+    text: '마이페이지',
     href: paths.profile,
-    icon: ProfileIcon,
+    iconSrc: figmaProfileIcon,
   },
 ]

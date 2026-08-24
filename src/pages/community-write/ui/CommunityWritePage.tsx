@@ -8,11 +8,10 @@ import {
   shareTrip,
   uploadImage,
   type CountryInfoResponseDto,
-  type TripResponseDto,
+  type TripPlanResponseDto,
 } from '@shared/api'
-import logoUrl from '@shared/assets/logo.png'
 import { createCommunityDetailPath, paths } from '@shared/config'
-import { MENUS, Sidebar } from '@widgets/sidebar'
+import { AppShell } from '@widgets/app-shell'
 
 import * as S from './CommunityWritePage.styles'
 
@@ -25,7 +24,7 @@ export function CommunityWritePage() {
   const [content, setContent] = useState('')
   const [category, setCategory] = useState<(typeof categories)[number]>('자유게시판')
   const [file, setFile] = useState<File | null>(null)
-  const [trips, setTrips] = useState<TripResponseDto[]>([])
+  const [trips, setTrips] = useState<TripPlanResponseDto[]>([])
   const [countries, setCountries] = useState<CountryInfoResponseDto[]>([])
   const [selectedTripId, setSelectedTripId] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
@@ -93,8 +92,8 @@ export function CommunityWritePage() {
   }
 
   return (
-    <S.Page>
-      <Sidebar logo={<S.Logo src={logoUrl} alt="PartTrip" />} menus={MENUS} />
+    <AppShell>
+      <S.Page>
       <S.Content>
         <S.Header><div><h1>게시글 작성</h1><p>여행 경험과 궁금한 점을 공유해보세요.</p></div><button type="button" onClick={() => navigate(paths.community)}>취소</button></S.Header>
         <S.Form onSubmit={(event) => void handleSubmit(event)} noValidate>
@@ -124,6 +123,7 @@ export function CommunityWritePage() {
           <S.Actions><button type="button" onClick={() => navigate(paths.community)}>취소</button><button type="submit" disabled={isSubmitting}>{isSubmitting ? '등록 중' : '게시글 등록'}</button></S.Actions>
         </S.Form>
       </S.Content>
-    </S.Page>
+      </S.Page>
+    </AppShell>
   )
 }

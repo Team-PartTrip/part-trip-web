@@ -1,5 +1,5 @@
-import { useState, type ReactElement } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, type ReactNode } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { getAccessToken } from '@shared/api'
 import { paths } from '@shared/config'
 
@@ -9,99 +9,67 @@ import SidebarItem from './sidebar-item/SidebarItem'
 import * as S from './Sidebar.style'
 
 interface Props {
-  logo: ReactElement
+  logo?: ReactNode
   menus: SidebarMenuType[]
 }
 
-function DoorOpenIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M14 8V5.5A1.5 1.5 0 0 0 12.5 4h-6A1.5 1.5 0 0 0 5 5.5v13A1.5 1.5 0 0 0 6.5 20h6a1.5 1.5 0 0 0 1.5-1.5V16M10 12h9m0 0-3-3m3 3-3 3"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
+function activeHref(pathname: string, menus: SidebarMenuType[]) {
+  if (pathname.startsWith(paths.planner) || pathname.startsWith(paths.tripCards)) return paths.planner
+  if (pathname.startsWith(paths.record)) return paths.record
+  if (
+    pathname.startsWith(paths.profile) ||
+    pathname.startsWith(paths.notifications) ||
+    pathname.startsWith('/settings')
+  ) return paths.profile
+  return menus.find((item) => pathname === item.href)?.href ?? paths.main
 }
 
-/** 로그인 아이콘: DoorOpenIcon을 좌우 반전(scaleX)하여 '입장' 모양으로 활용 */
-function DoorEnterIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ transform: 'scaleX(-1)' }}>
-      <path
-        d="M14 8V5.5A1.5 1.5 0 0 0 12.5 4h-6A1.5 1.5 0 0 0 5 5.5v13A1.5 1.5 0 0 0 6.5 20h6a1.5 1.5 0 0 0 1.5-1.5V16M10 12h9m0 0-3-3m3 3-3 3"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-const Sidebar = ({ logo, menus }: Props) => {
+export default function Sidebar({ menus }: Props) {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false)
+  const isLoggedIn = Boolean(getAccessToken())
 
-  // 렌더링 시마다 토큰 유무로 로그인 상태를 동기적으로 판단
-  const isLoggedIn = !!getAccessToken()
-
-  const closeLogoutDialog = () => setIsLogoutDialogOpen(false)
+  const selectedHref = activeHref(pathname, menus)
 
   return (
     <S.SidebarWrapper>
       <S.Aside>
         <S.LogoSection>
-          <Link to={paths.main}>{logo}</Link>
+          <Link to={paths.main} aria-label="PartTrip 홈">PartTrip</Link>
         </S.LogoSection>
 
         <S.MenuList aria-label="메인 메뉴">
           {menus.map((item) => (
             <SidebarItem
-              key={item.text}
-              Icon={item.icon}
+              key={item.href}
+              active={selectedHref === item.href}
+              iconSrc={item.iconSrc}
               text={item.text}
               href={item.href}
             />
           ))}
         </S.MenuList>
 
-        <S.Footer>
-          {isLoggedIn ? (
-            <S.LogoutButton
-              type="button"
-              onClick={() => setIsLogoutDialogOpen(true)}
-            >
-              <S.LogoutIconBox>
-                <DoorOpenIcon />
-              </S.LogoutIconBox>
-              <span>Log out</span>
-            </S.LogoutButton>
-          ) : (
-            <S.LogoutButton
-              type="button"
-              onClick={() => navigate(paths.login)}
-            >
-              <S.LogoutIconBox>
-                <DoorEnterIcon />
-              </S.LogoutIconBox>
-              <span>Log in</span>
-            </S.LogoutButton>
-          )}
-        </S.Footer>
+        <S.AccountButton
+          type="button"
+          onClick={() => {
+            if (isLoggedIn) setIsLogoutDialogOpen(true)
+            else navigate(paths.login)
+          }}
+          aria-label={isLoggedIn ? '로그아웃 메뉴' : '로그인'}
+        >
+          <S.Avatar aria-hidden="true">MS</S.Avatar>
+          <span>{isLoggedIn ? '내 PartTrip' : '로그인'}</span>
+        </S.AccountButton>
       </S.Aside>
 
       {isLogoutDialogOpen ? (
         <LogoutDialog
-          onClose={closeLogoutDialog}
+          onClose={() => setIsLogoutDialogOpen(false)}
           moveToLogin={() => navigate(paths.login, { replace: true })}
         />
       ) : null}
     </S.SidebarWrapper>
   )
 }
-
-export default Sidebar

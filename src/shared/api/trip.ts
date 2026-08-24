@@ -1,29 +1,29 @@
 import { apiClient } from './client'
 
-export type TripPlaceRequestDto = {
+export type TripPlanPlaceRequestDto = {
   dayNumber?: number
   placeName?: string
   placeSub?: string
 }
 
-export type TripRequestDto = {
+export type TripPlanRequestDto = {
   title?: string
   countryInfoId?: number
   startDate?: string
   endDate?: string
   content?: string
   images?: string[]
-  places?: TripPlaceRequestDto[]
+  places?: TripPlanPlaceRequestDto[]
 }
 
-export type TripPlaceResponseDto = {
+export type TripPlanPlaceResponseDto = {
   tripPlaceId?: number
   dayNumber?: number
   placeName?: string
   placeSub?: string
 }
 
-export type TripResponseDto = {
+export type TripPlanResponseDto = {
   tripId?: number
   userId?: string
   nickName?: string
@@ -40,7 +40,7 @@ export type TripResponseDto = {
   commentCount?: number
   isPublic?: boolean
   createDate?: string
-  places?: TripPlaceResponseDto[]
+  places?: TripPlanPlaceResponseDto[]
 }
 
 const TRIP_API_PATHS = {
@@ -49,18 +49,18 @@ const TRIP_API_PATHS = {
   mine: '/trips/mine',
 } as const
 
-export async function getTrip(tripId: number): Promise<TripResponseDto> {
-  const { data } = await apiClient.get<TripResponseDto>(TRIP_API_PATHS.detail(tripId))
+export async function getTrip(tripId: number): Promise<TripPlanResponseDto> {
+  const { data } = await apiClient.get<TripPlanResponseDto>(TRIP_API_PATHS.detail(tripId))
   return data
 }
 
-export async function createTrip(payload: TripRequestDto): Promise<TripResponseDto> {
-  const { data } = await apiClient.post<TripResponseDto>(TRIP_API_PATHS.base, payload)
+export async function createTrip(payload: TripPlanRequestDto): Promise<TripPlanResponseDto> {
+  const { data } = await apiClient.post<TripPlanResponseDto>(TRIP_API_PATHS.base, payload)
   return data
 }
 
-export async function updateTrip(tripId: number, payload: TripRequestDto): Promise<TripResponseDto> {
-  const { data } = await apiClient.put<TripResponseDto>(TRIP_API_PATHS.detail(tripId), payload)
+export async function updateTrip(tripId: number, payload: TripPlanRequestDto): Promise<TripPlanResponseDto> {
+  const { data } = await apiClient.put<TripPlanResponseDto>(TRIP_API_PATHS.detail(tripId), payload)
   return data
 }
 
@@ -69,7 +69,7 @@ export async function deleteTrip(tripId: number): Promise<string> {
   return data
 }
 
-export async function getMyTrips(): Promise<TripResponseDto[]> {
-  const { data } = await apiClient.get<TripResponseDto[]>(TRIP_API_PATHS.mine)
+export async function getMyTrips(): Promise<TripPlanResponseDto[]> {
+  const { data } = await apiClient.get<TripPlanResponseDto[]>(TRIP_API_PATHS.mine)
   return data
 }

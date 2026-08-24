@@ -3,9 +3,11 @@ import { DestinationBackIcon, DestinationSearchIcon } from "@shared/assets";
 import {
   deleteRecentSearch,
   getCountries,
+  getDday,
   getPopularPlaces,
   getProfile,
   getRecentSearches,
+  changeTravelCountry,
   saveRecentSearch,
   saveTravelPlan,
   type Destination,
@@ -49,22 +51,7 @@ function getDestinationImage(destination: Destination) {
 }
 
 function CloseIcon() {
-  return (
-    <svg
-      viewBox="0 0 12 12"
-      width="12"
-      height="12"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="m3 3 6 6m0-6L3 9"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
+  return <span aria-hidden="true">×</span>;
 }
 
 const DestinationSelector = ({ onBack }: Props) => {
@@ -76,6 +63,7 @@ const DestinationSelector = ({ onBack }: Props) => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectingId, setSelectingId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string>();
+  const [travelPlanId, setTravelPlanId] = useState<number>();
   const [errorMessage, setErrorMessage] = useState("");
   const keyword = query.trim().toLocaleLowerCase();
   const results = keyword
@@ -89,9 +77,10 @@ const DestinationSelector = ({ onBack }: Props) => {
   useEffect(() => {
     let isMounted = true;
 
-    void Promise.all([getCountries(), getPopularPlaces(), getProfile()])
-      .then(async ([countries, popularPlaces, profile]) => {
+    void Promise.all([getCountries(), getPopularPlaces(), getProfile(), getDday().catch(() => undefined)])
+      .then(async ([countries, popularPlaces, profile, currentPlan]) => {
         if (!isMounted) return;
+        setTravelPlanId(currentPlan?.travelPlanId);
         const nextDestinations = countries.map((country, index) => ({
           country: country.countryName ?? "여행지",
           countryInfoId: country.countryInfoId,
@@ -144,12 +133,19 @@ const DestinationSelector = ({ onBack }: Props) => {
       setSelectingId(destination.id);
       setErrorMessage("");
       const today = new Date();
-      await saveTravelPlan({
-        cityName: destination.name,
-        countryName: destination.country,
-        endDate: addDays(today, 34),
-        startDate: addDays(today, 30),
-      });
+      if (travelPlanId != null && destination.countryInfoId != null) {
+        await changeTravelCountry({
+          countryInfoId: destination.countryInfoId,
+          travelPlanId,
+        });
+      } else {
+        await saveTravelPlan({
+          cityName: destination.name,
+          countryName: destination.country,
+          endDate: addDays(today, 34),
+          startDate: addDays(today, 30),
+        });
+      }
       if (userId != null && destination.countryInfoId != null) {
         await saveRecentSearch({
           userId,

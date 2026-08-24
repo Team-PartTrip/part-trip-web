@@ -5,9 +5,8 @@ import {
   getMissions,
   type MissionResponseDto,
 } from '@shared/api'
-import logoUrl from '@shared/assets/logo.png'
 import missionCharacterUrl from '@shared/assets/mission-character.png'
-import { MENUS, Sidebar } from '@widgets/sidebar'
+import { AppShell } from '@widgets/app-shell'
 
 import { CalendarDialog, CompletedMissionDialog, MissionDetailDialog } from './MissionDialogs'
 import * as S from './MissionPage.styles'
@@ -102,8 +101,8 @@ export function MissionPage() {
   }
 
   return (
-    <S.Page>
-      <Sidebar logo={<S.Logo src={logoUrl} alt="PartTrip" />} menus={MENUS} />
+    <AppShell>
+      <S.Page>
       <S.Content>
         <S.CharacterCard>
           <S.CardActions>
@@ -159,6 +158,7 @@ export function MissionPage() {
           }}
         />
       ) : null}
-    </S.Page>
+      </S.Page>
+    </AppShell>
   )
 }

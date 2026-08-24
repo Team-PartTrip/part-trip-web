@@ -23,9 +23,8 @@ import {
   type CommentResponseDto,
 } from '@shared/api'
 import catAvatarUrl from '@shared/assets/community-avatar-cat.png'
-import logoUrl from '@shared/assets/logo.png'
 import { createRecordDetailPath, paths } from '@shared/config'
-import { MENUS, Sidebar } from '@widgets/sidebar'
+import { AppShell } from '@widgets/app-shell'
 
 import * as S from './CommunityDetailPage.styles'
 
@@ -287,8 +286,8 @@ export function CommunityDetailPage() {
   }
 
   return (
-    <S.Page>
-      <Sidebar logo={<S.Logo src={logoUrl} alt="PartTrip" />} menus={MENUS} />
+    <AppShell>
+      <S.Page>
       <S.Content>
         <S.TopBar>
           <S.BackButton type="button" onClick={() => navigate(paths.community)}>← 커뮤니티</S.BackButton>
@@ -366,6 +365,7 @@ export function CommunityDetailPage() {
           </S.StateCard>
         ) : null}
       </S.Content>
-    </S.Page>
+      </S.Page>
+    </AppShell>
   )
 }

@@ -1,7 +1,5 @@
-import type { FC, SVGProps } from 'react'
-
 export interface SidebarMenuType {
   href: string
+  iconSrc?: string
   text: string
-  icon?: FC<SVGProps<SVGSVGElement>>
 }

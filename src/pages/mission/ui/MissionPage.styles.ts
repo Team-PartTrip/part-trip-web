@@ -1,19 +1,16 @@
 import styled from 'styled-components'
 
 export const Page = styled.main`
-  display: flex;
-  min-height: 100dvh;
-  background: #f4f8fc;
+  min-height: 100%;
+  background: transparent;
   color: #111827;
-
-  @media (max-width: 47.9375rem) { flex-direction: column; }
 `
 
 export const Logo = styled.img`display: block;`
 
 export const Content = styled.section`
   display: grid;
-  flex: 1;
+  width: 100%;
   grid-template-columns: minmax(480px, 592px) minmax(400px, 478px);
   gap: 100px;
   align-items: start;

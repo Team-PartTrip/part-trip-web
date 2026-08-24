@@ -1,16 +1,4 @@
-export { default as HomeIcon } from "./Home.svg?react"
-export { default as RecordIcon } from "./Record.svg?react"
-export { default as ProfileIcon } from "./Profile.svg?react"
-export { default as MissionIcon } from "./Mission.svg?react"
-export { default as CommunityIcon } from "./Community.svg?react"
-export { default as GroupIcon } from "./Group.svg?react"
-export { default as DashboardArrowIcon } from './dashboard-arrow.svg?react'
-export { default as DashboardCalendarIcon } from './dashboard-calendar.svg?react'
-export { default as DashboardChevronLeftIcon } from './dashboard-chevron-left.svg?react'
-export { default as DashboardChevronRightIcon } from './dashboard-chevron-right.svg?react'
-export { default as DashboardExchangeIcon } from './dashboard-exchange.svg?react'
-export { default as DashboardSpeakerIcon } from './dashboard-speaker.svg?react'
-export { default as DashboardTranslateIcon } from './dashboard-translate.svg?react'
-export { default as DashboardWeatherIcon } from './dashboard-weather.svg?react'
 export { default as DestinationBackIcon } from './destination-back.svg?react'
 export { default as DestinationSearchIcon } from './destination-search.svg?react'
+// eslint-disable-next-line react-refresh/only-export-components
+export * from './figma'

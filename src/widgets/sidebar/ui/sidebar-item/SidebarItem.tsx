@@ -1,25 +1,24 @@
-import type { FC, SVGProps } from 'react'
 import { useLocation } from 'react-router-dom'
 
 import * as S from './SidebarItem.style'
 
 interface Props {
-  Icon?: FC<SVGProps<SVGSVGElement>>
+  active?: boolean
+  iconSrc?: string
   text: string
   href: string
   onClick?: () => void
 }
 
 const SidebarItem = ({
-  Icon,
+  active,
+  iconSrc,
   text,
   href,
   onClick,
 }: Props) => {
   const { pathname } = useLocation()
-
-  const isParentActive =
-    pathname === href || (href !== '/' && pathname.startsWith(href))
+  const isParentActive = active ?? (pathname === href || (href !== '/' && pathname.startsWith(href)))
 
   return (
     <S.ItemLink
@@ -27,9 +26,9 @@ const SidebarItem = ({
       onClick={onClick}
       $isParentActive={isParentActive}
     >
-      {Icon && (
+      {iconSrc && (
         <S.IconWrapper>
-          <Icon aria-hidden="true" focusable="false" />
+          <img src={iconSrc} alt="" />
         </S.IconWrapper>
       )}
 

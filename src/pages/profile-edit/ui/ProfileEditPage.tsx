@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
-import logoUrl from '@shared/assets/logo.png'
-import { getCharacterInfo, getProfile, toUserProfile, type UserProfile } from '@shared/api'
+import { getUserProfile, type UserProfile } from '@shared/api'
+import { AppShell } from '@widgets/app-shell'
 import { ProfileCard } from '@widgets/profile-card'
 import { ProfileForm } from '@widgets/profile-form'
-import { MENUS, Sidebar } from '@widgets/sidebar'
 
 import * as S from './ProfileEditPage.styles'
 
@@ -13,24 +12,24 @@ export function ProfileEditPage() {
 
   useEffect(() => {
     let isMounted = true
-    void getProfile()
-      .then(async (data) => {
-        const character = await getCharacterInfo().catch(() => undefined)
-        if (isMounted) setProfile(toUserProfile(data, character))
+    void getUserProfile()
+      .then((nextProfile) => {
+        if (isMounted) setProfile(nextProfile)
       })
       .catch(() => { if (isMounted) setHasError(true) })
     return () => { isMounted = false }
   }, [])
 
   return (
-    <S.Page>
-      <Sidebar logo={<S.Logo><img src={logoUrl} alt="PartTrip" /></S.Logo>} menus={MENUS} />
+    <AppShell>
+      <S.Page>
       <S.Content>
         {hasError ? <S.State role="alert">프로필 정보를 불러오지 못했습니다.</S.State> : null}
         {!hasError && !profile ? <S.State aria-busy="true">수정할 정보를 준비하고 있습니다.</S.State> : null}
         {profile ? <ProfileCard profile={profile} /> : null}
       </S.Content>
       {profile ? <><S.Backdrop /><ProfileForm profile={profile} /></> : null}
-    </S.Page>
+      </S.Page>
+    </AppShell>
   )
 }

@@ -13,7 +13,6 @@ import {
   sendPasswordResetCode,
   verifyPasswordResetCode,
 } from '@shared/api'
-import logoUrl from '@shared/assets/logo.png'
 import { paths } from '@shared/config'
 import {
   authValidationRules,
@@ -242,7 +241,7 @@ export function ChangePasswordForm() {
   return (
     <S.Container>
       <S.Header>
-        <S.Logo src={logoUrl} alt="PartTrip" />
+        <S.Brand>PartTrip</S.Brand>
         <S.Title>비밀번호 찾기</S.Title>
       </S.Header>
 

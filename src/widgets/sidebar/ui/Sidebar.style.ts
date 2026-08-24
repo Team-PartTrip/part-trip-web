@@ -1,188 +1,104 @@
 import styled from 'styled-components'
 
-export const SidebarWrapper = styled.div`
+export const SidebarWrapper = styled.aside`
   position: sticky;
   top: 0;
-  width: 15.0625rem;
+  z-index: 10;
+  width: 232px;
   height: 100dvh;
-  min-height: 0;
-  flex: 0 0 15.0625rem;
-  background: #ffffff;
+  flex: 0 0 232px;
+  border-right: 1px solid ${({ theme }) => theme.colors.border.soft};
+  background: ${({ theme }) => theme.colors.background.default};
 
-  @media (max-width: 74.9375rem) {
-    width: 10rem;
-    flex-basis: 10rem;
-  }
-
-  @media (max-width: 63.9375rem) {
-    width: 5rem;
-    flex-basis: 5rem;
-  }
-
-  @media (max-width: 47.9375rem) {
-    position: static;
+  @media (max-width: 767px) {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
     width: 100%;
-    height: 3.5rem;
-    min-height: 0;
-    flex: 0 0 3.5rem;
+    height: 64px;
+    flex: 0 0 64px;
+    border-top: 1px solid ${({ theme }) => theme.colors.border.soft};
+    border-right: 0;
   }
 `
 
-export const Aside = styled.aside`
+export const Aside = styled.div`
   display: flex;
   width: 100%;
   height: 100%;
   flex-direction: column;
-  background: #ffffff;
+  padding: 23px;
 
-  @media (max-width: 47.9375rem) {
+  @media (max-width: 767px) {
     flex-direction: row;
     align-items: center;
+    justify-content: space-between;
+    padding: 8px;
   }
 `
 
 export const LogoSection = styled.div`
-  display: flex;
-  height: 4.625rem;
-  align-items: flex-start;
-  padding: 1.9375rem 1.875rem 0;
+  height: 32px;
+  margin-bottom: 24px;
 
   a {
-    display: inline-flex;
-    align-items: center;
+    color: ${({ theme }) => theme.colors.brand.strong};
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 32px;
     text-decoration: none;
   }
 
-  img {
-    display: block;
-    width: 11.3125rem;
-    height: 2.6875rem;
-    object-fit: contain;
-  }
-
-  @media (max-width: 74.9375rem) {
-    padding-inline: 1.5rem;
-
-    img {
-      width: 7rem;
-      height: auto;
-    }
-  }
-
-  @media (max-width: 63.9375rem) {
-    justify-content: center;
-    padding-inline: 0.75rem;
-
-    img {
-      width: 3.5rem;
-    }
-  }
-
-  @media (max-width: 47.9375rem) {
-    width: 5.75rem;
-    height: 100%;
-    flex: 0 0 5.75rem;
-    align-items: center;
-    padding: 0 0 0 0.75rem;
-
-    img {
-      width: 5rem;
-    }
+  @media (max-width: 767px) {
+    display: none;
   }
 `
 
 export const MenuList = styled.nav`
   display: flex;
   flex-direction: column;
-  gap: 2.1875rem;
-  padding: 4.3125rem 2.5625rem 0;
+  gap: 8px;
 
-  @media (max-width: 74.9375rem) {
-    padding-inline: 1.5rem;
-  }
-
-  @media (max-width: 63.9375rem) {
-    align-items: center;
-    padding-inline: 1.75rem;
-  }
-
-  @media (max-width: 47.9375rem) {
-    height: 100%;
-    flex: 1;
+  @media (max-width: 767px) {
+    width: 100%;
     flex-direction: row;
-    align-items: center;
-    justify-content: space-evenly;
-    gap: 0;
-    padding: 0 0.5rem;
+    justify-content: space-around;
+    gap: 4px;
   }
 `
 
-export const Footer = styled.div`
-  margin: auto 1.9375rem 1.5625rem;
-  border-top: 0.0625rem solid #b8bdc5;
-  padding-top: 1.25rem;
-
-  @media (max-width: 63.9375rem) {
-    margin-inline: 1.25rem;
-  }
-
-  @media (max-width: 47.9375rem) {
-    display: flex;
-    width: 3rem;
-    height: 100%;
-    flex: 0 0 3rem;
-    align-items: center;
-    justify-content: center;
-    margin: 0;
-    border-top: 0;
-    padding: 0;
-  }
-`
-
-export const LogoutButton = styled.button`
+export const AccountButton = styled.button`
   display: flex;
   align-items: center;
-  gap: 0.625rem;
+  gap: 10px;
+  width: 100%;
+  margin-top: auto;
   border: 0;
   padding: 0;
   background: transparent;
-  color: #727780;
+  color: #000000;
   cursor: pointer;
-  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  text-align: left;
 
-  span {
-    font-size: 1.125rem;
-    font-weight: 500;
-    line-height: 1.3;
-  }
-
-  @media (max-width: 63.9375rem) {
-    width: 100%;
-    justify-content: center;
-
-    > span:last-child {
-      position: absolute;
-      width: 0.0625rem;
-      height: 0.0625rem;
-      overflow: hidden;
-      clip: rect(0 0 0 0);
-      clip-path: inset(50%);
-      white-space: nowrap;
-    }
+  @media (max-width: 767px) {
+    display: none;
   }
 `
 
-export const LogoutIconBox = styled.span`
-  display: flex;
-  width: 1.0625rem;
-  height: 1.0625rem;
-  flex: 0 0 1.0625rem;
+export const Avatar = styled.span`
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
   align-items: center;
   justify-content: center;
-  color: #727780;
-
-  svg {
-    width: 100%;
-    height: 100%;
-  }
+  border-radius: 999px;
+  background: ${({ theme }) => theme.colors.background.muted};
+  color: ${({ theme }) => theme.colors.brand.strong};
+  font-size: 11px;
+  font-weight: 600;
 `

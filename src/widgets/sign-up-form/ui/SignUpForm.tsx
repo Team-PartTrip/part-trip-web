@@ -9,8 +9,7 @@ import {
   type UseFormRegisterReturn,
 } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
-import { signUp, verifyCode } from '@shared/api'
-import logoUrl from '@shared/assets/logo.png'
+import { sendVerificationCode, signUp, verifyCode } from '@shared/api'
 import { paths } from '@shared/config'
 import {
   authValidationRules,
@@ -29,7 +28,6 @@ type CredentialsFormValues = {
   id: string
   password: string
   passwordConfirm: string
-  phoneNumber: string
 }
 
 type VerificationFormValues = {
@@ -86,7 +84,6 @@ export function SignUpForm() {
       id: '',
       password: '',
       passwordConfirm: '',
-      phoneNumber: '',
     },
   })
   const verificationForm = useForm<VerificationFormValues>({
@@ -117,10 +114,6 @@ export function SignUpForm() {
     validate: (value, values) =>
       value === values.password || '비밀번호가 일치하지 않습니다.',
   })
-  const phoneNumberField = credentialsForm.register('phoneNumber', {
-    required: '전화번호를 입력해주세요.',
-    setValueAs: trimFormValue,
-  })
   const verificationCodeField = verificationForm.register('verificationCode', {
     required: '인증코드를 입력해주세요.',
     minLength: {
@@ -136,7 +129,6 @@ export function SignUpForm() {
 
   const handleCredentialsSubmit: SubmitHandler<CredentialsFormValues> = async ({
     email,
-    id,
     password,
     passwordConfirm,
   }) => {
@@ -149,11 +141,7 @@ export function SignUpForm() {
     }
 
     try {
-      await signUp({
-        email,
-        id,
-        password,
-      })
+      await sendVerificationCode({ email })
       setMessage({
         text: '인증코드를 발송했습니다.',
         tone: 'success',
@@ -186,6 +174,8 @@ export function SignUpForm() {
         code: verificationCode,
         email,
       })
+      const { id, password } = credentialsForm.getValues()
+      await signUp({ email, id, password })
       navigate(paths.login, { replace: true })
     } catch (error) {
       setMessage({
@@ -234,7 +224,7 @@ export function SignUpForm() {
     return (
       <S.Container key="sign-up-verification">
         <S.Header>
-          <S.Logo src={logoUrl} alt="PartTrip" />
+          <S.Brand>PartTrip</S.Brand>
           <S.Title>인증번호 입력</S.Title>
         </S.Header>
 
@@ -307,7 +297,7 @@ export function SignUpForm() {
   return (
     <S.Container key="sign-up-credentials">
       <S.Header>
-        <S.Logo src={logoUrl} alt="PartTrip" />
+        <S.Brand>PartTrip</S.Brand>
         <S.Title>회원가입</S.Title>
       </S.Header>
 
@@ -381,22 +371,6 @@ export function SignUpForm() {
             disabled={isCredentialsSubmitting}
             required
           />
-
-          <S.PhoneField>
-            <S.CountryButton type="button" aria-label="국가 선택">
-              <S.FlagText>🇰🇷</S.FlagText>
-              <S.Chevron aria-hidden />
-            </S.CountryButton>
-            <S.PhoneInput
-              {...phoneNumberField}
-              aria-label="국번 전화번호"
-              type="tel"
-              autoComplete="tel"
-              placeholder="국번 전화번호를 입력하세요."
-              disabled={isCredentialsSubmitting}
-              required
-            />
-          </S.PhoneField>
 
           {message ? (
             <S.Message $tone={message.tone} aria-live="polite">

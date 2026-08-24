@@ -1,9 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createTrip, getCountries, type CountryInfoResponseDto } from '@shared/api'
-import logoUrl from '@shared/assets/logo.png'
 import { createRecordDetailPath, paths } from '@shared/config'
-import { MENUS, Sidebar } from '@widgets/sidebar'
+import { AppShell } from '@widgets/app-shell'
 
 import * as S from './RecordWritePage.styles'
 
@@ -69,8 +68,7 @@ export function RecordWritePage() {
   }
 
   return (
-    <S.Page>
-      <Sidebar logo={<S.Logo src={logoUrl} alt="PartTrip" />} menus={MENUS} />
+    <AppShell>
       <S.Content>
         <S.Header><div><h1>새 여행 기록</h1><p>기억하고 싶은 여행을 한곳에 남겨보세요.</p></div><button type="button" onClick={() => navigate(paths.record)}>취소</button></S.Header>
         <S.Layout>
@@ -85,6 +83,6 @@ export function RecordWritePage() {
           </S.Form>
         </S.Layout>
       </S.Content>
-    </S.Page>
+    </AppShell>
   )
 }

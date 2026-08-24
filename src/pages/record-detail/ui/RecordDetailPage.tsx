@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { deleteTrip, getTrip, updateTrip, type TripResponseDto } from '@shared/api'
-import logoUrl from '@shared/assets/logo.png'
+import { deleteTrip, getTrip, updateTrip, type TripPlanResponseDto } from '@shared/api'
 import fallbackRecordImageUrl from '@shared/assets/record-singapore.jpg'
+import { figmaRecordDetail } from '@shared/assets'
 import { paths } from '@shared/config'
-import { MENUS, Sidebar } from '@widgets/sidebar'
+import { AppShell } from '@widgets/app-shell'
 
 import { toTripUpdateRequest } from '../model/tripForm'
 import * as S from './RecordDetailPage.styles'
@@ -14,7 +14,7 @@ const formatDate = (value: string) => value.replaceAll('-', '.')
 export function RecordDetailPage() {
   const navigate = useNavigate()
   const { recordId = '' } = useParams()
-  const [record, setRecord] = useState<TripResponseDto | null>(null)
+  const [record, setRecord] = useState<TripPlanResponseDto | null>(null)
   const [isLoading, setIsLoading] = useState(() => Number.isInteger(Number(recordId)))
   const [isEditing, setIsEditing] = useState(false)
   const [isMutating, setIsMutating] = useState(false)
@@ -84,11 +84,10 @@ export function RecordDetailPage() {
   }
 
   return (
-    <S.Page>
-      <Sidebar logo={<S.Logo src={logoUrl} alt="PartTrip" />} menus={MENUS} />
+    <AppShell>
       <S.Content>
         <S.TopBar>
-          <button type="button" onClick={() => navigate(paths.record)}>← 여행 기록</button>
+          <div><h1>기록 상세</h1><p>한 장소에서 남긴 사진과 메모를 확인하세요.</p></div>
           <div><button type="button" onClick={() => navigate(paths.recordWrite)}>새 기록 작성</button>{record ? <><button type="button" onClick={startEditing}>수정</button><button type="button" disabled={isMutating} onClick={() => void handleDelete()}>삭제</button></> : null}</div>
         </S.TopBar>
 
@@ -105,18 +104,19 @@ export function RecordDetailPage() {
             <label>여행 메모<textarea value={draft.content} onChange={(event) => setDraft((current) => ({ ...current, content: event.target.value }))} maxLength={1000} /></label>
             <div><button type="button" onClick={() => setIsEditing(false)}>취소</button><button type="submit" disabled={isMutating}>{isMutating ? '저장 중' : '저장'}</button></div>
           </S.EditForm>
-        ) : (
+          ) : (
           <S.Layout>
-            <S.Hero>
-              <img src={record.images?.[0] || fallbackRecordImageUrl} alt={`${record.countryName ?? ''} 여행`} />
-              <S.HeroOverlay>
-                <span>{[record.cityName, record.countryName].filter(Boolean).join(', ')}</span>
-                <h1>{record.title}</h1>
-                <p>{formatDate(record.startDate ?? '-')} - {formatDate(record.endDate ?? '-')}</p>
-              </S.HeroOverlay>
-            </S.Hero>
+            <S.DetailBody>
+              <S.RecordPhoto><img src={record.images?.[0] || figmaRecordDetail || fallbackRecordImageUrl} alt={`${record.countryName ?? ''} 여행`} /></S.RecordPhoto>
+              <S.RecordDetailCard>
+                <h1>{record.title || record.cityName || '여행 기록'}</h1>
+                <p>{[record.cityName, formatDate(record.startDate ?? '-')].filter(Boolean).join(' · ')}</p>
+                <S.Badge>여행 기록</S.Badge>
+                <S.RecordDescription>{record.content ?? '작성된 여행 메모가 없습니다.'}</S.RecordDescription>
+                <button type="button" onClick={startEditing}>기록 편집</button>
+              </S.RecordDetailCard>
+            </S.DetailBody>
             <S.Body>
-              <S.Memo><h2>여행 메모</h2><p>{record.content ?? '작성된 여행 메모가 없습니다.'}</p></S.Memo>
               <S.Schedule>
                 <h2>여행 일정</h2>
                 {(record.places ?? []).map((place, index) => (
@@ -140,6 +140,6 @@ export function RecordDetailPage() {
           </S.StateCard>
         )}
       </S.Content>
-    </S.Page>
+    </AppShell>
   )
 }

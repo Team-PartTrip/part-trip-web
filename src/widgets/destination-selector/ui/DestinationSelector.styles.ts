@@ -3,22 +3,11 @@ import styled from 'styled-components'
 export const Root = styled.section`
   display: flex;
   flex-direction: column;
-  width: calc(100% - 15.0625rem);
+  width: 100%;
   min-width: 0;
-  height: 100%;
+  min-height: 720px;
   overflow: hidden;
-  background: #f4f8fc;
-
-  @media (max-width: 74.9375rem) {
-    flex: 1;
-    width: auto;
-  }
-
-  @media (max-width: 47.9375rem) {
-    width: 100%;
-    height: calc(100vh - 3.5rem);
-    flex: 0 0 calc(100vh - 3.5rem);
-  }
+  background: transparent;
 `
 
 export const TopBar = styled.header`
@@ -27,19 +16,19 @@ export const TopBar = styled.header`
   height: 4.375rem;
   align-items: center;
   gap: 3.875rem;
-  border-bottom: 0.0625rem solid #d7dce5;
-  padding-inline: 2rem 7.75rem;
-  background: #f4f8fc;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border.soft};
+  padding-inline: 0 0;
+  background: transparent;
 
   @media (max-width: 74.9375rem) {
     gap: 1.5rem;
-    padding-inline: 1.5rem;
+    padding-inline: 0;
   }
 
   @media (max-width: 47.9375rem) {
     height: 4rem;
     gap: 0.75rem;
-    padding-inline: 0.75rem;
+    padding-inline: 0;
   }
 `
 
@@ -51,7 +40,7 @@ export const BackButton = styled.button`
   border: 0;
   padding: 0;
   background: transparent;
-  color: #191c1e;
+  color: ${({ theme }) => theme.colors.text.strong};
   cursor: pointer;
   font: inherit;
 
@@ -124,8 +113,8 @@ export const Body = styled.div`
   min-height: 0;
   flex: 1;
   flex-direction: column;
-  width: min(60rem, calc(100% - 4rem));
-  margin: 1.25rem auto 0;
+  width: 100%;
+  margin: 24px auto 0;
 
   @media (max-width: 47.9375rem) {
     width: calc(100% - 1.5rem);

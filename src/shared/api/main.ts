@@ -10,11 +10,17 @@ export type TravelPlanRequestDto = {
 }
 
 export type DdayResponseDto = {
+  travelPlanId?: number
   countryName?: string
   cityName?: string
   startDate?: string
   endDate?: string
   dday?: string
+}
+
+export type TravelChangeRequestDto = {
+  travelPlanId: number
+  countryInfoId: number
 }
 
 export type TourPlaceResponseDto = {
@@ -99,15 +105,9 @@ export type Destination = {
   recentSearchId?: number
 }
 
-export type TravelInfoSection = {
-  id: 'population' | 'places' | 'food' | 'etiquette'
-  items: readonly string[]
-  summary: string
-  title: string
-}
-
 const MAIN_API_PATHS = {
   travelPlan: '/main/travel-plan',
+  travelChange: '/main/search/travel-change',
   dday: '/main/dday',
   tourPlace: '/main/tour-place',
   population: '/main/population-info',
@@ -125,6 +125,10 @@ const MAIN_API_PATHS = {
 export async function saveTravelPlan(payload: TravelPlanRequestDto): Promise<DdayResponseDto> {
   const { data } = await apiClient.post<DdayResponseDto>(MAIN_API_PATHS.travelPlan, payload)
   return data
+}
+
+export async function changeTravelCountry(payload: TravelChangeRequestDto): Promise<void> {
+  await apiClient.patch(MAIN_API_PATHS.travelChange, payload)
 }
 
 export async function getDday(): Promise<DdayResponseDto | undefined> {

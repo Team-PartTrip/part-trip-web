@@ -2,12 +2,9 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 export const Page = styled.main`
-  display: flex;
-  min-height: 100dvh;
-  background: #f4f8fc;
+  min-height: 100%;
+  background: transparent;
   color: #191c1e;
-
-  @media (max-width: 47.9375rem) { flex-direction: column; }
 `
 
 export const Logo = styled.img`display: block;`
@@ -16,9 +13,9 @@ export const Content = styled.section`
   width: min(100%, 1120px);
   min-width: 0;
   margin: 0 auto;
-  padding: 32px 40px 64px;
+  padding: 0 0 64px;
 
-  @media (max-width: 47.9375rem) { padding: 24px 18px 48px; }
+  @media (max-width: 47.9375rem) { padding: 0 0 48px; }
 `
 
 export const TopBar = styled.header`

@@ -1,18 +1,44 @@
 import { apiClient } from './client'
-import { type TripResponseDto } from './trip'
 import { type CommentRequestDto, type CommentResponseDto } from './board'
 
 export type ShareTripRequestDto = {
   tripId?: number
 }
 
-export type PageResponseDtoTripResponseDto = {
-  content?: TripResponseDto[]
+export type PageResponseDtoSharedTripResponseDto = {
+  content?: SharedTripResponseDto[]
   page?: number
   size?: number
   totalElements?: number
   totalPages?: number
   hasNext?: boolean
+}
+
+export type SharedTripPlaceResponseDto = {
+  tripPlaceId?: number
+  dayNumber?: number
+  placeName?: string
+  placeSub?: string
+}
+
+export type SharedTripResponseDto = {
+  tripId?: number
+  userId?: string
+  nickName?: string
+  title?: string
+  countryInfoId?: number
+  countryName?: string
+  cityName?: string
+  startDate?: string
+  endDate?: string
+  content?: string
+  images?: string[]
+  likeCount?: number
+  liked?: boolean
+  commentCount?: number
+  isPublic?: boolean
+  createDate?: string
+  places?: SharedTripPlaceResponseDto[]
 }
 
 const SHARED_TRIP_API_PATHS = {
@@ -25,23 +51,23 @@ const SHARED_TRIP_API_PATHS = {
 export async function listSharedTrips(params?: {
   page?: number
   size?: number
-}): Promise<PageResponseDtoTripResponseDto> {
-  const { data } = await apiClient.get<PageResponseDtoTripResponseDto>(SHARED_TRIP_API_PATHS.base, { params })
+}): Promise<PageResponseDtoSharedTripResponseDto> {
+  const { data } = await apiClient.get<PageResponseDtoSharedTripResponseDto>(SHARED_TRIP_API_PATHS.base, { params })
   return data
 }
 
-export async function shareTrip(payload: ShareTripRequestDto): Promise<TripResponseDto> {
-  const { data } = await apiClient.post<TripResponseDto>(SHARED_TRIP_API_PATHS.base, payload)
+export async function shareTrip(payload: ShareTripRequestDto): Promise<SharedTripResponseDto> {
+  const { data } = await apiClient.post<SharedTripResponseDto>(SHARED_TRIP_API_PATHS.base, payload)
   return data
 }
 
-export async function getSharedTripDetail(tripId: number): Promise<TripResponseDto> {
-  const { data } = await apiClient.get<TripResponseDto>(SHARED_TRIP_API_PATHS.detail(tripId))
+export async function getSharedTripDetail(tripId: number): Promise<SharedTripResponseDto> {
+  const { data } = await apiClient.get<SharedTripResponseDto>(SHARED_TRIP_API_PATHS.detail(tripId))
   return data
 }
 
-export async function importTrip(tripId: number): Promise<TripResponseDto> {
-  const { data } = await apiClient.post<TripResponseDto>(SHARED_TRIP_API_PATHS.import(tripId))
+export async function importTrip(tripId: number): Promise<SharedTripResponseDto> {
+  const { data } = await apiClient.post<SharedTripResponseDto>(SHARED_TRIP_API_PATHS.import(tripId))
   return data
 }
 

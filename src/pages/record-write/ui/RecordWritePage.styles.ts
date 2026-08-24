@@ -1,20 +1,18 @@
 import styled from 'styled-components'
 
 export const Page = styled.main`
-  display: flex;
-  min-height: 100dvh;
-  background: #f4f8fc;
-  color: #111827;
-  @media (max-width: 47.9375rem) { flex-direction: column; }
+  min-height: 100%;
+  background: transparent;
+  color: ${({ theme }) => theme.colors.text.strong};
 `
 
 export const Logo = styled.img`display: block;`
 
 export const Content = styled.section`
-  width: min(100%, 1120px);
+  width: 100%;
   min-width: 0;
   margin: 0 auto;
-  padding: 34px 42px 60px;
+  padding: 0 0 60px;
   @media (max-width: 47.9375rem) { padding: 24px 18px 48px; }
 `
 

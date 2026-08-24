@@ -4,40 +4,39 @@ import styled from 'styled-components'
 export const ItemLink = styled(Link)<{ $isParentActive: boolean }>`
   display: flex;
   width: 100%;
-  height: 1.3125rem;
+  height: 44px;
   align-items: center;
-  gap: 0.625rem;
-  color: ${({ $isParentActive }) => ($isParentActive ? '#1478c8' : '#727780')};
+  gap: 10px;
+  border-radius: 12px;
+  padding: 0 8px;
+  background: ${({ $isParentActive, theme }) => ($isParentActive ? theme.colors.background.muted : 'transparent')};
+  color: ${({ theme }) => theme.colors.text.muted};
   text-decoration: none;
   outline: none;
 
-  svg {
-    color: currentColor;
-  }
-
   &:hover,
   &:focus-visible {
-    color: #1478c8;
+    background: ${({ theme }) => theme.colors.background.muted};
+    color: ${({ theme }) => theme.colors.brand.strong};
   }
 
   @media (max-width: 47.9375rem) {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 25%;
+    height: 48px;
     justify-content: center;
-    border-radius: 0.75rem;
+    padding: 0;
   }
 `
 
 export const IconWrapper = styled.span`
   display: flex;
-  width: 1.125rem;
-  height: 1.1875rem;
-  flex: 0 0 1.125rem;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
   align-items: center;
   justify-content: center;
-  color: currentColor;
 
-  svg {
+  img {
     display: block;
     width: 100%;
     height: 100%;
@@ -46,13 +45,12 @@ export const IconWrapper = styled.span`
 
 export const Text = styled.span<{ $isParentActive: boolean }>`
   color: currentColor;
-  font-size: 1.125rem;
-  font-weight: ${({ $isParentActive }) => ($isParentActive ? 600 : 400)};
-  letter-spacing: -0.02rem;
-  line-height: 1.3;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
   white-space: nowrap;
 
-  @media (max-width: 63.9375rem) {
+  @media (max-width: 47.9375rem) {
     position: absolute;
     width: 0.0625rem;
     height: 0.0625rem;

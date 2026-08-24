@@ -1,27 +1,28 @@
 import styled from 'styled-components'
 
 export const Page = styled.main`
-  display: flex;
-  min-height: 100dvh;
-  background: #f4f8fc;
-  color: #111827;
-  @media (max-width: 47.9375rem) { flex-direction: column; }
+  min-height: 100%;
+  background: transparent;
+  color: ${({ theme }) => theme.colors.text.strong};
 `
 
-export const Logo = styled.img`display: block;`
-
 export const Content = styled.section`
-  width: min(100%, 1140px);
+  width: min(100%, 1200px);
   min-width: 0;
   margin: 0 auto;
-  padding: 30px 42px 60px;
-  @media (max-width: 47.9375rem) { padding: 24px 18px 48px; }
+  padding: 0 0 60px;
+  @media (max-width: 47.9375rem) { padding: 0 0 48px; }
 `
 
 export const TopBar = styled.header`
   display: flex;
+  align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 22px;
+  gap: 16px;
+  h1 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 32px; line-height: 40px; }
+  p { margin: 6px 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 15px; }
+  > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; }
   button { border: 0; border-radius: 10px; padding: 10px 14px; background: transparent; color: #1a6ebf; cursor: pointer; font: inherit; font-weight: 700; }
   button:last-child { background: #1a6ebf; color: #fff; }
 `
@@ -59,33 +60,59 @@ export const DateFields = styled.div`
 
 export const Layout = styled.div`
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: 1fr;
   gap: 24px;
   align-items: start;
-  @media (max-width: 61.25rem) { grid-template-columns: 1fr; }
 `
 
-export const Hero = styled.section`
-  position: relative;
-  min-height: 360px;
+export const DetailBody = styled.section`
+  display: grid;
+  height: 560px;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 456px;
+  @media (max-width: 900px) { height: auto; grid-template-columns: 1fr; }
+`
+
+export const RecordPhoto = styled.div`
+  min-width: 0;
   overflow: hidden;
-  border-radius: 26px;
-  background: #142536;
-  img { width: 100%; height: 360px; object-fit: cover; }
-  &::after { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 30%, rgb(9 24 38 / 78%)); content: ''; }
-  @media (max-width: 40rem) { min-height: 280px; img { height: 280px; } }
+  border-radius: 28px;
+  background: #dcecf6;
+  img { display: block; width: 100%; height: 560px; object-fit: cover; }
+  @media (max-width: 900px) { img { height: 360px; } }
 `
 
-export const HeroOverlay = styled.div`
-  position: absolute;
-  z-index: 1;
-  right: 28px;
-  bottom: 26px;
-  left: 28px;
-  color: #fff;
-  span { display: inline-block; border-radius: 999px; padding: 6px 10px; background: rgb(255 255 255 / 20%); font-size: 13px; }
-  h1 { margin: 12px 0 6px; font-size: clamp(26px, 4vw, 40px); line-height: 1.2; }
-  p { margin: 0; color: #dceafa; font-size: 14px; }
+export const RecordDetailCard = styled.section`
+  display: flex;
+  min-width: 0;
+  height: 560px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  overflow: hidden;
+  border-radius: 28px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  h1 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 26px; line-height: 32px; }
+  p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 14px; }
+  button { margin-top: 4px; min-height: 46px; border: 1px solid ${({ theme }) => theme.colors.brand.strong}; border-radius: 12px; padding: 12px 24px; background: ${({ theme }) => theme.colors.background.default}; color: ${({ theme }) => theme.colors.brand.strong}; cursor: pointer; font-weight: 600; }
+  @media (max-width: 900px) { height: auto; min-height: 260px; }
+`
+
+export const Badge = styled.span`
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: #e8f2ff;
+  color: ${({ theme }) => theme.colors.brand.strong};
+  font-size: 12px;
+`
+
+export const RecordDescription = styled.p`
+  max-width: 100%;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 15px !important;
+  line-height: 22px;
 `
 
 export const Body = styled.section`
@@ -103,8 +130,6 @@ const Panel = styled.section`
   background: #fff;
   h2 { margin: 0 0 14px; font-size: 20px; }
 `
-
-export const Memo = styled(Panel)`p { margin: 0; color: #5f6670; line-height: 1.7; }`
 
 export const Schedule = styled(Panel)`
   article { display: grid; grid-template-columns: 72px 1fr; gap: 12px; border-top: 1px solid #edf2f7; padding: 14px 0; }

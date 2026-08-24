@@ -49,3 +49,12 @@ export function toUserProfile(
     travelStyle: character?.characterType || fallbackProfile.travelStyle,
   }
 }
+
+export async function getUserProfile(): Promise<UserProfile> {
+  const [profile, character] = await Promise.all([
+    getProfile(),
+    getCharacterInfo().catch(() => undefined),
+  ])
+  return toUserProfile(profile, character)
+}
+import { getCharacterInfo, getProfile } from './profile'

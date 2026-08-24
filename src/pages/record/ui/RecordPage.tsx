@@ -1,70 +1,83 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getMyTrips, type TripResponseDto } from '@shared/api'
-import logoUrl from '@shared/assets/logo.png'
-import fallbackRecordImageUrl from '@shared/assets/record-singapore.jpg'
+import {
+  figmaRecordDotonbori,
+  figmaRecordNamba,
+  figmaRecordOsakaCastle,
+} from '@shared/assets'
 import { createRecordDetailPath, paths } from '@shared/config'
-import { MENUS, Sidebar } from '@widgets/sidebar'
+import { useMyTrips } from '@shared/lib'
+import { Button as PartTripButton, Tab as PartTripTab, Tabs as PartTripTabs } from '@shared/ui/parttrip'
+import { AppShell } from '@widgets/app-shell'
 
 import * as S from './RecordPage.styles'
 
+type RecordTab = 'timeline' | 'photos'
+
+const fallbackImages = [figmaRecordNamba, figmaRecordOsakaCastle, figmaRecordDotonbori]
+
 export function RecordPage() {
   const navigate = useNavigate()
-  const [trips, setTrips] = useState<TripResponseDto[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [errorMessage, setErrorMessage] = useState('')
-
-  useEffect(() => {
-    let isMounted = true
-    void getMyTrips()
-      .then((nextTrips) => { if (isMounted) setTrips(nextTrips) })
-      .catch(() => { if (isMounted) setErrorMessage('여행 기록을 불러오지 못했습니다.') })
-      .finally(() => { if (isMounted) setIsLoading(false) })
-    return () => { isMounted = false }
-  }, [])
-
-  const currentTrip = trips[0]
+  const [activeTab, setActiveTab] = useState<RecordTab>('timeline')
+  const { hasError, isLoading, trips } = useMyTrips()
+  const errorMessage = hasError ? '여행 기록을 불러오지 못했습니다.' : ''
 
   return (
-    <S.Page>
-      <Sidebar logo={<S.Logo src={logoUrl} alt="PartTrip" />} menus={MENUS} />
-      <S.Content>
-        <S.TopBar>
-          <S.TripTitle type="button" onClick={() => navigate(paths.main)}>
-            <span aria-hidden="true">‹</span>
-            {currentTrip?.title ?? '나의 여행 기록'}
-          </S.TripTitle>
-          <S.SearchBar aria-label="여행 기록 검색">
-            <S.SearchIcon aria-hidden="true" />
-            <span>어디로 여행을 떠나시나요?</span>
-          </S.SearchBar>
-        </S.TopBar>
-        <S.Workspace>
-          <S.RecordCard>
-            <S.RecordList>
-              {isLoading ? <S.StatusMessage>여행 기록을 불러오는 중입니다.</S.StatusMessage> : null}
-              {errorMessage ? <S.StatusMessage role="alert">{errorMessage}</S.StatusMessage> : null}
-              {!isLoading && !errorMessage && trips.length === 0 ? <S.StatusMessage>아직 작성한 여행 기록이 없습니다.</S.StatusMessage> : null}
-              {trips.map((record) => (
-                <S.RecordRow key={record.tripId ?? record.title}>
-                  <img src={record.images?.[0] || fallbackRecordImageUrl} alt="" />
-                  <S.RecordText>
-                    <h2>{record.title ?? '제목 없는 여행 기록'}</h2>
-                    <p>{record.content ?? '작성된 여행 메모가 없습니다.'}</p>
-                    <span>{record.startDate ?? '-'} ~ {record.endDate ?? '-'}</span>
-                  </S.RecordText>
-                  <S.RowActions>
-                    <S.MenuButton type="button" aria-label={`${record.title} 메뉴`}>⋮</S.MenuButton>
-                    <S.ViewButton type="button" disabled={!record.tripId} onClick={() => record.tripId && navigate(createRecordDetailPath(String(record.tripId)))}>보기</S.ViewButton>
-                  </S.RowActions>
-                </S.RecordRow>
-              ))}
-            </S.RecordList>
-            {trips.length > 0 ? <S.MoreButton type="button">총 {trips.length}개의 기록</S.MoreButton> : null}
-          </S.RecordCard>
-          <S.CreateButton type="button" onClick={() => navigate(paths.recordWrite)}>+ 기록 작성</S.CreateButton>
-        </S.Workspace>
-      </S.Content>
-    </S.Page>
+    <AppShell>
+      <S.Page>
+        <S.Header>
+          <div>
+            <S.Title>여행 기록</S.Title>
+            <S.Subtitle>여행의 순간을 날짜와 장소별로 다시 만나보세요.</S.Subtitle>
+          </div>
+          <S.HeaderActions>
+            <PartTripButton type="button" $variant="secondary" onClick={() => navigate(paths.recordMap)}>지도 보기</PartTripButton>
+            <PartTripButton type="button" $variant="secondary" onClick={() => navigate(paths.recordCalendar)}>캘린더</PartTripButton>
+            <PartTripButton type="button" $variant="secondary" onClick={() => navigate(paths.recordCamera)}>사진 분석</PartTripButton>
+            <PartTripButton type="button" onClick={() => navigate(paths.recordWrite)}>기록 작성</PartTripButton>
+          </S.HeaderActions>
+        </S.Header>
+
+        <PartTripTabs aria-label="여행 기록 보기 방식">
+          <PartTripTab type="button" role="tab" aria-selected={activeTab === 'timeline'} $active={activeTab === 'timeline'} onClick={() => setActiveTab('timeline')}>여행별 기록</PartTripTab>
+          <PartTripTab type="button" role="tab" aria-selected={activeTab === 'photos'} $active={activeTab === 'photos'} onClick={() => setActiveTab('photos')}>사진 중심 목록</PartTripTab>
+        </PartTripTabs>
+
+        {isLoading ? <S.State aria-busy="true">여행 기록을 불러오는 중입니다.</S.State> : null}
+        {errorMessage ? <S.State role="alert">{errorMessage}</S.State> : null}
+        {!isLoading && !errorMessage && trips.length === 0 ? (
+          <S.Empty><strong>아직 여행 기록이 없습니다.</strong><span>첫 여행 기록을 남겨보세요.</span></S.Empty>
+        ) : null}
+
+        {!isLoading && !errorMessage && trips.length > 0 && activeTab === 'timeline' ? (
+          <S.Timeline>
+            {trips.map((trip, index) => (
+              <S.TimelineItem key={trip.tripId ?? `${trip.title}-${index}`}>
+                <S.Dot aria-hidden="true" />
+                <S.RecordCard>
+                  <img src={trip.images?.[0] || fallbackImages[index % fallbackImages.length]} alt="" />
+                  <S.RecordCopy>
+                    <small>{trip.startDate?.replaceAll('-', '.')} · {trip.cityName || trip.countryName || '여행지'}</small>
+                    <h2>{trip.title || '제목 없는 여행 기록'}</h2>
+                    <p>{trip.content || '작성된 여행 메모가 없습니다.'}</p>
+                  </S.RecordCopy>
+                  <S.ViewButton type="button" disabled={!trip.tripId} onClick={() => trip.tripId && navigate(createRecordDetailPath(String(trip.tripId)))}>보기</S.ViewButton>
+                </S.RecordCard>
+              </S.TimelineItem>
+            ))}
+          </S.Timeline>
+        ) : null}
+
+        {!isLoading && !errorMessage && trips.length > 0 && activeTab === 'photos' ? (
+          <S.PhotoGrid>
+            {trips.flatMap((trip, tripIndex) => (trip.images?.length ? trip.images : [fallbackImages[tripIndex % fallbackImages.length]]).map((image, imageIndex) => (
+              <button key={`${trip.tripId ?? tripIndex}-${imageIndex}`} type="button" onClick={() => trip.tripId && navigate(createRecordDetailPath(String(trip.tripId)))}>
+                <img src={image} alt={`${trip.title || '여행'} 사진 ${imageIndex + 1}`} />
+              </button>
+            )))}
+          </S.PhotoGrid>
+        ) : null}
+      </S.Page>
+    </AppShell>
   )
 }

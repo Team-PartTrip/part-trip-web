@@ -2,21 +2,13 @@ import styled from 'styled-components'
 
 export const Page = styled.main`
   position: relative;
-  display: flex;
   width: 100%;
-  min-height: 100vh;
-  background: #f4f8fc;
-  @media (max-width: 47.9375rem) { flex-direction: column; }
-`
-
-export const Logo = styled.div`
-  img { display: block; width: 11.3125rem; max-width: 100%; height: auto; }
+  min-height: 100%;
 `
 
 export const Content = styled.section`
   min-width: 0;
-  flex: 1;
-  padding: 52px 58px;
+  padding: 0 0 60px;
 `
 
 export const Backdrop = styled.div`
