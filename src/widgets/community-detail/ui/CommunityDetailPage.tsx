@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
 import {
   useCommunityDetailQuery,
   useCreateBoardCommentMutation,
@@ -13,7 +12,7 @@ import {
   useUpdateCommentMutation,
   useUpdateReviewMutation,
 } from '@/entities/community'
-import { getProfile } from '@/entities/user/api'
+import { useProfileSourceQuery } from '@/entities/user'
 import { resolveApiAssetUrl } from '@/entities/file/api'
 import { useCreateSharedTripCommentMutation, useImportTripMutation } from '@/entities/trip-card'
 import catAvatarUrl from '@/shared/assets/community-avatar-cat.png'
@@ -26,7 +25,7 @@ export function CommunityDetailPage() {
   const navigate = useNavigate()
   const { postId = '' } = useParams({ strict: false })
   const postQuery = useCommunityDetailQuery(postId)
-  const profileQuery = useQuery({ queryKey: ['user', 'source'], queryFn: getProfile })
+  const profileQuery = useProfileSourceQuery()
   const post = postQuery.data?.post ?? null
   const comments = postQuery.data?.comments ?? []
   const [comment, setComment] = useState('')
