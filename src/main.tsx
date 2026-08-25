@@ -5,7 +5,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google'
 import { ThemeProvider } from 'styled-components'
 
 import { routeTree } from './routeTree.gen'
-import { AUTH_EXPIRED_EVENT } from '@/shared/libs/api-client'
+import { AUTH_EXPIRED_EVENT } from '@/shared/libs/auth-expiration'
 import { GlobalStyle } from '@/shared/ui/global-style'
 import { appTheme } from '@/shared/theme'
 

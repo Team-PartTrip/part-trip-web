@@ -7,8 +7,9 @@ import {
   saveAuthTokens,
   type AuthTokens,
 } from './token-storage.ts'
+import { notifyAuthExpired } from './auth-expiration.ts'
 
-export const AUTH_EXPIRED_EVENT = 'parttrip:auth-expired'
+export { AUTH_EXPIRED_EVENT } from './auth-expiration.ts'
 
 export const apiClient = axios.create({
   baseURL: import.meta.env?.VITE_API_BASE_URL ?? '',
@@ -39,7 +40,7 @@ let refreshPromise: Promise<AuthTokens> | null = null
 
 function expireSession() {
   clearAuthTokens()
-  if (typeof window !== 'undefined') window.dispatchEvent(new Event(AUTH_EXPIRED_EVENT))
+  notifyAuthExpired()
 }
 
 async function requestNewTokens(refreshToken: string) {
