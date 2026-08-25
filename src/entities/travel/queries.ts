@@ -140,14 +140,14 @@ export function useMainTravelQuery() {
   const countryName = ddayQuery.data?.countryName ?? '한국'
   const results = useQueries({
     queries: [
-      { queryKey: [...travelQueryKeys.all, 'country', countryName], queryFn: () => getCountryInfo(countryName) },
-      { queryKey: [...travelQueryKeys.all, 'population', countryName], queryFn: () => getPopulationInfo(countryName) },
+      { queryKey: travelQueryKeys.country(countryName), queryFn: () => getCountryInfo(countryName) },
+      { queryKey: travelQueryKeys.population(countryName), queryFn: () => getPopulationInfo(countryName) },
       { queryKey: travelQueryKeys.tourPlaces(countryName), queryFn: () => getTourPlace(countryName) },
-      { queryKey: [...travelQueryKeys.all, 'food', countryName], queryFn: () => getFoodInfo(countryName) },
+      { queryKey: travelQueryKeys.food(countryName), queryFn: () => getFoodInfo(countryName) },
       { queryKey: travelQueryKeys.festivals(countryName), queryFn: () => getFestivals(countryName) },
-      { queryKey: [...travelQueryKeys.all, 'phrase', countryName], queryFn: () => getTodayPhrase(countryName, 1), retry: false },
-      { queryKey: [...travelQueryKeys.all, 'weather', countryName], queryFn: () => getWeather(countryName), retry: false },
-      { queryKey: [...travelQueryKeys.all, 'exchange-rate', countryName], queryFn: () => getExchangeRate(countryName), retry: false },
+      { queryKey: travelQueryKeys.phrase(countryName), queryFn: () => getTodayPhrase(countryName, 1), retry: false },
+      { queryKey: travelQueryKeys.weather(countryName), queryFn: () => getWeather(countryName), retry: false },
+      { queryKey: travelQueryKeys.exchangeRate(countryName), queryFn: () => getExchangeRate(countryName), retry: false },
     ],
   })
   const [country, populationInfo, tourPlaces, foodInfo, festivals, phrase, weather, exchangeRate] = results
