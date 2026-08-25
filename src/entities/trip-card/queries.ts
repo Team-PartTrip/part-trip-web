@@ -2,10 +2,11 @@ import { queryOptions, useQuery } from '@tanstack/react-query'
 import { getSharedTripDetail, listSharedTrips } from './api'
 import { tripCardQueryKeys } from './query-keys'
 
-export const sharedTripsQueryOptions = () =>
+export const sharedTripsQueryOptions = (enabled = true) =>
   queryOptions({
     queryKey: tripCardQueryKeys.list(),
     queryFn: () => listSharedTrips({ page: 0, size: 30 }),
+    enabled,
   })
 
 export const sharedTripQueryOptions = (tripId: number) =>
@@ -15,8 +16,8 @@ export const sharedTripQueryOptions = (tripId: number) =>
     enabled: Number.isInteger(tripId),
   })
 
-export function useSharedTripsQuery() {
-  return useQuery(sharedTripsQueryOptions())
+export function useSharedTripsQuery(enabled = true) {
+  return useQuery(sharedTripsQueryOptions(enabled))
 }
 
 export function useSharedTripQuery(tripId: number) {

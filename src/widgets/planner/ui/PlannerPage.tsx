@@ -32,13 +32,15 @@ function Header({ step }: { step: PlannerStep }) {
   return <S.Header><S.Title>{title}</S.Title><S.Subtitle>{subtitle}</S.Subtitle></S.Header>
 }
 
-function usePlannerData() {
+function usePlannerData(step: PlannerStep) {
+  const needsPlan = step !== 'list' && step !== 'create' && step !== 'group'
+  const needsPlaces = step === 'explore' || step === 'vote' || step === 'lineup' || step === 'final' || step === 'place'
   const [overriddenPlan, setOverriddenPlan] = useState<ReturnType<typeof useDdayQuery>['data']>()
-  const ddayQuery = useDdayQuery()
-  const countriesQuery = useCountriesQuery()
+  const ddayQuery = useDdayQuery(needsPlan)
+  const countriesQuery = useCountriesQuery(step === 'destination')
   const plan = overriddenPlan ?? ddayQuery.data
-  const placesQuery = useTourPlacesQuery(plan?.countryName, plan?.cityName)
-  const { trips, isLoading: isTripsLoading } = useMyTrips()
+  const placesQuery = useTourPlacesQuery(plan?.countryName, plan?.cityName, undefined, needsPlaces)
+  const { trips, isLoading: isTripsLoading } = useMyTrips(step === 'list')
 
   return {
     countries: countriesQuery.data ?? [],
@@ -64,7 +66,7 @@ export function PlannerPlacePage() { return <PlannerFlowPage step="place" /> }
 function PlannerFlowPage({ step }: Props) {
   const navigate = useNavigate()
   const { placeId } = useParams({ strict: false })
-  const { countries, isLoading, places, plan, setPlan, trips } = usePlannerData()
+  const { countries, isLoading, places, plan, setPlan, trips } = usePlannerData(step)
   const [selected, setSelected] = useState<number[]>(() => {
     try {
       const saved = sessionStorage.getItem('parttrip:planner-selected')

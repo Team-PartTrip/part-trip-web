@@ -32,16 +32,18 @@ const currencyByCountry: Record<string, string> = {
   태국: 'THB',
 }
 
-export const countriesQueryOptions = () =>
+export const countriesQueryOptions = (enabled = true) =>
   queryOptions({
     queryKey: travelQueryKeys.countries(),
     queryFn: getCountries,
+    enabled,
   })
 
-export const ddayQueryOptions = () =>
+export const ddayQueryOptions = (enabled = true) =>
   queryOptions({
     queryKey: travelQueryKeys.dday(),
     queryFn: getDday,
+    enabled,
   })
 
 export const festivalsQueryOptions = (countryName: string, year?: number, month?: number) =>
@@ -51,27 +53,37 @@ export const festivalsQueryOptions = (countryName: string, year?: number, month?
     enabled: Boolean(countryName),
   })
 
-export function useCountriesQuery() {
-  return useQuery(countriesQueryOptions())
+export function useCountriesQuery(enabled = true) {
+  return useQuery(countriesQueryOptions(enabled))
 }
 
-export function useDdayQuery() {
-  return useQuery(ddayQueryOptions())
+export function useDdayQuery(enabled = true) {
+  return useQuery(ddayQueryOptions(enabled))
 }
 
 export function useFestivalsQuery(countryName?: string, year?: number, month?: number) {
   return useQuery(festivalsQueryOptions(countryName ?? '', year, month))
 }
 
-export const tourPlacesQueryOptions = (countryName: string, cityName?: string, category?: string) =>
+export const tourPlacesQueryOptions = (
+  countryName: string,
+  cityName?: string,
+  category?: string,
+  enabled = true,
+) =>
   queryOptions({
     queryKey: travelQueryKeys.tourPlaces(countryName, cityName, category),
     queryFn: () => getTourPlace(countryName, cityName, category),
-    enabled: Boolean(countryName),
+    enabled: enabled && Boolean(countryName),
   })
 
-export function useTourPlacesQuery(countryName?: string, cityName?: string, category?: string) {
-  return useQuery(tourPlacesQueryOptions(countryName ?? '', cityName, category))
+export function useTourPlacesQuery(
+  countryName?: string,
+  cityName?: string,
+  category?: string,
+  enabled = true,
+) {
+  return useQuery(tourPlacesQueryOptions(countryName ?? '', cityName, category, enabled))
 }
 
 export type DestinationQueryData = {

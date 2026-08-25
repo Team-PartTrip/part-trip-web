@@ -23,7 +23,7 @@ function TripCardsFlow({ mode }: CardPageProps) {
   const { tripId } = useParams({ strict: false })
   const [selected, setSelected] = useState<number[]>([])
   const [message, setMessage] = useState('')
-  const sharedTripsQuery = useSharedTripsQuery()
+  const sharedTripsQuery = useSharedTripsQuery(mode !== 'detail' && mode !== 'create')
   const sharedTripQuery = useSharedTripQuery(Number(tripId))
   const myTripsQuery = useMyTrips(mode === 'create')
   const shareMutation = useShareTripMutation()
