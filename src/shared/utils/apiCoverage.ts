@@ -1,7 +1,8 @@
 export const REQUIRED_NEW_API_CLIENTS = [
+  'POST /api/profile/image',
   'GET /api/profile/myInfo',
+  'GET /api/profile/themes',
   'PUT /api/profile',
-  'GET /api/profile/character',
   'GET /api/main/today-phrase',
   'GET /api/main/countries',
   'GET /api/main/weather',
