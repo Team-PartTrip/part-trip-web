@@ -1,15 +1,4 @@
-type ProfileSource = {
-  imgUrl?: string
-  nickName?: string
-  userId?: string
-}
-
-type CharacterSource = {
-  characterDescription?: string
-  characterName?: string
-  characterType?: string
-  imgUrl?: string
-}
+import { getProfile, getTravelThemes, type ProfileResponseDto, type TravelThemeResponseDto } from './api.ts'
 
 export type UserProfile = {
   avatarUrl?: string
@@ -21,29 +10,33 @@ export type UserProfile = {
   id?: string
   name: string
   phone?: string
+  themeId?: number
   travelStyle?: string
 }
 
 export function toUserProfile(
-  profile: ProfileSource,
-  character?: CharacterSource,
+  profile: ProfileResponseDto,
+  theme?: TravelThemeResponseDto,
 ): UserProfile {
+  const themeName = theme?.themeName ?? profile.themeName
+  const themeDescription = theme?.description ?? profile.themeDescription
   return {
     avatarUrl: profile.imgUrl,
-    bio: character?.characterDescription,
-    characterImageUrl: character?.imgUrl,
-    characterName: character?.characterName,
+    bio: themeDescription,
+    characterImageUrl: theme?.imageUrl,
+    characterName: themeName,
     id: profile.userId,
     name: profile.nickName ?? '',
-    travelStyle: character?.characterType,
+    themeId: profile.themeId ?? theme?.themeId,
+    travelStyle: theme?.themeCode ?? themeName,
   }
 }
 
 export async function getUserProfile(): Promise<UserProfile> {
-  const [profile, character] = await Promise.all([
+  const [profile, themes] = await Promise.all([
     getProfile(),
-    getCharacterInfo().catch(() => undefined),
+    getTravelThemes().catch(() => []),
   ])
-  return toUserProfile(profile, character)
+  const theme = themes.find((item) => item.themeId === profile.themeId)
+  return toUserProfile(profile, theme)
 }
-import { getCharacterInfo, getProfile } from './api.ts'

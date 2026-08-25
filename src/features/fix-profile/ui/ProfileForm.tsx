@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm, useWatch, type SubmitHandler } from 'react-hook-form'
 import { useNavigate } from '@tanstack/react-router'
-import { type UserProfile, useUpdateProfileMutation } from '@/entities/user'
-import { useUploadImageMutation } from '@/entities/file'
+import { type UserProfile, useUpdateProfileMutation, useUploadProfileImageMutation } from '@/entities/user'
 import { paths } from '@/shared/config'
 import { useLockBodyScroll } from '@/shared/hooks'
 
@@ -32,7 +31,7 @@ export function ProfileForm({ onCancel, onSaved, profile }: ProfileFormProps) {
   const [photoError, setPhotoError] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const updateProfileMutation = useUpdateProfileMutation()
-  const uploadImageMutation = useUploadImageMutation()
+  const uploadProfileImageMutation = useUploadProfileImageMutation()
   const { register, handleSubmit, formState, control } = useForm<ProfileFormValues>({
     defaultValues: {
       name: profile.name || '',
@@ -96,11 +95,13 @@ export function ProfileForm({ onCancel, onSaved, profile }: ProfileFormProps) {
   const onSubmit: SubmitHandler<ProfileFormValues> = async (values) => {
     try {
       setErrorMessage(null)
-      const uploaded = selectedPhoto ? await uploadImageMutation.mutateAsync(selectedPhoto) : null
-      const uploadedUrl = uploaded ? Object.values(uploaded)[0] : undefined
+      const uploadedUrl = selectedPhoto
+        ? await uploadProfileImageMutation.mutateAsync(selectedPhoto)
+        : undefined
       const response = await updateProfileMutation.mutateAsync({
         imgUrl: selectedPhoto ? uploadedUrl : avatarPreview || undefined,
         nickName: values.name.trim(),
+        themeId: profile.themeId,
       })
       const savedProfile: UserProfile = {
         ...profile,

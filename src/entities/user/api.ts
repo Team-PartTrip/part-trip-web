@@ -3,25 +3,31 @@ import { apiClient } from '../../shared/libs/api-client.ts'
 export type ProfileUpdateRequestDto = {
   imgUrl?: string
   nickName: string
+  themeId?: number
 }
 
 export type ProfileResponseDto = {
   imgUrl?: string
   nickName?: string
+  themeDescription?: string
+  themeId?: number
+  themeName?: string
   userId?: string
 }
 
-export type CharacterInfoResponseDto = {
-  characterDescription?: string
-  characterName?: string
-  characterType?: string
-  imgUrl?: string
+export type TravelThemeResponseDto = {
+  description?: string
+  imageUrl?: string
+  themeCode?: string
+  themeId?: number
+  themeName?: string
 }
 
 const PROFILE_API_PATHS = {
   base: '/profile',
-  character: '/profile/character',
+  image: '/profile/image',
   mine: '/profile/myInfo',
+  themes: '/profile/themes',
 } as const
 
 export async function getProfile(): Promise<ProfileResponseDto> {
@@ -34,8 +40,13 @@ export async function updateProfile(payload: ProfileUpdateRequestDto): Promise<P
   return data
 }
 
-export async function getCharacterInfo(): Promise<CharacterInfoResponseDto> {
-  const { data } = await apiClient.get<CharacterInfoResponseDto>(PROFILE_API_PATHS.character)
+export async function uploadProfileImage(file: File): Promise<string> {
+  const { data } = await apiClient.postForm<string>(PROFILE_API_PATHS.image, { file })
+  return data
+}
+
+export async function getTravelThemes(): Promise<TravelThemeResponseDto[]> {
+  const { data } = await apiClient.get<TravelThemeResponseDto[]>(PROFILE_API_PATHS.themes)
   return data
 }
 export * from './profile-model.ts'
