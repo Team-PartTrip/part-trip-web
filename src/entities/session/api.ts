@@ -5,6 +5,7 @@ export * from '@/shared/libs/token-storage'
 // === Swagger DTO Types ===
 
 export type SignUpRequestDto = {
+  phoneNumber: string
   userId: string
   userPwd: string
   userMail: string
@@ -54,6 +55,7 @@ export type UserEntity = {
   userId: string
   userPwd?: string
   userMail: string
+  phoneNumber?: string
   signUpDivision: string
   nickName?: string
   myCountry: string
@@ -81,6 +83,7 @@ export type SignUpRequest = {
   email: string
   id: string
   password: string
+  phoneNumber: string
 }
 
 export type ResetPasswordRequest = PasswordResetRequestDto
@@ -145,6 +148,7 @@ export async function signUp(payload: SignUpRequest | SignUpRequestDto): Promise
     const { email, id, password } = payload
     return post<string>(AUTH_API_PATHS.signUp, {
       myCountry: 'KR',
+      phoneNumber: payload.phoneNumber,
       signUpDivision: 'USER',
       userId: id,
       userMail: email,

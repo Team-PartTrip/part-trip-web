@@ -28,6 +28,7 @@ type CredentialsFormValues = {
   id: string
   password: string
   passwordConfirm: string
+  phoneNumber: string
 }
 
 type VerificationFormValues = {
@@ -43,6 +44,7 @@ const trimFormValue = (value: unknown) =>
   typeof value === 'string' ? value.trim() : ''
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const phoneNumberPattern = /^\+?[0-9-]{9,20}$/
 
 const getFirstErrorMessage = <TFormValues extends FieldValues>(
   errors: FieldErrors<TFormValues>,
@@ -84,6 +86,7 @@ export function SignUpForm() {
       id: '',
       password: '',
       passwordConfirm: '',
+      phoneNumber: '',
     },
   })
   const verificationForm = useForm<VerificationFormValues>({
@@ -113,6 +116,12 @@ export function SignUpForm() {
     setValueAs: (value) => sanitizePassword(trimFormValue(value)),
     validate: (value, values) =>
       value === values.password || '비밀번호가 일치하지 않습니다.',
+  })
+  const phoneNumberField = credentialsForm.register('phoneNumber', {
+    required: '전화번호를 입력해주세요.',
+    setValueAs: trimFormValue,
+    validate: (value) =>
+      phoneNumberPattern.test(value) || '전화번호는 숫자와 하이픈으로 입력해주세요.',
   })
   const verificationCodeField = verificationForm.register('verificationCode', {
     required: '인증코드를 입력해주세요.',
@@ -174,8 +183,8 @@ export function SignUpForm() {
         code: verificationCode,
         email,
       })
-      const { id, password } = credentialsForm.getValues()
-      await signUp({ email, id, password })
+      const { id, password, phoneNumber } = credentialsForm.getValues()
+      await signUp({ email, id, password, phoneNumber })
       navigate({ to: paths.login, replace: true })
     } catch (error) {
       setMessage({
@@ -317,6 +326,18 @@ export function SignUpForm() {
             type="email"
             autoComplete="email"
             placeholder="이메일을 입력하세요."
+            disabled={isCredentialsSubmitting}
+            required
+          />
+
+          <S.Input
+            {...phoneNumberField}
+            aria-label="전화번호"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            placeholder="전화번호를 입력하세요."
+            maxLength={20}
             disabled={isCredentialsSubmitting}
             required
           />
