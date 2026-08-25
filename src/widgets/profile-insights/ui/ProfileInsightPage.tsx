@@ -1,9 +1,9 @@
-import { useNavigate } from 'react-router-dom'
-import { type TripPlanResponseDto } from '@shared/api'
-import { figmaWorldMap } from '@shared/assets'
-import { paths } from '@shared/config'
-import { useMyTrips } from '@shared/lib'
-import { AppShell } from '@widgets/app-shell'
+import { useNavigate } from '@/shared/libs/router'
+import { type TripPlanResponseDto } from '@/shared/api'
+import { figmaWorldMap } from '@/shared/assets'
+import { paths } from '@/shared/config'
+import { useMyTrips } from '@/entities/trip-plan'
+import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './ProfileInsightPage.styles'
 

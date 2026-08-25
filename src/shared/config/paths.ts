@@ -3,8 +3,6 @@ export const paths = {
   community: '/community',
   communityDetail: '/community/:postId',
   communityWrite: '/community/write',
-  diagnosis: '/diagnosis',
-  diagnosisResult: '/result',
   login: '/login',
   main: '/main',
   planner: '/planner',

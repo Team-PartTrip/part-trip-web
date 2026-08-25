@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { getAccessToken } from '@shared/api'
-import { paths } from '@shared/config'
+import { Link, useLocation, useNavigate } from '@/shared/libs/router'
+import { getAccessToken } from '@/shared/api'
+import { paths } from '@/shared/config'
 
 import type { SidebarMenuType } from '../types/sidebar-item/sidebar-item'
 import LogoutDialog from './logout-dialog'

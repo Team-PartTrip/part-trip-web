@@ -3,7 +3,6 @@ export const REQUIRED_NEW_API_CLIENTS = [
   'PUT /api/profile',
   'GET /api/profile/character',
   'GET /api/main/today-phrase',
-  'POST /api/users/survey-complete',
   'GET /api/main/countries',
   'GET /api/main/weather',
   'GET /api/main/exchange-rate',

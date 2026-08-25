@@ -2,7 +2,7 @@ import {
   clearAuthTokens,
   getRefreshToken,
   logout as logoutRequest,
-} from '@shared/api'
+} from '@/shared/api'
 
 export const logout = async () => {
   const refreshToken = getRefreshToken()

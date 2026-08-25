@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DestinationBackIcon, DestinationSearchIcon } from "@shared/assets";
+import { DestinationBackIcon, DestinationSearchIcon } from "@/shared/assets";
 import {
   deleteRecentSearch,
   getCountries,
@@ -11,13 +11,13 @@ import {
   saveRecentSearch,
   saveTravelPlan,
   type Destination,
-} from "@shared/api";
+} from "@/shared/api";
 import {
   destinationBangkokUrl,
   destinationDaNangUrl,
   destinationSingaporeUrl,
   destinationTokyoUrl,
-} from "@shared/assets/images";
+} from "@/shared/assets/images";
 
 import * as S from "./DestinationSelector.styles";
 

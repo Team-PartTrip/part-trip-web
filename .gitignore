@@ -25,5 +25,8 @@ dist-ssr
 .env
 AGENTS.md
 DOCS
+!docs/
+docs/*
+!docs/ARCHITECTURE.md
 .agents/
 .codex-plugins

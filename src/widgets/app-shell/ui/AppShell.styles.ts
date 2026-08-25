@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom'
+import { Link } from '@/shared/libs/router'
 import styled from 'styled-components'
-import searchIcon from '@shared/assets/figma/search.svg'
+import searchIcon from '@/shared/assets/figma/search.svg'
 
 export { searchIcon }
 

@@ -6,7 +6,7 @@ import {
   getPasswordPairError,
   isProfileImageSizeAllowed,
   isSupportedProfileImageType,
-} from '../src/widgets/profile-form/model/profileForm.ts'
+} from '../src/features/fix-profile/model/profileForm.ts'
 
 test('닉네임은 공백을 제외하고 2자 이상이어야 한다', () => {
   assert.equal(getNicknameError(' 김 '), '닉네임은 2자 이상 입력해주세요.')

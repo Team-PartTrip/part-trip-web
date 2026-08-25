@@ -7,7 +7,7 @@ import {
   clearAuthTokens,
   getRefreshToken,
   saveAuthTokens,
-} from '../src/shared/api/tokenStorage.ts'
+} from '../src/shared/libs/token-storage.ts'
 
 function createStorage() {
   const values = new Map<string, string>()

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { toTripUpdateRequest } from '../src/pages/record-detail/model/tripForm'
+import { toTripUpdateRequest } from '../src/widgets/record-detail/model/tripForm.ts'
 
 test('여행 기록 수정 시 기존 이미지와 장소를 보존한다', () => {
   const payload = toTripUpdateRequest(

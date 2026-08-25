@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from '@/shared/libs/router'
 import styled, { css, keyframes } from 'styled-components'
 
 type InputProps = { $compact?: boolean }

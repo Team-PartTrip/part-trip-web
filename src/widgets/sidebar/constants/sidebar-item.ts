@@ -4,8 +4,8 @@ import {
   figmaPlannerIcon,
   figmaProfileIcon,
   figmaRecordsIcon,
-} from '@shared/assets'
-import { paths } from '@shared/config'
+} from '@/shared/assets'
+import { paths } from '@/shared/config'
 
 export const MENUS: SidebarMenuType[] = [
   {

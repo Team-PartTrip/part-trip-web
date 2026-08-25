@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from '@/shared/libs/router'
 import styled from 'styled-components'
 
 export const ItemLink = styled(Link)<{ $isParentActive: boolean }>`

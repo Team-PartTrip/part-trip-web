@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom'
+import { useLocation } from '@/shared/libs/router'
 
 import * as S from './SidebarItem.style'
 

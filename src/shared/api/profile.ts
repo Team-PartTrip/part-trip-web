@@ -1,4 +1,4 @@
-import { apiClient } from './client'
+import { apiClient } from '../libs/api-client.ts'
 
 export type ProfileUpdateRequestDto = {
   imgUrl?: string

@@ -57,4 +57,4 @@ export async function getUserProfile(): Promise<UserProfile> {
   ])
   return toUserProfile(profile, character)
 }
-import { getCharacterInfo, getProfile } from './profile'
+import { getCharacterInfo, getProfile } from './profile.ts'

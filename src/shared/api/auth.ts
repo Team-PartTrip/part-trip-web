@@ -1,4 +1,4 @@
-import { apiClient } from './client'
+import { apiClient } from '../libs/api-client'
 
 // === Swagger DTO Types ===
 
@@ -17,7 +17,6 @@ export type RefreshRequestDto = {
 export type TokenResponseDto = {
   accessToken: string
   refreshToken: string
-  surveyCompleted?: boolean
 }
 
 export type EmailVerifyRequestDto = {
@@ -57,7 +56,6 @@ export type UserEntity = {
   nickName?: string
   myCountry: string
   createDate?: string
-  surveyCompleted?: boolean
   imgUrl?: string
   characterId?: string
   userLevel?: number

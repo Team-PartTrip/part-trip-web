@@ -1,4 +1,4 @@
-import { apiClient } from './client'
+import { apiClient } from '../libs/api-client'
 
 export type BoardRequestDto = {
   title?: string

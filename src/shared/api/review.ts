@@ -1,4 +1,4 @@
-import { apiClient } from './client'
+import { apiClient } from '../libs/api-client'
 import { type CommentRequestDto, type CommentResponseDto } from './board'
 
 export type ReviewRequestDto = {

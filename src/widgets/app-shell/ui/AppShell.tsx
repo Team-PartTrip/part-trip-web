@@ -1,8 +1,8 @@
 import { useState, type ReactNode } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { paths } from '@shared/config'
-import { MENUS } from '@widgets/sidebar'
-import { Sidebar } from '@widgets/sidebar'
+import { useNavigate } from '@/shared/libs/router'
+import { paths } from '@/shared/config'
+import { MENUS } from '@/widgets/sidebar'
+import { Sidebar } from '@/widgets/sidebar'
 
 import * as S from './AppShell.styles'
 

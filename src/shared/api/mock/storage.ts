@@ -1,7 +1,3 @@
-export const MOCK_STORAGE_KEYS = {
-  diagnosisResult: 'parttrip.demo.diagnosis-result',
-} as const
-
 export function waitForMock(delay = 450) {
   return new Promise<void>((resolve) => {
     window.setTimeout(resolve, delay)
