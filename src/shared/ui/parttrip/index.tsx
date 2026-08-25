@@ -109,7 +109,7 @@ export const Badge = styled.span`
   justify-content: center;
   border-radius: ${({ theme }) => theme.radii.round};
   padding: 4px 8px;
-  background: #e8f2ff;
+  background: var(--pt-bg-info);
   color: ${({ theme }) => theme.colors.brand.strong};
   font-size: 12px;
   font-weight: 500;
@@ -156,6 +156,23 @@ export const Input = styled.input`
 
   &::placeholder {
     color: ${({ theme }) => theme.colors.text.placeholder};
+  }
+`
+
+export const Select = styled.select`
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  border: 1px solid ${({ theme }) => theme.colors.border.default};
+  border-radius: ${({ theme }) => theme.radii.md};
+  padding: 0 12px;
+  background: ${({ theme }) => theme.colors.background.soft};
+  color: ${({ theme }) => theme.colors.text.strong};
+  outline: none;
+
+  &:focus {
+    border-color: ${({ theme }) => theme.colors.brand.primary};
+    box-shadow: ${({ theme }) => theme.shadows.inputFocus};
   }
 `
 

@@ -11,10 +11,10 @@ export const Form = styled.form`
   flex-direction: column;
   gap: 20px;
   overflow: hidden;
-  border: 1px solid #e0e9f4;
+  border: 1px solid var(--pt-border-subtle);
   border-radius: 26px;
   padding: 28px 32px 24px;
-  background: #fff;
+  background: var(--pt-bg-default);
   box-shadow: 0 24px 70px rgb(13 31 64 / 22%);
   transform: translate(-50%, -50%);
 
@@ -33,8 +33,8 @@ export const Header = styled.header`
   justify-content: space-between;
   gap: 20px;
 
-  h1 { margin: 0; color: #111827; font-size: 28px; line-height: 38px; letter-spacing: -1.1px; }
-  p { margin: 2px 0 0; color: #727780; font-size: 13px; }
+  h1 { margin: 0; color: var(--pt-text-strong); font-size: 28px; line-height: 38px; letter-spacing: -1.1px; }
+  p { margin: 2px 0 0; color: var(--pt-text-muted); font-size: 13px; }
 `
 
 export const CloseButton = styled.button`
@@ -42,16 +42,16 @@ export const CloseButton = styled.button`
   width: 40px;
   height: 40px;
   flex: 0 0 40px;
-  border: 1px solid #dde7f3;
+  border: 1px solid var(--pt-border-subtle);
   border-radius: 50%;
   place-items: center;
-  background: #f7fafe;
-  color: #727780;
+  background: var(--pt-bg-subtle);
+  color: var(--pt-text-muted);
   cursor: pointer;
   font-size: 24px;
   line-height: 1;
 
-  &:hover { background: #edf5fc; color: #1a6ebf; }
+  &:hover { background: var(--pt-bg-muted); color: var(--pt-brand-primary); }
   &:focus-visible { outline: 3px solid rgb(26 110 191 / 18%); }
 `
 
@@ -74,10 +74,10 @@ export const EditorColumn = styled.div`
 `
 
 export const Section = styled.section`
-  border: 1px solid #e7edf7;
+  border: 1px solid var(--pt-border-subtle);
   border-radius: 16px;
   padding: 16px;
-  background: #fff;
+  background: var(--pt-bg-default);
 `
 
 export const SectionHeading = styled.div`
@@ -87,8 +87,8 @@ export const SectionHeading = styled.div`
   gap: 12px;
   margin-bottom: 12px;
 
-  strong { color: #1e293b; font-size: 15px; }
-  span { color: #8b95a3; font-size: 11px; text-align: right; }
+  strong { color: var(--pt-text-strong); font-size: 15px; }
+  span { color: var(--pt-text-muted); font-size: 11px; text-align: right; }
 
   @media (max-width: 30rem) { align-items: flex-start; flex-direction: column; gap: 2px; }
 `
@@ -105,11 +105,11 @@ export const PhotoPreview = styled.div`
   height: 76px;
   flex: 0 0 76px;
   overflow: hidden;
-  border: 1px solid #d8dddd;
+  border: 1px solid var(--pt-border-soft);
   border-radius: 50%;
   place-items: center;
-  background: #e6ecf3;
-  color: #627085;
+  background: var(--pt-border-subtle);
+  color: var(--pt-text-muted);
   font-size: 28px;
   font-weight: 700;
 
@@ -128,29 +128,29 @@ export const PhotoButton = styled.label`
   align-items: center;
   border-radius: 10px;
   padding: 0 14px;
-  background: #1a6ebf;
-  color: #fff;
+  background: var(--pt-brand-primary);
+  color: var(--pt-text-inverse);
   cursor: pointer;
   font-size: 13px;
   font-weight: 700;
 
   input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-  &:hover { background: #075caa; }
+  &:hover { background: var(--pt-brand-primary); }
   &:focus-within { outline: 3px solid rgb(26 110 191 / 18%); outline-offset: 2px; }
 `
 
 export const ResetPhotoButton = styled.button`
   height: 38px;
-  border: 1px solid #dde7f3;
+  border: 1px solid var(--pt-border-subtle);
   border-radius: 10px;
   padding: 0 13px;
-  background: #fff;
-  color: #526071;
+  background: var(--pt-bg-default);
+  color: var(--pt-text-muted);
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
 
-  &:hover { background: #f7fafe; }
+  &:hover { background: var(--pt-bg-subtle); }
 `
 
 export const Field = styled.label`
@@ -158,25 +158,25 @@ export const Field = styled.label`
   min-width: 0;
   flex-direction: column;
   gap: 6px;
-  color: #404752;
+  color: var(--pt-text-muted);
   font-size: 12px;
   font-weight: 600;
 
   input {
     width: 100%;
     height: 42px;
-    border: 1px solid #dde7f3;
+    border: 1px solid var(--pt-border-subtle);
     border-radius: 12px;
     padding: 0 14px;
-    background: #f7fafe;
-    color: #273244;
+    background: var(--pt-bg-subtle);
+    color: var(--pt-text-strong);
     font: inherit;
     font-size: 14px;
     outline: none;
   }
 
-  input:focus { border-color: #1a6ebf; box-shadow: 0 0 0 3px rgb(26 110 191 / 12%); }
-  input[aria-invalid='true'] { border-color: #dc2626; }
+  input:focus { border-color: var(--pt-brand-primary); box-shadow: 0 0 0 3px rgb(26 110 191 / 12%); }
+  input[aria-invalid='true'] { border-color: var(--pt-status-error); }
 `
 
 export const PasswordGrid = styled.div`
@@ -194,16 +194,16 @@ export const Preview = styled.aside`
   min-height: 430px;
   align-items: center;
   flex-direction: column;
-  border: 1px solid #e0e9f4;
+  border: 1px solid var(--pt-border-subtle);
   border-radius: 22px;
   padding: 24px 22px;
-  background: #f7fafe;
+  background: var(--pt-bg-subtle);
   text-align: center;
 
-  h2 { width: 100%; margin: 0; color: #111827; font-size: 22px; line-height: 30px; text-align: left; }
-  h3 { max-width: 100%; overflow: hidden; margin: 18px 0 0; color: #111827; font-size: 24px; line-height: 32px; text-overflow: ellipsis; white-space: nowrap; }
-  p { margin: 3px 0 0; color: #1a6ebf; font-size: 14px; font-weight: 600; }
-  small { margin-top: auto; color: #8b95a3; font-size: 11px; line-height: 16px; }
+  h2 { width: 100%; margin: 0; color: var(--pt-text-strong); font-size: 22px; line-height: 30px; text-align: left; }
+  h3 { max-width: 100%; overflow: hidden; margin: 18px 0 0; color: var(--pt-text-strong); font-size: 24px; line-height: 32px; text-overflow: ellipsis; white-space: nowrap; }
+  p { margin: 3px 0 0; color: var(--pt-brand-primary); font-size: 14px; font-weight: 600; }
+  small { margin-top: auto; color: var(--pt-text-muted); font-size: 11px; line-height: 16px; }
 
   @media (max-width: 47.9375rem) { position: static; min-height: 300px; }
 `
@@ -214,11 +214,11 @@ export const PreviewAvatar = styled.div`
   height: 124px;
   overflow: hidden;
   margin-top: 36px;
-  border: 1px solid #d8dddd;
+  border: 1px solid var(--pt-border-soft);
   border-radius: 50%;
   place-items: center;
-  background: #e6ecf3;
-  color: #627085;
+  background: var(--pt-border-subtle);
+  color: var(--pt-text-muted);
   font-size: 44px;
   font-weight: 700;
 
@@ -226,14 +226,14 @@ export const PreviewAvatar = styled.div`
 `
 
 export const FieldError = styled.span`
-  color: #dc2626;
+  color: var(--pt-status-error);
   font-size: 11px;
   font-weight: 500;
 `
 
 export const ErrorMessage = styled.p`
   margin: 8px 0 0;
-  color: #dc2626;
+  color: var(--pt-status-error);
   font-size: 12px;
 `
 
@@ -242,7 +242,7 @@ export const Actions = styled.div`
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  border-top: 1px solid #edf1f6;
+  border-top: 1px solid var(--pt-border-subtle);
   padding-top: 18px;
 `
 
@@ -259,5 +259,5 @@ const Button = styled.button`
   &:focus-visible { outline: 3px solid rgb(26 110 191 / 18%); outline-offset: 2px; }
 `
 
-export const CancelButton = styled(Button)`min-width: 88px; border: 1px solid #dde7f3; background: #fff; color: #526071;`
-export const SaveButton = styled(Button)`min-width: 134px; border: 0; background: #1a6ebf; color: #fff;`
+export const CancelButton = styled(Button)`min-width: 88px; border: 1px solid var(--pt-border-subtle); background: var(--pt-bg-default); color: var(--pt-text-muted);`
+export const SaveButton = styled(Button)`min-width: 134px; border: 0; background: var(--pt-brand-primary); color: var(--pt-text-inverse);`

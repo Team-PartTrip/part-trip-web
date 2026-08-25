@@ -75,8 +75,8 @@ export const SearchLabel = styled.label`
   gap: 0.875rem;
   border-radius: 999rem;
   padding: 0 1rem;
-  background: #ffffff;
-  color: #657080;
+  background: var(--pt-bg-default);
+  color: var(--pt-text-muted);
 
   > svg {
     width: 1.125rem;
@@ -90,12 +90,12 @@ export const SearchLabel = styled.label`
     border: 0;
     outline: 0;
     background: transparent;
-    color: #303640;
+    color: var(--pt-text-strong);
     font: inherit;
     font-size: 0.875rem;
 
     &::placeholder {
-      color: #727780;
+      color: var(--pt-text-muted);
     }
   }
 
@@ -137,7 +137,7 @@ export const SectionHeader = styled.div`
 
   h2 {
     margin: 0;
-    color: #191c1e;
+    color: var(--pt-text-strong);
     font-size: 1.25rem;
     font-weight: 600;
     line-height: 1.75rem;
@@ -147,7 +147,7 @@ export const SectionHeader = styled.div`
     border: 0;
     padding: 0;
     background: transparent;
-    color: #1478c8;
+    color: var(--pt-brand-primary);
     cursor: pointer;
     font: inherit;
     font-size: 0.875rem;
@@ -166,7 +166,7 @@ export const SectionHeader = styled.div`
 
 export const EmptyRecent = styled.p`
   margin: 1.5rem 0 0;
-  color: #727780;
+  color: var(--pt-text-muted);
   font-size: 0.8125rem;
 `
 
@@ -177,10 +177,10 @@ export const RecentChip = styled.div`
   align-items: center;
   gap: 0.75rem;
   margin-top: 1.5rem;
-  border: 0.0625rem solid #c5ccd8;
+  border: 0.0625rem solid var(--pt-border-default);
   border-radius: 0.625rem;
   padding: 0.5rem 1rem;
-  background: #ffffff;
+  background: var(--pt-bg-default);
   box-shadow: 0 0.0625rem 0.125rem rgb(0 0 0 / 5%);
 
   > span:first-child {
@@ -189,7 +189,7 @@ export const RecentChip = styled.div`
     height: 1.5rem;
     place-items: center;
     border-radius: 0.25rem;
-    background: #f5f6f7;
+    background: var(--pt-bg-soft);
 
     img {
       display: block;
@@ -203,7 +203,7 @@ export const RecentChip = styled.div`
     display: flex;
     flex: 1;
     flex-direction: column;
-    color: #303640;
+    color: var(--pt-text-strong);
 
     strong { font-size: 0.75rem; font-weight: 500; }
     small { font-size: 0.625rem; }
@@ -215,7 +215,7 @@ export const RecentChip = styled.div`
     padding: 0;
     place-items: center;
     background: transparent;
-    color: #5f6875;
+    color: var(--pt-text-muted);
     cursor: pointer;
   }
 
@@ -234,7 +234,7 @@ export const PopularSection = styled.section`
 
   > h2 {
     margin: 0 0 1.25rem;
-    color: #191c1e;
+    color: var(--pt-text-strong);
     font-size: 1.25rem;
     font-weight: 600;
     line-height: 1.75rem;
@@ -265,7 +265,7 @@ export const DestinationGrid = styled.div`
 
 export const ResultState = styled.p`
   margin: 2rem 0;
-  color: #727780;
+  color: var(--pt-text-muted);
   text-align: center;
 `
 
@@ -280,7 +280,7 @@ export const DestinationCard = styled.button<{ $imageUrl: string }>`
     linear-gradient(0deg, rgb(0 0 0 / 80%), transparent 50%),
     url('${({ $imageUrl }) => $imageUrl}') center / 104.35% 100% no-repeat;
   box-shadow: 0 0.0625rem 0.125rem rgb(0 0 0 / 5%);
-  color: #ffffff;
+  color: var(--pt-text-inverse);
   cursor: pointer;
 
   &:hover:not(:disabled) {

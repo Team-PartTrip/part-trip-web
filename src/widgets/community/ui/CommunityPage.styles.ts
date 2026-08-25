@@ -3,7 +3,7 @@ import styled from 'styled-components'
 export const Page = styled.main`
   min-height: 100%;
   background: transparent;
-  color: #191c1e;
+  color: var(--pt-text-strong);
 `
 
 export const Logo = styled.img`display: block;`
@@ -34,10 +34,10 @@ export const Tabs = styled.div`
   margin: 16px 0 40px 4px;
   border-radius: 999px;
   padding: 4px;
-  background: #eceef0;
+  background: var(--pt-border-subtle);
 
   button { height: 36px; border: 0; border-radius: 999px; padding: 0 24px; background: transparent; cursor: pointer; font: inherit; font-size: 14px; }
-  button.active { background: #1a6ebf; color: #fff; box-shadow: 0 1px 1px rgb(0 0 0 / 5%); }
+  button.active { background: var(--pt-brand-primary); color: var(--pt-text-inverse); box-shadow: 0 1px 1px rgb(0 0 0 / 5%); }
 `
 
 export const Layout = styled.div`
@@ -67,7 +67,7 @@ export const Feed = styled.div`
 export const FeedStatus = styled.p`
   grid-column: 1 / -1;
   margin: 2rem 0;
-  color: #727780;
+  color: var(--pt-text-muted);
   text-align: center;
 `
 
@@ -97,18 +97,18 @@ export const Author = styled.div`
   img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
   div { display: flex; flex-direction: column; }
   strong { font-size: 16px; font-weight: 400; line-height: 24px; }
-  span { color: #717784; font-size: 12px; line-height: 16px; }
+  span { color: var(--pt-text-muted); font-size: 12px; line-height: 16px; }
 `
 
 export const QuestionCard = styled.article`
   min-height: 302px;
-  border: 1px solid #e4e2e2;
+  border: 1px solid var(--pt-border-default);
   border-radius: 20px;
   padding: 16px;
-  background: #fff;
+  background: var(--pt-bg-default);
   box-shadow: 0 1px 2px rgb(0 0 0 / 5%);
 
-  h2 { margin: 16px 0 8px; color: #005da6; font-size: 16px; line-height: 24px; }
+  h2 { margin: 16px 0 8px; color: var(--pt-brand-primary); font-size: 16px; line-height: 24px; }
   > p { margin: 0; font-size: 16px; font-weight: 500; line-height: 24px; word-break: keep-all; }
 `
 
@@ -117,20 +117,20 @@ export const Reactions = styled.div`
   gap: 24px;
   align-items: center;
   margin-top: 20px;
-  color: #404752;
+  color: var(--pt-text-muted);
   font-size: 25px;
 
   span { display: flex; gap: 7px; align-items: center; }
   b { font-size: 16px; font-weight: 400; }
-  .heart { color: #d82332; }
-  .heart b { color: #404752; }
+  .heart { color: var(--pt-status-error); }
+  .heart b { color: var(--pt-text-muted); }
 `
 
 export const PhotoCard = styled.article`
   overflow: hidden;
   border: 1px solid rgb(192 199 212 / 30%);
   border-radius: 10px;
-  background: #fff;
+  background: var(--pt-bg-default);
   box-shadow: 0 1px 2px rgb(0 0 0 / 5%);
 
   > ${Author} { padding: 16px; }
@@ -157,13 +157,13 @@ export const MorePhoto = styled.div`
   overflow: hidden;
   border-radius: 12px;
   img { width: 100%; height: 154px; object-fit: cover; filter: brightness(55%); }
-  span { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: 20px; }
+  span { position: absolute; inset: 0; display: grid; place-items: center; color: var(--pt-text-inverse); font-size: 20px; }
 `
 
 export const PhotoCopy = styled.div`
   padding: 16px 16px 0;
-  h2 { margin: 0 0 8px; color: #005da6; font-size: 16px; line-height: 24px; }
-  p { margin: 0; color: #424656; font-size: 16px; line-height: 24px; }
+  h2 { margin: 0 0 8px; color: var(--pt-brand-primary); font-size: 16px; line-height: 24px; }
+  p { margin: 0; color: var(--pt-text-muted); font-size: 16px; line-height: 24px; }
 `
 
 export const Aside = styled.aside`
@@ -189,8 +189,8 @@ export const CreateButton = styled.button`
   height: 56px;
   border: 0;
   border-radius: 24px;
-  background: #1a6ebf;
-  color: #fff;
+  background: var(--pt-brand-primary);
+  color: var(--pt-text-inverse);
   cursor: pointer;
   font-size: 16px;
   font-weight: 500;
@@ -201,14 +201,14 @@ export const Trending = styled.section`
   display: flex;
   flex-direction: column;
   gap: 16px;
-  border: 1px solid #c2c6d8;
+  border: 1px solid var(--pt-border-default);
   border-radius: 32px;
   padding: 25px;
-  background: #fff;
+  background: var(--pt-bg-default);
 
   header { display: flex; align-items: center; justify-content: space-between; }
   h2 { margin: 0; font-size: 20px; font-weight: 500; line-height: 28px; }
-  header button { border: 0; padding: 0; background: transparent; color: #0050cb; cursor: pointer; font-size: 12px; }
+  header button { border: 0; padding: 0; background: transparent; color: var(--pt-brand-primary); cursor: pointer; font-size: 12px; }
 `
 
 export const Destination = styled.div`
@@ -218,5 +218,5 @@ export const Destination = styled.div`
   img { width: 64px; height: 64px; border-radius: 16px; object-fit: cover; }
   div { display: flex; flex: 1; flex-direction: column; }
   strong { font-size: 14px; font-weight: 500; line-height: 20px; }
-  span { color: #424656; font-size: 12px; line-height: 16px; }
+  span { color: var(--pt-text-muted); font-size: 12px; line-height: 16px; }
 `

@@ -77,7 +77,7 @@ export const AccountButton = styled.button`
   border: 0;
   padding: 0;
   background: transparent;
-  color: #000000;
+  color: var(--pt-text-strong);
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;

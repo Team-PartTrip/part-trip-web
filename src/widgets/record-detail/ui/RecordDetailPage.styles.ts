@@ -23,32 +23,32 @@ export const TopBar = styled.header`
   h1 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 32px; line-height: 40px; }
   p { margin: 6px 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 15px; }
   > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; }
-  button { border: 0; border-radius: 10px; padding: 10px 14px; background: transparent; color: #1a6ebf; cursor: pointer; font: inherit; font-weight: 700; }
-  button:last-child { background: #1a6ebf; color: #fff; }
+  button { border: 0; border-radius: 10px; padding: 10px 14px; background: transparent; color: var(--pt-brand-primary); cursor: pointer; font: inherit; font-weight: 700; }
+  button:last-child { background: var(--pt-brand-primary); color: var(--pt-text-inverse); }
 `
 
 export const ErrorMessage = styled.p`
   margin: 0 0 16px;
   border-radius: 10px;
   padding: 12px 16px;
-  background: #fff1f2;
-  color: #b42318;
+  background: var(--pt-bg-error);
+  color: var(--pt-status-error);
 `
 
 export const EditForm = styled.form`
   display: grid;
   gap: 18px;
-  border: 1px solid #e1e9f3;
+  border: 1px solid var(--pt-border-subtle);
   border-radius: 24px;
   padding: 28px;
-  background: #fff;
+  background: var(--pt-bg-default);
   h1 { margin: 0; }
   label { display: grid; gap: 8px; font-weight: 700; }
-  input, textarea { width: 100%; border: 1px solid #dce6f2; border-radius: 10px; padding: 12px; font: inherit; }
+  input, textarea { width: 100%; border: 1px solid var(--pt-border-default); border-radius: 10px; padding: 12px; font: inherit; }
   textarea { min-height: 180px; resize: vertical; }
   > div:last-child { display: flex; justify-content: flex-end; gap: 8px; }
   button { border: 0; border-radius: 9px; padding: 10px 18px; cursor: pointer; }
-  button[type='submit'] { background: #1a6ebf; color: #fff; }
+  button[type='submit'] { background: var(--pt-brand-primary); color: var(--pt-text-inverse); }
 `
 
 export const DateFields = styled.div`
@@ -77,7 +77,7 @@ export const RecordPhoto = styled.div`
   min-width: 0;
   overflow: hidden;
   border-radius: 28px;
-  background: #dcecf6;
+  background: var(--pt-bg-muted);
   img { display: block; width: 100%; height: 560px; object-fit: cover; }
   @media (max-width: 900px) { img { height: 360px; } }
 `
@@ -103,7 +103,7 @@ export const RecordDetailCard = styled.section`
 export const Badge = styled.span`
   border-radius: 999px;
   padding: 4px 8px;
-  background: #e8f2ff;
+  background: var(--pt-bg-info);
   color: ${({ theme }) => theme.colors.brand.strong};
   font-size: 12px;
 `
@@ -124,18 +124,18 @@ export const Body = styled.section`
 `
 
 const Panel = styled.section`
-  border: 1px solid #e1e9f3;
+  border: 1px solid var(--pt-border-subtle);
   border-radius: 20px;
   padding: 22px;
-  background: #fff;
+  background: var(--pt-bg-default);
   h2 { margin: 0 0 14px; font-size: 20px; }
 `
 
 export const Schedule = styled(Panel)`
-  article { display: grid; grid-template-columns: 72px 1fr; gap: 12px; border-top: 1px solid #edf2f7; padding: 14px 0; }
+  article { display: grid; grid-template-columns: 72px 1fr; gap: 12px; border-top: 1px solid var(--pt-border-subtle); padding: 14px 0; }
   article:first-of-type { border-top: 0; padding-top: 0; }
-  strong { color: #1a6ebf; font-size: 13px; }
-  ul { margin: 0; padding-left: 18px; color: #5f6670; font-size: 14px; line-height: 1.7; }
+  strong { color: var(--pt-brand-primary); font-size: 13px; }
+  ul { margin: 0; padding-left: 18px; color: var(--pt-text-muted); font-size: 14px; line-height: 1.7; }
 `
 
 export const MapPanel = styled.aside`
@@ -145,18 +145,18 @@ export const MapPanel = styled.aside`
   height: 100%;
   min-height: 540px;
   overflow: hidden;
-  border: 1px solid #d8e4f0;
+  border: 1px solid var(--pt-border-subtle);
   border-radius: 24px;
-  background: #dcecf6;
+  background: var(--pt-bg-muted);
   > div:last-child { position: absolute; right: 20px; bottom: 20px; left: 20px; display: flex; flex-direction: column; border-radius: 14px; padding: 14px; background: rgb(255 255 255 / 92%); }
-  span { color: #727780; font-size: 12px; }
+  span { color: var(--pt-text-muted); font-size: 12px; }
   @media (max-width: 61.25rem) { grid-column: 1; grid-row: auto; min-height: 300px; }
 `
 
 export const MapGrid = styled.div`
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(rgb(255 255 255 / 45%) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / 45%) 1px, transparent 1px), linear-gradient(35deg, transparent 44%, #b5d5e8 45% 48%, transparent 49%);
+  background-image: linear-gradient(rgb(255 255 255 / 45%) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / 45%) 1px, transparent 1px), linear-gradient(35deg, transparent 44%, var(--pt-border-subtle) 45% 48%, transparent 49%);
   background-size: 42px 42px, 42px 42px, 180px 180px;
 `
 
@@ -170,8 +170,8 @@ export const MapPin = styled.span`
   place-items: center;
   border: 8px solid rgb(255 255 255 / 85%);
   border-radius: 50%;
-  background: #1a6ebf;
-  color: #fff !important;
+  background: var(--pt-brand-primary);
+  color: var(--pt-text-inverse) !important;
   box-shadow: 0 8px 20px rgb(26 110 191 / 35%);
 `
 
@@ -183,10 +183,10 @@ export const StateCard = styled.div`
   gap: 10px;
   border-radius: 24px;
   padding: 30px;
-  background: #fff;
-  color: #727780;
+  background: var(--pt-bg-default);
+  color: var(--pt-text-muted);
   text-align: center;
   h1, p { margin: 0; }
-  h1 { color: #111827; font-size: 24px; }
-  button { margin-top: 10px; border: 0; border-radius: 10px; padding: 12px 18px; background: #1a6ebf; color: #fff; cursor: pointer; }
+  h1 { color: var(--pt-text-strong); font-size: 24px; }
+  button { margin-top: 10px; border: 0; border-radius: 10px; padding: 12px 18px; background: var(--pt-brand-primary); color: var(--pt-text-inverse); cursor: pointer; }
 `

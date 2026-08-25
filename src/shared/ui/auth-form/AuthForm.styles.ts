@@ -71,10 +71,10 @@ export const Input = styled.input<InputProps>`
   width: 100%;
   height: ${({ $compact }) => ($compact ? '36px' : '44px')};
   min-width: 0;
-  border: 1px solid #d5dee6;
+  border: 1px solid var(--pt-border-default);
   border-radius: 12px;
   padding: 0 16px;
-  background: #f7f9fb;
+  background: var(--pt-bg-soft);
   color: ${({ theme }) => theme.colors.text.strong};
   font-size: 16px;
   outline: none;
@@ -85,7 +85,7 @@ export const Input = styled.input<InputProps>`
   }
 
   &:disabled { cursor: not-allowed; opacity: 0.6; }
-  &::placeholder { color: #91a2b5; }
+  &::placeholder { color: var(--pt-text-placeholder); }
 `
 
 const buttonStyles = css`

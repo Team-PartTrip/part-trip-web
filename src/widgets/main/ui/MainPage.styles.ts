@@ -178,7 +178,7 @@ export const ProgressTrack = styled.div`
   height: 8px;
   overflow: hidden;
   border-radius: 4px;
-  background: #e3ebf2;
+  background: var(--pt-border-subtle);
 `
 
 export const ProgressBar = styled.div<{ $progress: number }>`
@@ -206,7 +206,7 @@ export const StatusItem = styled.div`
   font-size: 11px;
 
   b { color: ${({ theme }) => theme.colors.brand.successStrong}; font-size: 13px; }
-  b[data-warning='true'] { color: #ff7a35; }
+  b[data-warning='true'] { color: var(--pt-status-warning); }
 `
 
 export const TodoButton = styled.button`

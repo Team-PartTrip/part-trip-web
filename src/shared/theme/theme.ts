@@ -2,9 +2,12 @@ export const appTheme = {
   colors: {
     background: {
       default: '#ffffff',
+      error: '#fff1f2',
+      info: '#e8f2ff',
       muted: '#ebf4fc',
       soft: '#f7f9fb',
       subtle: '#f7fafd',
+      warning: '#fff3e8',
     },
     border: {
       default: '#d5dee6',
@@ -29,6 +32,7 @@ export const appTheme = {
     status: {
       error: '#dc2626',
       success: '#087f5b',
+      warning: '#b65300',
     },
     text: {
       default: '#1a3d5c',

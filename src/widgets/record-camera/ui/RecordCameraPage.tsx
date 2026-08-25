@@ -8,7 +8,7 @@ import {
 } from '@/entities/travel-record'
 import { paths } from '@/shared/config'
 import { useMyTrips } from '@/entities/trip-plan'
-import { Button as PartTripButton, Input as PartTripInput, Textarea as PartTripTextarea } from '@/shared/ui/parttrip'
+import { Button as PartTripButton, Input as PartTripInput, Select as PartTripSelect, Textarea as PartTripTextarea } from '@/shared/ui/parttrip'
 import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './RecordCameraPage.styles'
@@ -72,7 +72,7 @@ export function RecordCameraPage() {
       <S.Page>
         <S.Header><div><S.Title>촬영 기록 분석</S.Title><S.Subtitle>사진을 올리면 장소와 여행 정보를 분석합니다.</S.Subtitle></div><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.record })}>여행 기록</PartTripButton></S.Header>
         <S.Form onSubmit={(event) => void handleSubmit(event)}>
-          <S.Field><label htmlFor="camera-travel">여행</label><select id="camera-travel" value={travelId} onChange={(event) => setTravelId(event.target.value)} disabled={isLoading}><option value="">여행을 선택하세요</option>{trips.map((trip) => <option key={trip.tripId} value={trip.tripId}>{trip.title || `${trip.cityName || trip.countryName || '여행'} 기록`}</option>)}</select></S.Field>
+          <S.Field><label htmlFor="camera-travel">여행</label><PartTripSelect id="camera-travel" value={travelId} onChange={(event) => setTravelId(event.target.value)} disabled={isLoading}><option value="">여행을 선택하세요</option>{trips.map((trip) => <option key={trip.tripId} value={trip.tripId}>{trip.title || `${trip.cityName || trip.countryName || '여행'} 기록`}</option>)}</PartTripSelect></S.Field>
           <S.Field><label htmlFor="camera-image">사진</label><input id="camera-image" type="file" accept="image/*" onChange={(event) => setImageFile(event.target.files?.[0] ?? null)} /><small>{imageFile?.name || '분석할 사진을 선택하세요.'}</small></S.Field>
           <S.LocationBox><div><strong>촬영 위치</strong><span>{latitude != null && longitude != null ? `${latitude.toFixed(5)}, ${longitude.toFixed(5)}` : '위치가 입력되지 않았습니다.'}</span></div><PartTripButton type="button" $variant="secondary" onClick={() => void handleLocation}>현재 위치 가져오기</PartTripButton></S.LocationBox>
           {errorMessage ? <S.Error role="alert">{errorMessage}</S.Error> : null}

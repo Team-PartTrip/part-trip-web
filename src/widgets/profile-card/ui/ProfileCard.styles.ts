@@ -1,9 +1,9 @@
 import styled from 'styled-components'
 
 const panel = `
-  border: 1px solid #e7edf7;
+  border: 1px solid var(--pt-border-subtle);
   border-radius: 24px;
-  background: #fff;
+  background: var(--pt-bg-default);
   box-shadow: 0 8px 16px rgb(13 31 64 / 8%);
 `
 
@@ -43,9 +43,9 @@ export const Avatar = styled.div`
   width: 112px;
   height: 112px;
   flex: 0 0 112px;
-  border: 1px solid #d8dddd;
+  border: 1px solid var(--pt-border-soft);
   border-radius: 50%;
-  background: #e6ecf3;
+  background: var(--pt-border-subtle);
   overflow: hidden;
 
   img { display: block; width: 100%; height: 100%; object-fit: cover; }
@@ -65,8 +65,8 @@ export const BasicInfo = styled.div`
   justify-content: center;
   gap: 8px;
 
-  h1 { margin: 0; color: #111827; font-size: 34px; line-height: 46px; letter-spacing: -1.36px; }
-  p { margin: 0; color: #1a6ebf; font-size: 16px; font-weight: 600; line-height: 22px; }
+  h1 { margin: 0; color: var(--pt-text-strong); font-size: 34px; line-height: 46px; letter-spacing: -1.36px; }
+  p { margin: 0; color: var(--pt-brand-primary); font-size: 16px; font-weight: 600; line-height: 22px; }
 
   @media (max-width: 40rem) {
     width: auto;
@@ -82,8 +82,8 @@ export const EditButton = styled.button`
   flex: 0 0 118px;
   border: 0;
   border-radius: 10px;
-  background: #1a6ebf;
-  color: #fff;
+  background: var(--pt-brand-primary);
+  color: var(--pt-text-inverse);
   cursor: pointer;
   font-size: 15px;
   font-weight: 600;
@@ -121,8 +121,8 @@ export const PanelTitle = styled.header`
   align-items: flex-start;
   justify-content: space-between;
   h2 { margin: 0; font-size: 24px; line-height: 32px; }
-  p { margin: 2px 0 0; color: #727780; font-size: 13px; }
-  > strong { flex: 0 0 auto; padding-top: 12px; color: #1a6ebf; font-size: 14px; white-space: nowrap; }
+  p { margin: 2px 0 0; color: var(--pt-text-muted); font-size: 13px; }
+  > strong { flex: 0 0 auto; padding-top: 12px; color: var(--pt-brand-primary); font-size: 14px; white-space: nowrap; }
 
   @media (max-width: 40rem) {
     height: auto;
@@ -175,19 +175,19 @@ export const TypePanel = styled.section`
   > h2 { width: 100%; margin: 0; font-size: 24px; line-height: 32px; }
   > img { width: clamp(170px, 26.48vh, 260px); height: clamp(170px, 26.48vh, 260px); margin-top: clamp(14px, 2.44vh, 24px); object-fit: contain; }
   > h3 { margin: -4px 0 3px; font-size: 24px; line-height: 32px; }
-  > span { color: #a6a6a6; font-size: 15px; }
+  > span { color: var(--pt-text-muted); font-size: 15px; }
 `
 
 export const TypeDescription = styled.div`
   width: 100%;
   min-height: clamp(108px, 15.48vh, 152px);
   margin-top: clamp(14px, 3.77vh, 37px);
-  border: 1px solid #d8dddd;
+  border: 1px solid var(--pt-border-soft);
   border-radius: 10px;
   padding: 17px 10px;
   font-size: 13px;
   line-height: 18px;
-  strong { color: #1a6ebf; }
+  strong { color: var(--pt-brand-primary); }
   p { margin: 0; }
   p + p { margin-top: 14px; }
 
