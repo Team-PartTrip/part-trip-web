@@ -47,8 +47,8 @@ export function RecordCameraPage() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const selectedTravelId = Number(travelId)
-    if (!Number.isInteger(selectedTravelId) || !imageFile || latitude == null || longitude == null) {
+    const selectedTravelId = travelId.trim()
+    if (!selectedTravelId || !Number.isInteger(Number(selectedTravelId)) || !imageFile || latitude == null || longitude == null) {
       setErrorMessage('여행, 사진, 촬영 위치를 모두 입력해주세요.')
       return
     }
@@ -56,8 +56,8 @@ export function RecordCameraPage() {
       setErrorMessage('')
       const result = await uploadMutation.mutateAsync({
         imageFile,
-        latitude,
-        longitude,
+        latitude: String(latitude),
+        longitude: String(longitude),
         travelId: selectedTravelId,
       })
       if (result.imageId == null) throw new Error('imageId is missing')

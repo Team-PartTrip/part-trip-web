@@ -25,10 +25,10 @@ export type PhotoAnalysisResponseDto = {
 }
 
 export type GuideCameraUploadRequestDto = {
-  travelId: number
+  travelId: string
   imageFile: File
-  latitude: number
-  longitude: number
+  latitude: string
+  longitude: string
 }
 
 export type GuideCameraRecordRequestDto = {
