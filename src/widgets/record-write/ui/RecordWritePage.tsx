@@ -1,6 +1,7 @@
-import { useEffect, useState, type FormEvent } from 'react'
-import { useNavigate } from '@/shared/libs/router'
-import { createTrip, getCountries, type CountryInfoResponseDto } from '@/shared/api'
+import { useState, type FormEvent } from 'react'
+import { useNavigate } from '@tanstack/react-router'
+import { createTrip } from '@/entities/trip-plan/api'
+import { useCountriesQuery } from '@/entities/travel'
 import { createRecordDetailPath, paths } from '@/shared/config'
 import { AppShell } from '@/widgets/app-shell'
 
@@ -15,15 +16,7 @@ export function RecordWritePage() {
   const [memo, setMemo] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [countries, setCountries] = useState<CountryInfoResponseDto[]>([])
-
-  useEffect(() => {
-    let isMounted = true
-    void getCountries()
-      .then((nextCountries) => { if (isMounted) setCountries(nextCountries) })
-      .catch(() => { if (isMounted) setErrorMessage('여행지 목록을 불러오지 못했습니다.') })
-    return () => { isMounted = false }
-  }, [])
+  const { data: countries = [], isError: hasCountriesError } = useCountriesQuery()
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -59,7 +52,7 @@ export function RecordWritePage() {
         title: title.trim(),
       })
       if (!record.tripId) throw new Error('Created trip id is missing')
-      navigate(createRecordDetailPath(String(record.tripId)), { replace: true })
+      navigate({ to: createRecordDetailPath(String(record.tripId)) as never, replace: true })
     } catch {
       setErrorMessage('여행 기록을 저장하지 못했습니다. 다시 시도해주세요.')
     } finally {
@@ -70,7 +63,7 @@ export function RecordWritePage() {
   return (
     <AppShell>
       <S.Content>
-        <S.Header><div><h1>새 여행 기록</h1><p>기억하고 싶은 여행을 한곳에 남겨보세요.</p></div><button type="button" onClick={() => navigate(paths.record)}>취소</button></S.Header>
+        <S.Header><div><h1>새 여행 기록</h1><p>기억하고 싶은 여행을 한곳에 남겨보세요.</p></div><button type="button" onClick={() => navigate({ to: paths.record as never })}>취소</button></S.Header>
         <S.Layout>
           <S.Preview><div aria-hidden>⌖</div><strong>{destination || '여행지를 입력해주세요.'}</strong><span>{startDate && endDate ? `${startDate} - ${endDate}` : '여행 기간'}</span></S.Preview>
           <S.Form onSubmit={(event) => void handleSubmit(event)} noValidate>
@@ -78,8 +71,8 @@ export function RecordWritePage() {
             <S.Field><label htmlFor="record-destination">여행지</label><input id="record-destination" list="record-destinations" value={destination} onChange={(event) => setDestination(event.target.value)} placeholder="예: 싱가포르" maxLength={40} /><datalist id="record-destinations">{countries.map((country) => <option key={country.countryInfoId ?? `${country.countryName}-${country.cityName}`} value={country.countryName ?? country.cityName}>{country.cityName ? `${country.cityName}, ${country.countryName}` : country.countryName}</option>)}</datalist></S.Field>
             <S.DateFields><S.Field><label htmlFor="record-start">시작일</label><input id="record-start" type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} /></S.Field><S.Field><label htmlFor="record-end">종료일</label><input id="record-end" type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} /></S.Field></S.DateFields>
             <S.Field><label htmlFor="record-memo">여행 메모</label><textarea id="record-memo" value={memo} onChange={(event) => setMemo(event.target.value)} placeholder="여행에서 기억하고 싶은 순간을 작성하세요." maxLength={1000} /></S.Field>
-            {errorMessage ? <S.ErrorMessage role="alert">{errorMessage}</S.ErrorMessage> : null}
-            <S.Actions><button type="button" onClick={() => navigate(paths.record)}>취소</button><button type="submit" disabled={isSubmitting}>{isSubmitting ? '저장 중' : '기록 저장'}</button></S.Actions>
+            {errorMessage || hasCountriesError ? <S.ErrorMessage role="alert">{errorMessage || '여행지 목록을 불러오지 못했습니다.'}</S.ErrorMessage> : null}
+            <S.Actions><button type="button" onClick={() => navigate({ to: paths.record as never })}>취소</button><button type="submit" disabled={isSubmitting}>{isSubmitting ? '저장 중' : '기록 저장'}</button></S.Actions>
           </S.Form>
         </S.Layout>
       </S.Content>

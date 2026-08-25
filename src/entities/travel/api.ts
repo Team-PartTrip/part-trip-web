@@ -1,6 +1,6 @@
 import { isAxiosError } from 'axios'
-import { apiClient } from '../libs/api-client'
-import { isMissingTravelPlanResponse } from './mainError'
+import { apiClient } from '@/shared/libs/api-client'
+import { isMissingTravelPlanResponse } from './main-error'
 
 export type TravelPlanRequestDto = {
   countryName?: string

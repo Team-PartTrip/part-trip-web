@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
-import { getAccessToken } from '@/shared/api'
+import { getAccessToken } from '@/entities/session/api'
 
 export const Route = createFileRoute('/(app)/_authenticated')({
   beforeLoad: () => {

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { toUserProfile } from '../src/shared/api/profileModel.ts'
+import { toUserProfile } from '../src/entities/user/profile-model.ts'
 
 test('서버 프로필과 캐릭터 응답을 화면 프로필로 변환한다', () => {
   const profile = toUserProfile(

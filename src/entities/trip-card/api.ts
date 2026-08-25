@@ -1,5 +1,5 @@
-import { apiClient } from '../libs/api-client'
-import { type CommentRequestDto, type CommentResponseDto } from './board'
+import { apiClient } from '@/shared/libs/api-client'
+import { type CommentRequestDto, type CommentResponseDto } from '@/entities/community/board'
 
 export type ShareTripRequestDto = {
   tripId?: number

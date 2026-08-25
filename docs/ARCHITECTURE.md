@@ -56,7 +56,7 @@ src/
 └── routeTree.gen.ts
 ```
 
-현재 PartTrip은 directory/group route와 `main.tsx` bootstrap을 적용한 상태다. 화면 구현은 route 밖의 widgets/features에 있고, 일부 도메인 endpoint만 아직 `shared/api`에 남아 있다.
+현재 PartTrip은 directory/group route와 `main.tsx` bootstrap을 적용했고, 화면 구현은 route 밖의 widgets/features에 있다. 도메인 endpoint는 Entity별 API에 둔다.
 
 ## 3. 계층 책임
 

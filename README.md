@@ -42,7 +42,7 @@ src/
 - `main.tsx` 중심의 Provider와 Router 조립
 - `@/*` 단일 alias
 
-현재 PartTrip은 위 route group/directory 구조와 `main.tsx` bootstrap을 적용한 상태입니다. 일부 도메인 endpoint가 아직 `shared/api`에 남아 있어 Entity별 API로 점진 이동할 수 있습니다. 최종 정리 기준과 개선 원칙은 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)에 있습니다.
+현재 PartTrip은 위 route group/directory 구조와 `main.tsx` bootstrap을 적용했고, 도메인 endpoint를 Entity별 API로 분리했습니다. 최종 정리 기준과 개선 원칙은 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)에 있습니다.
 
 ## Layer rules
 

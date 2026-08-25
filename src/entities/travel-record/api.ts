@@ -1,4 +1,4 @@
-import { apiClient } from '../libs/api-client'
+import { apiClient } from '@/shared/libs/api-client'
 
 export type GuideCameraImageResponseDto = {
   imageId?: number

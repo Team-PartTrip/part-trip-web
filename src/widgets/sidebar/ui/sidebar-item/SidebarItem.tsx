@@ -1,4 +1,4 @@
-import { useLocation } from '@/shared/libs/router'
+import { useLocation } from '@tanstack/react-router'
 
 import * as S from './SidebarItem.style'
 

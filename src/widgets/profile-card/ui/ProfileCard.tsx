@@ -1,5 +1,5 @@
-import { useNavigate } from '@/shared/libs/router'
-import type { UserProfile } from '@/shared/api'
+import { useNavigate } from '@tanstack/react-router'
+import type { UserProfile } from '@/entities/user/api'
 import badge1Url from '@/shared/assets/profile-badge-1.png'
 import badge2Url from '@/shared/assets/profile-badge-2.png'
 import badge3Url from '@/shared/assets/profile-badge-3.png'
@@ -42,7 +42,7 @@ export function ProfileCard({ onEdit, profile }: ProfileCardProps) {
         <S.BasicInfo><h1>{profile.name}</h1><p>{profile.travelStyle}</p></S.BasicInfo>
         <S.EditButton
           type="button"
-          onClick={() => onEdit ? onEdit() : navigate(paths.profileEdit)}
+          onClick={() => onEdit ? onEdit() : navigate({ to: paths.profileEdit as never })}
         >
           프로필 수정
         </S.EditButton>

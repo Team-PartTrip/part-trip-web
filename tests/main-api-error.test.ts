@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { isMissingTravelPlanResponse } from '../src/shared/api/mainError.ts'
+import { isMissingTravelPlanResponse } from '../src/entities/travel/main-error.ts'
 
 test('등록된 여행 일정이 없다는 400 응답을 빈 상태로 구분한다', () => {
   assert.equal(isMissingTravelPlanResponse(400, '등록된 여행 일정이 없습니다.'), true)

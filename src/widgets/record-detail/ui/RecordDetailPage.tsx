@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from '@/shared/libs/router'
-import { deleteTrip, getTrip, updateTrip, type TripPlanResponseDto } from '@/shared/api'
+import { useState } from 'react'
+import { useNavigate, useParams } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
+import { deleteTrip, updateTrip } from '@/entities/trip-plan/api'
+import { tripPlanQueryKeys, useTripQuery } from '@/entities/trip-plan'
 import fallbackRecordImageUrl from '@/shared/assets/record-singapore.jpg'
 import { figmaRecordDetail } from '@/shared/assets'
 import { paths } from '@/shared/config'
@@ -13,29 +15,13 @@ const formatDate = (value: string) => value.replaceAll('-', '.')
 
 export function RecordDetailPage() {
   const navigate = useNavigate()
-  const { recordId = '' } = useParams()
-  const [record, setRecord] = useState<TripPlanResponseDto | null>(null)
-  const [isLoading, setIsLoading] = useState(() => Number.isInteger(Number(recordId)))
+  const { recordId = '' } = useParams({ strict: false })
+  const queryClient = useQueryClient()
+  const { data: record, isLoading, isError: hasRecordError } = useTripQuery(Number(recordId))
   const [isEditing, setIsEditing] = useState(false)
   const [isMutating, setIsMutating] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [draft, setDraft] = useState({ content: '', endDate: '', startDate: '', title: '' })
-
-  useEffect(() => {
-    let isMounted = true
-
-    const tripId = Number(recordId)
-    if (!Number.isInteger(tripId)) return () => { isMounted = false }
-
-    void getTrip(tripId)
-      .then((nextRecord) => { if (isMounted) setRecord(nextRecord) })
-      .catch(() => { if (isMounted) setRecord(null) })
-      .finally(() => { if (isMounted) setIsLoading(false) })
-
-    return () => {
-      isMounted = false
-    }
-  }, [recordId])
 
   const startEditing = () => {
     if (!record) return
@@ -62,7 +48,7 @@ export function RecordDetailPage() {
         content: draft.content.trim(),
         title: draft.title.trim(),
       }))
-      setRecord(updated)
+      queryClient.setQueryData(tripPlanQueryKeys.detail(record.tripId), updated)
       setIsEditing(false)
     } catch {
       setErrorMessage('여행 기록을 수정하지 못했습니다.')
@@ -76,7 +62,7 @@ export function RecordDetailPage() {
     try {
       setIsMutating(true)
       await deleteTrip(record.tripId)
-      navigate(paths.record, { replace: true })
+      navigate({ to: paths.record as never, replace: true })
     } catch {
       setErrorMessage('여행 기록을 삭제하지 못했습니다.')
       setIsMutating(false)
@@ -88,10 +74,10 @@ export function RecordDetailPage() {
       <S.Content>
         <S.TopBar>
           <div><h1>기록 상세</h1><p>한 장소에서 남긴 사진과 메모를 확인하세요.</p></div>
-          <div><button type="button" onClick={() => navigate(paths.recordWrite)}>새 기록 작성</button>{record ? <><button type="button" onClick={startEditing}>수정</button><button type="button" disabled={isMutating} onClick={() => void handleDelete()}>삭제</button></> : null}</div>
+          <div><button type="button" onClick={() => navigate({ to: paths.recordWrite as never })}>새 기록 작성</button>{record ? <><button type="button" onClick={startEditing}>수정</button><button type="button" disabled={isMutating} onClick={() => void handleDelete()}>삭제</button></> : null}</div>
         </S.TopBar>
 
-        {errorMessage ? <S.ErrorMessage role="alert">{errorMessage}</S.ErrorMessage> : null}
+        {errorMessage || hasRecordError ? <S.ErrorMessage role="alert">{errorMessage || '여행 기록을 불러오지 못했습니다.'}</S.ErrorMessage> : null}
 
         {isLoading ? (
           <S.StateCard>여행 기록을 불러오고 있습니다.</S.StateCard>
@@ -136,7 +122,7 @@ export function RecordDetailPage() {
           <S.StateCard>
             <h1>여행 기록을 찾을 수 없습니다.</h1>
             <p>목록에서 다른 기록을 선택해주세요.</p>
-            <button type="button" onClick={() => navigate(paths.record)}>목록으로 돌아가기</button>
+            <button type="button" onClick={() => navigate({ to: paths.record as never })}>목록으로 돌아가기</button>
           </S.StateCard>
         )}
       </S.Content>

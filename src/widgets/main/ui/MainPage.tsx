@@ -1,49 +1,10 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from '@/shared/libs/router'
-import {
-  getCountryInfo,
-  getDday,
-  getExchangeRate,
-  getFestivals,
-  getFoodInfo,
-  getPopulationInfo,
-  getTodayPhrase,
-  getTourPlace,
-  getWeather,
-  type CountryInfoResponseDto,
-  type DdayResponseDto,
-  type ExchangeRateResponseDto,
-  type FestivalResponseDto,
-  type FoodInfoResponseDto,
-  type PopulationInfoResponseDto,
-  type TodayPhraseResponseDto,
-  type TourPlaceResponseDto,
-  type WeatherResponseDto,
-} from '@/shared/api'
+import { useNavigate } from '@tanstack/react-router'
+import { useMainTravelQuery } from '@/entities/travel'
 import { figmaHomeHero } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './MainPage.styles'
-
-type MainApiData = {
-  country?: CountryInfoResponseDto
-  exchangeRate?: ExchangeRateResponseDto
-  festivals: FestivalResponseDto[]
-  foodInfo: FoodInfoResponseDto[]
-  plan?: DdayResponseDto
-  phrase?: TodayPhraseResponseDto
-  populationInfo: PopulationInfoResponseDto[]
-  tourPlaces: TourPlaceResponseDto[]
-  weather?: WeatherResponseDto
-}
-
-const initialData: MainApiData = {
-  festivals: [],
-  foodInfo: [],
-  populationInfo: [],
-  tourPlaces: [],
-}
 
 function parseDday(value?: string) {
   const matched = value?.match(/-?\d+/)
@@ -65,41 +26,7 @@ function durationLabel(startDate?: string, endDate?: string) {
 
 export function MainPage() {
   const navigate = useNavigate()
-  const [data, setData] = useState<MainApiData>(initialData)
-  const [isLoading, setIsLoading] = useState(true)
-  const [errorMessage, setErrorMessage] = useState('')
-
-  useEffect(() => {
-    let isMounted = true
-
-    void (async () => {
-      try {
-        const plan = await getDday()
-        const countryName = plan?.countryName ?? '한국'
-        const [country, populationInfo, tourPlaces, foodInfo, festivals, phrase, weather, exchangeRate] =
-          await Promise.all([
-            getCountryInfo(countryName),
-            getPopulationInfo(countryName),
-            getTourPlace(countryName),
-            getFoodInfo(countryName),
-            getFestivals(countryName),
-            getTodayPhrase(countryName, 1).catch(() => undefined),
-            getWeather(countryName).catch(() => undefined),
-            getExchangeRate(countryName).catch(() => undefined),
-          ])
-
-        if (isMounted) {
-          setData({ country, exchangeRate, festivals, foodInfo, plan, phrase, populationInfo, tourPlaces, weather })
-        }
-      } catch {
-        if (isMounted) setErrorMessage('여행 정보를 불러오지 못했습니다.')
-      } finally {
-        if (isMounted) setIsLoading(false)
-      }
-    })()
-
-    return () => { isMounted = false }
-  }, [])
+  const { data, isError, isLoading } = useMainTravelQuery()
 
   const plan = data.plan
   const destination = plan?.cityName || plan?.countryName || data.country?.cityName || data.country?.countryName
@@ -114,14 +41,14 @@ export function MainPage() {
           <S.Subtitle>여행 정보를 한눈에 확인하고 다음 계획을 이어가세요.</S.Subtitle>
         </S.Header>
 
-        {errorMessage ? <S.Error role="alert">{errorMessage}</S.Error> : null}
+        {isError ? <S.Error role="alert">여행 정보를 불러오지 못했습니다.</S.Error> : null}
         {isLoading ? <S.State aria-busy="true">여행 정보를 불러오는 중입니다.</S.State> : null}
 
         {!isLoading && !plan ? (
           <S.EmptyCard>
             <strong>아직 다음 여행이 없습니다.</strong>
             <span>여행지를 정하고 나만의 여행 계획을 시작해보세요.</span>
-            <S.ActionButton type="button" onClick={() => navigate(paths.travelSelect)}>여행 정보 설정</S.ActionButton>
+            <S.ActionButton type="button" onClick={() => navigate({ to: paths.travelSelect as never })}>여행 정보 설정</S.ActionButton>
           </S.EmptyCard>
         ) : null}
 
@@ -141,7 +68,7 @@ export function MainPage() {
                 <S.Dday>{dday === undefined ? '-' : `D${dday >= 0 ? '-' : '+'}${Math.abs(dday)}`}</S.Dday>
                 <S.Destination>{destination}</S.Destination>
                 <S.Dates>{dateRange} · {durationLabel(plan.startDate, plan.endDate)}</S.Dates>
-                <S.ActionButton type="button" onClick={() => navigate(paths.travelSelect)}>여행 정보 수정</S.ActionButton>
+                <S.ActionButton type="button" onClick={() => navigate({ to: paths.travelSelect as never })}>여행 정보 수정</S.ActionButton>
               </S.DdayCard>
             </S.HeroRow>
 
@@ -157,10 +84,10 @@ export function MainPage() {
               </S.InfoCard>
               <S.InfoCard>
                 <S.CardTitle>해야 할 일</S.CardTitle>
-                <S.TodoButton type="button" onClick={() => navigate(paths.planner)}>
+                <S.TodoButton type="button" onClick={() => navigate({ to: paths.planner as never })}>
                   <span>플래너에서 일정 준비하기</span><small>플래너 API 연동 전</small><b>›</b>
                 </S.TodoButton>
-                <S.TodoButton type="button" onClick={() => navigate(paths.record)}>
+                <S.TodoButton type="button" onClick={() => navigate({ to: paths.record as never })}>
                   <span>지난 여행 기록 확인하기</span><small>여행 기록으로 이동</small><b>›</b>
                 </S.TodoButton>
               </S.InfoCard>

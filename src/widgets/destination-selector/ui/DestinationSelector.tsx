@@ -1,17 +1,18 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { DestinationBackIcon, DestinationSearchIcon } from "@/shared/assets";
 import {
   deleteRecentSearch,
   getCountries,
   getDday,
   getPopularPlaces,
-  getProfile,
   getRecentSearches,
   changeTravelCountry,
   saveRecentSearch,
   saveTravelPlan,
   type Destination,
-} from "@/shared/api";
+} from "@/entities/travel/api";
+import { getProfile } from "@/entities/user/api";
 import {
   destinationBangkokUrl,
   destinationDaNangUrl,
@@ -54,17 +55,62 @@ function CloseIcon() {
   return <span aria-hidden="true">×</span>;
 }
 
+type DestinationQueryData = {
+  destinations: readonly Destination[];
+  recentDestinations: readonly Destination[];
+  userId?: string;
+  travelPlanId?: number;
+}
+
+async function loadDestinationData(): Promise<DestinationQueryData> {
+  const [countries, popularPlaces, profile, currentPlan] = await Promise.all([
+    getCountries(),
+    getPopularPlaces(),
+    getProfile(),
+    getDday().catch(() => undefined),
+  ])
+  const nextDestinations = countries.map((country, index) => ({
+    country: country.countryName ?? "여행지",
+    countryInfoId: country.countryInfoId,
+    currency: currencyByCountry[country.countryName ?? ""] ?? "",
+    id: String(country.countryInfoId ?? index),
+    imageUrl: country.imageUrl,
+    name: country.cityName || country.countryName || "여행지",
+  }))
+  const popularIds = new Set(popularPlaces.map((place) => place.countryInfoId))
+  const recentSearches = await getRecentSearches(profile.userId)
+
+  return {
+    destinations: [...nextDestinations].sort(
+      (a, b) => Number(popularIds.has(b.countryInfoId)) - Number(popularIds.has(a.countryInfoId)),
+    ),
+    recentDestinations: recentSearches.map((item, index) => ({
+      country: item.countryName ?? "여행지",
+      currency: currencyByCountry[item.countryName ?? ""] ?? "",
+      id: `recent-${item.recentSearchId ?? index}`,
+      imageUrl: item.imageUrl,
+      name: item.cityName || item.countryName || "여행지",
+      recentSearchId: item.recentSearchId,
+    })),
+    travelPlanId: currentPlan?.travelPlanId,
+    userId: profile.userId,
+  }
+}
+
 const DestinationSelector = ({ onBack }: Props) => {
   const [query, setQuery] = useState("");
-  const [destinations, setDestinations] = useState<readonly Destination[]>([]);
-  const [recentDestinations, setRecentDestinations] = useState<
-    readonly Destination[]
-  >([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [recentOverride, setRecentOverride] = useState<readonly Destination[] | null>(null);
   const [selectingId, setSelectingId] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string>();
-  const [travelPlanId, setTravelPlanId] = useState<number>();
   const [errorMessage, setErrorMessage] = useState("");
+  const destinationQuery = useQuery({
+    queryKey: ["travel", "destination-selector"],
+    queryFn: loadDestinationData,
+  });
+  const destinations = destinationQuery.data?.destinations ?? [];
+  const recentDestinations = recentOverride ?? destinationQuery.data?.recentDestinations ?? [];
+  const userId = destinationQuery.data?.userId;
+  const travelPlanId = destinationQuery.data?.travelPlanId;
+  const isLoading = destinationQuery.isLoading;
   const keyword = query.trim().toLocaleLowerCase();
   const results = keyword
     ? destinations.filter((destination) =>
@@ -73,60 +119,6 @@ const DestinationSelector = ({ onBack }: Props) => {
           .includes(keyword),
       )
     : destinations;
-
-  useEffect(() => {
-    let isMounted = true;
-
-    void Promise.all([getCountries(), getPopularPlaces(), getProfile(), getDday().catch(() => undefined)])
-      .then(async ([countries, popularPlaces, profile, currentPlan]) => {
-        if (!isMounted) return;
-        setTravelPlanId(currentPlan?.travelPlanId);
-        const nextDestinations = countries.map((country, index) => ({
-          country: country.countryName ?? "여행지",
-          countryInfoId: country.countryInfoId,
-          currency: currencyByCountry[country.countryName ?? ""] ?? "",
-          id: String(country.countryInfoId ?? index),
-          imageUrl: country.imageUrl,
-          name: country.cityName || country.countryName || "여행지",
-        }));
-        const popularIds = new Set(
-          popularPlaces.map((place) => place.countryInfoId),
-        );
-        setDestinations(
-          [...nextDestinations].sort(
-            (a, b) =>
-              Number(popularIds.has(b.countryInfoId)) -
-              Number(popularIds.has(a.countryInfoId)),
-          ),
-        );
-
-        const userId = profile.userId;
-        setUserId(userId);
-        const recentSearches = await getRecentSearches(userId);
-        if (isMounted) {
-          setRecentDestinations(
-            recentSearches.map((item, index) => ({
-              country: item.countryName ?? "여행지",
-              currency: currencyByCountry[item.countryName ?? ""] ?? "",
-              id: `recent-${item.recentSearchId ?? index}`,
-              imageUrl: item.imageUrl,
-              name: item.cityName || item.countryName || "여행지",
-              recentSearchId: item.recentSearchId,
-            })),
-          );
-        }
-      })
-      .catch(() => {
-        if (isMounted) setErrorMessage("여행지 목록을 불러오지 못했습니다.");
-      })
-      .finally(() => {
-        if (isMounted) setIsLoading(false);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const handleSelect = async (destination: Destination) => {
     try {
@@ -162,8 +154,8 @@ const DestinationSelector = ({ onBack }: Props) => {
   const handleDeleteRecent = async (destination: Destination) => {
     if (destination.recentSearchId == null) return;
     await deleteRecentSearch(destination.recentSearchId);
-    setRecentDestinations((current) =>
-      current.filter((item) => item.id !== destination.id),
+    setRecentOverride((current) =>
+      (current ?? destinationQuery.data?.recentDestinations ?? []).filter((item) => item.id !== destination.id),
     );
   };
 
@@ -175,7 +167,7 @@ const DestinationSelector = ({ onBack }: Props) => {
           : [deleteRecentSearch(item.recentSearchId)],
       ),
     );
-    setRecentDestinations([]);
+    setRecentOverride([]);
   };
 
   return (
@@ -247,8 +239,8 @@ const DestinationSelector = ({ onBack }: Props) => {
               여행지를 찾는 중입니다.
             </S.ResultState>
           ) : null}
-          {errorMessage ? (
-            <S.ResultState role="alert">{errorMessage}</S.ResultState>
+          {errorMessage || destinationQuery.isError ? (
+            <S.ResultState role="alert">{errorMessage || "여행지 목록을 불러오지 못했습니다."}</S.ResultState>
           ) : null}
           {!isLoading && results.length === 0 ? (
             <S.ResultState>검색 결과가 없습니다.</S.ResultState>

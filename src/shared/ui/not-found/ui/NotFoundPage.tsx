@@ -1,4 +1,4 @@
-import { Link } from '@/shared/libs/router'
+import { Link } from '@tanstack/react-router'
 import { paths } from '@/shared/config'
 
 import * as S from './NotFoundPage.styles'

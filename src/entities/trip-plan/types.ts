@@ -3,4 +3,4 @@ export type {
   TripPlanPlaceResponseDto,
   TripPlanRequestDto,
   TripPlanResponseDto,
-} from '@/shared/api/trip'
+} from './api'

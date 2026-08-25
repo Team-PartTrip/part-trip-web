@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from '@/shared/libs/router'
+import { useNavigate } from '@tanstack/react-router'
 import {
   figmaRecordDotonbori,
   figmaRecordNamba,
@@ -31,10 +31,10 @@ export function RecordPage() {
             <S.Subtitle>여행의 순간을 날짜와 장소별로 다시 만나보세요.</S.Subtitle>
           </div>
           <S.HeaderActions>
-            <PartTripButton type="button" $variant="secondary" onClick={() => navigate(paths.recordMap)}>지도 보기</PartTripButton>
-            <PartTripButton type="button" $variant="secondary" onClick={() => navigate(paths.recordCalendar)}>캘린더</PartTripButton>
-            <PartTripButton type="button" $variant="secondary" onClick={() => navigate(paths.recordCamera)}>사진 분석</PartTripButton>
-            <PartTripButton type="button" onClick={() => navigate(paths.recordWrite)}>기록 작성</PartTripButton>
+            <PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.recordMap as never })}>지도 보기</PartTripButton>
+            <PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.recordCalendar as never })}>캘린더</PartTripButton>
+            <PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.recordCamera as never })}>사진 분석</PartTripButton>
+            <PartTripButton type="button" onClick={() => navigate({ to: paths.recordWrite as never })}>기록 작성</PartTripButton>
           </S.HeaderActions>
         </S.Header>
 
@@ -61,7 +61,7 @@ export function RecordPage() {
                     <h2>{trip.title || '제목 없는 여행 기록'}</h2>
                     <p>{trip.content || '작성된 여행 메모가 없습니다.'}</p>
                   </S.RecordCopy>
-                  <S.ViewButton type="button" disabled={!trip.tripId} onClick={() => trip.tripId && navigate(createRecordDetailPath(String(trip.tripId)))}>보기</S.ViewButton>
+                  <S.ViewButton type="button" disabled={!trip.tripId} onClick={() => trip.tripId && navigate({ to: createRecordDetailPath(String(trip.tripId)) })}>보기</S.ViewButton>
                 </S.RecordCard>
               </S.TimelineItem>
             ))}
@@ -71,7 +71,7 @@ export function RecordPage() {
         {!isLoading && !errorMessage && trips.length > 0 && activeTab === 'photos' ? (
           <S.PhotoGrid>
             {trips.flatMap((trip, tripIndex) => (trip.images?.length ? trip.images : [fallbackImages[tripIndex % fallbackImages.length]]).map((image, imageIndex) => (
-              <button key={`${trip.tripId ?? tripIndex}-${imageIndex}`} type="button" onClick={() => trip.tripId && navigate(createRecordDetailPath(String(trip.tripId)))}>
+              <button key={`${trip.tripId ?? tripIndex}-${imageIndex}`} type="button" onClick={() => trip.tripId && navigate({ to: createRecordDetailPath(String(trip.tripId)) })}>
                 <img src={image} alt={`${trip.title || '여행'} 사진 ${imageIndex + 1}`} />
               </button>
             )))}

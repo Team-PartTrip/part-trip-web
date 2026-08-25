@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { useNavigate } from '@/shared/libs/router'
+import { useNavigate } from '@tanstack/react-router'
 import { paths } from '@/shared/config'
 import { MENUS } from '@/widgets/sidebar'
 import { Sidebar } from '@/widgets/sidebar'
@@ -23,7 +23,7 @@ export function AppShell({ children }: AppShellProps) {
             role="search"
             onSubmit={(event) => {
               event.preventDefault()
-              if (query.trim()) navigate(`${paths.tripCards}?q=${encodeURIComponent(query.trim())}`)
+              if (query.trim()) navigate({ to: `${paths.tripCards}?q=${encodeURIComponent(query.trim())}` as never })
             }}
           >
             <img src={S.searchIcon} alt="" />

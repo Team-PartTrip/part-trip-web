@@ -2,7 +2,7 @@ import {
   clearAuthTokens,
   getRefreshToken,
   logout as logoutRequest,
-} from '@/shared/api'
+} from '@/entities/session/api'
 
 export const logout = async () => {
   const refreshToken = getRefreshToken()

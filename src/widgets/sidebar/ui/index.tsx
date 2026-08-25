@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
-import { Link, useLocation, useNavigate } from '@/shared/libs/router'
-import { getAccessToken } from '@/shared/api'
+import { Link, useLocation, useNavigate } from '@tanstack/react-router'
+import { getAccessToken } from '@/entities/session/api'
 import { paths } from '@/shared/config'
 
 import type { SidebarMenuType } from '../types/sidebar-item/sidebar-item'
@@ -55,7 +55,7 @@ export default function Sidebar({ menus }: Props) {
           type="button"
           onClick={() => {
             if (isLoggedIn) setIsLogoutDialogOpen(true)
-            else navigate(paths.login)
+            else navigate({ to: paths.login as never })
           }}
           aria-label={isLoggedIn ? '로그아웃 메뉴' : '로그인'}
         >
@@ -67,7 +67,7 @@ export default function Sidebar({ menus }: Props) {
       {isLogoutDialogOpen ? (
         <LogoutDialog
           onClose={() => setIsLogoutDialogOpen(false)}
-          moveToLogin={() => navigate(paths.login, { replace: true })}
+          moveToLogin={() => navigate({ to: paths.login as never, replace: true })}
         />
       ) : null}
     </S.SidebarWrapper>

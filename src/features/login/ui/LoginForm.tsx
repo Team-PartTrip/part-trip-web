@@ -7,8 +7,8 @@ import {
   type SubmitHandler,
   type UseFormRegisterReturn,
 } from 'react-hook-form'
-import { useNavigate } from '@/shared/libs/router'
-import { googleLogin, login, saveAuthTokens } from '@/shared/api'
+import { useNavigate } from '@tanstack/react-router'
+import { googleLogin, login, saveAuthTokens } from '@/entities/session/api'
 import { paths } from '@/shared/config'
 import {
   authValidationRules,
@@ -95,7 +95,7 @@ export function LoginForm() {
         userPwd,
       })
       saveAuthTokens(tokens)
-      navigate(paths.main, { replace: true })
+      navigate({ to: paths.main as never, replace: true })
     } catch (error) {
       setMessage({
         text: getErrorMessage(error),
@@ -116,7 +116,7 @@ export function LoginForm() {
       setIsGoogleSubmitting(true)
       const tokens = await googleLogin({ code })
       saveAuthTokens(tokens)
-      navigate(paths.main, { replace: true })
+      navigate({ to: paths.main as never, replace: true })
     } catch (error) {
       setMessage({ text: getErrorMessage(error), tone: 'error' })
     } finally {

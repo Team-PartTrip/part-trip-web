@@ -1,10 +1,7 @@
-import { useEffect, useState } from 'react'
-import {
-  completeMission,
-  getCompletedMissions,
-  getMissions,
-  type MissionResponseDto,
-} from '@/shared/api'
+import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { completeMission } from '@/entities/mission/api'
+import { missionQueryKeys, useCompletedMissionsQuery, useMissionsQuery } from '@/entities/mission'
 import missionCharacterUrl from '@/shared/assets/mission-character.png'
 import { AppShell } from '@/widgets/app-shell'
 
@@ -30,13 +27,16 @@ function CheckIcon() {
 }
 
 export function MissionPage() {
-  const [missions, setMissions] = useState<MissionResponseDto[]>([])
-  const [completedMissions, setCompletedMissions] = useState<MissionResponseDto[]>([])
   const [activeDialog, setActiveDialog] = useState<'calendar' | 'completed' | null>(null)
   const [selectedMissionId, setSelectedMissionId] = useState<number | null>(null)
   const [pendingMissionId, setPendingMissionId] = useState<number | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+  const queryClient = useQueryClient()
+  const missionsQuery = useMissionsQuery()
+  const completedMissionsQuery = useCompletedMissionsQuery()
+  const missions = missionsQuery.data ?? []
+  const completedMissions = completedMissionsQuery.data ?? missions.filter((mission) => mission.completed)
+  const isLoading = missionsQuery.isLoading || completedMissionsQuery.isLoading
   const completedMissionIds = new Set(
     completedMissions
       .map((mission) => mission.missionId)
@@ -47,40 +47,6 @@ export function MissionPage() {
   const isAllCompleted = missions.length > 0 && completedCount === missions.length
   const selectedMission = missions.find((mission) => mission.missionId === selectedMissionId) ?? null
 
-  useEffect(() => {
-    let ignore = false
-
-    async function loadMissions() {
-      try {
-        setIsLoading(true)
-        setErrorMessage('')
-        const missionList = await getMissions()
-        let completedMissionList = missionList.filter((mission) => mission.completed)
-        console.log('missionList', missionList)
-        try {
-          completedMissionList = await getCompletedMissions()
-        } catch {
-          // 완료 목록 API가 실패해도 전체 미션 목록은 보여준다.
-        }
-
-        if (!ignore) {
-          setMissions(missionList)
-          setCompletedMissions(completedMissionList)
-        }
-      } catch {
-        if (!ignore) setErrorMessage('미션 목록을 불러오지 못했습니다. 다시 시도해주세요.')
-      } finally {
-        if (!ignore) setIsLoading(false)
-      }
-    }
-
-    void loadMissions()
-
-    return () => {
-      ignore = true
-    }
-  }, [])
-
   const handleComplete = async (missionId: number) => {
     if (completedMissionIds.has(missionId) || pendingMissionId) return
 
@@ -88,11 +54,7 @@ export function MissionPage() {
       setPendingMissionId(missionId)
       setErrorMessage('')
       await completeMission(missionId)
-      const completedMissionList = await getCompletedMissions()
-      setCompletedMissions(completedMissionList)
-      setMissions((current) => current.map((mission) => (
-        mission.missionId === missionId ? { ...mission, completed: true } : mission
-      )))
+      await queryClient.invalidateQueries({ queryKey: missionQueryKeys.all })
     } catch {
       setErrorMessage('미션 완료 상태를 저장하지 못했습니다. 다시 시도해주세요.')
     } finally {
@@ -117,7 +79,7 @@ export function MissionPage() {
         </S.CharacterCard>
         <S.MissionPanel>
           <S.Title>미션 <span>{isAllCompleted ? 'Complete' : 'New'}</span></S.Title>
-          {errorMessage ? <S.ErrorMessage role="alert">{errorMessage}</S.ErrorMessage> : null}
+          {errorMessage || missionsQuery.isError ? <S.ErrorMessage role="alert">{errorMessage || '미션 목록을 불러오지 못했습니다. 다시 시도해주세요.'}</S.ErrorMessage> : null}
           {isLoading ? <S.StateMessage>미션을 불러오는 중입니다.</S.StateMessage> : null}
           {!isLoading && missions.length === 0 ? <S.StateMessage>진행할 미션이 없습니다.</S.StateMessage> : null}
           {!isLoading && missions.length > 0 ? (

@@ -7,12 +7,12 @@ import {
   type SubmitHandler,
   type UseFormRegisterReturn,
 } from 'react-hook-form'
-import { useNavigate } from '@/shared/libs/router'
+import { useNavigate } from '@tanstack/react-router'
 import {
   resetPassword,
   sendPasswordResetCode,
   verifyPasswordResetCode,
-} from '@/shared/api'
+} from '@/entities/session/api'
 import { paths } from '@/shared/config'
 import {
   authValidationRules,
@@ -216,7 +216,7 @@ export function ChangePasswordForm() {
         confirmPassword: newPasswordConfirm,
         newPassword,
       })
-      navigate(paths.login, { replace: true })
+      navigate({ to: paths.login as never, replace: true })
     } catch (error) {
       setMessage({
         text: getErrorMessage(error),

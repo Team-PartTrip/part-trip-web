@@ -1,4 +1,4 @@
-import { apiClient } from '../libs/api-client.ts'
+import { apiClient } from '../../shared/libs/api-client.ts'
 
 export type ProfileUpdateRequestDto = {
   imgUrl?: string
@@ -38,3 +38,4 @@ export async function getCharacterInfo(): Promise<CharacterInfoResponseDto> {
   const { data } = await apiClient.get<CharacterInfoResponseDto>(PROFILE_API_PATHS.character)
   return data
 }
+export * from './profile-model.ts'

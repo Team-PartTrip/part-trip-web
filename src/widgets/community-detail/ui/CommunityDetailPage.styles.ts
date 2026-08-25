@@ -1,4 +1,4 @@
-import { Link } from '@/shared/libs/router'
+import { Link } from '@tanstack/react-router'
 import styled from 'styled-components'
 
 export const Page = styled.main`

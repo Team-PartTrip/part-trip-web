@@ -1,9 +1,9 @@
-import { useEffect, useState, type FormEvent } from 'react'
-import { useNavigate, useParams } from '@/shared/libs/router'
+import { useState, type FormEvent } from 'react'
+import { useNavigate, useParams } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
 import {
   createBoardComment,
   createReviewComment,
-  createSharedTripComment,
   deleteBoard,
   deleteComment,
   deleteReview,
@@ -11,17 +11,15 @@ import {
   getBoardComments,
   getReview,
   getReviewComments,
-  getSharedTripComments,
-  getSharedTripDetail,
-  getProfile,
-  importTrip,
-  resolveApiAssetUrl,
   toggleLike,
   updateBoard,
   updateComment,
   updateReview,
   type CommentResponseDto,
-} from '@/shared/api'
+} from '@/entities/community/api'
+import { getProfile } from '@/entities/user/api'
+import { resolveApiAssetUrl } from '@/entities/file/api'
+import { createSharedTripComment, getSharedTripComments, getSharedTripDetail, importTrip } from '@/entities/trip-card/api'
 import catAvatarUrl from '@/shared/assets/community-avatar-cat.png'
 import { createRecordDetailPath, paths } from '@/shared/config'
 import { AppShell } from '@/widgets/app-shell'
@@ -126,41 +124,29 @@ async function loadPost(type: PostKind, id: number): Promise<{ comments: Comment
 
 export function CommunityDetailPage() {
   const navigate = useNavigate()
-  const { postId = '' } = useParams()
-  const [post, setPost] = useState<DetailPost | null>(null)
-  const [comments, setComments] = useState<CommentResponseDto[]>([])
+  const { postId = '' } = useParams({ strict: false })
+  const parsedPost = parsePostId(postId)
+  const postQuery = useQuery({
+    queryKey: ['community', 'detail', postId],
+    queryFn: () => loadPost(parsedPost!.type, parsedPost!.id),
+    enabled: Boolean(parsedPost),
+  })
+  const profileQuery = useQuery({ queryKey: ['user', 'source'], queryFn: getProfile })
+  const [postOverride, setPostOverride] = useState<DetailPost | null>(null)
+  const [commentsOverride, setCommentsOverride] = useState<CommentResponseDto[] | null>(null)
+  const post = postOverride ?? postQuery.data?.post ?? null
+  const comments = commentsOverride ?? postQuery.data?.comments ?? []
   const [comment, setComment] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(() => Boolean(parsePostId(postId)))
+  const isLoading = Boolean(parsedPost) && postQuery.isLoading
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
-  const [currentUserId, setCurrentUserId] = useState('')
+  const currentUserId = profileQuery.data?.userId ?? ''
   const [isEditingPost, setIsEditingPost] = useState(false)
   const [editTitle, setEditTitle] = useState('')
   const [editContent, setEditContent] = useState('')
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null)
   const [editingCommentContent, setEditingCommentContent] = useState('')
   const [isMutating, setIsMutating] = useState(false)
-
-  useEffect(() => {
-    let isMounted = true
-    const parsedPost = parsePostId(postId)
-    if (!parsedPost) {
-      return () => { isMounted = false }
-    }
-
-    void Promise.all([loadPost(parsedPost.type, parsedPost.id), getProfile().catch(() => null)])
-      .then(([result, profile]) => {
-        if (isMounted) {
-          setPost(result.post)
-          setComments(result.comments)
-          setCurrentUserId(profile?.userId ?? '')
-        }
-      })
-      .catch(() => { if (isMounted) setErrorMessage('게시글을 불러오지 못했습니다.') })
-      .finally(() => { if (isMounted) setIsLoading(false) })
-
-    return () => { isMounted = false }
-  }, [postId])
 
   const handleLike = async () => {
     if (!post) return
@@ -170,7 +156,7 @@ export function CommunityDetailPage() {
         targetId: post.id,
         targetType: post.type === 'trip' ? 'TRIP' : post.type.toUpperCase(),
       })
-      setPost((current) => current ? { ...current, liked: result.liked ?? current.liked, likeCount: result.likeCount ?? current.likeCount } : current)
+      setPostOverride((current) => current ? { ...current, liked: result.liked ?? current.liked, likeCount: result.likeCount ?? current.likeCount } : current)
     } catch {
       setErrorMessage('좋아요를 처리하지 못했습니다.')
     }
@@ -187,7 +173,7 @@ export function CommunityDetailPage() {
         : post.type === 'review'
           ? await createReviewComment(post.id, payload)
           : await createSharedTripComment(post.id, payload)
-      setComments((current) => [...current, created])
+      setCommentsOverride((current) => [...(current ?? postQuery.data?.comments ?? []), created])
       setComment('')
     } catch {
       setErrorMessage('댓글을 등록하지 못했습니다.')
@@ -218,7 +204,7 @@ export function CommunityDetailPage() {
             rating: post.rating ?? 5,
             title: editTitle.trim(),
           })
-      setPost((current) => current ? {
+      setPostOverride((current) => current ? {
         ...current,
         content: updated.content ?? editContent.trim(),
         title: updated.title ?? editTitle.trim(),
@@ -237,7 +223,7 @@ export function CommunityDetailPage() {
       setIsMutating(true)
       if (post.type === 'board') await deleteBoard(post.id)
       else await deleteReview(post.id)
-      navigate(paths.community, { replace: true })
+      navigate({ to: paths.community as never, replace: true })
     } catch {
       setErrorMessage('게시글을 삭제하지 못했습니다.')
       setIsMutating(false)
@@ -249,7 +235,7 @@ export function CommunityDetailPage() {
     try {
       setIsMutating(true)
       const updated = await updateComment(commentId, { content: editingCommentContent.trim() })
-      setComments((current) => current.map((item) => item.commentId === commentId ? updated : item))
+      setCommentsOverride((current) => (current ?? postQuery.data?.comments ?? []).map((item) => item.commentId === commentId ? updated : item))
       setEditingCommentId(null)
       setEditingCommentContent('')
     } catch {
@@ -264,7 +250,7 @@ export function CommunityDetailPage() {
     try {
       setIsMutating(true)
       await deleteComment(commentId)
-      setComments((current) => current.filter((item) => item.commentId !== commentId))
+      setCommentsOverride((current) => (current ?? postQuery.data?.comments ?? []).filter((item) => item.commentId !== commentId))
     } catch {
       setErrorMessage('댓글을 삭제하지 못했습니다.')
     } finally {
@@ -277,7 +263,7 @@ export function CommunityDetailPage() {
     try {
       setIsMutating(true)
       const imported = await importTrip(post.id)
-      if (imported.tripId) navigate(createRecordDetailPath(String(imported.tripId)))
+      if (imported.tripId) navigate({ to: createRecordDetailPath(String(imported.tripId)) })
     } catch {
       setErrorMessage('여행 일정을 가져오지 못했습니다.')
     } finally {
@@ -290,11 +276,11 @@ export function CommunityDetailPage() {
       <S.Page>
       <S.Content>
         <S.TopBar>
-          <S.BackButton type="button" onClick={() => navigate(paths.community)}>← 커뮤니티</S.BackButton>
+          <S.BackButton type="button" onClick={() => navigate({ to: paths.community as never })}>← 커뮤니티</S.BackButton>
           <S.WriteLink to={paths.communityWrite}>새 글 작성</S.WriteLink>
         </S.TopBar>
 
-        {errorMessage ? <S.StateCard role="alert">{errorMessage}</S.StateCard> : null}
+        {errorMessage || postQuery.isError ? <S.StateCard role="alert">{errorMessage || '게시글을 불러오지 못했습니다.'}</S.StateCard> : null}
         {isLoading ? (
           <S.StateCard aria-live="polite">게시글을 불러오고 있습니다.</S.StateCard>
         ) : post ? (
@@ -361,7 +347,7 @@ export function CommunityDetailPage() {
         ) : !errorMessage ? (
           <S.StateCard>
             <h1>여행 게시글을 찾을 수 없습니다.</h1>
-            <button type="button" onClick={() => navigate(paths.community)}>목록으로 돌아가기</button>
+            <button type="button" onClick={() => navigate({ to: paths.community as never })}>목록으로 돌아가기</button>
           </S.StateCard>
         ) : null}
       </S.Content>

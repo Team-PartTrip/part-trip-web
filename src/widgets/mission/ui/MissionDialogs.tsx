@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-import type { MissionResponseDto } from '@/shared/api'
+import type { MissionResponseDto } from '@/entities/mission/api'
 import * as S from './MissionPage.styles'
 
 type DialogShellProps = {

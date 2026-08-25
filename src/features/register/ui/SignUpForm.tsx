@@ -8,8 +8,8 @@ import {
   type SubmitHandler,
   type UseFormRegisterReturn,
 } from 'react-hook-form'
-import { useNavigate } from '@/shared/libs/router'
-import { sendVerificationCode, signUp, verifyCode } from '@/shared/api'
+import { useNavigate } from '@tanstack/react-router'
+import { sendVerificationCode, signUp, verifyCode } from '@/entities/session/api'
 import { paths } from '@/shared/config'
 import {
   authValidationRules,
@@ -176,7 +176,7 @@ export function SignUpForm() {
       })
       const { id, password } = credentialsForm.getValues()
       await signUp({ email, id, password })
-      navigate(paths.login, { replace: true })
+      navigate({ to: paths.login as never, replace: true })
     } catch (error) {
       setMessage({
         text: getErrorMessage(error),

@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from '@/shared/libs/router'
+import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
 import {
   getBoards,
   getReviews,
-  resolveApiAssetUrl,
-  listSharedTrips,
-} from '@/shared/api'
+} from '@/entities/community/api'
+import { listSharedTrips } from '@/entities/trip-card/api'
+import { resolveApiAssetUrl } from '@/entities/file/api'
 import catAvatarUrl from '@/shared/assets/community-avatar-cat.png'
 import dogAvatarUrl from '@/shared/assets/community-avatar-dog.png'
 import communityDaNangUrl from '@/shared/assets/community-destination-danang.jpg'
@@ -106,24 +107,17 @@ function PostCard({ onOpen, post }: { onOpen: () => void; post: FeedPost }) {
 export function CommunityPage() {
   const navigate = useNavigate()
   const [category, setCategory] = useState<Category>('자유게시판')
-  const [posts, setPosts] = useState<FeedPost[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [errorMessage, setErrorMessage] = useState('')
-
-  useEffect(() => {
-    let isMounted = true
-    void loadPosts(category)
-      .then((nextPosts) => { if (isMounted) setPosts(nextPosts) })
-      .catch(() => { if (isMounted) setErrorMessage('게시글을 불러오지 못했습니다.') })
-      .finally(() => { if (isMounted) setIsLoading(false) })
-    return () => { isMounted = false }
-  }, [category])
+  const postsQuery = useQuery({
+    queryKey: ['community', 'feed', category],
+    queryFn: () => loadPosts(category),
+  })
+  const posts = postsQuery.data ?? []
+  const isLoading = postsQuery.isLoading
+  const errorMessage = postsQuery.isError ? '게시글을 불러오지 못했습니다.' : ''
 
   const handleCategoryChange = (nextCategory: Category) => {
     if (nextCategory === category) return
     setCategory(nextCategory)
-    setIsLoading(true)
-    setErrorMessage('')
   }
 
   const columns = [posts.filter((_, index) => index % 2 === 0), posts.filter((_, index) => index % 2 === 1)]
@@ -141,12 +135,12 @@ export function CommunityPage() {
             {!isLoading && !errorMessage && posts.length === 0 ? <S.FeedStatus>등록된 게시글이 없습니다.</S.FeedStatus> : null}
             {columns.map((column, columnIndex) => (
               <S.Column key={columnIndex}>
-                {column.map((post) => <PostCard key={post.id} post={post} onOpen={() => navigate(createCommunityDetailPath(post.id))} />)}
+                {column.map((post) => <PostCard key={post.id} post={post} onOpen={() => navigate({ to: createCommunityDetailPath(post.id) as never })} />)}
               </S.Column>
             ))}
           </S.Feed>
           <S.Aside>
-            <S.CreateButton type="button" onClick={() => navigate(paths.communityWrite)}>⊕ 게시글 작성하기</S.CreateButton>
+            <S.CreateButton type="button" onClick={() => navigate({ to: paths.communityWrite as never })}>⊕ 게시글 작성하기</S.CreateButton>
             <S.Trending>
               <header><h2>인기 여행지</h2><button type="button">전체보기</button></header>
               <S.Destination><img src={communityTokyoUrl} alt="도쿄" /><div><strong>도쿄, 일본</strong><span>최근 24시간 1.2k+ 언급</span></div></S.Destination>
