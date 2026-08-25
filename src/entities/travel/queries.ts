@@ -23,7 +23,6 @@ import {
   type TourPlaceResponseDto,
   type WeatherResponseDto,
 } from './api'
-import { getProfile } from '../user/api'
 import { travelQueryKeys } from './query-keys'
 
 const currencyByCountry: Record<string, string> = {
@@ -45,10 +44,10 @@ export const ddayQueryOptions = () =>
     queryFn: getDday,
   })
 
-export const festivalsQueryOptions = (countryName: string) =>
+export const festivalsQueryOptions = (countryName: string, year?: number, month?: number) =>
   queryOptions({
-    queryKey: travelQueryKeys.festivals(countryName),
-    queryFn: () => getFestivals(countryName),
+    queryKey: travelQueryKeys.festivals(countryName, year, month),
+    queryFn: () => getFestivals(countryName, year, month),
     enabled: Boolean(countryName),
   })
 
@@ -60,33 +59,31 @@ export function useDdayQuery() {
   return useQuery(ddayQueryOptions())
 }
 
-export function useFestivalsQuery(countryName?: string) {
-  return useQuery(festivalsQueryOptions(countryName ?? ''))
+export function useFestivalsQuery(countryName?: string, year?: number, month?: number) {
+  return useQuery(festivalsQueryOptions(countryName ?? '', year, month))
 }
 
-export const tourPlacesQueryOptions = (countryName: string) =>
+export const tourPlacesQueryOptions = (countryName: string, cityName?: string, category?: string) =>
   queryOptions({
-    queryKey: [...travelQueryKeys.all, 'tour-places', countryName] as const,
-    queryFn: () => getTourPlace(countryName),
+    queryKey: travelQueryKeys.tourPlaces(countryName, cityName, category),
+    queryFn: () => getTourPlace(countryName, cityName, category),
     enabled: Boolean(countryName),
   })
 
-export function useTourPlacesQuery(countryName?: string) {
-  return useQuery(tourPlacesQueryOptions(countryName ?? ''))
+export function useTourPlacesQuery(countryName?: string, cityName?: string, category?: string) {
+  return useQuery(tourPlacesQueryOptions(countryName ?? '', cityName, category))
 }
 
 export type DestinationQueryData = {
   destinations: readonly Destination[]
   recentDestinations: readonly Destination[]
   travelPlanId?: number
-  userId?: string
 }
 
 export async function getDestinationData(): Promise<DestinationQueryData> {
-  const [countries, popularPlaces, profile, currentPlan] = await Promise.all([
+  const [countries, popularPlaces, currentPlan] = await Promise.all([
     getCountries(),
     getPopularPlaces(),
-    getProfile(),
     getDday().catch(() => undefined),
   ])
   const destinations = countries.map((country, index) => ({
@@ -98,7 +95,7 @@ export async function getDestinationData(): Promise<DestinationQueryData> {
     name: country.cityName || country.countryName || '여행지',
   }))
   const popularIds = new Set(popularPlaces.map((place) => place.countryInfoId))
-  const recentSearches = await getRecentSearches(profile.userId)
+  const recentSearches = await getRecentSearches()
 
   return {
     destinations: [...destinations].sort(
@@ -113,7 +110,6 @@ export async function getDestinationData(): Promise<DestinationQueryData> {
       recentSearchId: item.recentSearchId,
     })),
     travelPlanId: currentPlan?.travelPlanId,
-    userId: profile.userId,
   }
 }
 
@@ -146,7 +142,7 @@ export function useMainTravelQuery() {
     queries: [
       { queryKey: [...travelQueryKeys.all, 'country', countryName], queryFn: () => getCountryInfo(countryName) },
       { queryKey: [...travelQueryKeys.all, 'population', countryName], queryFn: () => getPopulationInfo(countryName) },
-      { queryKey: [...travelQueryKeys.all, 'tour-places', countryName], queryFn: () => getTourPlace(countryName) },
+      { queryKey: travelQueryKeys.tourPlaces(countryName), queryFn: () => getTourPlace(countryName) },
       { queryKey: [...travelQueryKeys.all, 'food', countryName], queryFn: () => getFoodInfo(countryName) },
       { queryKey: travelQueryKeys.festivals(countryName), queryFn: () => getFestivals(countryName) },
       { queryKey: [...travelQueryKeys.all, 'phrase', countryName], queryFn: () => getTodayPhrase(countryName, 1), retry: false },

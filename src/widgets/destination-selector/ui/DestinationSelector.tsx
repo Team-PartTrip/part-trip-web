@@ -54,7 +54,6 @@ const DestinationSelector = ({ onBack }: Props) => {
   const deleteRecentSearchMutation = useDeleteRecentSearchMutation();
   const destinations = destinationQuery.data?.destinations ?? [];
   const recentDestinations = destinationQuery.data?.recentDestinations ?? [];
-  const userId = destinationQuery.data?.userId;
   const travelPlanId = destinationQuery.data?.travelPlanId;
   const isLoading = destinationQuery.isLoading;
   const keyword = query.trim().toLocaleLowerCase();
@@ -84,9 +83,8 @@ const DestinationSelector = ({ onBack }: Props) => {
           startDate: addDays(today, 30),
         });
       }
-      if (userId != null && destination.countryInfoId != null) {
+      if (destination.countryInfoId != null) {
         await saveRecentSearchMutation.mutateAsync({
-          userId,
           countryInfoId: destination.countryInfoId,
         });
       }

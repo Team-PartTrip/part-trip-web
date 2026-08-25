@@ -12,7 +12,11 @@ export function RecordCalendarPage() {
   const navigate = useNavigate()
   const [month, setMonth] = useState(() => new Date())
   const { data: plan, isLoading: isPlanLoading } = useDdayQuery()
-  const { data: festivals = [], isLoading: isFestivalsLoading } = useFestivalsQuery(plan?.countryName)
+  const { data: festivals = [], isLoading: isFestivalsLoading } = useFestivalsQuery(
+    plan?.countryName,
+    month.getFullYear(),
+    month.getMonth() + 1,
+  )
   const isLoading = isPlanLoading || isFestivalsLoading
 
   const cells = useMemo(() => {

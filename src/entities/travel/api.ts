@@ -5,6 +5,7 @@ import { isMissingTravelPlanResponse } from './main-error'
 export type TravelPlanRequestDto = {
   countryName?: string
   cityName?: string
+  headcount?: number
   startDate?: string
   endDate?: string
 }
@@ -13,6 +14,7 @@ export type DdayResponseDto = {
   travelPlanId?: number
   countryName?: string
   cityName?: string
+  headcount?: number
   startDate?: string
   endDate?: string
   dday?: string
@@ -24,11 +26,15 @@ export type TravelChangeRequestDto = {
 }
 
 export type TourPlaceResponseDto = {
+  address?: string
+  category?: string
   placeName?: string
   description?: string
   imageUrl?: string
   latitude?: number
   longitude?: number
+  rating?: number
+  tourPlaceId?: number
 }
 
 export type PopulationInfoResponseDto = {
@@ -91,7 +97,6 @@ export type RecentSearchResponseDto = {
 }
 
 export type RecentSearchRequestDto = {
-  userId: string
   countryInfoId: number
 }
 
@@ -143,9 +148,13 @@ export async function getDday(): Promise<DdayResponseDto | undefined> {
   }
 }
 
-export async function getTourPlace(countryName: string): Promise<TourPlaceResponseDto[]> {
+export async function getTourPlace(
+  countryName: string,
+  cityName?: string,
+  category?: string,
+): Promise<TourPlaceResponseDto[]> {
   const { data } = await apiClient.get<TourPlaceResponseDto[]>(MAIN_API_PATHS.tourPlace, {
-    params: { countryName }
+    params: { category, cityName, countryName },
   })
   return data
 }
@@ -164,9 +173,13 @@ export async function getFoodInfo(countryName: string): Promise<FoodInfoResponse
   return data
 }
 
-export async function getFestivals(countryName: string): Promise<FestivalResponseDto[]> {
+export async function getFestivals(
+  countryName: string,
+  year?: number,
+  month?: number,
+): Promise<FestivalResponseDto[]> {
   const { data } = await apiClient.get<FestivalResponseDto[]>(MAIN_API_PATHS.festivals, {
-    params: { countryName }
+    params: { countryName, month, year },
   })
   return data
 }
@@ -205,8 +218,8 @@ export async function getPopularPlaces(): Promise<PopularPlaceResponseDto[]> {
   return data
 }
 
-export async function getRecentSearches(userId: string | undefined): Promise<RecentSearchResponseDto[]> {
-  const { data } = await apiClient.get<RecentSearchResponseDto[]>(MAIN_API_PATHS.recent, { params: { userId } })
+export async function getRecentSearches(): Promise<RecentSearchResponseDto[]> {
+  const { data } = await apiClient.get<RecentSearchResponseDto[]>(MAIN_API_PATHS.recent)
   return data
 }
 

@@ -37,7 +37,7 @@ function usePlannerData() {
   const ddayQuery = useDdayQuery()
   const countriesQuery = useCountriesQuery()
   const plan = overriddenPlan ?? ddayQuery.data
-  const placesQuery = useTourPlacesQuery(plan?.countryName)
+  const placesQuery = useTourPlacesQuery(plan?.countryName, plan?.cityName)
   const { trips, isLoading: isTripsLoading } = useMyTrips()
 
   return {
