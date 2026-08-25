@@ -1,5 +1,6 @@
 import { queryOptions, useQuery } from '@tanstack/react-query'
-import { getProfile, getUserProfile } from './api'
+import { getProfile } from './api'
+import { getUserProfile } from './profile-model'
 
 export const userQueryKeys = {
   all: ['user'] as const,

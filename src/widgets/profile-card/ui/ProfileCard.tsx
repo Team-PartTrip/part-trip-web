@@ -1,5 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
-import type { UserProfile } from '@/entities/user/api'
+import type { UserProfile } from '@/entities/user'
 import badge1Url from '@/shared/assets/profile-badge-1.png'
 import badge2Url from '@/shared/assets/profile-badge-2.png'
 import badge3Url from '@/shared/assets/profile-badge-3.png'

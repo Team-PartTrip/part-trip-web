@@ -49,4 +49,3 @@ export async function getTravelThemes(): Promise<TravelThemeResponseDto[]> {
   const { data } = await apiClient.get<TravelThemeResponseDto[]>(PROFILE_API_PATHS.themes)
   return data
 }
-export * from './profile-model.ts'
