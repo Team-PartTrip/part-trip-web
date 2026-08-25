@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { createTrip } from '@/entities/trip-plan/api'
+import { useCreateTripMutation } from '@/entities/trip-plan'
 import { useCountriesQuery } from '@/entities/travel'
 import { paths } from '@/shared/config'
 import { AppShell } from '@/widgets/app-shell'
@@ -16,6 +16,7 @@ export function RecordWritePage() {
   const [memo, setMemo] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const createTripMutation = useCreateTripMutation()
   const { data: countries = [], isError: hasCountriesError } = useCountriesQuery()
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -42,7 +43,7 @@ export function RecordWritePage() {
     try {
       setIsSubmitting(true)
       setErrorMessage('')
-      const record = await createTrip({
+      const record = await createTripMutation.mutateAsync({
         content: memo.trim(),
         countryInfoId: country.countryInfoId,
         endDate,

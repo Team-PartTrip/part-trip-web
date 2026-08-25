@@ -1,7 +1,11 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
-import { saveGuideCameraRecord, uploadGuideCameraImage, type PhotoAnalysisResponseDto } from '@/entities/travel-record/api'
-import { useGuideCameraResultQuery } from '@/entities/travel-record'
+import {
+  useGuideCameraResultQuery,
+  useSaveGuideCameraRecordMutation,
+  useUploadGuideCameraImageMutation,
+  type PhotoAnalysisResponseDto,
+} from '@/entities/travel-record'
 import { paths } from '@/shared/config'
 import { useMyTrips } from '@/entities/trip-plan'
 import { Button as PartTripButton, Input as PartTripInput, Textarea as PartTripTextarea } from '@/shared/ui/parttrip'
@@ -26,9 +30,9 @@ export function RecordCameraPage() {
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [latitude, setLatitude] = useState<number>()
   const [longitude, setLongitude] = useState<number>()
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-
+  const uploadMutation = useUploadGuideCameraImageMutation()
+  const isSubmitting = uploadMutation.isPending
 
   const handleLocation = async () => {
     try {
@@ -49,9 +53,8 @@ export function RecordCameraPage() {
       return
     }
     try {
-      setIsSubmitting(true)
       setErrorMessage('')
-      const result = await uploadGuideCameraImage({
+      const result = await uploadMutation.mutateAsync({
         imageFile,
         latitude,
         longitude,
@@ -61,8 +64,6 @@ export function RecordCameraPage() {
       navigate({ params: { imageId: String(result.imageId) }, to: '/record/camera/$imageId' })
     } catch {
       setErrorMessage('사진 분석 요청을 처리하지 못했습니다.')
-    } finally {
-      setIsSubmitting(false)
     }
   }
 
@@ -117,9 +118,10 @@ export function RecordCameraWritePage() {
   const [content, setContent] = useState<string>()
   const [photoDate, setPhotoDate] = useState<string>()
   const isLoading = isValidImageId && resultQuery.isLoading
-  const [isSaving, setIsSaving] = useState(false)
   const [saved, setSaved] = useState<PhotoAnalysisResponseDto | null>(null)
   const [errorMessage, setErrorMessage] = useState(isValidImageId ? '' : '잘못된 분석 결과입니다.')
+  const saveMutation = useSaveGuideCameraRecordMutation()
+  const isSaving = saveMutation.isPending
 
   const queryErrorMessage = resultQuery.isError ? '분석 결과를 불러오지 못했습니다.' : ''
   const titleValue = title ?? result?.commTitle ?? result?.title ?? ''
@@ -133,9 +135,8 @@ export function RecordCameraWritePage() {
       return
     }
     try {
-      setIsSaving(true)
       setErrorMessage('')
-      const nextSaved = await saveGuideCameraRecord({
+      const nextSaved = await saveMutation.mutateAsync({
         commContent: contentValue.trim(),
         commTitle: titleValue.trim(),
         photoDate: photoDateValue,
@@ -144,8 +145,6 @@ export function RecordCameraWritePage() {
       setSaved(nextSaved)
     } catch {
       setErrorMessage('기록을 저장하지 못했습니다.')
-    } finally {
-      setIsSaving(false)
     }
   }
 

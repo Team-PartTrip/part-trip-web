@@ -4,7 +4,7 @@ import { useCreateBoardMutation, useCreateReviewMutation } from '@/entities/comm
 import { useCountriesQuery } from '@/entities/travel'
 import { useMyTrips } from '@/entities/trip-plan'
 import { useShareTripMutation } from '@/entities/trip-card'
-import { uploadImage } from '@/entities/file/api'
+import { useUploadImageMutation } from '@/entities/file'
 import { paths } from '@/shared/config'
 import { AppShell } from '@/widgets/app-shell'
 
@@ -29,6 +29,7 @@ export function CommunityWritePage() {
   const createBoardMutation = useCreateBoardMutation()
   const createReviewMutation = useCreateReviewMutation()
   const shareTripMutation = useShareTripMutation()
+  const uploadImageMutation = useUploadImageMutation()
 
   const selectedTripValue = selectedTripId || (trips[0]?.tripId != null ? String(trips[0].tripId) : '')
 
@@ -46,7 +47,7 @@ export function CommunityWritePage() {
     try {
       setIsSubmitting(true)
       setErrorMessage('')
-      const images = file ? [Object.values(await uploadImage(file))[0]].filter(Boolean) : []
+      const images = file ? [Object.values(await uploadImageMutation.mutateAsync(file))[0]].filter(Boolean) : []
 
       if (category === '자유게시판') {
         const post = await createBoardMutation.mutateAsync({
