@@ -39,15 +39,3 @@ export const paths = {
   signUp: '/sign-up',
   travelSelect: '/travel/select',
 } as const
-
-export const createCommunityDetailPath = (postId: string) =>
-  `/community/${encodeURIComponent(postId)}`
-
-export const createRecordDetailPath = (recordId: string) =>
-  `/record/${encodeURIComponent(recordId)}`
-
-export const createRecordCameraDetailPath = (imageId: number | string) =>
-  `/record/camera/${encodeURIComponent(String(imageId))}`
-
-export const createRecordCameraWritePath = (imageId: number | string) =>
-  `/record/camera/${encodeURIComponent(String(imageId))}/write`

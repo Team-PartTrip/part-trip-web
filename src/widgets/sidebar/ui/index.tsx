@@ -55,7 +55,7 @@ export default function Sidebar({ menus }: Props) {
           type="button"
           onClick={() => {
             if (isLoggedIn) setIsLogoutDialogOpen(true)
-            else navigate({ to: paths.login as never })
+            else navigate({ to: paths.login })
           }}
           aria-label={isLoggedIn ? '로그아웃 메뉴' : '로그인'}
         >
@@ -67,7 +67,7 @@ export default function Sidebar({ menus }: Props) {
       {isLogoutDialogOpen ? (
         <LogoutDialog
           onClose={() => setIsLogoutDialogOpen(false)}
-          moveToLogin={() => navigate({ to: paths.login as never, replace: true })}
+          moveToLogin={() => navigate({ to: paths.login, replace: true })}
         />
       ) : null}
     </S.SidebarWrapper>

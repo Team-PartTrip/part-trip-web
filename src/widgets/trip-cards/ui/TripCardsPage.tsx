@@ -37,7 +37,7 @@ function TripCardsFlow({ mode }: CardPageProps) {
     if (!id) return
     try {
       await shareTrip({ tripId: id })
-      navigate({ to: paths.tripCards as never })
+      navigate({ to: paths.tripCards })
     } catch { setMessage('여행 카드를 공유하지 못했습니다.') }
   }
 
@@ -54,12 +54,12 @@ function TripCardsFlow({ mode }: CardPageProps) {
       <S.Page>
         <S.Header>
           <div><S.Title>{mode === 'detail' ? detail?.title || '여행 카드 상세' : mode === 'create' ? '여행 카드 작성' : mode === 'delete' ? '여행 카드 삭제' : '여행 카드'}</S.Title><S.Subtitle>여행 계획을 카드로 공유하고 다시 확인하세요.</S.Subtitle></div>
-          <S.ActionRow><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.tripCards as never })}>목록</PartTripButton>{mode === 'list' ? <PartTripButton type="button" onClick={() => navigate({ to: paths.tripCardCreate as never })}>여행 카드 공유하기</PartTripButton> : null}</S.ActionRow>
+          <S.ActionRow><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.tripCards })}>목록</PartTripButton>{mode === 'list' ? <PartTripButton type="button" onClick={() => navigate({ to: paths.tripCardCreate })}>여행 카드 공유하기</PartTripButton> : null}</S.ActionRow>
         </S.Header>
         {message || hasQueryError ? <S.Notice role={hasQueryError ? 'alert' : 'status'}>{message || '여행 카드를 불러오지 못했습니다.'}</S.Notice> : null}
         {isLoading ? <S.State aria-busy="true">여행 카드를 불러오는 중입니다.</S.State> : null}
 
-        {mode === 'list' && !isLoading ? <S.CardGrid>{cards.map((card, index) => <S.Card type="button" key={card.tripId ?? index} onClick={() => card.tripId && navigate({ to: `/trip-cards/${card.tripId}` as never })}><img src={card.images?.[0] || fallbackImages[index % fallbackImages.length]} alt="" /><div><strong>{card.title || '공유 여행'}</strong><span>{card.startDate || '-'} – {card.endDate || '-'}</span><small>{card.cityName || card.countryName || '여행지'}</small></div></S.Card>)}{cards.length === 0 ? <S.Empty>공유된 여행 카드가 없습니다.</S.Empty> : null}</S.CardGrid> : null}
+        {mode === 'list' && !isLoading ? <S.CardGrid>{cards.map((card, index) => <S.Card type="button" key={card.tripId ?? index} onClick={() => card.tripId && navigate({ params: { tripId: String(card.tripId) }, to: '/trip-cards/$tripId' })}><img src={card.images?.[0] || fallbackImages[index % fallbackImages.length]} alt="" /><div><strong>{card.title || '공유 여행'}</strong><span>{card.startDate || '-'} – {card.endDate || '-'}</span><small>{card.cityName || card.countryName || '여행지'}</small></div></S.Card>)}{cards.length === 0 ? <S.Empty>공유된 여행 카드가 없습니다.</S.Empty> : null}</S.CardGrid> : null}
 
         {mode === 'detail' && !isLoading ? <S.Detail>{detail ? <><S.DetailHero><img src={detail.images?.[0] || figmaCardJapan} alt="" /><div><S.Badge>공유 여행</S.Badge><h2>{detail.title || '여행 카드'}</h2><p>{detail.startDate || '-'} – {detail.endDate || '-'}</p></div></S.DetailHero><S.DetailBody><h3>여행 일정</h3>{detail.places?.map((place, index) => <p key={place.tripPlaceId ?? index}>DAY {place.dayNumber ?? index + 1} · {place.placeName || '장소'} {place.placeSub ? `· ${place.placeSub}` : ''}</p>)}{!detail.places?.length ? <S.Empty>등록된 일정이 없습니다.</S.Empty> : null}<PartTripButton type="button" onClick={() => void handleImport()}>내 여행으로 가져오기</PartTripButton></S.DetailBody></> : <S.Empty>여행 카드를 찾을 수 없습니다.</S.Empty>}</S.Detail> : null}
 

@@ -46,7 +46,7 @@ export function ProfileForm({ onCancel, onSaved, profile }: ProfileFormProps) {
   const close = useCallback(() => {
     if (formState.isSubmitting) return
     if (onCancel) onCancel()
-    else navigate({ to: paths.profile as never })
+    else navigate({ to: paths.profile })
   }, [formState.isSubmitting, navigate, onCancel])
 
   useEffect(() => {
@@ -111,7 +111,7 @@ export function ProfileForm({ onCancel, onSaved, profile }: ProfileFormProps) {
       }
 
       if (onSaved) onSaved(savedProfile)
-      else navigate({ to: paths.profile as never, replace: true })
+      else navigate({ to: paths.profile, replace: true })
     } catch {
       setErrorMessage('프로필을 저장하지 못했습니다. 다시 시도해주세요.')
     }
@@ -175,7 +175,7 @@ export function ProfileForm({ onCancel, onSaved, profile }: ProfileFormProps) {
               <strong>비밀번호 재설정</strong>
               <span>본인 확인을 위해 이메일 인증 후 변경합니다.</span>
             </S.SectionHeading>
-            <S.ResetPhotoButton type="button" onClick={() => navigate({ to: paths.changePassword as never })}>
+            <S.ResetPhotoButton type="button" onClick={() => navigate({ to: paths.changePassword })}>
               이메일 인증 후 비밀번호 변경
             </S.ResetPhotoButton>
           </S.Section>

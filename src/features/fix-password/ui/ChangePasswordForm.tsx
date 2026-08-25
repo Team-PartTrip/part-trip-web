@@ -216,7 +216,7 @@ export function ChangePasswordForm() {
         confirmPassword: newPasswordConfirm,
         newPassword,
       })
-      navigate({ to: paths.login as never, replace: true })
+      navigate({ to: paths.login, replace: true })
     } catch (error) {
       setMessage({
         text: getErrorMessage(error),

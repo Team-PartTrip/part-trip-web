@@ -12,7 +12,7 @@ import dogAvatarUrl from '@/shared/assets/community-avatar-dog.png'
 import communityDaNangUrl from '@/shared/assets/community-destination-danang.jpg'
 import communitySwissUrl from '@/shared/assets/community-destination-swiss.jpg'
 import communityTokyoUrl from '@/shared/assets/community-destination-tokyo.jpg'
-import { createCommunityDetailPath, paths } from '@/shared/config'
+import { paths } from '@/shared/config'
 import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './CommunityPage.styles'
@@ -135,12 +135,12 @@ export function CommunityPage() {
             {!isLoading && !errorMessage && posts.length === 0 ? <S.FeedStatus>등록된 게시글이 없습니다.</S.FeedStatus> : null}
             {columns.map((column, columnIndex) => (
               <S.Column key={columnIndex}>
-                {column.map((post) => <PostCard key={post.id} post={post} onOpen={() => navigate({ to: createCommunityDetailPath(post.id) as never })} />)}
+                {column.map((post) => <PostCard key={post.id} post={post} onOpen={() => navigate({ params: { postId: post.id }, to: '/community/$postId' })} />)}
               </S.Column>
             ))}
           </S.Feed>
           <S.Aside>
-            <S.CreateButton type="button" onClick={() => navigate({ to: paths.communityWrite as never })}>⊕ 게시글 작성하기</S.CreateButton>
+            <S.CreateButton type="button" onClick={() => navigate({ to: paths.communityWrite })}>⊕ 게시글 작성하기</S.CreateButton>
             <S.Trending>
               <header><h2>인기 여행지</h2><button type="button">전체보기</button></header>
               <S.Destination><img src={communityTokyoUrl} alt="도쿄" /><div><strong>도쿄, 일본</strong><span>최근 24시간 1.2k+ 언급</span></div></S.Destination>

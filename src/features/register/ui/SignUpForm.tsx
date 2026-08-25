@@ -176,7 +176,7 @@ export function SignUpForm() {
       })
       const { id, password } = credentialsForm.getValues()
       await signUp({ email, id, password })
-      navigate({ to: paths.login as never, replace: true })
+      navigate({ to: paths.login, replace: true })
     } catch (error) {
       setMessage({
         text: getErrorMessage(error),

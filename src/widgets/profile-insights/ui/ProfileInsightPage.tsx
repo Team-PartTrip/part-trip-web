@@ -30,7 +30,7 @@ export function ProfileInsightPage({ kind }: { kind: ProfileInsightKind }) {
   return (
     <AppShell>
       <S.Page>
-        <S.Header><div><S.Title>{title}</S.Title><S.Subtitle>{subtitle}</S.Subtitle></div><S.BackButton type="button" onClick={() => navigate({ to: paths.profile as never })}>마이페이지</S.BackButton></S.Header>
+        <S.Header><div><S.Title>{title}</S.Title><S.Subtitle>{subtitle}</S.Subtitle></div><S.BackButton type="button" onClick={() => navigate({ to: paths.profile })}>마이페이지</S.BackButton></S.Header>
         {errorMessage ? <S.State role="alert">{errorMessage}</S.State> : null}
         {isLoading ? <S.State aria-busy="true">여행 기록을 불러오는 중입니다.</S.State> : null}
         {!isLoading && !errorMessage && kind === 'map' ? <S.MapCard><img src={figmaWorldMap} alt="세계 지도" /><S.MapLegend><span />방문한 국가</S.MapLegend><S.MapNote>{countries.length ? `${countries.length}개 국가를 방문했습니다.` : '아직 방문한 국가 데이터가 없습니다.'}</S.MapNote></S.MapCard> : null}

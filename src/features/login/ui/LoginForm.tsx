@@ -95,7 +95,7 @@ export function LoginForm() {
         userPwd,
       })
       saveAuthTokens(tokens)
-      navigate({ to: paths.main as never, replace: true })
+      navigate({ to: paths.main, replace: true })
     } catch (error) {
       setMessage({
         text: getErrorMessage(error),
@@ -116,7 +116,7 @@ export function LoginForm() {
       setIsGoogleSubmitting(true)
       const tokens = await googleLogin({ code })
       saveAuthTokens(tokens)
-      navigate({ to: paths.main as never, replace: true })
+      navigate({ to: paths.main, replace: true })
     } catch (error) {
       setMessage({ text: getErrorMessage(error), tone: 'error' })
     } finally {

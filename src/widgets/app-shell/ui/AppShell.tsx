@@ -23,7 +23,7 @@ export function AppShell({ children }: AppShellProps) {
             role="search"
             onSubmit={(event) => {
               event.preventDefault()
-              if (query.trim()) navigate({ to: `${paths.tripCards}?q=${encodeURIComponent(query.trim())}` as never })
+              if (query.trim()) navigate({ search: { q: query.trim() }, to: paths.tripCards })
             }}
           >
             <img src={S.searchIcon} alt="" />

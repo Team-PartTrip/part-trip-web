@@ -62,7 +62,7 @@ export function RecordDetailPage() {
     try {
       setIsMutating(true)
       await deleteTrip(record.tripId)
-      navigate({ to: paths.record as never, replace: true })
+      navigate({ to: paths.record, replace: true })
     } catch {
       setErrorMessage('여행 기록을 삭제하지 못했습니다.')
       setIsMutating(false)
@@ -74,7 +74,7 @@ export function RecordDetailPage() {
       <S.Content>
         <S.TopBar>
           <div><h1>기록 상세</h1><p>한 장소에서 남긴 사진과 메모를 확인하세요.</p></div>
-          <div><button type="button" onClick={() => navigate({ to: paths.recordWrite as never })}>새 기록 작성</button>{record ? <><button type="button" onClick={startEditing}>수정</button><button type="button" disabled={isMutating} onClick={() => void handleDelete()}>삭제</button></> : null}</div>
+          <div><button type="button" onClick={() => navigate({ to: paths.recordWrite })}>새 기록 작성</button>{record ? <><button type="button" onClick={startEditing}>수정</button><button type="button" disabled={isMutating} onClick={() => void handleDelete()}>삭제</button></> : null}</div>
         </S.TopBar>
 
         {errorMessage || hasRecordError ? <S.ErrorMessage role="alert">{errorMessage || '여행 기록을 불러오지 못했습니다.'}</S.ErrorMessage> : null}
@@ -122,7 +122,7 @@ export function RecordDetailPage() {
           <S.StateCard>
             <h1>여행 기록을 찾을 수 없습니다.</h1>
             <p>목록에서 다른 기록을 선택해주세요.</p>
-            <button type="button" onClick={() => navigate({ to: paths.record as never })}>목록으로 돌아가기</button>
+            <button type="button" onClick={() => navigate({ to: paths.record })}>목록으로 돌아가기</button>
           </S.StateCard>
         )}
       </S.Content>

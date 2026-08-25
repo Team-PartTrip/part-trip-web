@@ -7,7 +7,7 @@ export function TravelSelectPage() {
   const navigate = useNavigate()
   return (
     <AppShell>
-      <DestinationSelector onBack={() => navigate({ to: paths.main as never })} />
+      <DestinationSelector onBack={() => navigate({ to: paths.main })} />
     </AppShell>
   )
 }

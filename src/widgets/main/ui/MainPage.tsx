@@ -48,7 +48,7 @@ export function MainPage() {
           <S.EmptyCard>
             <strong>아직 다음 여행이 없습니다.</strong>
             <span>여행지를 정하고 나만의 여행 계획을 시작해보세요.</span>
-            <S.ActionButton type="button" onClick={() => navigate({ to: paths.travelSelect as never })}>여행 정보 설정</S.ActionButton>
+            <S.ActionButton type="button" onClick={() => navigate({ to: paths.travelSelect })}>여행 정보 설정</S.ActionButton>
           </S.EmptyCard>
         ) : null}
 
@@ -68,7 +68,7 @@ export function MainPage() {
                 <S.Dday>{dday === undefined ? '-' : `D${dday >= 0 ? '-' : '+'}${Math.abs(dday)}`}</S.Dday>
                 <S.Destination>{destination}</S.Destination>
                 <S.Dates>{dateRange} · {durationLabel(plan.startDate, plan.endDate)}</S.Dates>
-                <S.ActionButton type="button" onClick={() => navigate({ to: paths.travelSelect as never })}>여행 정보 수정</S.ActionButton>
+                <S.ActionButton type="button" onClick={() => navigate({ to: paths.travelSelect })}>여행 정보 수정</S.ActionButton>
               </S.DdayCard>
             </S.HeroRow>
 
@@ -84,10 +84,10 @@ export function MainPage() {
               </S.InfoCard>
               <S.InfoCard>
                 <S.CardTitle>해야 할 일</S.CardTitle>
-                <S.TodoButton type="button" onClick={() => navigate({ to: paths.planner as never })}>
+                <S.TodoButton type="button" onClick={() => navigate({ to: paths.planner })}>
                   <span>플래너에서 일정 준비하기</span><small>플래너 API 연동 전</small><b>›</b>
                 </S.TodoButton>
-                <S.TodoButton type="button" onClick={() => navigate({ to: paths.record as never })}>
+                <S.TodoButton type="button" onClick={() => navigate({ to: paths.record })}>
                   <span>지난 여행 기록 확인하기</span><small>여행 기록으로 이동</small><b>›</b>
                 </S.TodoButton>
               </S.InfoCard>

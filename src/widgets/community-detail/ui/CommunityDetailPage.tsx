@@ -21,7 +21,7 @@ import { getProfile } from '@/entities/user/api'
 import { resolveApiAssetUrl } from '@/entities/file/api'
 import { createSharedTripComment, getSharedTripComments, getSharedTripDetail, importTrip } from '@/entities/trip-card/api'
 import catAvatarUrl from '@/shared/assets/community-avatar-cat.png'
-import { createRecordDetailPath, paths } from '@/shared/config'
+import { paths } from '@/shared/config'
 import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './CommunityDetailPage.styles'
@@ -223,7 +223,7 @@ export function CommunityDetailPage() {
       setIsMutating(true)
       if (post.type === 'board') await deleteBoard(post.id)
       else await deleteReview(post.id)
-      navigate({ to: paths.community as never, replace: true })
+      navigate({ to: paths.community, replace: true })
     } catch {
       setErrorMessage('게시글을 삭제하지 못했습니다.')
       setIsMutating(false)
@@ -263,7 +263,7 @@ export function CommunityDetailPage() {
     try {
       setIsMutating(true)
       const imported = await importTrip(post.id)
-      if (imported.tripId) navigate({ to: createRecordDetailPath(String(imported.tripId)) })
+      if (imported.tripId) navigate({ params: { recordId: String(imported.tripId) }, to: '/record/$recordId' })
     } catch {
       setErrorMessage('여행 일정을 가져오지 못했습니다.')
     } finally {
@@ -276,7 +276,7 @@ export function CommunityDetailPage() {
       <S.Page>
       <S.Content>
         <S.TopBar>
-          <S.BackButton type="button" onClick={() => navigate({ to: paths.community as never })}>← 커뮤니티</S.BackButton>
+          <S.BackButton type="button" onClick={() => navigate({ to: paths.community })}>← 커뮤니티</S.BackButton>
           <S.WriteLink to={paths.communityWrite}>새 글 작성</S.WriteLink>
         </S.TopBar>
 
@@ -347,7 +347,7 @@ export function CommunityDetailPage() {
         ) : !errorMessage ? (
           <S.StateCard>
             <h1>여행 게시글을 찾을 수 없습니다.</h1>
-            <button type="button" onClick={() => navigate({ to: paths.community as never })}>목록으로 돌아가기</button>
+            <button type="button" onClick={() => navigate({ to: paths.community })}>목록으로 돌아가기</button>
           </S.StateCard>
         ) : null}
       </S.Content>

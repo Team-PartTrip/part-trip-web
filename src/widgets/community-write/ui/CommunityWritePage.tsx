@@ -8,7 +8,7 @@ import { useCountriesQuery } from '@/entities/travel'
 import { useMyTrips } from '@/entities/trip-plan'
 import { shareTrip } from '@/entities/trip-card/api'
 import { uploadImage } from '@/entities/file/api'
-import { createCommunityDetailPath, paths } from '@/shared/config'
+import { paths } from '@/shared/config'
 import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './CommunityWritePage.styles'
@@ -54,7 +54,7 @@ export function CommunityWritePage() {
           images,
           title: title.trim(),
         })
-        navigate({ to: createCommunityDetailPath(`board-${post.boardId}`) as never, replace: true })
+        navigate({ params: { postId: `board-${post.boardId}` }, to: '/community/$postId', replace: true })
         return
       }
 
@@ -70,12 +70,12 @@ export function CommunityWritePage() {
           rating: 5,
           title: title.trim(),
         })
-        navigate({ to: createCommunityDetailPath(`review-${post.reviewId}`) as never, replace: true })
+        navigate({ params: { postId: `review-${post.reviewId}` }, to: '/community/$postId', replace: true })
         return
       }
 
       const post = await shareTrip({ tripId: Number(selectedTripValue) })
-      navigate({ to: createCommunityDetailPath(`trip-${post.tripId}`) as never, replace: true })
+      navigate({ params: { postId: `trip-${post.tripId}` }, to: '/community/$postId', replace: true })
     } catch {
       setErrorMessage('게시글을 등록하지 못했습니다. 다시 시도해주세요.')
     } finally {
@@ -87,7 +87,7 @@ export function CommunityWritePage() {
     <AppShell>
       <S.Page>
       <S.Content>
-        <S.Header><div><h1>게시글 작성</h1><p>여행 경험과 궁금한 점을 공유해보세요.</p></div><button type="button" onClick={() => navigate({ to: paths.community as never })}>취소</button></S.Header>
+        <S.Header><div><h1>게시글 작성</h1><p>여행 경험과 궁금한 점을 공유해보세요.</p></div><button type="button" onClick={() => navigate({ to: paths.community })}>취소</button></S.Header>
         <S.Form onSubmit={(event) => void handleSubmit(event)} noValidate>
           <S.Field>
             <span>게시판</span>
@@ -112,7 +112,7 @@ export function CommunityWritePage() {
             </>
           )}
           {errorMessage || hasTripsError || countriesQuery.isError ? <S.ErrorMessage role="alert">{errorMessage || '작성에 필요한 정보를 불러오지 못했습니다.'}</S.ErrorMessage> : null}
-          <S.Actions><button type="button" onClick={() => navigate({ to: paths.community as never })}>취소</button><button type="submit" disabled={isSubmitting}>{isSubmitting ? '등록 중' : '게시글 등록'}</button></S.Actions>
+          <S.Actions><button type="button" onClick={() => navigate({ to: paths.community })}>취소</button><button type="submit" disabled={isSubmitting}>{isSubmitting ? '등록 중' : '게시글 등록'}</button></S.Actions>
         </S.Form>
       </S.Content>
       </S.Page>

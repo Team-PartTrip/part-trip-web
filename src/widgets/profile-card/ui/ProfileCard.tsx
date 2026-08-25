@@ -42,7 +42,7 @@ export function ProfileCard({ onEdit, profile }: ProfileCardProps) {
         <S.BasicInfo><h1>{profile.name}</h1><p>{profile.travelStyle}</p></S.BasicInfo>
         <S.EditButton
           type="button"
-          onClick={() => onEdit ? onEdit() : navigate({ to: paths.profileEdit as never })}
+          onClick={() => onEdit ? onEdit() : navigate({ to: paths.profileEdit })}
         >
           프로필 수정
         </S.EditButton>

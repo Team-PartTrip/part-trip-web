@@ -25,7 +25,7 @@ export function ProfilePage() {
   return (
     <AppShell>
       <S.Page>
-        <S.Header><div><S.Title>마이페이지</S.Title><S.Subtitle>나의 여행 활동과 설정을 관리하세요.</S.Subtitle></div><S.EditButton type="button" onClick={() => navigate({ to: paths.profileEdit as never })}>프로필 수정</S.EditButton></S.Header>
+        <S.Header><div><S.Title>마이페이지</S.Title><S.Subtitle>나의 여행 활동과 설정을 관리하세요.</S.Subtitle></div><S.EditButton type="button" onClick={() => navigate({ to: paths.profileEdit })}>프로필 수정</S.EditButton></S.Header>
         {hasProfileError || hasTripsError ? <S.State role="alert">{hasProfileError ? '프로필을 불러오지 못했습니다.' : '여행 기록을 불러오지 못했습니다.'}</S.State> : null}
         {!profile && !hasProfileError && isProfileLoading ? <S.State aria-busy="true">프로필을 불러오는 중입니다.</S.State> : null}
         {profile ? (
@@ -41,17 +41,17 @@ export function ProfilePage() {
             <S.Section>
               <S.SectionTitle>최근 여행</S.SectionTitle>
               <S.RecentGrid>
-                {trips.slice(0, 3).map((trip, index) => <S.RecentTrip key={trip.tripId ?? index} type="button" onClick={() => trip.tripId && navigate({ to: `/record/${trip.tripId}` as never })}><img src={trip.images?.[0] || (index === 0 ? figmaProfileTrip : figmaProfileHero)} alt="" /><strong>{trip.title || '여행 기록'}</strong><span>{trip.cityName || trip.countryName || '여행지'}</span></S.RecentTrip>)}
+                {trips.slice(0, 3).map((trip, index) => <S.RecentTrip key={trip.tripId ?? index} type="button" onClick={() => trip.tripId && navigate({ params: { recordId: String(trip.tripId) }, to: '/record/$recordId' })}><img src={trip.images?.[0] || (index === 0 ? figmaProfileTrip : figmaProfileHero)} alt="" /><strong>{trip.title || '여행 기록'}</strong><span>{trip.cityName || trip.countryName || '여행지'}</span></S.RecentTrip>)}
                 {trips.length === 0 ? <S.Empty>연결된 여행 기록이 없습니다.</S.Empty> : null}
               </S.RecentGrid>
             </S.Section>
             <S.Section>
               <S.SectionTitle>둘러보기</S.SectionTitle>
               <S.SettingsCard>
-                <S.SettingsButton type="button" onClick={() => navigate({ to: paths.profileMap as never })}>개인 세계지도 <span>›</span></S.SettingsButton>
-                <S.SettingsButton type="button" onClick={() => navigate({ to: paths.profileCountries as never })}>국가별 여행 기록 <span>›</span></S.SettingsButton>
-                <S.SettingsButton type="button" onClick={() => navigate({ to: paths.profileAchievements as never })}>여행 달성 현황 <span>›</span></S.SettingsButton>
-                <S.SettingsButton type="button" onClick={() => navigate({ to: paths.notificationSettings as never })}>알림 설정 <span>›</span></S.SettingsButton>
+                <S.SettingsButton type="button" onClick={() => navigate({ to: paths.profileMap })}>개인 세계지도 <span>›</span></S.SettingsButton>
+                <S.SettingsButton type="button" onClick={() => navigate({ to: paths.profileCountries })}>국가별 여행 기록 <span>›</span></S.SettingsButton>
+                <S.SettingsButton type="button" onClick={() => navigate({ to: paths.profileAchievements })}>여행 달성 현황 <span>›</span></S.SettingsButton>
+                <S.SettingsButton type="button" onClick={() => navigate({ to: paths.notificationSettings })}>알림 설정 <span>›</span></S.SettingsButton>
               </S.SettingsCard>
             </S.Section>
           </>
