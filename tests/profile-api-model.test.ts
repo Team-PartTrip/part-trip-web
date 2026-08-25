@@ -16,9 +16,11 @@ test('서버 프로필과 캐릭터 응답을 화면 프로필로 변환한다',
   assert.equal(profile.bio, '계획을 즐깁니다.')
 })
 
-test('캐릭터 응답이 없으면 기존 기본 표시 정보를 유지한다', () => {
+test('캐릭터 응답이 없으면 서버에 없는 정보를 임의로 채우지 않는다', () => {
   const profile = toUserProfile({ nickName: '파트', userId: 'part01' })
 
-  assert.equal(profile.travelStyle, '계획적인 문화 탐험가')
-  assert.ok(profile.bio.length > 0)
+  assert.equal(profile.travelStyle, undefined)
+  assert.equal(profile.bio, undefined)
+  assert.equal(profile.email, undefined)
+  assert.equal(profile.phone, undefined)
 })

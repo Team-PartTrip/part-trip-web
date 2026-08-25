@@ -31,7 +31,7 @@ export function ProfilePage() {
         {profile ? (
           <>
             <S.ProfileCard>
-              <S.ProfileHero><img src={profile.avatarUrl || figmaProfileHero} alt="" /><div><h2>{profile.name}</h2><p>{profile.travelStyle}</p><span>{profile.bio}</span></div></S.ProfileHero>
+              <S.ProfileHero><img src={profile.avatarUrl || figmaProfileHero} alt="" /><div><h2>{profile.name || '닉네임 미설정'}</h2><p>{profile.travelStyle || '여행 성향 정보 없음'}</p><span>{profile.bio || '아직 등록된 자기소개가 없습니다.'}</span></div></S.ProfileHero>
               <S.Stats>
                 <div><strong>{countries}</strong><span>방문 국가</span></div>
                 <div><strong>{trips.length}</strong><span>여행 기록</span></div>

@@ -36,7 +36,7 @@ export function ProfileForm({ onCancel, onSaved, profile }: ProfileFormProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const { register, handleSubmit, formState, control } = useForm<ProfileFormValues>({
     defaultValues: {
-      name: profile.name,
+      name: profile.name || '',
     },
   })
   const previewName = useWatch({ control, name: 'name' })
@@ -191,7 +191,7 @@ export function ProfileForm({ onCancel, onSaved, profile }: ProfileFormProps) {
               : <span>{previewName?.trim().slice(0, 1) || 'P'}</span>}
           </S.PreviewAvatar>
           <h3>{previewName?.trim() || '닉네임'}</h3>
-          <p>{profile.travelStyle}</p>
+          <p>{profile.travelStyle || '여행 성향 정보 없음'}</p>
           <small>저장하면 프로필 화면에 바로 반영됩니다.</small>
         </S.Preview>
       </S.Body>

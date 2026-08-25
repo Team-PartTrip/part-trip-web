@@ -36,10 +36,10 @@ export function ProfileCard({ onEdit, profile }: ProfileCardProps) {
   return (
     <S.Card>
       <S.ProfileLine>
-        <S.Avatar aria-label={`${profile.name} 프로필 사진`}>
+        <S.Avatar aria-label={`${profile.name || '사용자'} 프로필 사진`}>
           {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : null}
         </S.Avatar>
-        <S.BasicInfo><h1>{profile.name}</h1><p>{profile.travelStyle}</p></S.BasicInfo>
+        <S.BasicInfo><h1>{profile.name || '닉네임 미설정'}</h1><p>{profile.travelStyle || '여행 성향 정보 없음'}</p></S.BasicInfo>
         <S.EditButton
           type="button"
           onClick={() => onEdit ? onEdit() : navigate({ to: paths.profileEdit })}
@@ -64,9 +64,9 @@ export function ProfileCard({ onEdit, profile }: ProfileCardProps) {
         <S.TypePanel>
           <h2>여행 타입 상세</h2>
           <img src={profile.characterImageUrl || characterUrl} alt={`${profile.characterName || '여행'} 캐릭터`} />
-          <h3>{profile.characterName || '마트'}</h3>
-          <span>{profile.travelStyle}</span>
-          <S.TypeDescription><strong>{profile.characterName ? `${profile.characterName}의 여행 성향` : '즉흥적일 때의 경험을 좋아하는 코알라 마트'}</strong><p>{profile.bio}</p></S.TypeDescription>
+          <h3>{profile.characterName || '여행 캐릭터 미설정'}</h3>
+          <span>{profile.travelStyle || '여행 성향 정보 없음'}</span>
+          <S.TypeDescription><strong>{profile.characterName ? `${profile.characterName}의 여행 성향` : '여행 성향을 아직 분석하지 않았어요.'}</strong><p>{profile.bio || '아직 등록된 자기소개가 없습니다.'}</p></S.TypeDescription>
         </S.TypePanel>
       </S.Body>
     </S.Card>

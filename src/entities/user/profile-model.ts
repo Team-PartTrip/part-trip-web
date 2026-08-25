@@ -13,25 +13,15 @@ type CharacterSource = {
 
 export type UserProfile = {
   avatarUrl?: string
-  bio: string
+  bio?: string
   characterImageUrl?: string
   characterName?: string
-  country: string
-  email: string
-  id: string
+  country?: string
+  email?: string
+  id?: string
   name: string
-  phone: string
-  travelStyle: string
-}
-
-const fallbackProfile = {
-  bio: '낯선 도시의 일상과 문화를 천천히 경험하는 여행을 좋아합니다.',
-  country: '대한민국',
-  email: 'parttrip@example.com',
-  id: 'parttrip01',
-  name: '김파트',
-  phone: '010-1234-5678',
-  travelStyle: '계획적인 문화 탐험가',
+  phone?: string
+  travelStyle?: string
 }
 
 export function toUserProfile(
@@ -39,14 +29,13 @@ export function toUserProfile(
   character?: CharacterSource,
 ): UserProfile {
   return {
-    ...fallbackProfile,
-    avatarUrl: profile.imgUrl || undefined,
-    bio: character?.characterDescription || fallbackProfile.bio,
+    avatarUrl: profile.imgUrl,
+    bio: character?.characterDescription,
     characterImageUrl: character?.imgUrl,
     characterName: character?.characterName,
-    id: profile.userId || fallbackProfile.id,
-    name: profile.nickName || fallbackProfile.name,
-    travelStyle: character?.characterType || fallbackProfile.travelStyle,
+    id: profile.userId,
+    name: profile.nickName ?? '',
+    travelStyle: character?.characterType,
   }
 }
 
