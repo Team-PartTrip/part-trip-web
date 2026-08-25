@@ -1,0 +1,56 @@
+import assert from 'node:assert/strict'
+import test from 'node:test'
+import axios, { AxiosError, type AxiosAdapter } from 'axios'
+
+import { apiClient } from '../src/shared/libs/api-client.ts'
+import { clearAuthTokens, saveAuthTokens } from '../src/shared/libs/token-storage.ts'
+
+function createStorage() {
+  const values = new Map<string, string>()
+  return {
+    getItem: (key: string) => values.get(key) ?? null,
+    removeItem: (key: string) => values.delete(key),
+    setItem: (key: string, value: string) => values.set(key, value),
+  }
+}
+
+test('401 응답이면 refresh 후 원래 요청을 새 access token으로 재시도한다', async () => {
+  const storage = createStorage()
+  const previousStorage = globalThis.localStorage
+  const previousAxiosAdapter = axios.defaults.adapter
+  const previousApiAdapter = apiClient.defaults.adapter
+  const requests: string[] = []
+  const adapter: AxiosAdapter = async (config) => {
+    const url = config.url ?? ''
+    requests.push(url)
+
+    if (url === '/auth/refresh') {
+      return { config, data: { accessToken: 'refreshed', refreshToken: 'refresh-2' }, headers: {}, status: 200, statusText: 'OK' }
+    }
+
+    if (config.headers.Authorization === 'Bearer refreshed') {
+      return { config, data: { ok: true }, headers: {}, status: 200, statusText: 'OK' }
+    }
+
+    const response = { config, data: {}, headers: {}, status: 401, statusText: 'Unauthorized' }
+    return Promise.reject(new AxiosError('Unauthorized', AxiosError.ERR_BAD_REQUEST, config, undefined, response))
+  }
+
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: storage })
+  axios.defaults.adapter = adapter
+  apiClient.defaults.adapter = adapter
+  saveAuthTokens({ accessToken: 'expired', refreshToken: 'refresh-1' })
+
+  try {
+    const response = await apiClient.get<{ ok: boolean }>('/private')
+    assert.equal(response.data.ok, true)
+    assert.deepEqual(requests, ['/private', '/auth/refresh', '/private'])
+    assert.equal(storage.getItem('accessToken'), 'refreshed')
+    assert.equal(storage.getItem('refreshToken'), 'refresh-2')
+  } finally {
+    clearAuthTokens()
+    Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: previousStorage })
+    axios.defaults.adapter = previousAxiosAdapter
+    apiClient.defaults.adapter = previousApiAdapter
+  }
+})
