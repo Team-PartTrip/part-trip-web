@@ -2,22 +2,23 @@ import { useRef, useState, type ChangeEvent } from 'react'
 import {
   useForm,
   useWatch,
-  type FieldErrors,
-  type FieldValues,
   type SubmitErrorHandler,
   type SubmitHandler,
-  type UseFormRegisterReturn,
 } from 'react-hook-form'
 import { useNavigate } from '@tanstack/react-router'
 import { sendVerificationCode, signUp, verifyCode } from '@/entities/session/api'
 import { paths } from '@/shared/config'
 import {
   authValidationRules,
+  createSanitizedChangeHandler,
+  emailPattern,
   getErrorMessage,
+  getFirstErrorMessage,
   getIdValidationError,
   getPasswordValidationError,
   sanitizeId,
   sanitizePassword,
+  trimFormValue,
 } from '@/shared/utils'
 import { AuthForm as S } from '@/shared/ui'
 
@@ -40,38 +41,7 @@ type FormMessage = {
   tone: 'error' | 'success'
 }
 
-const trimFormValue = (value: unknown) =>
-  typeof value === 'string' ? value.trim() : ''
-
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const phoneNumberPattern = /^\+?[0-9-]{9,20}$/
-
-const getFirstErrorMessage = <TFormValues extends FieldValues>(
-  errors: FieldErrors<TFormValues>,
-) => {
-  const firstError = Object.values(errors)[0]
-
-  if (
-    firstError &&
-    typeof firstError === 'object' &&
-    'message' in firstError &&
-    typeof firstError.message === 'string'
-  ) {
-    return firstError.message
-  }
-
-  return '입력값을 확인해주세요.'
-}
-
-const createSanitizedChangeHandler =
-  (
-    registration: UseFormRegisterReturn,
-    sanitize: (value: string) => string,
-  ) =>
-  (event: ChangeEvent<HTMLInputElement>) => {
-    event.currentTarget.value = sanitize(event.currentTarget.value)
-    void registration.onChange(event)
-  }
 
 export function SignUpForm() {
   const navigate = useNavigate()

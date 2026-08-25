@@ -1,11 +1,8 @@
-import { useState, type ChangeEvent } from 'react'
+import { useState } from 'react'
 import {
   useForm,
-  type FieldErrors,
-  type FieldValues,
   type SubmitErrorHandler,
   type SubmitHandler,
-  type UseFormRegisterReturn,
 } from 'react-hook-form'
 import { useNavigate } from '@tanstack/react-router'
 import {
@@ -16,9 +13,13 @@ import {
 import { paths } from '@/shared/config'
 import {
   authValidationRules,
+  createSanitizedChangeHandler,
+  emailPattern,
   getErrorMessage,
+  getFirstErrorMessage,
   getPasswordValidationError,
   sanitizePassword,
+  trimFormValue,
 } from '@/shared/utils'
 import { AuthForm as S } from '@/shared/ui'
 
@@ -42,38 +43,6 @@ type PasswordFormValues = {
   newPassword: string
   newPasswordConfirm: string
 }
-
-const trimFormValue = (value: unknown) =>
-  typeof value === 'string' ? value.trim() : ''
-
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-const getFirstErrorMessage = <TFormValues extends FieldValues>(
-  errors: FieldErrors<TFormValues>,
-) => {
-  const firstError = Object.values(errors)[0]
-
-  if (
-    firstError &&
-    typeof firstError === 'object' &&
-    'message' in firstError &&
-    typeof firstError.message === 'string'
-  ) {
-    return firstError.message
-  }
-
-  return '입력값을 확인해주세요.'
-}
-
-const createSanitizedChangeHandler =
-  (
-    registration: UseFormRegisterReturn,
-    sanitize: (value: string) => string,
-  ) =>
-  (event: ChangeEvent<HTMLInputElement>) => {
-    event.currentTarget.value = sanitize(event.currentTarget.value)
-    void registration.onChange(event)
-  }
 
 export function ChangePasswordForm() {
   const navigate = useNavigate()

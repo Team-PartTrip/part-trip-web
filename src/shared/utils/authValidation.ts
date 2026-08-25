@@ -12,6 +12,8 @@ export const authValidationRules = {
   },
 } as const
 
+export const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 const idAllowedPattern = /^[A-Za-z0-9]+$/
 const passwordAllowedPattern = /^[A-Za-z0-9!@#$%^&*]+$/
 const idDeniedCharactersPattern = /[^A-Za-z0-9]/g

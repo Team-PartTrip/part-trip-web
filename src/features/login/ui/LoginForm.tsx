@@ -1,22 +1,22 @@
-import { useState, type ChangeEvent } from 'react'
+import { useState } from 'react'
 import {
   useForm,
-  type FieldErrors,
-  type FieldValues,
   type SubmitErrorHandler,
   type SubmitHandler,
-  type UseFormRegisterReturn,
 } from 'react-hook-form'
 import { useNavigate } from '@tanstack/react-router'
 import { googleLogin, login, saveAuthTokens } from '@/entities/session/api'
 import { paths } from '@/shared/config'
 import {
   authValidationRules,
+  createSanitizedChangeHandler,
   getErrorMessage,
+  getFirstErrorMessage,
   getIdValidationError,
   getPasswordValidationError,
   sanitizeId,
   sanitizePassword,
+  trimFormValue,
 } from '@/shared/utils'
 import { AuthForm as S } from '@/shared/ui'
 
@@ -31,36 +31,6 @@ type LoginFormValues = {
   userId: string
   userPwd: string
 }
-
-const trimFormValue = (value: unknown) =>
-  typeof value === 'string' ? value.trim() : ''
-
-const getFirstErrorMessage = <TFormValues extends FieldValues>(
-  errors: FieldErrors<TFormValues>,
-) => {
-  const firstError = Object.values(errors)[0]
-
-  if (
-    firstError &&
-    typeof firstError === 'object' &&
-    'message' in firstError &&
-    typeof firstError.message === 'string'
-  ) {
-    return firstError.message
-  }
-
-  return '입력값을 확인해주세요.'
-}
-
-const createSanitizedChangeHandler =
-  (
-    registration: UseFormRegisterReturn,
-    sanitize: (value: string) => string,
-  ) =>
-  (event: ChangeEvent<HTMLInputElement>) => {
-    event.currentTarget.value = sanitize(event.currentTarget.value)
-    void registration.onChange(event)
-  }
 
 export function LoginForm() {
   const navigate = useNavigate()
