@@ -6,12 +6,15 @@ import {
   getExchangeRate,
   getFestivals,
   getFoodInfo,
+  getPopularPlaces,
+  getRecentSearches,
   getPopulationInfo,
   getTodayPhrase,
   getTourPlace,
   getWeather,
   type CountryInfoResponseDto,
   type DdayResponseDto,
+  type Destination,
   type ExchangeRateResponseDto,
   type FestivalResponseDto,
   type FoodInfoResponseDto,
@@ -20,7 +23,15 @@ import {
   type TourPlaceResponseDto,
   type WeatherResponseDto,
 } from './api'
+import { getProfile } from '../user/api'
 import { travelQueryKeys } from './query-keys'
+
+const currencyByCountry: Record<string, string> = {
+  베트남: 'VND',
+  싱가포르: 'SGD',
+  일본: 'JPY',
+  태국: 'THB',
+}
 
 export const countriesQueryOptions = () =>
   queryOptions({
@@ -62,6 +73,58 @@ export const tourPlacesQueryOptions = (countryName: string) =>
 
 export function useTourPlacesQuery(countryName?: string) {
   return useQuery(tourPlacesQueryOptions(countryName ?? ''))
+}
+
+export type DestinationQueryData = {
+  destinations: readonly Destination[]
+  recentDestinations: readonly Destination[]
+  travelPlanId?: number
+  userId?: string
+}
+
+export async function getDestinationData(): Promise<DestinationQueryData> {
+  const [countries, popularPlaces, profile, currentPlan] = await Promise.all([
+    getCountries(),
+    getPopularPlaces(),
+    getProfile(),
+    getDday().catch(() => undefined),
+  ])
+  const destinations = countries.map((country, index) => ({
+    country: country.countryName ?? '여행지',
+    countryInfoId: country.countryInfoId,
+    currency: currencyByCountry[country.countryName ?? ''] ?? '',
+    id: String(country.countryInfoId ?? index),
+    imageUrl: country.imageUrl,
+    name: country.cityName || country.countryName || '여행지',
+  }))
+  const popularIds = new Set(popularPlaces.map((place) => place.countryInfoId))
+  const recentSearches = await getRecentSearches(profile.userId)
+
+  return {
+    destinations: [...destinations].sort(
+      (a, b) => Number(popularIds.has(b.countryInfoId)) - Number(popularIds.has(a.countryInfoId)),
+    ),
+    recentDestinations: recentSearches.map((item, index) => ({
+      country: item.countryName ?? '여행지',
+      currency: currencyByCountry[item.countryName ?? ''] ?? '',
+      id: `recent-${item.recentSearchId ?? index}`,
+      imageUrl: item.imageUrl,
+      name: item.cityName || item.countryName || '여행지',
+      recentSearchId: item.recentSearchId,
+    })),
+    travelPlanId: currentPlan?.travelPlanId,
+    userId: profile.userId,
+  }
+}
+
+export const destinationQueryOptions = () =>
+  queryOptions({
+    queryKey: travelQueryKeys.destinationSelector(),
+    queryFn: getDestinationData,
+  })
+
+export function useDestinationDataQuery() {
+  return useQuery(destinationQueryOptions())
 }
 
 export type MainTravelQueryData = {

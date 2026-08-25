@@ -1,18 +1,13 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { DestinationBackIcon, DestinationSearchIcon } from "@/shared/assets";
 import {
-  deleteRecentSearch,
-  getCountries,
-  getDday,
-  getPopularPlaces,
-  getRecentSearches,
-  changeTravelCountry,
-  saveRecentSearch,
-  saveTravelPlan,
+  useChangeTravelCountryMutation,
+  useDeleteRecentSearchMutation,
+  useDestinationDataQuery,
+  useSaveRecentSearchMutation,
+  useSaveTravelPlanMutation,
   type Destination,
-} from "@/entities/travel/api";
-import { getProfile } from "@/entities/user/api";
+} from "@/entities/travel";
 import {
   destinationBangkokUrl,
   destinationDaNangUrl,
@@ -25,13 +20,6 @@ import * as S from "./DestinationSelector.styles";
 interface Props {
   onBack: () => void;
 }
-
-const currencyByCountry: Record<string, string> = {
-  베트남: "VND",
-  싱가포르: "SGD",
-  일본: "JPY",
-  태국: "THB",
-};
 
 function addDays(date: Date, days: number) {
   const nextDate = new Date(date);
@@ -55,59 +43,17 @@ function CloseIcon() {
   return <span aria-hidden="true">×</span>;
 }
 
-type DestinationQueryData = {
-  destinations: readonly Destination[];
-  recentDestinations: readonly Destination[];
-  userId?: string;
-  travelPlanId?: number;
-}
-
-async function loadDestinationData(): Promise<DestinationQueryData> {
-  const [countries, popularPlaces, profile, currentPlan] = await Promise.all([
-    getCountries(),
-    getPopularPlaces(),
-    getProfile(),
-    getDday().catch(() => undefined),
-  ])
-  const nextDestinations = countries.map((country, index) => ({
-    country: country.countryName ?? "여행지",
-    countryInfoId: country.countryInfoId,
-    currency: currencyByCountry[country.countryName ?? ""] ?? "",
-    id: String(country.countryInfoId ?? index),
-    imageUrl: country.imageUrl,
-    name: country.cityName || country.countryName || "여행지",
-  }))
-  const popularIds = new Set(popularPlaces.map((place) => place.countryInfoId))
-  const recentSearches = await getRecentSearches(profile.userId)
-
-  return {
-    destinations: [...nextDestinations].sort(
-      (a, b) => Number(popularIds.has(b.countryInfoId)) - Number(popularIds.has(a.countryInfoId)),
-    ),
-    recentDestinations: recentSearches.map((item, index) => ({
-      country: item.countryName ?? "여행지",
-      currency: currencyByCountry[item.countryName ?? ""] ?? "",
-      id: `recent-${item.recentSearchId ?? index}`,
-      imageUrl: item.imageUrl,
-      name: item.cityName || item.countryName || "여행지",
-      recentSearchId: item.recentSearchId,
-    })),
-    travelPlanId: currentPlan?.travelPlanId,
-    userId: profile.userId,
-  }
-}
-
 const DestinationSelector = ({ onBack }: Props) => {
   const [query, setQuery] = useState("");
-  const [recentOverride, setRecentOverride] = useState<readonly Destination[] | null>(null);
   const [selectingId, setSelectingId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
-  const destinationQuery = useQuery({
-    queryKey: ["travel", "destination-selector"],
-    queryFn: loadDestinationData,
-  });
+  const destinationQuery = useDestinationDataQuery();
+  const saveTravelPlanMutation = useSaveTravelPlanMutation();
+  const changeTravelCountryMutation = useChangeTravelCountryMutation();
+  const saveRecentSearchMutation = useSaveRecentSearchMutation();
+  const deleteRecentSearchMutation = useDeleteRecentSearchMutation();
   const destinations = destinationQuery.data?.destinations ?? [];
-  const recentDestinations = recentOverride ?? destinationQuery.data?.recentDestinations ?? [];
+  const recentDestinations = destinationQuery.data?.recentDestinations ?? [];
   const userId = destinationQuery.data?.userId;
   const travelPlanId = destinationQuery.data?.travelPlanId;
   const isLoading = destinationQuery.isLoading;
@@ -126,12 +72,12 @@ const DestinationSelector = ({ onBack }: Props) => {
       setErrorMessage("");
       const today = new Date();
       if (travelPlanId != null && destination.countryInfoId != null) {
-        await changeTravelCountry({
+        await changeTravelCountryMutation.mutateAsync({
           countryInfoId: destination.countryInfoId,
           travelPlanId,
         });
       } else {
-        await saveTravelPlan({
+        await saveTravelPlanMutation.mutateAsync({
           cityName: destination.name,
           countryName: destination.country,
           endDate: addDays(today, 34),
@@ -139,7 +85,7 @@ const DestinationSelector = ({ onBack }: Props) => {
         });
       }
       if (userId != null && destination.countryInfoId != null) {
-        await saveRecentSearch({
+        await saveRecentSearchMutation.mutateAsync({
           userId,
           countryInfoId: destination.countryInfoId,
         });
@@ -153,10 +99,7 @@ const DestinationSelector = ({ onBack }: Props) => {
 
   const handleDeleteRecent = async (destination: Destination) => {
     if (destination.recentSearchId == null) return;
-    await deleteRecentSearch(destination.recentSearchId);
-    setRecentOverride((current) =>
-      (current ?? destinationQuery.data?.recentDestinations ?? []).filter((item) => item.id !== destination.id),
-    );
+    await deleteRecentSearchMutation.mutateAsync(destination.recentSearchId);
   };
 
   const handleDeleteAllRecent = async () => {
@@ -164,10 +107,9 @@ const DestinationSelector = ({ onBack }: Props) => {
       recentDestinations.flatMap((item) =>
         item.recentSearchId == null
           ? []
-          : [deleteRecentSearch(item.recentSearchId)],
+          : [deleteRecentSearchMutation.mutateAsync(item.recentSearchId)],
       ),
     );
-    setRecentOverride([]);
   };
 
   return (
