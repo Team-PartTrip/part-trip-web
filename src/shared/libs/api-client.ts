@@ -8,6 +8,8 @@ import {
   type AuthTokens,
 } from './token-storage.ts'
 
+export const AUTH_EXPIRED_EVENT = 'parttrip:auth-expired'
+
 export const apiClient = axios.create({
   baseURL: import.meta.env?.VITE_API_BASE_URL ?? '',
   timeout: 100000,
@@ -34,6 +36,11 @@ type RetryableRequestConfig = InternalAxiosRequestConfig & {
 }
 
 let refreshPromise: Promise<AuthTokens> | null = null
+
+function expireSession() {
+  clearAuthTokens()
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(AUTH_EXPIRED_EVENT))
+}
 
 async function requestNewTokens(refreshToken: string) {
   if (!refreshPromise) {
@@ -64,7 +71,7 @@ apiClient.interceptors.response.use(
     const isRefreshRequest = originalRequest.url?.includes('/auth/refresh')
 
     if (originalRequest._retry || !refreshToken || isRefreshRequest) {
-      clearAuthTokens()
+      expireSession()
       return Promise.reject(error)
     }
 
@@ -75,7 +82,7 @@ apiClient.interceptors.response.use(
       originalRequest.headers.Authorization = `Bearer ${tokens.accessToken}`
       return apiClient(originalRequest)
     } catch (refreshError) {
-      clearAuthTokens()
+      expireSession()
       return Promise.reject(refreshError)
     }
   },
