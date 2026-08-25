@@ -1,12 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
-import {
-  getBoards,
-  getReviews,
-} from '@/entities/community/api'
-import { communityQueryKeys } from '@/entities/community'
-import { listSharedTrips } from '@/entities/trip-card/api'
+import { useCommunityFeedQuery, type CommunityFeedPost } from '@/entities/community'
 import { resolveApiAssetUrl } from '@/entities/file/api'
 import catAvatarUrl from '@/shared/assets/community-avatar-cat.png'
 import dogAvatarUrl from '@/shared/assets/community-avatar-dog.png'
@@ -21,69 +15,7 @@ import * as S from './CommunityPage.styles'
 const categories = ['자유게시판', '여행 후기', '경로/일정 공유'] as const
 type Category = (typeof categories)[number]
 
-type FeedPost = {
-  author: string
-  category: Category
-  commentCount: number
-  content: string
-  createdAt: string
-  id: string
-  imageUrls: string[]
-  likeCount: number
-  title: string
-}
-
-function toDateLabel(value?: string) {
-  if (!value) return '방금 전'
-  return new Date(value).toLocaleDateString('ko-KR')
-}
-
-async function loadPosts(category: Category): Promise<FeedPost[]> {
-  if (category === '자유게시판') {
-    const page = await getBoards({ page: 0, size: 20 })
-    return (page.content ?? []).map((post) => ({
-      author: post.nickName ?? post.userId ?? '여행자',
-      category,
-      commentCount: post.commentCount ?? 0,
-      content: post.content ?? '',
-      createdAt: toDateLabel(post.createDate),
-      id: `board-${post.boardId}`,
-      imageUrls: post.images ?? [],
-      likeCount: post.likeCount ?? 0,
-      title: post.title ?? '제목 없는 게시글',
-    }))
-  }
-
-  if (category === '여행 후기') {
-    const page = await getReviews({ page: 0, size: 20 })
-    return (page.content ?? []).map((post) => ({
-      author: post.nickName ?? post.userId ?? '여행자',
-      category,
-      commentCount: post.commentCount ?? 0,
-      content: post.content ?? '',
-      createdAt: toDateLabel(post.createDate),
-      id: `review-${post.reviewId}`,
-      imageUrls: post.images ?? [],
-      likeCount: post.likeCount ?? 0,
-      title: post.title ?? '제목 없는 여행 후기',
-    }))
-  }
-
-  const page = await listSharedTrips({ page: 0, size: 20 })
-  return (page.content ?? []).map((post) => ({
-    author: post.nickName ?? post.userId ?? '여행자',
-    category,
-    commentCount: post.commentCount ?? 0,
-    content: post.content ?? '',
-    createdAt: toDateLabel(post.createDate),
-    id: `trip-${post.tripId}`,
-    imageUrls: post.images ?? [],
-    likeCount: post.likeCount ?? 0,
-    title: post.title ?? '공유 여행 일정',
-  }))
-}
-
-function PostCard({ onOpen, post }: { onOpen: () => void; post: FeedPost }) {
+function PostCard({ onOpen, post }: { onOpen: () => void; post: CommunityFeedPost }) {
   const avatarUrl = post.category === '자유게시판' ? catAvatarUrl : dogAvatarUrl
   const content = (
     <>
@@ -108,10 +40,7 @@ function PostCard({ onOpen, post }: { onOpen: () => void; post: FeedPost }) {
 export function CommunityPage() {
   const navigate = useNavigate()
   const [category, setCategory] = useState<Category>('자유게시판')
-  const postsQuery = useQuery({
-    queryKey: communityQueryKeys.feed(category),
-    queryFn: () => loadPosts(category),
-  })
+  const postsQuery = useCommunityFeedQuery(category)
   const posts = postsQuery.data ?? []
   const isLoading = postsQuery.isLoading
   const errorMessage = postsQuery.isError ? '게시글을 불러오지 못했습니다.' : ''

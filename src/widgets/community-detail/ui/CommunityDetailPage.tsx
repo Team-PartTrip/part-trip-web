@@ -2,14 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import {
-  getBoard,
-  getBoardComments,
-  getReview,
-  getReviewComments,
-  type CommentResponseDto,
-} from '@/entities/community/api'
-import {
-  communityQueryKeys,
+  useCommunityDetailQuery,
   useCreateBoardCommentMutation,
   useCreateReviewCommentMutation,
   useDeleteBoardMutation,
@@ -22,7 +15,6 @@ import {
 } from '@/entities/community'
 import { getProfile } from '@/entities/user/api'
 import { resolveApiAssetUrl } from '@/entities/file/api'
-import { getSharedTripComments, getSharedTripDetail } from '@/entities/trip-card/api'
 import { useCreateSharedTripCommentMutation, useImportTripMutation } from '@/entities/trip-card'
 import catAvatarUrl from '@/shared/assets/community-avatar-cat.png'
 import { paths } from '@/shared/config'
@@ -30,111 +22,10 @@ import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './CommunityDetailPage.styles'
 
-type PostKind = 'board' | 'review' | 'trip'
-
-type DetailPost = {
-  author: string
-  category: string
-  content: string
-  countryInfoId?: number
-  createdAt: string
-  destination: string
-  id: number
-  imageUrls: string[]
-  likeCount: number
-  liked: boolean
-  rating?: number
-  title: string
-  type: PostKind
-  userId: string
-}
-
-function parsePostId(value: string): { id: number; type: PostKind } | null {
-  const [type, id] = value.split('-')
-  if ((type === 'board' || type === 'review' || type === 'trip') && Number.isFinite(Number(id))) {
-    return { id: Number(id), type }
-  }
-  return null
-}
-
-async function loadPost(type: PostKind, id: number): Promise<{ comments: CommentResponseDto[]; post: DetailPost }> {
-  if (type === 'board') {
-    const [post, comments] = await Promise.all([getBoard(id), getBoardComments(id)])
-    return {
-      comments,
-      post: {
-        author: post.nickName ?? post.userId ?? '여행자',
-        category: '자유게시판',
-        content: post.content ?? '',
-        countryInfoId: undefined,
-        createdAt: post.createDate ?? '',
-        destination: '자유게시판',
-        id,
-        imageUrls: post.images ?? [],
-        likeCount: post.likeCount ?? 0,
-        liked: post.liked ?? false,
-        rating: undefined,
-        title: post.title ?? '제목 없는 게시글',
-        type,
-        userId: post.userId ?? '',
-      },
-    }
-  }
-
-  if (type === 'review') {
-    const [post, comments] = await Promise.all([getReview(id), getReviewComments(id)])
-    return {
-      comments,
-      post: {
-        author: post.nickName ?? post.userId ?? '여행자',
-        category: '여행 후기',
-        content: post.content ?? '',
-        countryInfoId: post.countryInfoId,
-        createdAt: post.createDate ?? '',
-        destination: [post.cityName, post.countryName].filter(Boolean).join(', '),
-        id,
-        imageUrls: post.images ?? [],
-        likeCount: post.likeCount ?? 0,
-        liked: post.liked ?? false,
-        rating: post.rating,
-        title: post.title ?? '제목 없는 여행 후기',
-        type,
-        userId: post.userId ?? '',
-      },
-    }
-  }
-
-  const [post, comments] = await Promise.all([getSharedTripDetail(id), getSharedTripComments(id)])
-  return {
-    comments,
-    post: {
-      author: post.nickName ?? post.userId ?? '여행자',
-      category: '경로/일정 공유',
-      content: post.content ?? '',
-      countryInfoId: post.countryInfoId,
-      createdAt: post.createDate ?? '',
-      destination: [post.cityName, post.countryName].filter(Boolean).join(', '),
-      id,
-      imageUrls: post.images ?? [],
-      likeCount: post.likeCount ?? 0,
-      liked: post.liked ?? false,
-      rating: undefined,
-      title: post.title ?? '공유 여행 일정',
-      type,
-      userId: post.userId ?? '',
-    },
-  }
-}
-
 export function CommunityDetailPage() {
   const navigate = useNavigate()
   const { postId = '' } = useParams({ strict: false })
-  const parsedPost = parsePostId(postId)
-  const postQuery = useQuery({
-    queryKey: communityQueryKeys.detail(postId),
-    queryFn: () => loadPost(parsedPost!.type, parsedPost!.id),
-    enabled: Boolean(parsedPost),
-  })
+  const postQuery = useCommunityDetailQuery(postId)
   const profileQuery = useQuery({ queryKey: ['user', 'source'], queryFn: getProfile })
   const post = postQuery.data?.post ?? null
   const comments = postQuery.data?.comments ?? []
@@ -157,7 +48,7 @@ export function CommunityDetailPage() {
   const updateCommentMutation = useUpdateCommentMutation()
   const deleteCommentMutation = useDeleteCommentMutation()
   const importTripMutation = useImportTripMutation()
-  const isLoading = Boolean(parsedPost) && postQuery.isLoading
+  const isLoading = postQuery.isLoading
   const isSubmittingComment = createBoardCommentMutation.isPending
     || createReviewCommentMutation.isPending
     || createSharedTripCommentMutation.isPending
