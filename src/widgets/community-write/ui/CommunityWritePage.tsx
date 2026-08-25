@@ -1,12 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import {
-  createBoard,
-  createReview,
-} from '@/entities/community/api'
+import { useCreateBoardMutation, useCreateReviewMutation } from '@/entities/community'
 import { useCountriesQuery } from '@/entities/travel'
 import { useMyTrips } from '@/entities/trip-plan'
-import { shareTrip } from '@/entities/trip-card/api'
+import { useShareTripMutation } from '@/entities/trip-card'
 import { uploadImage } from '@/entities/file/api'
 import { paths } from '@/shared/config'
 import { AppShell } from '@/widgets/app-shell'
@@ -29,6 +26,9 @@ export function CommunityWritePage() {
   const { trips, hasError: hasTripsError } = useMyTrips()
   const countriesQuery = useCountriesQuery()
   const countries = countriesQuery.data ?? []
+  const createBoardMutation = useCreateBoardMutation()
+  const createReviewMutation = useCreateReviewMutation()
+  const shareTripMutation = useShareTripMutation()
 
   const selectedTripValue = selectedTripId || (trips[0]?.tripId != null ? String(trips[0].tripId) : '')
 
@@ -49,7 +49,7 @@ export function CommunityWritePage() {
       const images = file ? [Object.values(await uploadImage(file))[0]].filter(Boolean) : []
 
       if (category === '자유게시판') {
-        const post = await createBoard({
+        const post = await createBoardMutation.mutateAsync({
           content: destination.trim() ? `[${destination.trim()}]\n${content.trim()}` : content.trim(),
           images,
           title: title.trim(),
@@ -63,7 +63,7 @@ export function CommunityWritePage() {
         const country = countries.find((item) =>
           `${item.countryName ?? ''} ${item.cityName ?? ''}`.toLocaleLowerCase().includes(normalizedDestination),
         ) ?? countries[0]
-        const post = await createReview({
+        const post = await createReviewMutation.mutateAsync({
           content: content.trim(),
           countryInfoId: country?.countryInfoId,
           images,
@@ -74,7 +74,7 @@ export function CommunityWritePage() {
         return
       }
 
-      const post = await shareTrip({ tripId: Number(selectedTripValue) })
+      const post = await shareTripMutation.mutateAsync({ tripId: Number(selectedTripValue) })
       navigate({ params: { postId: `trip-${post.tripId}` }, to: '/community/$postId', replace: true })
     } catch {
       setErrorMessage('게시글을 등록하지 못했습니다. 다시 시도해주세요.')

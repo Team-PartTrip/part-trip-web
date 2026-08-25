@@ -5,6 +5,7 @@ import {
   getBoards,
   getReviews,
 } from '@/entities/community/api'
+import { communityQueryKeys } from '@/entities/community'
 import { listSharedTrips } from '@/entities/trip-card/api'
 import { resolveApiAssetUrl } from '@/entities/file/api'
 import catAvatarUrl from '@/shared/assets/community-avatar-cat.png'
@@ -108,7 +109,7 @@ export function CommunityPage() {
   const navigate = useNavigate()
   const [category, setCategory] = useState<Category>('자유게시판')
   const postsQuery = useQuery({
-    queryKey: ['community', 'feed', category],
+    queryKey: communityQueryKeys.feed(category),
     queryFn: () => loadPosts(category),
   })
   const posts = postsQuery.data ?? []

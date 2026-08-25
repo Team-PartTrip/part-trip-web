@@ -2,24 +2,28 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import {
-  createBoardComment,
-  createReviewComment,
-  deleteBoard,
-  deleteComment,
-  deleteReview,
   getBoard,
   getBoardComments,
   getReview,
   getReviewComments,
-  toggleLike,
-  updateBoard,
-  updateComment,
-  updateReview,
   type CommentResponseDto,
 } from '@/entities/community/api'
+import {
+  communityQueryKeys,
+  useCreateBoardCommentMutation,
+  useCreateReviewCommentMutation,
+  useDeleteBoardMutation,
+  useDeleteCommentMutation,
+  useDeleteReviewMutation,
+  useToggleLikeMutation,
+  useUpdateBoardMutation,
+  useUpdateCommentMutation,
+  useUpdateReviewMutation,
+} from '@/entities/community'
 import { getProfile } from '@/entities/user/api'
 import { resolveApiAssetUrl } from '@/entities/file/api'
-import { createSharedTripComment, getSharedTripComments, getSharedTripDetail, importTrip } from '@/entities/trip-card/api'
+import { getSharedTripComments, getSharedTripDetail } from '@/entities/trip-card/api'
+import { useCreateSharedTripCommentMutation, useImportTripMutation } from '@/entities/trip-card'
 import catAvatarUrl from '@/shared/assets/community-avatar-cat.png'
 import { paths } from '@/shared/config'
 import { AppShell } from '@/widgets/app-shell'
@@ -127,36 +131,54 @@ export function CommunityDetailPage() {
   const { postId = '' } = useParams({ strict: false })
   const parsedPost = parsePostId(postId)
   const postQuery = useQuery({
-    queryKey: ['community', 'detail', postId],
+    queryKey: communityQueryKeys.detail(postId),
     queryFn: () => loadPost(parsedPost!.type, parsedPost!.id),
     enabled: Boolean(parsedPost),
   })
   const profileQuery = useQuery({ queryKey: ['user', 'source'], queryFn: getProfile })
-  const [postOverride, setPostOverride] = useState<DetailPost | null>(null)
-  const [commentsOverride, setCommentsOverride] = useState<CommentResponseDto[] | null>(null)
-  const post = postOverride ?? postQuery.data?.post ?? null
-  const comments = commentsOverride ?? postQuery.data?.comments ?? []
+  const post = postQuery.data?.post ?? null
+  const comments = postQuery.data?.comments ?? []
   const [comment, setComment] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
-  const isLoading = Boolean(parsedPost) && postQuery.isLoading
-  const [isSubmittingComment, setIsSubmittingComment] = useState(false)
   const currentUserId = profileQuery.data?.userId ?? ''
   const [isEditingPost, setIsEditingPost] = useState(false)
   const [editTitle, setEditTitle] = useState('')
   const [editContent, setEditContent] = useState('')
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null)
   const [editingCommentContent, setEditingCommentContent] = useState('')
-  const [isMutating, setIsMutating] = useState(false)
+  const likeMutation = useToggleLikeMutation()
+  const createBoardCommentMutation = useCreateBoardCommentMutation()
+  const createReviewCommentMutation = useCreateReviewCommentMutation()
+  const createSharedTripCommentMutation = useCreateSharedTripCommentMutation()
+  const updateBoardMutation = useUpdateBoardMutation()
+  const updateReviewMutation = useUpdateReviewMutation()
+  const deleteBoardMutation = useDeleteBoardMutation()
+  const deleteReviewMutation = useDeleteReviewMutation()
+  const updateCommentMutation = useUpdateCommentMutation()
+  const deleteCommentMutation = useDeleteCommentMutation()
+  const importTripMutation = useImportTripMutation()
+  const isLoading = Boolean(parsedPost) && postQuery.isLoading
+  const isSubmittingComment = createBoardCommentMutation.isPending
+    || createReviewCommentMutation.isPending
+    || createSharedTripCommentMutation.isPending
+  const isMutating = likeMutation.isPending
+    || isSubmittingComment
+    || updateBoardMutation.isPending
+    || updateReviewMutation.isPending
+    || deleteBoardMutation.isPending
+    || deleteReviewMutation.isPending
+    || updateCommentMutation.isPending
+    || deleteCommentMutation.isPending
+    || importTripMutation.isPending
 
   const handleLike = async () => {
     if (!post) return
     try {
       setErrorMessage('')
-      const result = await toggleLike({
+      await likeMutation.mutateAsync({
         targetId: post.id,
         targetType: post.type === 'trip' ? 'TRIP' : post.type.toUpperCase(),
       })
-      setPostOverride((current) => current ? { ...current, liked: result.liked ?? current.liked, likeCount: result.likeCount ?? current.likeCount } : current)
     } catch {
       setErrorMessage('좋아요를 처리하지 못했습니다.')
     }
@@ -166,19 +188,17 @@ export function CommunityDetailPage() {
     event.preventDefault()
     if (!post || !comment.trim()) return
     try {
-      setIsSubmittingComment(true)
       const payload = { content: comment.trim() }
-      const created = post.type === 'board'
-        ? await createBoardComment(post.id, payload)
-        : post.type === 'review'
-          ? await createReviewComment(post.id, payload)
-          : await createSharedTripComment(post.id, payload)
-      setCommentsOverride((current) => [...(current ?? postQuery.data?.comments ?? []), created])
+      if (post.type === 'board') {
+        await createBoardCommentMutation.mutateAsync({ boardId: post.id, payload })
+      } else if (post.type === 'review') {
+        await createReviewCommentMutation.mutateAsync({ reviewId: post.id, payload })
+      } else {
+        await createSharedTripCommentMutation.mutateAsync({ tripId: post.id, payload })
+      }
       setComment('')
     } catch {
       setErrorMessage('댓글을 등록하지 못했습니다.')
-    } finally {
-      setIsSubmittingComment(false)
     }
   }
 
@@ -193,81 +213,62 @@ export function CommunityDetailPage() {
     event.preventDefault()
     if (!post || post.type === 'trip' || !editTitle.trim() || !editContent.trim()) return
     try {
-      setIsMutating(true)
       setErrorMessage('')
-      const updated = post.type === 'board'
-        ? await updateBoard(post.id, { content: editContent.trim(), images: post.imageUrls, title: editTitle.trim() })
-        : await updateReview(post.id, {
+      if (post.type === 'board') {
+        await updateBoardMutation.mutateAsync({ boardId: post.id, payload: { content: editContent.trim(), images: post.imageUrls, title: editTitle.trim() } })
+      } else {
+        await updateReviewMutation.mutateAsync({ reviewId: post.id, payload: {
             content: editContent.trim(),
             countryInfoId: post.countryInfoId,
             images: post.imageUrls,
             rating: post.rating ?? 5,
             title: editTitle.trim(),
-          })
-      setPostOverride((current) => current ? {
-        ...current,
-        content: updated.content ?? editContent.trim(),
-        title: updated.title ?? editTitle.trim(),
-      } : current)
+          } })
+      }
       setIsEditingPost(false)
     } catch {
       setErrorMessage('게시글을 수정하지 못했습니다.')
-    } finally {
-      setIsMutating(false)
     }
   }
 
   const handlePostDelete = async () => {
     if (!post || post.type === 'trip' || !window.confirm('이 게시글을 삭제하시겠습니까?')) return
     try {
-      setIsMutating(true)
-      if (post.type === 'board') await deleteBoard(post.id)
-      else await deleteReview(post.id)
+      if (post.type === 'board') await deleteBoardMutation.mutateAsync(post.id)
+      else await deleteReviewMutation.mutateAsync(post.id)
       navigate({ to: paths.community, replace: true })
     } catch {
       setErrorMessage('게시글을 삭제하지 못했습니다.')
-      setIsMutating(false)
     }
   }
 
   const handleCommentUpdate = async (commentId: number) => {
     if (!editingCommentContent.trim()) return
     try {
-      setIsMutating(true)
-      const updated = await updateComment(commentId, { content: editingCommentContent.trim() })
-      setCommentsOverride((current) => (current ?? postQuery.data?.comments ?? []).map((item) => item.commentId === commentId ? updated : item))
+      await updateCommentMutation.mutateAsync({ commentId, payload: { content: editingCommentContent.trim() } })
       setEditingCommentId(null)
       setEditingCommentContent('')
     } catch {
       setErrorMessage('댓글을 수정하지 못했습니다.')
-    } finally {
-      setIsMutating(false)
     }
   }
 
   const handleCommentDelete = async (commentId: number) => {
     if (!window.confirm('이 댓글을 삭제하시겠습니까?')) return
     try {
-      setIsMutating(true)
-      await deleteComment(commentId)
-      setCommentsOverride((current) => (current ?? postQuery.data?.comments ?? []).filter((item) => item.commentId !== commentId))
+      await deleteCommentMutation.mutateAsync(commentId)
     } catch {
       setErrorMessage('댓글을 삭제하지 못했습니다.')
-    } finally {
-      setIsMutating(false)
     }
   }
 
   const handleImportTrip = async () => {
     if (!post) return
     try {
-      setIsMutating(true)
-      const imported = await importTrip(post.id)
+      const imported = await importTripMutation.mutateAsync(post.id)
       if (imported.tripId) navigate({ params: { recordId: String(imported.tripId) }, to: '/record/$recordId' })
     } catch {
       setErrorMessage('여행 일정을 가져오지 못했습니다.')
-    } finally {
-      setIsMutating(false)
     }
   }
 

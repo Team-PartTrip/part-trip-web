@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
-import { saveTravelPlan } from '@/entities/travel/api'
-import { useCountriesQuery, useDdayQuery, useTourPlacesQuery } from '@/entities/travel'
+import { useCountriesQuery, useDdayQuery, useSaveTravelPlanMutation, useTourPlacesQuery } from '@/entities/travel'
 import { figmaTripPlanning } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import { useMyTrips } from '@/entities/trip-plan'
@@ -81,7 +80,8 @@ function PlannerFlowPage({ step }: Props) {
   const [countryName, setCountryName] = useState(plan?.countryName ?? '')
   const [cityName, setCityName] = useState(plan?.cityName ?? '')
   const [errorMessage, setErrorMessage] = useState('')
-  const [isSaving, setIsSaving] = useState(false)
+  const saveTravelPlanMutation = useSaveTravelPlanMutation()
+  const isSaving = saveTravelPlanMutation.isPending
 
   useEffect(() => {
     sessionStorage.setItem('parttrip:planner-selected', JSON.stringify(selected))
@@ -101,14 +101,11 @@ function PlannerFlowPage({ step }: Props) {
       return
     }
     try {
-      setIsSaving(true)
-      const nextPlan = await saveTravelPlan({ cityName: nextCity, countryName: nextCountry, endDate, startDate })
+      const nextPlan = await saveTravelPlanMutation.mutateAsync({ cityName: nextCity, countryName: nextCountry, endDate, startDate })
       setPlan(nextPlan)
       continueTo(paths.plannerProgress)
     } catch {
       setErrorMessage('여행 정보를 저장하지 못했습니다.')
-    } finally {
-      setIsSaving(false)
     }
   }
 

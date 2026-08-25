@@ -1,7 +1,5 @@
 import { useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
-import { completeMission } from '@/entities/mission/api'
-import { missionQueryKeys, useCompletedMissionsQuery, useMissionsQuery } from '@/entities/mission'
+import { useCompletedMissionsQuery, useCompleteMissionMutation, useMissionsQuery } from '@/entities/mission'
 import missionCharacterUrl from '@/shared/assets/mission-character.png'
 import { AppShell } from '@/widgets/app-shell'
 
@@ -31,9 +29,9 @@ export function MissionPage() {
   const [selectedMissionId, setSelectedMissionId] = useState<number | null>(null)
   const [pendingMissionId, setPendingMissionId] = useState<number | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
-  const queryClient = useQueryClient()
   const missionsQuery = useMissionsQuery()
   const completedMissionsQuery = useCompletedMissionsQuery()
+  const completeMutation = useCompleteMissionMutation()
   const missions = missionsQuery.data ?? []
   const completedMissions = completedMissionsQuery.data ?? missions.filter((mission) => mission.completed)
   const isLoading = missionsQuery.isLoading || completedMissionsQuery.isLoading
@@ -53,8 +51,7 @@ export function MissionPage() {
     try {
       setPendingMissionId(missionId)
       setErrorMessage('')
-      await completeMission(missionId)
-      await queryClient.invalidateQueries({ queryKey: missionQueryKeys.all })
+      await completeMutation.mutateAsync(missionId)
     } catch {
       setErrorMessage('미션 완료 상태를 저장하지 못했습니다. 다시 시도해주세요.')
     } finally {

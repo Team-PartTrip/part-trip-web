@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
-import { useQueryClient } from '@tanstack/react-query'
-import { deleteTrip, updateTrip } from '@/entities/trip-plan/api'
-import { tripPlanQueryKeys, useTripQuery } from '@/entities/trip-plan'
+import { useDeleteTripMutation, useTripQuery, useUpdateTripMutation } from '@/entities/trip-plan'
 import fallbackRecordImageUrl from '@/shared/assets/record-singapore.jpg'
 import { figmaRecordDetail } from '@/shared/assets'
 import { paths } from '@/shared/config'
@@ -16,12 +14,13 @@ const formatDate = (value: string) => value.replaceAll('-', '.')
 export function RecordDetailPage() {
   const navigate = useNavigate()
   const { recordId = '' } = useParams({ strict: false })
-  const queryClient = useQueryClient()
   const { data: record, isLoading, isError: hasRecordError } = useTripQuery(Number(recordId))
   const [isEditing, setIsEditing] = useState(false)
-  const [isMutating, setIsMutating] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [draft, setDraft] = useState({ content: '', endDate: '', startDate: '', title: '' })
+  const updateMutation = useUpdateTripMutation()
+  const deleteMutation = useDeleteTripMutation()
+  const isMutating = updateMutation.isPending || deleteMutation.isPending
 
   const startEditing = () => {
     if (!record) return
@@ -41,31 +40,28 @@ export function RecordDetailPage() {
       return
     }
     try {
-      setIsMutating(true)
       setErrorMessage('')
-      const updated = await updateTrip(record.tripId, toTripUpdateRequest(record, {
+      await updateMutation.mutateAsync({
+        tripId: record.tripId,
+        payload: toTripUpdateRequest(record, {
         ...draft,
         content: draft.content.trim(),
         title: draft.title.trim(),
-      }))
-      queryClient.setQueryData(tripPlanQueryKeys.detail(record.tripId), updated)
+        }),
+      })
       setIsEditing(false)
     } catch {
       setErrorMessage('여행 기록을 수정하지 못했습니다.')
-    } finally {
-      setIsMutating(false)
     }
   }
 
   const handleDelete = async () => {
     if (!record?.tripId || !window.confirm('이 여행 기록을 삭제하시겠습니까?')) return
     try {
-      setIsMutating(true)
-      await deleteTrip(record.tripId)
+      await deleteMutation.mutateAsync(record.tripId)
       navigate({ to: paths.record, replace: true })
     } catch {
       setErrorMessage('여행 기록을 삭제하지 못했습니다.')
-      setIsMutating(false)
     }
   }
 
