@@ -16,22 +16,33 @@ function reportLabel(trip: TripPlanResponseDto) {
   return trip.title || `${trip.cityName || trip.countryName || '여행'} 기록`
 }
 
+type ReportFormat = 'pdf' | 'card' | 'school'
+
+const reportFormats: Array<{ label: string; value: ReportFormat }> = [
+  { label: 'PDF', value: 'pdf' },
+  { label: '카드뉴스', value: 'card' },
+  { label: '학교 보고서', value: 'school' },
+]
+
 export function RecordReportPage() {
   const navigate = useNavigate()
   const { hasError, isLoading, trips } = useMyTrips()
   const [selectedTripId, setSelectedTripId] = useState('')
+  const [format, setFormat] = useState<ReportFormat>('pdf')
   const selectedTrip = trips.find((trip) => String(trip.tripId) === selectedTripId) ?? trips[0]
 
   return (
     <AppShell>
       <S.Page>
         <S.Header>
-          <div><S.Title>여행 리포트</S.Title><S.Subtitle>사진과 일정이 담긴 여행 기록을 인쇄하거나 PDF로 저장하세요.</S.Subtitle></div>
-          <S.Actions><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.record })}>기록으로 돌아가기</PartTripButton>{selectedTrip ? <PartTripButton type="button" onClick={() => window.print()}>PDF로 저장</PartTripButton> : null}</S.Actions>
+          <div><S.Title>여행 리포트</S.Title><S.Subtitle>사진과 일정이 담긴 여행 기록을 원하는 형식으로 인쇄하거나 PDF로 저장하세요.</S.Subtitle></div>
+          <S.Actions><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.record })}>기록으로 돌아가기</PartTripButton>{selectedTrip ? <PartTripButton type="button" onClick={() => window.print()}>{format === 'pdf' ? 'PDF로 저장' : '인쇄/저장'}</PartTripButton> : null}</S.Actions>
         </S.Header>
         {isLoading ? <S.Empty>여행 기록을 불러오는 중입니다.</S.Empty> : hasError ? <S.Empty>여행 기록을 불러오지 못했습니다.</S.Empty> : selectedTrip ? <>
           <S.Controls><label htmlFor="report-trip">리포트 여행 선택</label><PartTripSelect id="report-trip" value={selectedTripId || String(selectedTrip.tripId ?? '')} onChange={(event) => setSelectedTripId(event.target.value)}>{trips.map((trip, index) => <option key={trip.tripId ?? index} value={trip.tripId}>{reportLabel(trip)}</option>)}</PartTripSelect></S.Controls>
-          <S.Report>
+          <S.FormatTabs aria-label="리포트 형식">{reportFormats.map((item) => <S.FormatTab key={item.value} type="button" $active={format === item.value} aria-pressed={format === item.value} onClick={() => setFormat(item.value)}>{item.label}</S.FormatTab>)}</S.FormatTabs>
+          <S.FormatHint>{format === 'pdf' ? '문서 형식으로 인쇄하거나 PDF로 저장합니다.' : format === 'card' ? '사진과 핵심 내용을 카드뉴스처럼 나눠서 확인합니다.' : '제출용 문서처럼 제목·기간·일정·메모를 정리합니다.'}</S.FormatHint>
+          <S.Report $format={format}>
             <S.Hero><h2>{reportLabel(selectedTrip)}</h2><p>{[selectedTrip.countryName, selectedTrip.cityName].filter(Boolean).join(' · ') || '여행지 미정'} · {dateLabel(selectedTrip.startDate)} – {dateLabel(selectedTrip.endDate)}</p></S.Hero>
             <S.Section><h3>여행 메모</h3><p>{selectedTrip.content || '작성된 여행 메모가 없습니다.'}</p></S.Section>
             <S.Section><h3>여행 일정</h3>{selectedTrip.places?.length ? <S.PlaceList>{selectedTrip.places.map((place, index) => <li key={place.tripPlaceId ?? index}><strong>DAY {place.dayNumber ?? index + 1}</strong> · {place.placeName || '장소'}{place.placeSub ? ` · ${place.placeSub}` : ''}</li>)}</S.PlaceList> : <p>등록된 세부 일정이 없습니다.</p>}</S.Section>
