@@ -119,7 +119,7 @@ export function LoginForm() {
             minLength={authValidationRules.id.minLength}
             maxLength={authValidationRules.id.maxLength}
             pattern={authValidationRules.id.pattern}
-            title="아이디는 영문과 숫자만 입력해주세요."
+            title="아이디는 영문 소문자와 숫자만 입력해주세요."
             onChange={createSanitizedChangeHandler(userIdField, sanitizeId)}
             disabled={isSubmitting}
             required
@@ -134,7 +134,7 @@ export function LoginForm() {
             minLength={authValidationRules.password.minLength}
             maxLength={authValidationRules.password.maxLength}
             pattern={authValidationRules.password.pattern}
-            title={`비밀번호는 영문, 숫자, 특수문자(${authValidationRules.password.allowedSpecialCharacters})만 입력해주세요.`}
+            title="비밀번호는 영문, 숫자, 특수문자 중 2종 이상을 포함해주세요."
             onChange={createSanitizedChangeHandler(
               userPwdField,
               sanitizePassword,
