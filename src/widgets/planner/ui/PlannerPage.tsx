@@ -16,6 +16,7 @@ type PlannerGroupSettings = { isSolo: boolean; memberCount: number }
 
 const PLANNER_GROUP_SETTINGS_KEY = 'parttrip:planner-group-settings'
 const ACTIVE_PLANNER_ID_KEY = 'parttrip:active-planner-id'
+const PLANNER_CONFIRMED_KEY = 'parttrip:planner-confirmed'
 const plannerCategories = ['명소', '맛집', '카페'] as const
 
 function readPlannerGroupSettings(): PlannerGroupSettings {
@@ -117,6 +118,9 @@ function PlannerFlowPage({ step }: Props) {
   const [isSolo, setIsSolo] = useState(() => readPlannerGroupSettings().isSolo)
   const [inviteCode, setInviteCode] = useState('')
   const [lineupChoice, setLineupChoice] = useState<number | null>(null)
+  const activePlannerId = Number(sessionStorage.getItem(ACTIVE_PLANNER_ID_KEY))
+  const plannerConfirmationKey = `${PLANNER_CONFIRMED_KEY}:${activePlannerId}`
+  const [isConfirmed, setIsConfirmed] = useState(() => sessionStorage.getItem(plannerConfirmationKey) === 'true')
   const [errorMessage, setErrorMessage] = useState('')
   const createPlannerMutation = useCreatePlannerMutation()
   const createVoteMutation = useCreateVoteMutation()
@@ -237,6 +241,16 @@ function PlannerFlowPage({ step }: Props) {
     setErrorMessage('')
   }
 
+  const handleConfirmPlan = () => {
+    if (!Number.isInteger(activePlannerId)) {
+      setErrorMessage('먼저 여행 계획을 저장해주세요.')
+      return
+    }
+    sessionStorage.setItem(plannerConfirmationKey, 'true')
+    setIsConfirmed(true)
+    setErrorMessage('')
+  }
+
   return (
     <AppShell>
       <S.Page>
@@ -260,7 +274,7 @@ function PlannerFlowPage({ step }: Props) {
 
         {step === 'progress' ? <S.ProgressLayout><S.StepCard><S.StepNumber>{plannerDetail?.status || '진행 중'}</S.StepNumber><h2>{plannerDetail?.title || plan?.cityName || '여행 계획'} 계획</h2><p>{dateLabel(plannerDetail?.startDate || plan?.startDate)} – {dateLabel(plannerDetail?.endDate || plan?.endDate)}</p><S.ProgressTrack><S.ProgressBar $progress={plannerDetail ? 60 : plan ? 40 : 0} /></S.ProgressTrack><S.StatusPill>여행지 정보 저장 완료</S.StatusPill><S.StatusPill>{plannerDetail ? `멤버 ${plannerDetail.joinedMemberCount ?? 0} / ${plannerDetail.memberCount ?? 0}` : '플래너 정보를 불러오는 중'}</S.StatusPill><S.ActionRow><PartTripButton type="button" onClick={() => navigate({ to: paths.plannerExplore })}>장소 찾기</PartTripButton><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.plannerFinal })}>최종 계획</PartTripButton></S.ActionRow></S.StepCard><S.SideSummary><h2>해야 할 일</h2><p>{plannerDetail?.countryName || plan?.countryName || '여행지'}의 장소 후보를 확인하고 투표를 이어가세요.</p><button type="button" onClick={() => navigate({ to: paths.plannerVote })}>투표 화면 열기 ›</button></S.SideSummary></S.ProgressLayout> : null}
 
-        {step === 'final' ? <S.ProgressLayout><S.StepCard><S.StepNumber>{plannerDetail?.status || '확정 전'}</S.StepNumber><h2>최종 계획 확인</h2><p>{plannerDetail ? `${plannerDetail.cityName || plannerDetail.countryName} · ${dateLabel(plannerDetail.startDate)} – ${dateLabel(plannerDetail.endDate)}` : plan ? `${plan.cityName || plan.countryName} · ${dateLabel(plan.startDate)} – ${dateLabel(plan.endDate)}` : '저장된 여행 정보가 없습니다.'}</p><S.Notice>현재 플래너 상태: {plannerDetail?.status || '확정 전'}</S.Notice><S.ActionRow><PartTripButton type="button" onClick={() => navigate({ to: paths.plannerProgress })}>진행 상태로 돌아가기</PartTripButton><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.tripCards })}>여행 카드 보기</PartTripButton></S.ActionRow></S.StepCard><S.SideSummary><h2>선택 장소</h2><p>{places.length ? `${places.length}곳의 후보 장소` : '장소 후보 없음'}</p></S.SideSummary></S.ProgressLayout> : null}
+        {step === 'final' ? <S.ProgressLayout><S.StepCard><S.StepNumber>{isConfirmed ? '확인 완료' : plannerDetail?.status || '확정 전'}</S.StepNumber><h2>최종 계획 확인</h2><p>{plannerDetail ? `${plannerDetail.cityName || plannerDetail.countryName} · ${dateLabel(plannerDetail.startDate)} – ${dateLabel(plannerDetail.endDate)}` : plan ? `${plan.cityName || plan.countryName} · ${dateLabel(plan.startDate)} – ${dateLabel(plan.endDate)}` : '저장된 여행 정보가 없습니다.'}</p><S.Notice>{isConfirmed ? '최종 계획을 확인했습니다. 현재 확인 상태는 이 브라우저에만 저장됩니다.' : '최종 계획을 확인해주세요. 서버 확정 API가 없어 확인 상태는 이 브라우저에만 저장됩니다.'}</S.Notice><S.ActionRow><PartTripButton type="button" onClick={() => navigate({ to: paths.plannerProgress })}>진행 상태로 돌아가기</PartTripButton><PartTripButton type="button" onClick={handleConfirmPlan} disabled={isConfirmed || (!plannerDetail && !plan)} $variant="secondary">{isConfirmed ? '확인 완료' : '최종 계획 확인'}</PartTripButton><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.tripCards })}>여행 카드 보기</PartTripButton></S.ActionRow></S.StepCard><S.SideSummary><h2>선택 장소</h2><p>{places.length ? `${places.length}곳의 후보 장소` : '장소 후보 없음'}</p></S.SideSummary></S.ProgressLayout> : null}
 
         {step === 'place' ? <S.PlaceLayout>{place ? <><S.PlaceImage src={place.imageUrl || figmaTripPlanning} alt="" /><S.StepCard><S.Badge>추천 장소</S.Badge><h2>{place.placeName}</h2><p>{place.description || '장소 설명이 없습니다.'}</p><PartTripButton type="button" onClick={() => navigate({ to: paths.plannerVote })}>투표 후보에 추가</PartTripButton></S.StepCard></> : <S.Empty>장소 정보를 찾을 수 없습니다.</S.Empty>}</S.PlaceLayout> : null}
       </S.Page>
