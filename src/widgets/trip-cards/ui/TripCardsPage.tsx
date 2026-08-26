@@ -28,7 +28,9 @@ function TripCardsFlow({ mode }: CardPageProps) {
   const myTripsQuery = useMyTrips(mode === 'create')
   const shareMutation = useShareTripMutation()
   const importMutation = useImportTripMutation()
-  const cards = sharedTripsQuery.data?.content ?? []
+  const cards = [...(sharedTripsQuery.data?.content ?? [])].sort((a, b) =>
+    (b.startDate ?? b.createDate ?? '').localeCompare(a.startDate ?? a.createDate ?? ''),
+  )
   const mine = myTripsQuery.trips
   const detail = sharedTripQuery.data
   const isLoading = mode === 'detail' ? sharedTripQuery.isLoading : mode === 'create' ? myTripsQuery.isLoading : sharedTripsQuery.isLoading
