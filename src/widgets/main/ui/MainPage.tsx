@@ -48,7 +48,7 @@ export function MainPage() {
           <S.EmptyCard>
             <strong>쉬는 중</strong>
             <span>여행지를 정하고 나만의 여행 계획을 시작해보세요.</span>
-            <S.ActionButton type="button" onClick={() => navigate({ to: paths.travelSelect })}>여행 정보 설정</S.ActionButton>
+            <S.ActionButton type="button" onClick={() => navigate({ to: paths.plannerDestination })}>여행 정보 설정</S.ActionButton>
           </S.EmptyCard>
         ) : null}
 
@@ -68,7 +68,7 @@ export function MainPage() {
                 <S.Dday>{dday === undefined ? '-' : `D${dday >= 0 ? '-' : '+'}${Math.abs(dday)}`}</S.Dday>
                 <S.Destination>{destination}</S.Destination>
                 <S.Dates>{dateRange} · {durationLabel(plan.startDate, plan.endDate)}</S.Dates>
-                <S.ActionButton type="button" onClick={() => navigate({ to: paths.travelSelect })}>여행 정보 수정</S.ActionButton>
+                <S.ActionButton type="button" onClick={() => navigate({ to: paths.plannerDestination })}>여행 정보 수정</S.ActionButton>
               </S.DdayCard>
             </S.HeroRow>
 

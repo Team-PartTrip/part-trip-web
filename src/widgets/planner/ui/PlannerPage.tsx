@@ -81,6 +81,7 @@ function PlannerFlowPage({ step }: Props) {
   const [endDate, setEndDate] = useState(plan?.endDate ?? '')
   const [countryName, setCountryName] = useState(plan?.countryName ?? '')
   const [cityName, setCityName] = useState(plan?.cityName ?? '')
+  const [headcount, setHeadcount] = useState(String(plan?.headcount ?? 1))
   const [errorMessage, setErrorMessage] = useState('')
   const saveTravelPlanMutation = useSaveTravelPlanMutation()
   const isSaving = saveTravelPlanMutation.isPending
@@ -90,20 +91,34 @@ function PlannerFlowPage({ step }: Props) {
   }, [selected])
 
   const continueTo = (next: string) => navigate({ to: next })
+  const currentCountry = countries.find((country) =>
+    country.countryName === plan?.countryName && country.cityName === plan?.cityName,
+  )
+  const selectedCountryInfoId = countryInfoId || String(currentCountry?.countryInfoId ?? '')
+  const selectedCountryName = countryName || plan?.countryName || ''
+  const selectedCityName = cityName || plan?.cityName || ''
+  const selectedStartDate = startDate || plan?.startDate || ''
+  const selectedEndDate = endDate || plan?.endDate || ''
+  const selectedHeadcount = headcount || String(plan?.headcount ?? 1)
   const selectedPlaces = places.filter((_, index) => selected.includes(index))
   const place = places[Number(placeId)] || places[0]
 
   const saveDestination = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const selectedCountry = countries.find((item) => String(item.countryInfoId) === countryInfoId)
-    const nextCountry = selectedCountry?.countryName || countryName.trim()
-    const nextCity = selectedCountry?.cityName || cityName.trim()
-    if (!nextCountry || !nextCity || !startDate || !endDate || startDate > endDate) {
+    const selectedCountry = countries.find((item) => String(item.countryInfoId) === selectedCountryInfoId)
+    const nextCountry = selectedCountry?.countryName || selectedCountryName.trim()
+    const nextCity = selectedCountry?.cityName || selectedCityName.trim()
+    const nextHeadcount = Number(selectedHeadcount)
+    if (!nextCountry || !nextCity || !selectedStartDate || !selectedEndDate || selectedStartDate > selectedEndDate) {
       setErrorMessage('여행지와 올바른 여행 기간을 입력해주세요.')
       return
     }
+    if (!Number.isInteger(nextHeadcount) || nextHeadcount < 1 || nextHeadcount > 30) {
+      setErrorMessage('여행 인원은 1명에서 30명 사이로 입력해주세요.')
+      return
+    }
     try {
-      const nextPlan = await saveTravelPlanMutation.mutateAsync({ cityName: nextCity, countryName: nextCountry, endDate, startDate })
+      const nextPlan = await saveTravelPlanMutation.mutateAsync({ cityName: nextCity, countryName: nextCountry, endDate: selectedEndDate, headcount: nextHeadcount, startDate: selectedStartDate })
       setPlan(nextPlan)
       continueTo(paths.plannerProgress)
     } catch {
@@ -124,7 +139,7 @@ function PlannerFlowPage({ step }: Props) {
 
         {step === 'group' ? <S.StepCard><S.StepNumber>02</S.StepNumber><h2>그룹 멤버를 확인하세요.</h2><S.MemberList><S.Member>나 <span>현재 사용자</span></S.Member><S.Member disabled>멤버 초대 API 미연동 <span>백엔드 계약 필요</span></S.Member></S.MemberList><S.ActionRow><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.plannerCreate })}>이전</PartTripButton><PartTripButton type="button" onClick={() => navigate({ to: paths.plannerDestination })}>다음</PartTripButton></S.ActionRow></S.StepCard> : null}
 
-        {step === 'destination' ? <S.StepCard as="form" onSubmit={(event) => void saveDestination(event)}><S.StepNumber>03</S.StepNumber><S.FormGrid><S.Field><label htmlFor="planner-country">여행지</label><PartTripSelect id="planner-country" value={countryInfoId} onChange={(event) => { setCountryInfoId(event.target.value); const item = countries.find((country) => String(country.countryInfoId) === event.target.value); setCountryName(item?.countryName ?? ''); setCityName(item?.cityName ?? '') }}><option value="">여행지를 선택하세요</option>{countries.map((country) => <option key={country.countryInfoId ?? country.countryName} value={country.countryInfoId}>{country.cityName || country.countryName}</option>)}</PartTripSelect></S.Field><S.Field><label htmlFor="planner-city">도시</label><PartTripInput id="planner-city" value={cityName} onChange={(event) => setCityName(event.target.value)} placeholder="도시" /></S.Field><S.Field><label htmlFor="planner-start">시작일</label><PartTripInput id="planner-start" type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} /></S.Field><S.Field><label htmlFor="planner-end">종료일</label><PartTripInput id="planner-end" type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} /></S.Field></S.FormGrid><S.ActionRow><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.plannerGroup })}>이전</PartTripButton><PartTripButton type="submit" disabled={isSaving}>{isSaving ? '저장 중' : '여행 정보 저장'}</PartTripButton></S.ActionRow></S.StepCard> : null}
+        {step === 'destination' ? <S.StepCard as="form" onSubmit={(event) => void saveDestination(event)}><S.StepNumber>03</S.StepNumber><S.FormGrid><S.Field><label htmlFor="planner-country">여행지</label><PartTripSelect id="planner-country" value={selectedCountryInfoId} onChange={(event) => { setCountryInfoId(event.target.value); const item = countries.find((country) => String(country.countryInfoId) === event.target.value); setCountryName(item?.countryName ?? ''); setCityName(item?.cityName ?? '') }}><option value="">여행지를 선택하세요</option>{countries.map((country) => <option key={country.countryInfoId ?? country.countryName} value={country.countryInfoId}>{country.cityName || country.countryName}</option>)}</PartTripSelect></S.Field><S.Field><label htmlFor="planner-city">도시</label><PartTripInput id="planner-city" value={selectedCityName} onChange={(event) => setCityName(event.target.value)} placeholder="도시" /></S.Field><S.Field><label htmlFor="planner-start">시작일</label><PartTripInput id="planner-start" type="date" value={selectedStartDate} onChange={(event) => setStartDate(event.target.value)} /></S.Field><S.Field><label htmlFor="planner-end">종료일</label><PartTripInput id="planner-end" type="date" value={selectedEndDate} onChange={(event) => setEndDate(event.target.value)} /></S.Field><S.Field><label htmlFor="planner-headcount">여행 인원</label><PartTripInput id="planner-headcount" type="number" min={1} max={30} value={selectedHeadcount} onChange={(event) => setHeadcount(event.target.value)} /></S.Field></S.FormGrid><S.ActionRow><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.plannerGroup })}>이전</PartTripButton><PartTripButton type="submit" disabled={isSaving}>{isSaving ? '저장 중' : '여행 정보 저장'}</PartTripButton></S.ActionRow></S.StepCard> : null}
 
         {step === 'explore' ? <S.ExploreGrid>{['명소', '맛집', '카페'].map((category) => <S.CategoryCard key={category} type="button" onClick={() => navigate({ to: paths.plannerVote })}><strong>{category}</strong><span>후보 장소를 조회하고 선택하기</span><b>›</b></S.CategoryCard>)}</S.ExploreGrid> : null}
 
