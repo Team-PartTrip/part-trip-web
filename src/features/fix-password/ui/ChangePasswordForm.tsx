@@ -338,7 +338,7 @@ export function ChangePasswordForm() {
               minLength={authValidationRules.password.minLength}
               maxLength={authValidationRules.password.maxLength}
               pattern={authValidationRules.password.pattern}
-              title={`비밀번호는 영문, 숫자, 특수문자(${authValidationRules.password.allowedSpecialCharacters})만 입력해주세요.`}
+              title="비밀번호는 영문, 숫자, 특수문자 중 2종 이상을 포함해주세요."
               onChange={createSanitizedChangeHandler(
                 newPasswordField,
                 sanitizePassword,
@@ -356,7 +356,7 @@ export function ChangePasswordForm() {
               minLength={authValidationRules.password.minLength}
               maxLength={authValidationRules.password.maxLength}
               pattern={authValidationRules.password.pattern}
-              title={`비밀번호는 영문, 숫자, 특수문자(${authValidationRules.password.allowedSpecialCharacters})만 입력해주세요.`}
+              title="비밀번호는 영문, 숫자, 특수문자 중 2종 이상을 포함해주세요."
               onChange={createSanitizedChangeHandler(
                 newPasswordConfirmField,
                 sanitizePassword,
