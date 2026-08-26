@@ -11,9 +11,20 @@ import { TripCardPhotoComposer } from './TripCardPhotoComposer'
 import * as S from './TripCardsPage.styles'
 
 const fallbackImages = [figmaCardJapan, figmaCardActive, figmaCardCompleted]
+const HIDDEN_TRIP_CARDS_KEY = 'parttrip:hidden-trip-cards'
 
 type CardPageProps = { mode: 'list' | 'detail' | 'create' | 'delete' }
 type CreateTab = 'share' | 'photo'
+
+function readHiddenTripIds() {
+  if (typeof window === 'undefined') return []
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(HIDDEN_TRIP_CARDS_KEY) ?? '[]')
+    return Array.isArray(stored) && stored.every((id): id is number => typeof id === 'number') ? stored : []
+  } catch {
+    return []
+  }
+}
 
 export function TripCardsPage() { return <TripCardsFlow mode="list" /> }
 export function TripCardDetailPage() { return <TripCardsFlow mode="detail" /> }
@@ -24,6 +35,7 @@ function TripCardsFlow({ mode }: CardPageProps) {
   const navigate = useNavigate()
   const { tripId } = useParams({ strict: false })
   const [selected, setSelected] = useState<number[]>([])
+  const [hiddenTripIds, setHiddenTripIds] = useState(readHiddenTripIds)
   const [createTab, setCreateTab] = useState<CreateTab>('share')
   const [message, setMessage] = useState('')
   const sharedTripsQuery = useSharedTripsQuery(mode !== 'detail' && mode !== 'create')
@@ -31,9 +43,9 @@ function TripCardsFlow({ mode }: CardPageProps) {
   const myTripsQuery = useMyTrips(mode === 'create')
   const shareMutation = useShareTripMutation()
   const importMutation = useImportTripMutation()
-  const cards = [...(sharedTripsQuery.data?.content ?? [])].sort((a, b) =>
-    (b.startDate ?? b.createDate ?? '').localeCompare(a.startDate ?? a.createDate ?? ''),
-  )
+  const cards = [...(sharedTripsQuery.data?.content ?? [])]
+    .filter((card) => card.tripId == null || !hiddenTripIds.includes(card.tripId))
+    .sort((a, b) => (b.startDate ?? b.createDate ?? '').localeCompare(a.startDate ?? a.createDate ?? ''))
   const mine = myTripsQuery.trips
   const detail = sharedTripQuery.data
   const isLoading = mode === 'detail' ? sharedTripQuery.isLoading : mode === 'create' ? myTripsQuery.isLoading : sharedTripsQuery.isLoading
@@ -55,6 +67,19 @@ function TripCardsFlow({ mode }: CardPageProps) {
     } catch { setMessage('공유 여행을 가져오지 못했습니다.') }
   }
 
+  const handleDelete = () => {
+    const ids = selected.filter((id) => id >= 0)
+    if (ids.length === 0) {
+      setMessage('삭제할 여행 카드를 선택해주세요.')
+      return
+    }
+    const nextIds = [...new Set([...hiddenTripIds, ...ids])]
+    window.localStorage.setItem(HIDDEN_TRIP_CARDS_KEY, JSON.stringify(nextIds))
+    setHiddenTripIds(nextIds)
+    setSelected([])
+    setMessage('선택한 카드가 이 브라우저에서 삭제되었습니다.')
+  }
+
   return (
     <AppShell>
       <S.Page>
@@ -71,7 +96,7 @@ function TripCardsFlow({ mode }: CardPageProps) {
 
         {mode === 'create' && !isLoading ? <><S.CreateTabs aria-label="여행 카드 작성 방식"><button type="button" aria-pressed={createTab === 'share'} onClick={() => setCreateTab('share')}>기존 여행 공유</button><button type="button" aria-pressed={createTab === 'photo'} onClick={() => setCreateTab('photo')}>사진으로 작성</button></S.CreateTabs>{createTab === 'share' ? <S.SelectList>{mine.map((trip, index) => <S.SelectRow key={trip.tripId ?? index}><div><strong>{trip.title || '여행 기록'}</strong><span>{trip.cityName || trip.countryName || '여행지'}</span></div><PartTripButton type="button" disabled={shareMutation.isPending} onClick={() => void handleShare(trip.tripId)}>공유하기</PartTripButton></S.SelectRow>)}{mine.length === 0 ? <S.Empty>공유할 내 여행이 없습니다.</S.Empty> : null}</S.SelectList> : <TripCardPhotoComposer />}</> : null}
 
-        {mode === 'delete' && !isLoading ? <S.SelectList><S.Notice>공유 여행 카드 삭제 API가 현재 저장소 계약에 없습니다. 선택 UI만 제공하며 삭제 요청은 보내지 않습니다.</S.Notice>{cards.map((card, index) => <S.SelectRow key={card.tripId ?? index}><label><input type="checkbox" checked={selected.includes(card.tripId ?? -1)} onChange={() => setSelected((current) => current.includes(card.tripId ?? -1) ? current.filter((id) => id !== (card.tripId ?? -1)) : [...current, card.tripId ?? -1])} /><span>{card.title || '여행 카드'}</span></label></S.SelectRow>)}<PartTripButton type="button" $variant="secondary" disabled>선택한 카드 삭제 ({selected.length})</PartTripButton></S.SelectList> : null}
+        {mode === 'delete' && !isLoading ? <S.SelectList><S.Notice>삭제 API가 연결되기 전까지 선택한 카드는 이 브라우저에서만 숨겨집니다.</S.Notice>{cards.map((card, index) => <S.SelectRow key={card.tripId ?? index}><label><input type="checkbox" checked={card.tripId != null && selected.includes(card.tripId)} disabled={card.tripId == null} onChange={() => card.tripId != null && setSelected((current) => current.includes(card.tripId as number) ? current.filter((id) => id !== card.tripId) : [...current, card.tripId as number])} /><span>{card.title || '여행 카드'}</span></label></S.SelectRow>)}<PartTripButton type="button" $variant="secondary" disabled={selected.length === 0} onClick={handleDelete}>선택한 카드 삭제 ({selected.length})</PartTripButton></S.SelectList> : null}
       </S.Page>
     </AppShell>
   )
