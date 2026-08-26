@@ -18,7 +18,7 @@ export const plannerDetailQueryOptions = (plannerId: number, enabled = true) =>
   queryOptions({
     queryKey: plannerQueryKeys.detail(plannerId),
     queryFn: () => getPlannerDetail(plannerId),
-    enabled: enabled && Number.isInteger(plannerId),
+    enabled: enabled && Number.isInteger(plannerId) && plannerId > 0,
   })
 
 export function usePlannerDetailQuery(plannerId: number, enabled = true) {
@@ -29,7 +29,7 @@ export const plannerMembersQueryOptions = (plannerId: number, enabled = true) =>
   queryOptions({
     queryKey: plannerQueryKeys.members(plannerId),
     queryFn: () => getPlannerMembers(plannerId),
-    enabled: enabled && Number.isInteger(plannerId),
+    enabled: enabled && Number.isInteger(plannerId) && plannerId > 0,
   })
 
 export function usePlannerMembersQuery(plannerId: number, enabled = true) {

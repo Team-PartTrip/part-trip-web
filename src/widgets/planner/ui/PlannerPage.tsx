@@ -214,7 +214,7 @@ function PlannerFlowPage({ step }: Props) {
 
   const handleCreateVote = async () => {
     const plannerId = Number(sessionStorage.getItem(ACTIVE_PLANNER_ID_KEY))
-    if (!Number.isInteger(plannerId)) {
+    if (!Number.isInteger(plannerId) || plannerId <= 0) {
       setErrorMessage('먼저 여행 계획을 저장해주세요.')
       return
     }
@@ -242,7 +242,7 @@ function PlannerFlowPage({ step }: Props) {
   }
 
   const handleConfirmPlan = () => {
-    if (!Number.isInteger(activePlannerId)) {
+    if (!Number.isInteger(activePlannerId) || activePlannerId <= 0) {
       setErrorMessage('먼저 여행 계획을 저장해주세요.')
       return
     }
