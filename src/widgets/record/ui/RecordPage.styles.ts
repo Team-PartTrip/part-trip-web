@@ -33,6 +33,17 @@ export const HeaderActions = styled.div`
   gap: 8px;
 `
 
+export const FilterRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 13px;
+  select { min-width: 220px; border: 1px solid ${({ theme }) => theme.colors.border.default}; border-radius: 10px; padding: 10px 12px; background: ${({ theme }) => theme.colors.background.default}; color: ${({ theme }) => theme.colors.text.strong}; }
+  @media (max-width: 560px) { align-items: stretch; flex-direction: column; select { width: 100%; } }
+`
+
 export const State = styled.p`
   padding: 64px 0;
   color: ${({ theme }) => theme.colors.text.muted};
