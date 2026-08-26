@@ -50,14 +50,14 @@ function Header({ step }: { step: PlannerStep }) {
   return <S.Header><S.Title>{title}</S.Title><S.Subtitle>{subtitle}</S.Subtitle></S.Header>
 }
 
-function usePlannerData(step: PlannerStep) {
+function usePlannerData(step: PlannerStep, category?: string) {
   const needsPlan = step !== 'list' && step !== 'create' && step !== 'group'
   const needsPlaces = step === 'explore' || step === 'vote' || step === 'lineup' || step === 'final' || step === 'place'
   const [overriddenPlan, setOverriddenPlan] = useState<ReturnType<typeof useDdayQuery>['data']>()
   const ddayQuery = useDdayQuery(needsPlan)
   const countriesQuery = useCountriesQuery(step === 'destination')
   const plan = overriddenPlan ?? ddayQuery.data
-  const placesQuery = useTourPlacesQuery(plan?.countryName, plan?.cityName, undefined, needsPlaces)
+  const placesQuery = useTourPlacesQuery(plan?.countryName, plan?.cityName, category, needsPlaces)
   const { trips, isLoading: isTripsLoading } = useMyTrips(step === 'list')
 
   return {
@@ -85,7 +85,8 @@ function PlannerFlowPage({ step }: Props) {
   const navigate = useNavigate()
   const { placeId } = useParams({ strict: false })
   const savedGroupSettings = readPlannerGroupSettings()
-  const { countries, isLoading, places, plan, setPlan, trips } = usePlannerData(step)
+  const [voteCategory, setVoteCategory] = useState<(typeof plannerCategories)[number]>('명소')
+  const { countries, isLoading, places, plan, setPlan, trips } = usePlannerData(step, voteCategory)
   const [selected, setSelected] = useState<number[]>(() => {
     try {
       const saved = sessionStorage.getItem('parttrip:planner-selected')
@@ -105,7 +106,6 @@ function PlannerFlowPage({ step }: Props) {
   const [memberCount, setMemberCount] = useState(() => String(readPlannerGroupSettings().memberCount))
   const [isSolo, setIsSolo] = useState(() => readPlannerGroupSettings().isSolo)
   const [inviteCode, setInviteCode] = useState('')
-  const [voteCategory, setVoteCategory] = useState<(typeof plannerCategories)[number]>('명소')
   const [lineupChoice, setLineupChoice] = useState<number | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
   const createPlannerMutation = useCreatePlannerMutation()
