@@ -1,19 +1,11 @@
 import { useNavigate } from '@tanstack/react-router'
-import type { TripPlanResponseDto } from '@/entities/trip-plan/types'
+import { getTripDurationDays, useMyTrips } from '@/entities/trip-plan'
 import { useUserProfileQuery } from '@/entities/user'
 import { figmaProfileHero, figmaProfileTrip } from '@/shared/assets'
 import { paths } from '@/shared/config'
-import { useMyTrips } from '@/entities/trip-plan'
 import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './ProfilePage.styles'
-
-function tripDays(trips: TripPlanResponseDto[]) {
-  return trips.reduce((total, trip) => {
-    if (!trip.startDate || !trip.endDate) return total
-    return total + Math.max(1, Math.round((Date.parse(trip.endDate) - Date.parse(trip.startDate)) / 86400000) + 1)
-  }, 0)
-}
 
 export function ProfilePage() {
   const navigate = useNavigate()
@@ -35,7 +27,7 @@ export function ProfilePage() {
               <S.Stats>
                 <div><strong>{countries}</strong><span>방문 국가</span></div>
                 <div><strong>{trips.length}</strong><span>여행 기록</span></div>
-                <div><strong>{tripDays(trips)}</strong><span>여행 일수</span></div>
+                <div><strong>{getTripDurationDays(trips)}</strong><span>여행 일수</span></div>
               </S.Stats>
             </S.ProfileCard>
             <S.Section>

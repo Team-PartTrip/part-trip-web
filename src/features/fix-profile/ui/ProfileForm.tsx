@@ -13,8 +13,6 @@ import {
 import * as S from './ProfileForm.styles'
 
 type ProfileFormProps = {
-  onCancel?: () => void
-  onSaved?: (profile: UserProfile) => void
   profile: UserProfile
 }
 
@@ -22,7 +20,7 @@ type ProfileFormValues = {
   name: string
 }
 
-export function ProfileForm({ onCancel, onSaved, profile }: ProfileFormProps) {
+export function ProfileForm({ profile }: ProfileFormProps) {
   const navigate = useNavigate()
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -43,9 +41,8 @@ export function ProfileForm({ onCancel, onSaved, profile }: ProfileFormProps) {
 
   const close = useCallback(() => {
     if (formState.isSubmitting) return
-    if (onCancel) onCancel()
-    else navigate({ to: paths.profile })
-  }, [formState.isSubmitting, navigate, onCancel])
+    navigate({ to: paths.profile })
+  }, [formState.isSubmitting, navigate])
 
   useEffect(() => {
     closeButtonRef.current?.focus()
@@ -98,20 +95,12 @@ export function ProfileForm({ onCancel, onSaved, profile }: ProfileFormProps) {
       const uploadedUrl = selectedPhoto
         ? await uploadProfileImageMutation.mutateAsync(selectedPhoto)
         : undefined
-      const response = await updateProfileMutation.mutateAsync({
+      await updateProfileMutation.mutateAsync({
         imgUrl: selectedPhoto ? uploadedUrl : avatarPreview || undefined,
         nickName: values.name.trim(),
         themeId: profile.themeId,
       })
-      const savedProfile: UserProfile = {
-        ...profile,
-        avatarUrl: response.imgUrl || undefined,
-        id: response.userId || profile.id,
-        name: response.nickName || values.name.trim(),
-      }
-
-      if (onSaved) onSaved(savedProfile)
-      else navigate({ to: paths.profile, replace: true })
+      navigate({ to: paths.profile, replace: true })
     } catch {
       setErrorMessage('프로필을 저장하지 못했습니다. 다시 시도해주세요.')
     }
