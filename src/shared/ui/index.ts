@@ -1,1 +1,1 @@
-export { AuthForm } from './auth-form'
+export { AuthForm, GoogleLoginControl } from './auth-form'

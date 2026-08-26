@@ -18,9 +18,7 @@ import {
   sanitizePassword,
   trimFormValue,
 } from '@/shared/utils'
-import { AuthForm as S } from '@/shared/ui'
-
-import { GoogleLoginControl } from './GoogleLoginControl'
+import { AuthForm as S, GoogleLoginControl } from '@/shared/ui'
 
 type FormMessage = {
   text: string

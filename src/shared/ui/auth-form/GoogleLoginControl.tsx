@@ -1,5 +1,6 @@
 import { useGoogleLogin } from '@react-oauth/google'
-import { AuthForm as S } from '@/shared/ui'
+
+import * as S from './AuthForm.styles'
 
 type GoogleLoginControlProps = {
   disabled: boolean
@@ -17,7 +18,7 @@ export function GoogleLoginControl({ disabled, isSubmitting, onError, onLogin }:
 
   return (
     <S.GoogleButton type="button" onClick={() => requestGoogleLogin()} disabled={disabled}>
-      {isSubmitting ? 'Google 로그인 중' : 'Google로 계속하기'}
+      {isSubmitting ? 'Google 처리 중' : 'Google로 계속하기'}
     </S.GoogleButton>
   )
 }

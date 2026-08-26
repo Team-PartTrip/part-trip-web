@@ -6,7 +6,7 @@ import {
   type SubmitHandler,
 } from 'react-hook-form'
 import { useNavigate } from '@tanstack/react-router'
-import { sendVerificationCode, signUp, verifyCode, type SignUpRequestDto } from '@/entities/session/api'
+import { googleLogin, saveAuthTokens, sendVerificationCode, signUp, verifyCode, type SignUpRequestDto } from '@/entities/session/api'
 import { paths } from '@/shared/config'
 import {
   authValidationRules,
@@ -20,7 +20,7 @@ import {
   sanitizePassword,
   trimFormValue,
 } from '@/shared/utils'
-import { AuthForm as S } from '@/shared/ui'
+import { AuthForm as S, GoogleLoginControl } from '@/shared/ui'
 
 type SignUpStep = 'credentials' | 'verification'
 
@@ -50,6 +50,7 @@ export function SignUpForm() {
   const [step, setStep] = useState<SignUpStep>('credentials')
   const [message, setMessage] = useState<FormMessage | null>(null)
   const [isCodeInputFocused, setIsCodeInputFocused] = useState(false)
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
 
   const credentialsForm = useForm<CredentialsFormValues>({
     defaultValues: {
@@ -149,6 +150,19 @@ export function SignUpForm() {
     })
   }
 
+  const handleGoogleSignup = async (code: string) => {
+    try {
+      setIsGoogleSubmitting(true)
+      const tokens = await googleLogin({ code })
+      saveAuthTokens(tokens)
+      navigate({ to: paths.main, replace: true })
+    } catch (error) {
+      setMessage({ text: getErrorMessage(error), tone: 'error' })
+    } finally {
+      setIsGoogleSubmitting(false)
+    }
+  }
+
   const handleVerificationSubmit: SubmitHandler<VerificationFormValues> = async ({
     verificationCode,
   }) => {
@@ -188,6 +202,7 @@ export function SignUpForm() {
   }
 
   const isCredentialsSubmitting = credentialsForm.formState.isSubmitting
+  const isCredentialsBusy = isCredentialsSubmitting || isGoogleSubmitting
   const isVerificationSubmitting = verificationForm.formState.isSubmitting
   const verificationCode =
     useWatch({
@@ -310,7 +325,7 @@ export function SignUpForm() {
             type="email"
             autoComplete="email"
             placeholder="이메일을 입력하세요."
-            disabled={isCredentialsSubmitting}
+            disabled={isCredentialsBusy}
             required
           />
 
@@ -321,7 +336,7 @@ export function SignUpForm() {
             autoComplete="country-name"
             placeholder="국적을 입력하세요."
             maxLength={40}
-            disabled={isCredentialsSubmitting}
+            disabled={isCredentialsBusy}
             required
           />
 
@@ -333,7 +348,7 @@ export function SignUpForm() {
             autoComplete="tel"
             placeholder="전화번호를 입력하세요."
             maxLength={20}
-            disabled={isCredentialsSubmitting}
+            disabled={isCredentialsBusy}
             required
           />
 
@@ -348,7 +363,7 @@ export function SignUpForm() {
             pattern={authValidationRules.id.pattern}
             title="아이디는 영문 소문자와 숫자만 입력해주세요."
             onChange={createSanitizedChangeHandler(idField, sanitizeId)}
-            disabled={isCredentialsSubmitting}
+            disabled={isCredentialsBusy}
             required
           />
 
@@ -366,7 +381,7 @@ export function SignUpForm() {
               passwordField,
               sanitizePassword,
             )}
-            disabled={isCredentialsSubmitting}
+            disabled={isCredentialsBusy}
             required
           />
 
@@ -384,7 +399,7 @@ export function SignUpForm() {
               passwordConfirmField,
               sanitizePassword,
             )}
-            disabled={isCredentialsSubmitting}
+            disabled={isCredentialsBusy}
             required
           />
 
@@ -395,9 +410,16 @@ export function SignUpForm() {
           ) : null}
 
           <S.Actions>
-            <S.PrimaryButton type="submit" disabled={isCredentialsSubmitting}>
-              다음
+            <S.PrimaryButton type="submit" disabled={isCredentialsBusy}>
+              {isCredentialsBusy ? '처리 중' : '다음'}
             </S.PrimaryButton>
+            <S.Divider>또는</S.Divider>
+            <GoogleLoginControl
+              disabled={isCredentialsBusy}
+              isSubmitting={isGoogleSubmitting}
+              onError={() => setMessage({ text: 'Google 회원가입에 실패했습니다.', tone: 'error' })}
+              onLogin={handleGoogleSignup}
+            />
             <S.SecondaryButton to={paths.login}>로그인 하기</S.SecondaryButton>
           </S.Actions>
         </S.Form>
