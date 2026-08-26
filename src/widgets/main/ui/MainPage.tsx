@@ -79,13 +79,13 @@ export function MainPage() {
                 <S.StatusGrid>
                   <S.StatusItem><span>여행지</span><b>확정</b></S.StatusItem>
                   <S.StatusItem><span>기간</span><b>{plan.startDate && plan.endDate ? '확정' : '미설정'}</b></S.StatusItem>
-                  <S.StatusItem><span>플래너</span><b data-warning="true">API 준비 중</b></S.StatusItem>
+                  <S.StatusItem><span>플래너</span><b>연동됨</b></S.StatusItem>
                 </S.StatusGrid>
               </S.InfoCard>
               <S.InfoCard>
                 <S.CardTitle>해야 할 일</S.CardTitle>
                 <S.TodoButton type="button" onClick={() => navigate({ to: paths.planner })}>
-                  <span>플래너에서 일정 준비하기</span><small>플래너 API 연동 전</small><b>›</b>
+                  <span>플래너에서 일정 준비하기</span><small>그룹·투표·장소를 이어서 준비하세요.</small><b>›</b>
                 </S.TodoButton>
                 <S.TodoButton type="button" onClick={() => navigate({ to: paths.record })}>
                   <span>지난 여행 기록 확인하기</span><small>여행 기록으로 이동</small><b>›</b>
