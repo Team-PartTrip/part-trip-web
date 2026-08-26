@@ -106,6 +106,7 @@ function PlannerFlowPage({ step }: Props) {
   const [isSolo, setIsSolo] = useState(() => readPlannerGroupSettings().isSolo)
   const [inviteCode, setInviteCode] = useState('')
   const [voteCategory, setVoteCategory] = useState<(typeof plannerCategories)[number]>('명소')
+  const [lineupChoice, setLineupChoice] = useState<number | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
   const createPlannerMutation = useCreatePlannerMutation()
   const createVoteMutation = useCreateVoteMutation()
@@ -126,7 +127,7 @@ function PlannerFlowPage({ step }: Props) {
   const selectedStartDate = startDate || plan?.startDate || ''
   const selectedEndDate = endDate || plan?.endDate || ''
   const selectedHeadcount = headcount || String(plan?.headcount ?? 1)
-  const selectedPlaces = places.filter((_, index) => selected.includes(index))
+  const selectedPlaces = places.flatMap((item, index) => selected.includes(index) ? [{ index, item }] : [])
   const place = places[Number(placeId)] || places[0]
 
   const saveDestination = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -211,6 +212,21 @@ function PlannerFlowPage({ step }: Props) {
     }
   }
 
+  const handleRemoveFromLineup = (index: number) => {
+    setSelected((current) => current.filter((item) => item !== index))
+    if (lineupChoice === index) setLineupChoice(null)
+  }
+
+  const handleRandomLineup = () => {
+    if (selectedPlaces.length === 0) {
+      setErrorMessage('먼저 장바구니에 장소를 담아주세요.')
+      return
+    }
+    const choice = selectedPlaces[Math.floor(Math.random() * selectedPlaces.length)]
+    setLineupChoice(choice.index)
+    setErrorMessage('')
+  }
+
   return (
     <AppShell>
       <S.Page>
@@ -228,9 +244,9 @@ function PlannerFlowPage({ step }: Props) {
 
         {step === 'explore' ? <S.ExploreGrid>{plannerCategories.map((category) => <S.CategoryCard key={category} type="button" onClick={() => { setVoteCategory(category); setSelected([]); navigate({ to: paths.plannerVote }) }}><strong>{category}</strong><span>후보 장소를 조회하고 선택하기</span><b>›</b></S.CategoryCard>)}</S.ExploreGrid> : null}
 
-        {step === 'vote' ? <S.VoteCard><S.Notice>{voteCategory} 카테고리의 후보를 선택하고 투표를 시작하세요.</S.Notice><S.VoteCategoryRow aria-label="투표 카테고리">{plannerCategories.map((category) => <S.VoteCategoryButton key={category} type="button" $active={voteCategory === category} aria-pressed={voteCategory === category} onClick={() => { setVoteCategory(category); setSelected([]) }}>{category}</S.VoteCategoryButton>)}</S.VoteCategoryRow>{places.map((placeItem, index) => <S.VoteRow key={`${placeItem.placeName}-${index}`}><div><small>{voteCategory}</small><strong>{placeItem.placeName || '장소'}</strong></div><S.CheckButton type="button" aria-pressed={selected.includes(index)} $selected={selected.includes(index)} onClick={() => setSelected((current) => current.includes(index) ? current.filter((item) => item !== index) : [...current, index])}>{selected.includes(index) ? '선택됨' : '선택'}</S.CheckButton></S.VoteRow>)}{places.length === 0 ? <S.Empty>연동된 장소 후보가 없습니다.</S.Empty> : null}<S.ActionRow><PartTripButton type="button" $variant="secondary" disabled={createVoteMutation.isPending} onClick={() => void handleCreateVote()}>{createVoteMutation.isPending ? '투표 생성 중' : `${voteCategory} 투표 만들기`}</PartTripButton><PartTripButton type="button" onClick={() => navigate({ to: paths.plannerLineup })}>선택한 장소 정리 ({selected.length})</PartTripButton></S.ActionRow></S.VoteCard> : null}
+        {step === 'vote' ? <S.VoteCard><S.Notice>{voteCategory} 카테고리의 후보를 선택하고 투표를 시작하세요.</S.Notice><S.VoteCategoryRow aria-label="투표 카테고리">{plannerCategories.map((category) => <S.VoteCategoryButton key={category} type="button" $active={voteCategory === category} aria-pressed={voteCategory === category} onClick={() => { setVoteCategory(category); setSelected([]); setLineupChoice(null) }}>{category}</S.VoteCategoryButton>)}</S.VoteCategoryRow>{places.map((placeItem, index) => <S.VoteRow key={`${placeItem.placeName}-${index}`}><div><small>{voteCategory}</small><strong>{placeItem.placeName || '장소'}</strong></div><S.CheckButton type="button" aria-pressed={selected.includes(index)} $selected={selected.includes(index)} onClick={() => { setSelected((current) => current.includes(index) ? current.filter((item) => item !== index) : [...current, index]); setLineupChoice(null) }}>{selected.includes(index) ? '선택됨' : '선택'}</S.CheckButton></S.VoteRow>)}{places.length === 0 ? <S.Empty>연동된 장소 후보가 없습니다.</S.Empty> : null}<S.ActionRow><PartTripButton type="button" $variant="secondary" disabled={createVoteMutation.isPending} onClick={() => void handleCreateVote()}>{createVoteMutation.isPending ? '투표 생성 중' : `${voteCategory} 투표 만들기`}</PartTripButton><PartTripButton type="button" onClick={() => navigate({ to: paths.plannerLineup })}>선택한 장소 정리 ({selected.length})</PartTripButton></S.ActionRow></S.VoteCard> : null}
 
-        {step === 'lineup' ? <S.StepCard><S.StepNumber>05</S.StepNumber><h2>라인업 및 장바구니</h2>{selectedPlaces.length ? <S.SelectedList>{selectedPlaces.map((item) => <li key={item.placeName}>{item.placeName}</li>)}</S.SelectedList> : <S.Empty>선택한 장소가 없습니다. 투표 화면에서 장소를 선택하세요.</S.Empty>}<S.ActionRow><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.plannerVote })}>장소 더 찾기</PartTripButton><PartTripButton type="button" onClick={() => navigate({ to: paths.plannerFinal })}>최종 계획 확인</PartTripButton></S.ActionRow></S.StepCard> : null}
+        {step === 'lineup' ? <S.StepCard><S.StepNumber>05</S.StepNumber><h2>라인업 및 장바구니</h2>{selectedPlaces.length ? <S.SelectedList>{selectedPlaces.map(({ index, item }) => <S.CartItem key={`${item.placeName}-${index}`}><span>{item.placeName || '장소'}</span><span><S.CartChoiceButton type="button" $selected={lineupChoice === index} onClick={() => setLineupChoice(index)}>{lineupChoice === index ? '선택됨' : '직접 선택'}</S.CartChoiceButton><button type="button" onClick={() => handleRemoveFromLineup(index)}>빼기</button></span></S.CartItem>)}</S.SelectedList> : <S.Empty>선택한 장소가 없습니다. 투표 화면에서 장소를 선택하세요.</S.Empty>}{lineupChoice != null ? <S.Notice>이번 여행의 선택 장소: {places[lineupChoice]?.placeName || '장소'}</S.Notice> : null}<S.ActionRow><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.plannerVote })}>장소 더 찾기</PartTripButton><PartTripButton type="button" $variant="secondary" onClick={handleRandomLineup}>랜덤으로 정하기</PartTripButton><PartTripButton type="button" onClick={() => navigate({ to: paths.plannerFinal })}>최종 계획 확인</PartTripButton></S.ActionRow></S.StepCard> : null}
 
         {step === 'progress' ? <S.ProgressLayout><S.StepCard><S.StepNumber>진행 중</S.StepNumber><h2>{plan?.cityName || '여행 계획'} 계획</h2><p>{dateLabel(plan?.startDate)} – {dateLabel(plan?.endDate)}</p><S.ProgressTrack><S.ProgressBar $progress={plan ? 60 : 0} /></S.ProgressTrack><S.StatusPill>여행지 정보 저장 완료</S.StatusPill><S.StatusPill $warning>플래너 투표 API 미연동</S.StatusPill><S.ActionRow><PartTripButton type="button" onClick={() => navigate({ to: paths.plannerExplore })}>장소 찾기</PartTripButton><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.plannerFinal })}>최종 계획</PartTripButton></S.ActionRow></S.StepCard><S.SideSummary><h2>해야 할 일</h2><p>장소 후보를 확인하고 투표를 이어가세요.</p><button type="button" onClick={() => navigate({ to: paths.plannerVote })}>투표 화면 열기 ›</button></S.SideSummary></S.ProgressLayout> : null}
 
