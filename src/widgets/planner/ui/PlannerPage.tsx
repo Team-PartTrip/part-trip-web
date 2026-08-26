@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
+import { useJoinPlannerMutation } from '@/entities/planner'
 import { useCountriesQuery, useDdayQuery, useSaveTravelPlanMutation, useTourPlacesQuery } from '@/entities/travel'
 import { figmaTripPlanning } from '@/shared/assets'
 import { paths } from '@/shared/config'
@@ -12,6 +13,22 @@ import * as S from './PlannerPage.styles'
 export type PlannerStep = 'list' | 'create' | 'group' | 'destination' | 'explore' | 'vote' | 'lineup' | 'progress' | 'final' | 'place'
 
 type Props = { step: PlannerStep }
+type PlannerGroupSettings = { isSolo: boolean; memberCount: number }
+
+const PLANNER_GROUP_SETTINGS_KEY = 'parttrip:planner-group-settings'
+const ACTIVE_PLANNER_ID_KEY = 'parttrip:active-planner-id'
+
+function readPlannerGroupSettings(): PlannerGroupSettings {
+  try {
+    const stored = JSON.parse(sessionStorage.getItem(PLANNER_GROUP_SETTINGS_KEY) ?? '{}')
+    return {
+      isSolo: stored.isSolo === true,
+      memberCount: typeof stored.memberCount === 'number' ? stored.memberCount : 1,
+    }
+  } catch {
+    return { isSolo: false, memberCount: 1 }
+  }
+}
 
 function dateLabel(value?: string) { return value?.replaceAll('-', '.') ?? '-' }
 
@@ -82,8 +99,12 @@ function PlannerFlowPage({ step }: Props) {
   const [countryName, setCountryName] = useState(plan?.countryName ?? '')
   const [cityName, setCityName] = useState(plan?.cityName ?? '')
   const [headcount, setHeadcount] = useState(String(plan?.headcount ?? 1))
+  const [memberCount, setMemberCount] = useState(() => String(readPlannerGroupSettings().memberCount))
+  const [isSolo, setIsSolo] = useState(() => readPlannerGroupSettings().isSolo)
+  const [inviteCode, setInviteCode] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const saveTravelPlanMutation = useSaveTravelPlanMutation()
+  const joinPlannerMutation = useJoinPlannerMutation()
   const isSaving = saveTravelPlanMutation.isPending
 
   useEffect(() => {
@@ -126,6 +147,34 @@ function PlannerFlowPage({ step }: Props) {
     }
   }
 
+  const saveGroupSettings = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const nextMemberCount = isSolo ? 1 : Number(memberCount)
+    if (!Number.isInteger(nextMemberCount) || nextMemberCount < 1 || nextMemberCount > 30) {
+      setErrorMessage('여행 인원은 1명에서 30명 사이로 입력해주세요.')
+      return
+    }
+    sessionStorage.setItem(PLANNER_GROUP_SETTINGS_KEY, JSON.stringify({ isSolo, memberCount: nextMemberCount }))
+    setErrorMessage('')
+    navigate({ to: paths.plannerDestination })
+  }
+
+  const handleJoinPlanner = async () => {
+    if (!inviteCode.trim()) {
+      setErrorMessage('초대 코드를 입력해주세요.')
+      return
+    }
+    try {
+      setErrorMessage('')
+      const joined = await joinPlannerMutation.mutateAsync({ inviteCode: inviteCode.trim() })
+      if (joined.plannerId == null) throw new Error('plannerId is missing')
+      sessionStorage.setItem(ACTIVE_PLANNER_ID_KEY, String(joined.plannerId))
+      navigate({ to: paths.plannerProgress })
+    } catch {
+      setErrorMessage('초대 코드로 여행 그룹에 참여하지 못했습니다.')
+    }
+  }
+
   return (
     <AppShell>
       <S.Page>
@@ -137,7 +186,7 @@ function PlannerFlowPage({ step }: Props) {
 
         {step === 'create' ? <S.StepCard><S.StepNumber>01</S.StepNumber><h2>여행을 함께 계획해보세요.</h2><p>기존 여행 정보 설정을 재사용하거나 새로 시작할 수 있습니다.</p><S.ActionRow><PartTripButton type="button" onClick={() => continueTo(paths.plannerGroup)}>그룹 정하기</PartTripButton><PartTripButton type="button" $variant="secondary" onClick={() => continueTo(paths.travelSelect)}>여행지 설정으로 이동</PartTripButton></S.ActionRow></S.StepCard> : null}
 
-        {step === 'group' ? <S.StepCard><S.StepNumber>02</S.StepNumber><h2>그룹 멤버를 확인하세요.</h2><S.MemberList><S.Member>나 <span>현재 사용자</span></S.Member><S.Member disabled>멤버 초대 API 미연동 <span>백엔드 계약 필요</span></S.Member></S.MemberList><S.ActionRow><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.plannerCreate })}>이전</PartTripButton><PartTripButton type="button" onClick={() => navigate({ to: paths.plannerDestination })}>다음</PartTripButton></S.ActionRow></S.StepCard> : null}
+        {step === 'group' ? <S.StepCard as="form" onSubmit={saveGroupSettings}><S.StepNumber>02</S.StepNumber><h2>여행 그룹을 정해보세요.</h2><S.MemberList><S.Member>나 <span>현재 사용자</span></S.Member><S.Member><label><input type="checkbox" checked={isSolo} onChange={(event) => setIsSolo(event.target.checked)} /> 혼자 여행</label><span>{isSolo ? '1명' : '그룹 여행'}</span></S.Member></S.MemberList>{!isSolo ? <S.Field><label htmlFor="planner-member-count">여행 인원</label><PartTripInput id="planner-member-count" type="number" min={1} max={30} value={memberCount} onChange={(event) => setMemberCount(event.target.value)} /></S.Field> : null}<S.Field><label htmlFor="planner-invite-code">초대 코드로 참여</label><PartTripInput id="planner-invite-code" value={inviteCode} onChange={(event) => setInviteCode(event.target.value)} maxLength={20} placeholder="초대 코드" /></S.Field><S.ActionRow><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.plannerCreate })}>이전</PartTripButton><PartTripButton type="button" $variant="secondary" disabled={joinPlannerMutation.isPending} onClick={() => void handleJoinPlanner()}>{joinPlannerMutation.isPending ? '참여 중' : '초대 코드로 참여'}</PartTripButton><PartTripButton type="submit">다음</PartTripButton></S.ActionRow></S.StepCard> : null}
 
         {step === 'destination' ? <S.StepCard as="form" onSubmit={(event) => void saveDestination(event)}><S.StepNumber>03</S.StepNumber><S.FormGrid><S.Field><label htmlFor="planner-country">여행지</label><PartTripSelect id="planner-country" value={selectedCountryInfoId} onChange={(event) => { setCountryInfoId(event.target.value); const item = countries.find((country) => String(country.countryInfoId) === event.target.value); setCountryName(item?.countryName ?? ''); setCityName(item?.cityName ?? '') }}><option value="">여행지를 선택하세요</option>{countries.map((country) => <option key={country.countryInfoId ?? country.countryName} value={country.countryInfoId}>{country.cityName || country.countryName}</option>)}</PartTripSelect></S.Field><S.Field><label htmlFor="planner-city">도시</label><PartTripInput id="planner-city" value={selectedCityName} onChange={(event) => setCityName(event.target.value)} placeholder="도시" /></S.Field><S.Field><label htmlFor="planner-start">시작일</label><PartTripInput id="planner-start" type="date" value={selectedStartDate} onChange={(event) => setStartDate(event.target.value)} /></S.Field><S.Field><label htmlFor="planner-end">종료일</label><PartTripInput id="planner-end" type="date" value={selectedEndDate} onChange={(event) => setEndDate(event.target.value)} /></S.Field><S.Field><label htmlFor="planner-headcount">여행 인원</label><PartTripInput id="planner-headcount" type="number" min={1} max={30} value={selectedHeadcount} onChange={(event) => setHeadcount(event.target.value)} /></S.Field></S.FormGrid><S.ActionRow><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.plannerGroup })}>이전</PartTripButton><PartTripButton type="submit" disabled={isSaving}>{isSaving ? '저장 중' : '여행 정보 저장'}</PartTripButton></S.ActionRow></S.StepCard> : null}
 
