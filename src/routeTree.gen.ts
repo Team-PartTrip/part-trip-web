@@ -41,6 +41,7 @@ import { Route as appAuthenticatedRecordRecordIdIndexRouteImport } from './route
 import { Route as appAuthenticatedRecordCalendarIndexRouteImport } from './routes/(app)/_authenticated/record/calendar/index'
 import { Route as appAuthenticatedRecordCameraIndexRouteImport } from './routes/(app)/_authenticated/record/camera/index'
 import { Route as appAuthenticatedRecordMapIndexRouteImport } from './routes/(app)/_authenticated/record/map/index'
+import { Route as appAuthenticatedRecordReportIndexRouteImport } from './routes/(app)/_authenticated/record/report/index'
 import { Route as appAuthenticatedRecordWriteIndexRouteImport } from './routes/(app)/_authenticated/record/write/index'
 import { Route as appAuthenticatedSettingsNotificationsIndexRouteImport } from './routes/(app)/_authenticated/settings/notifications/index'
 import { Route as appAuthenticatedTravelSelectIndexRouteImport } from './routes/(app)/_authenticated/travel/select/index'
@@ -238,6 +239,12 @@ const appAuthenticatedRecordMapIndexRoute =
     path: '/record/map/',
     getParentRoute: () => appAuthenticatedRouteRoute,
   } as any)
+const appAuthenticatedRecordReportIndexRoute =
+  appAuthenticatedRecordReportIndexRouteImport.update({
+    id: '/record/report/',
+    path: '/record/report/',
+    getParentRoute: () => appAuthenticatedRouteRoute,
+  } as any)
 const appAuthenticatedRecordWriteIndexRoute =
   appAuthenticatedRecordWriteIndexRouteImport.update({
     id: '/record/write/',
@@ -325,6 +332,7 @@ export interface FileRoutesByFullPath {
   '/record/calendar/': typeof appAuthenticatedRecordCalendarIndexRoute
   '/record/camera/': typeof appAuthenticatedRecordCameraIndexRoute
   '/record/map/': typeof appAuthenticatedRecordMapIndexRoute
+  '/record/report/': typeof appAuthenticatedRecordReportIndexRoute
   '/record/write/': typeof appAuthenticatedRecordWriteIndexRoute
   '/settings/notifications/': typeof appAuthenticatedSettingsNotificationsIndexRoute
   '/travel/select/': typeof appAuthenticatedTravelSelectIndexRoute
@@ -367,6 +375,7 @@ export interface FileRoutesByTo {
   '/record/calendar': typeof appAuthenticatedRecordCalendarIndexRoute
   '/record/camera': typeof appAuthenticatedRecordCameraIndexRoute
   '/record/map': typeof appAuthenticatedRecordMapIndexRoute
+  '/record/report': typeof appAuthenticatedRecordReportIndexRoute
   '/record/write': typeof appAuthenticatedRecordWriteIndexRoute
   '/settings/notifications': typeof appAuthenticatedSettingsNotificationsIndexRoute
   '/travel/select': typeof appAuthenticatedTravelSelectIndexRoute
@@ -411,6 +420,7 @@ export interface FileRoutesById {
   '/(app)/_authenticated/record/calendar/': typeof appAuthenticatedRecordCalendarIndexRoute
   '/(app)/_authenticated/record/camera/': typeof appAuthenticatedRecordCameraIndexRoute
   '/(app)/_authenticated/record/map/': typeof appAuthenticatedRecordMapIndexRoute
+  '/(app)/_authenticated/record/report/': typeof appAuthenticatedRecordReportIndexRoute
   '/(app)/_authenticated/record/write/': typeof appAuthenticatedRecordWriteIndexRoute
   '/(app)/_authenticated/settings/notifications/': typeof appAuthenticatedSettingsNotificationsIndexRoute
   '/(app)/_authenticated/travel/select/': typeof appAuthenticatedTravelSelectIndexRoute
@@ -455,6 +465,7 @@ export interface FileRouteTypes {
     | '/record/calendar/'
     | '/record/camera/'
     | '/record/map/'
+    | '/record/report/'
     | '/record/write/'
     | '/settings/notifications/'
     | '/travel/select/'
@@ -497,6 +508,7 @@ export interface FileRouteTypes {
     | '/record/calendar'
     | '/record/camera'
     | '/record/map'
+    | '/record/report'
     | '/record/write'
     | '/settings/notifications'
     | '/travel/select'
@@ -540,6 +552,7 @@ export interface FileRouteTypes {
     | '/(app)/_authenticated/record/calendar/'
     | '/(app)/_authenticated/record/camera/'
     | '/(app)/_authenticated/record/map/'
+    | '/(app)/_authenticated/record/report/'
     | '/(app)/_authenticated/record/write/'
     | '/(app)/_authenticated/settings/notifications/'
     | '/(app)/_authenticated/travel/select/'
@@ -785,6 +798,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAuthenticatedRecordMapIndexRouteImport
       parentRoute: typeof appAuthenticatedRouteRoute
     }
+    '/(app)/_authenticated/record/report/': {
+      id: '/(app)/_authenticated/record/report/'
+      path: '/record/report'
+      fullPath: '/record/report/'
+      preLoaderRoute: typeof appAuthenticatedRecordReportIndexRouteImport
+      parentRoute: typeof appAuthenticatedRouteRoute
+    }
     '/(app)/_authenticated/record/write/': {
       id: '/(app)/_authenticated/record/write/'
       path: '/record/write'
@@ -879,6 +899,7 @@ interface appAuthenticatedRouteRouteChildren {
   appAuthenticatedRecordCalendarIndexRoute: typeof appAuthenticatedRecordCalendarIndexRoute
   appAuthenticatedRecordCameraIndexRoute: typeof appAuthenticatedRecordCameraIndexRoute
   appAuthenticatedRecordMapIndexRoute: typeof appAuthenticatedRecordMapIndexRoute
+  appAuthenticatedRecordReportIndexRoute: typeof appAuthenticatedRecordReportIndexRoute
   appAuthenticatedRecordWriteIndexRoute: typeof appAuthenticatedRecordWriteIndexRoute
   appAuthenticatedSettingsNotificationsIndexRoute: typeof appAuthenticatedSettingsNotificationsIndexRoute
   appAuthenticatedTravelSelectIndexRoute: typeof appAuthenticatedTravelSelectIndexRoute
@@ -933,6 +954,8 @@ const appAuthenticatedRouteRouteChildren: appAuthenticatedRouteRouteChildren = {
   appAuthenticatedRecordCameraIndexRoute:
     appAuthenticatedRecordCameraIndexRoute,
   appAuthenticatedRecordMapIndexRoute: appAuthenticatedRecordMapIndexRoute,
+  appAuthenticatedRecordReportIndexRoute:
+    appAuthenticatedRecordReportIndexRoute,
   appAuthenticatedRecordWriteIndexRoute: appAuthenticatedRecordWriteIndexRoute,
   appAuthenticatedSettingsNotificationsIndexRoute:
     appAuthenticatedSettingsNotificationsIndexRoute,

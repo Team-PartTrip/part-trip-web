@@ -35,6 +35,7 @@ export const paths = {
   recordCameraDetail: '/record/camera/:imageId',
   recordCameraWrite: '/record/camera/:imageId/write',
   recordDetail: '/record/:recordId',
+  recordReport: '/record/report',
   recordWrite: '/record/write',
   signUp: '/sign-up',
   travelSelect: '/travel/select',

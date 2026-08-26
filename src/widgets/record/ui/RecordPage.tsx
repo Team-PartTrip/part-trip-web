@@ -38,6 +38,7 @@ export function RecordPage() {
             <PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.recordMap })}>지도 보기</PartTripButton>
             <PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.recordCalendar })}>캘린더</PartTripButton>
             <PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.recordCamera })}>사진 분석</PartTripButton>
+            <PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.recordReport })}>리포트</PartTripButton>
             <PartTripButton type="button" onClick={() => navigate({ to: paths.recordWrite })}>기록 작성</PartTripButton>
           </S.HeaderActions>
         </S.Header>
