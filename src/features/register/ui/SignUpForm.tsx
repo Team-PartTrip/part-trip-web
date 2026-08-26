@@ -6,7 +6,7 @@ import {
   type SubmitHandler,
 } from 'react-hook-form'
 import { useNavigate } from '@tanstack/react-router'
-import { sendVerificationCode, signUp, verifyCode } from '@/entities/session/api'
+import { sendVerificationCode, signUp, verifyCode, type SignUpRequestDto } from '@/entities/session/api'
 import { paths } from '@/shared/config'
 import {
   authValidationRules,
@@ -30,6 +30,7 @@ type CredentialsFormValues = {
   password: string
   passwordConfirm: string
   phoneNumber: string
+  country: string
 }
 
 type VerificationFormValues = {
@@ -57,6 +58,7 @@ export function SignUpForm() {
       password: '',
       passwordConfirm: '',
       phoneNumber: '',
+      country: 'KR',
     },
   })
   const verificationForm = useForm<VerificationFormValues>({
@@ -92,6 +94,10 @@ export function SignUpForm() {
     setValueAs: trimFormValue,
     validate: (value) =>
       phoneNumberPattern.test(value) || '전화번호는 숫자와 하이픈으로 입력해주세요.',
+  })
+  const countryField = credentialsForm.register('country', {
+    required: '국적을 입력해주세요.',
+    setValueAs: trimFormValue,
   })
   const verificationCodeField = verificationForm.register('verificationCode', {
     required: '인증코드를 입력해주세요.',
@@ -153,8 +159,16 @@ export function SignUpForm() {
         code: verificationCode,
         email,
       })
-      const { id, password, phoneNumber } = credentialsForm.getValues()
-      await signUp({ email, id, password, phoneNumber })
+      const { country, id, password, phoneNumber } = credentialsForm.getValues()
+      const payload: SignUpRequestDto = {
+        myCountry: country,
+        phoneNumber,
+        signUpDivision: 'USER',
+        userId: id,
+        userMail: email,
+        userPwd: password,
+      }
+      await signUp(payload)
       navigate({ to: paths.login, replace: true })
     } catch (error) {
       setMessage({
@@ -301,6 +315,17 @@ export function SignUpForm() {
           />
 
           <S.Input
+            {...countryField}
+            aria-label="국적"
+            type="text"
+            autoComplete="country-name"
+            placeholder="국적을 입력하세요."
+            maxLength={40}
+            disabled={isCredentialsSubmitting}
+            required
+          />
+
+          <S.Input
             {...phoneNumberField}
             aria-label="전화번호"
             type="tel"
@@ -321,7 +346,7 @@ export function SignUpForm() {
             minLength={authValidationRules.id.minLength}
             maxLength={authValidationRules.id.maxLength}
             pattern={authValidationRules.id.pattern}
-            title="아이디는 영문과 숫자만 입력해주세요."
+            title="아이디는 영문 소문자와 숫자만 입력해주세요."
             onChange={createSanitizedChangeHandler(idField, sanitizeId)}
             disabled={isCredentialsSubmitting}
             required
@@ -336,7 +361,7 @@ export function SignUpForm() {
             minLength={authValidationRules.password.minLength}
             maxLength={authValidationRules.password.maxLength}
             pattern={authValidationRules.password.pattern}
-            title={`비밀번호는 영문, 숫자, 특수문자(${authValidationRules.password.allowedSpecialCharacters})만 입력해주세요.`}
+            title="비밀번호는 영문, 숫자, 특수문자 중 2종 이상을 포함해주세요."
             onChange={createSanitizedChangeHandler(
               passwordField,
               sanitizePassword,
@@ -354,7 +379,7 @@ export function SignUpForm() {
             minLength={authValidationRules.password.minLength}
             maxLength={authValidationRules.password.maxLength}
             pattern={authValidationRules.password.pattern}
-            title={`비밀번호는 영문, 숫자, 특수문자(${authValidationRules.password.allowedSpecialCharacters})만 입력해주세요.`}
+            title="비밀번호는 영문, 숫자, 특수문자 중 2종 이상을 포함해주세요."
             onChange={createSanitizedChangeHandler(
               passwordConfirmField,
               sanitizePassword,

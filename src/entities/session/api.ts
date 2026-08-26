@@ -9,8 +9,8 @@ export type SignUpRequestDto = {
   userId: string
   userPwd: string
   userMail: string
-  signUpDivision: string
-  myCountry: string
+  signUpDivision?: string
+  myCountry?: string
 }
 
 export type RefreshRequestDto = {
@@ -66,28 +66,6 @@ export type UserEntity = {
   characterPoint?: number
 }
 
-// === Legacy Type Aliases for Backward Compatibility ===
-export type EmptySuccessResponse = {
-  ok: true
-}
-
-export type LoginResponse = TokenResponseDto
-
-export type LoginRequest = LoginRequestDto
-
-export type SendVerificationCodeRequest = EmailSendRequestDto
-
-export type VerifyCodeRequest = EmailVerifyRequestDto
-
-export type SignUpRequest = {
-  email: string
-  id: string
-  password: string
-  phoneNumber: string
-}
-
-export type ResetPasswordRequest = PasswordResetRequestDto
-
 // === API Paths ===
 const AUTH_API_PATHS = {
   email: {
@@ -140,21 +118,8 @@ export async function verifyPasswordResetCode(payload: EmailVerifyRequestDto): P
   return post<string>(AUTH_API_PATHS.password.verifyCode, payload)
 }
 
-export async function signUp(payload: SignUpRequest | SignUpRequestDto): Promise<string> {
-  // DTO 형식인 경우 그대로 전송, Legacy 형식인 경우 변환해서 전송
-  if ('userId' in payload) {
-    return post<string>(AUTH_API_PATHS.signUp, payload)
-  } else {
-    const { email, id, password } = payload
-    return post<string>(AUTH_API_PATHS.signUp, {
-      myCountry: 'KR',
-      phoneNumber: payload.phoneNumber,
-      signUpDivision: 'USER',
-      userId: id,
-      userMail: email,
-      userPwd: password,
-    } satisfies SignUpRequestDto)
-  }
+export async function signUp(payload: SignUpRequestDto): Promise<string> {
+  return post<string>(AUTH_API_PATHS.signUp, payload)
 }
 
 export async function resetPassword(payload: PasswordResetRequestDto): Promise<string> {
