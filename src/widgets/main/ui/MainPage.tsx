@@ -46,7 +46,7 @@ export function MainPage() {
 
         {!isLoading && !plan ? (
           <S.EmptyCard>
-            <strong>아직 다음 여행이 없습니다.</strong>
+            <strong>쉬는 중</strong>
             <span>여행지를 정하고 나만의 여행 계획을 시작해보세요.</span>
             <S.ActionButton type="button" onClick={() => navigate({ to: paths.travelSelect })}>여행 정보 설정</S.ActionButton>
           </S.EmptyCard>
