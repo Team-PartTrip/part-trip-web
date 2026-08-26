@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
-import { useCreatePlannerMutation, useCreateVoteMutation, useJoinPlannerMutation } from '@/entities/planner'
+import { useCreatePlannerMutation, useCreateVoteMutation, useJoinPlannerMutation, useMyPlannersQuery, usePlannerDetailQuery } from '@/entities/planner'
 import { useCountriesQuery, useDdayQuery, useTourPlacesQuery } from '@/entities/travel'
 import { figmaTripPlanning } from '@/shared/assets'
 import { paths } from '@/shared/config'
-import { useMyTrips } from '@/entities/trip-plan'
 import { Button as PartTripButton, Input as PartTripInput, Select as PartTripSelect } from '@/shared/ui/parttrip'
 import { AppShell } from '@/widgets/app-shell'
 
@@ -51,22 +50,33 @@ function Header({ step }: { step: PlannerStep }) {
 }
 
 function usePlannerData(step: PlannerStep, category?: string) {
-  const needsPlan = step !== 'list' && step !== 'create' && step !== 'group'
+  const needsPlan = step === 'destination' || step === 'explore' || step === 'vote' || step === 'lineup' || step === 'place'
   const needsPlaces = step === 'explore' || step === 'vote' || step === 'lineup' || step === 'final' || step === 'place'
+  const needsPlannerDetail = step === 'progress' || step === 'final'
+  const activePlannerId = Number(sessionStorage.getItem(ACTIVE_PLANNER_ID_KEY))
   const [overriddenPlan, setOverriddenPlan] = useState<ReturnType<typeof useDdayQuery>['data']>()
   const ddayQuery = useDdayQuery(needsPlan)
   const countriesQuery = useCountriesQuery(step === 'destination')
-  const plan = overriddenPlan ?? ddayQuery.data
+  const plannersQuery = useMyPlannersQuery(step === 'list')
+  const plannerDetailQuery = usePlannerDetailQuery(activePlannerId, needsPlannerDetail)
+  const plannerPlan = plannerDetailQuery.data ? {
+    cityName: plannerDetailQuery.data.cityName,
+    countryName: plannerDetailQuery.data.countryName,
+    endDate: plannerDetailQuery.data.endDate,
+    headcount: plannerDetailQuery.data.memberCount,
+    startDate: plannerDetailQuery.data.startDate,
+  } : undefined
+  const plan = overriddenPlan ?? plannerPlan ?? ddayQuery.data
   const placesQuery = useTourPlacesQuery(plan?.countryName, plan?.cityName, category, needsPlaces)
-  const { trips, isLoading: isTripsLoading } = useMyTrips(step === 'list')
 
   return {
     countries: countriesQuery.data ?? [],
-    isLoading: ddayQuery.isLoading || countriesQuery.isLoading || placesQuery.isLoading || isTripsLoading,
+    isLoading: ddayQuery.isLoading || countriesQuery.isLoading || placesQuery.isLoading || plannersQuery.isLoading || plannerDetailQuery.isLoading,
     places: placesQuery.data ?? [],
     plan,
+    plannerDetail: plannerDetailQuery.data,
+    planners: plannersQuery.data ?? [],
     setPlan: setOverriddenPlan,
-    trips,
   }
 }
 
@@ -86,7 +96,7 @@ function PlannerFlowPage({ step }: Props) {
   const { placeId } = useParams({ strict: false })
   const savedGroupSettings = readPlannerGroupSettings()
   const [voteCategory, setVoteCategory] = useState<(typeof plannerCategories)[number]>('명소')
-  const { countries, isLoading, places, plan, setPlan, trips } = usePlannerData(step, voteCategory)
+  const { countries, isLoading, places, plan, plannerDetail, planners, setPlan } = usePlannerData(step, voteCategory)
   const [selected, setSelected] = useState<number[]>(() => {
     try {
       const saved = sessionStorage.getItem('parttrip:planner-selected')
@@ -234,7 +244,7 @@ function PlannerFlowPage({ step }: Props) {
         {errorMessage ? <S.Error role="alert">{errorMessage}</S.Error> : null}
         {isLoading && step !== 'destination' ? <S.State aria-busy="true">플래너 정보를 불러오는 중입니다.</S.State> : null}
 
-        {step === 'list' ? <S.CardGrid>{trips.map((trip, index) => <S.TripCard key={trip.tripId ?? index} type="button" onClick={() => navigate({ to: paths.plannerProgress })}><img src={trip.images?.[0] || figmaTripPlanning} alt="" /><strong>{trip.title || '여행 계획'}</strong><span>{dateLabel(trip.startDate)} – {dateLabel(trip.endDate)}</span><small>계획 중</small></S.TripCard>)}<S.AddCard type="button" onClick={() => continueTo(paths.plannerCreate)}>+ 새 여행 만들기</S.AddCard>{!isLoading && trips.length === 0 ? <S.Empty>아직 여행 계획이 없습니다.</S.Empty> : null}</S.CardGrid> : null}
+        {step === 'list' ? <S.CardGrid>{planners.map((planner, index) => <S.TripCard key={planner.plannerId ?? index} type="button" onClick={() => { if (planner.plannerId != null) sessionStorage.setItem(ACTIVE_PLANNER_ID_KEY, String(planner.plannerId)); navigate({ to: paths.plannerProgress }) }}><img src={figmaTripPlanning} alt="" /><strong>{planner.title || '여행 계획'}</strong><span>{dateLabel(planner.startDate)} – {dateLabel(planner.endDate)}</span><small>{planner.status || '계획 중'}</small></S.TripCard>)}<S.AddCard type="button" onClick={() => continueTo(paths.plannerCreate)}>+ 새 여행 만들기</S.AddCard>{!isLoading && planners.length === 0 ? <S.Empty>아직 여행 계획이 없습니다.</S.Empty> : null}</S.CardGrid> : null}
 
         {step === 'create' ? <S.StepCard><S.StepNumber>01</S.StepNumber><h2>여행을 함께 계획해보세요.</h2><p>기존 여행 정보 설정을 재사용하거나 새로 시작할 수 있습니다.</p><S.ActionRow><PartTripButton type="button" onClick={() => continueTo(paths.plannerGroup)}>그룹 정하기</PartTripButton><PartTripButton type="button" $variant="secondary" onClick={() => continueTo(paths.travelSelect)}>여행지 설정으로 이동</PartTripButton></S.ActionRow></S.StepCard> : null}
 
@@ -248,9 +258,9 @@ function PlannerFlowPage({ step }: Props) {
 
         {step === 'lineup' ? <S.StepCard><S.StepNumber>05</S.StepNumber><h2>라인업 및 장바구니</h2>{selectedPlaces.length ? <S.SelectedList>{selectedPlaces.map(({ index, item }) => <S.CartItem key={`${item.placeName}-${index}`}><span>{item.placeName || '장소'}</span><span><S.CartChoiceButton type="button" $selected={lineupChoice === index} onClick={() => setLineupChoice(index)}>{lineupChoice === index ? '선택됨' : '직접 선택'}</S.CartChoiceButton><button type="button" onClick={() => handleRemoveFromLineup(index)}>빼기</button></span></S.CartItem>)}</S.SelectedList> : <S.Empty>선택한 장소가 없습니다. 투표 화면에서 장소를 선택하세요.</S.Empty>}{lineupChoice != null ? <S.Notice>이번 여행의 선택 장소: {places[lineupChoice]?.placeName || '장소'}</S.Notice> : null}<S.ActionRow><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.plannerVote })}>장소 더 찾기</PartTripButton><PartTripButton type="button" $variant="secondary" onClick={handleRandomLineup}>랜덤으로 정하기</PartTripButton><PartTripButton type="button" onClick={() => navigate({ to: paths.plannerFinal })}>최종 계획 확인</PartTripButton></S.ActionRow></S.StepCard> : null}
 
-        {step === 'progress' ? <S.ProgressLayout><S.StepCard><S.StepNumber>진행 중</S.StepNumber><h2>{plan?.cityName || '여행 계획'} 계획</h2><p>{dateLabel(plan?.startDate)} – {dateLabel(plan?.endDate)}</p><S.ProgressTrack><S.ProgressBar $progress={plan ? 60 : 0} /></S.ProgressTrack><S.StatusPill>여행지 정보 저장 완료</S.StatusPill><S.StatusPill $warning>플래너 투표 API 미연동</S.StatusPill><S.ActionRow><PartTripButton type="button" onClick={() => navigate({ to: paths.plannerExplore })}>장소 찾기</PartTripButton><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.plannerFinal })}>최종 계획</PartTripButton></S.ActionRow></S.StepCard><S.SideSummary><h2>해야 할 일</h2><p>장소 후보를 확인하고 투표를 이어가세요.</p><button type="button" onClick={() => navigate({ to: paths.plannerVote })}>투표 화면 열기 ›</button></S.SideSummary></S.ProgressLayout> : null}
+        {step === 'progress' ? <S.ProgressLayout><S.StepCard><S.StepNumber>{plannerDetail?.status || '진행 중'}</S.StepNumber><h2>{plannerDetail?.title || plan?.cityName || '여행 계획'} 계획</h2><p>{dateLabel(plannerDetail?.startDate || plan?.startDate)} – {dateLabel(plannerDetail?.endDate || plan?.endDate)}</p><S.ProgressTrack><S.ProgressBar $progress={plannerDetail ? 60 : plan ? 40 : 0} /></S.ProgressTrack><S.StatusPill>여행지 정보 저장 완료</S.StatusPill><S.StatusPill>{plannerDetail ? `멤버 ${plannerDetail.joinedMemberCount ?? 0} / ${plannerDetail.memberCount ?? 0}` : '플래너 정보를 불러오는 중'}</S.StatusPill><S.ActionRow><PartTripButton type="button" onClick={() => navigate({ to: paths.plannerExplore })}>장소 찾기</PartTripButton><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.plannerFinal })}>최종 계획</PartTripButton></S.ActionRow></S.StepCard><S.SideSummary><h2>해야 할 일</h2><p>{plannerDetail?.countryName || plan?.countryName || '여행지'}의 장소 후보를 확인하고 투표를 이어가세요.</p><button type="button" onClick={() => navigate({ to: paths.plannerVote })}>투표 화면 열기 ›</button></S.SideSummary></S.ProgressLayout> : null}
 
-        {step === 'final' ? <S.ProgressLayout><S.StepCard><S.StepNumber>확정 전</S.StepNumber><h2>최종 계획 확인</h2><p>{plan ? `${plan.cityName || plan.countryName} · ${dateLabel(plan.startDate)} – ${dateLabel(plan.endDate)}` : '저장된 여행 정보가 없습니다.'}</p><S.Notice>여행 계획 저장 API가 제공되면 이 단계에서 확정 동작을 연결합니다.</S.Notice><S.ActionRow><PartTripButton type="button" onClick={() => navigate({ to: paths.plannerProgress })}>진행 상태로 돌아가기</PartTripButton><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.tripCards })}>여행 카드 보기</PartTripButton></S.ActionRow></S.StepCard><S.SideSummary><h2>선택 장소</h2><p>{places.length ? `${places.length}곳의 후보 장소` : '장소 후보 없음'}</p></S.SideSummary></S.ProgressLayout> : null}
+        {step === 'final' ? <S.ProgressLayout><S.StepCard><S.StepNumber>{plannerDetail?.status || '확정 전'}</S.StepNumber><h2>최종 계획 확인</h2><p>{plannerDetail ? `${plannerDetail.cityName || plannerDetail.countryName} · ${dateLabel(plannerDetail.startDate)} – ${dateLabel(plannerDetail.endDate)}` : plan ? `${plan.cityName || plan.countryName} · ${dateLabel(plan.startDate)} – ${dateLabel(plan.endDate)}` : '저장된 여행 정보가 없습니다.'}</p><S.Notice>현재 플래너 상태: {plannerDetail?.status || '확정 전'}</S.Notice><S.ActionRow><PartTripButton type="button" onClick={() => navigate({ to: paths.plannerProgress })}>진행 상태로 돌아가기</PartTripButton><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.tripCards })}>여행 카드 보기</PartTripButton></S.ActionRow></S.StepCard><S.SideSummary><h2>선택 장소</h2><p>{places.length ? `${places.length}곳의 후보 장소` : '장소 후보 없음'}</p></S.SideSummary></S.ProgressLayout> : null}
 
         {step === 'place' ? <S.PlaceLayout>{place ? <><S.PlaceImage src={place.imageUrl || figmaTripPlanning} alt="" /><S.StepCard><S.Badge>추천 장소</S.Badge><h2>{place.placeName}</h2><p>{place.description || '장소 설명이 없습니다.'}</p><PartTripButton type="button" onClick={() => navigate({ to: paths.plannerVote })}>투표 후보에 추가</PartTripButton></S.StepCard></> : <S.Empty>장소 정보를 찾을 수 없습니다.</S.Empty>}</S.PlaceLayout> : null}
       </S.Page>
