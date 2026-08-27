@@ -116,6 +116,12 @@ export const Main = styled.main`
   min-width: 0;
   flex: 1;
   padding: 40px;
+  background: ${({ theme }) => theme.colors.background.subtle};
+
+  & > * {
+    min-height: 822px;
+    background: ${({ theme }) => theme.colors.background.default};
+  }
 
   @media (max-width: 1100px) {
     padding: 28px;
@@ -123,5 +129,7 @@ export const Main = styled.main`
 
   @media (max-width: 767px) {
     padding: 24px 16px;
+
+    & > * { min-height: auto; }
   }
 `

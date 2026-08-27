@@ -1,24 +1,194 @@
 import styled from 'styled-components'
 
-export const Page = styled.div`width: min(100%, 1200px); margin: 0 auto;`
-export const Header = styled.header`display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; @media (max-width: 560px) { flex-direction: column; }`
-export const Title = styled.h1`margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 32px; line-height: 40px;`
-export const Subtitle = styled.p`margin: 6px 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 15px;`
-export const BackButton = styled.button`min-height: 46px; border: 1px solid ${({ theme }) => theme.colors.brand.strong}; border-radius: 12px; padding: 12px 20px; background: ${({ theme }) => theme.colors.background.default}; color: ${({ theme }) => theme.colors.brand.strong}; cursor: pointer; font-weight: 600;`
-export const State = styled.p`padding: 64px 0; color: ${({ theme }) => theme.colors.text.muted}; text-align: center;`
-export const MapCard = styled.section`position: relative; min-height: 560px; overflow: hidden; border-radius: 28px; padding: 0; background: ${({ theme }) => theme.colors.background.default}; box-shadow: ${({ theme }) => theme.shadows.subtle}; img { display: block; width: 100%; height: 560px; object-fit: contain; padding: 24px; } @media (max-width: 560px) { min-height: 360px; img { height: 360px; padding: 12px; } }`
-export const MapLegend = styled.div`position: absolute; top: 24px; left: 24px; display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 8px 12px; background: ${({ theme }) => theme.colors.background.default}; color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; box-shadow: ${({ theme }) => theme.shadows.subtle}; span { width: 10px; height: 10px; border-radius: 50%; background: ${({ theme }) => theme.colors.brand.primary}; }`
-export const MapNote = styled.p`position: absolute; right: 24px; bottom: 24px; margin: 0; border-radius: 12px; padding: 12px 16px; background: rgb(255 255 255 / 92%); color: ${({ theme }) => theme.colors.text.strong}; font-size: 13px;`
-export const MapSummary = styled.section`display: grid; gap: 16px; margin-top: 20px; grid-template-columns: repeat(3, minmax(0, 1fr)); div { display: flex; min-height: 108px; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border-radius: 20px; background: ${({ theme }) => theme.colors.background.default}; box-shadow: ${({ theme }) => theme.shadows.subtle}; } strong { color: ${({ theme }) => theme.colors.brand.strong}; font-size: 30px; } span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; } @media (max-width: 560px) { grid-template-columns: 1fr; }`
-export const MapCountrySection = styled.section`margin-top: 28px; h2 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 20px; } p { margin: 6px 0 16px; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; }`
-export const CountryGrid = styled.div`display: grid; gap: 16px; grid-template-columns: repeat(4, minmax(0, 1fr)); @media (max-width: 800px) { grid-template-columns: repeat(2, minmax(0, 1fr)); } @media (max-width: 420px) { grid-template-columns: 1fr; }`
-export const CountryCard = styled.article<{ $selected?: boolean }>`min-height: 120px; display: flex; flex-direction: column; justify-content: flex-end; border: 0; border-radius: 20px; padding: 20px; background: ${({ theme }) => theme.colors.background.default}; box-shadow: ${({ theme }) => theme.shadows.subtle}; text-align: left; cursor: ${({ as }) => as === 'button' ? 'pointer' : 'default'}; outline: ${({ $selected, theme }) => $selected ? `3px solid ${theme.colors.brand.primary}` : 'none'}; strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 18px; } span { margin-top: 6px; color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }`
-export const CountryDetail = styled.section`margin-top: 28px; border-radius: 20px; padding: 24px; background: ${({ theme }) => theme.colors.background.default}; box-shadow: ${({ theme }) => theme.shadows.subtle}; h2 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 20px; } p { margin: 6px 0 16px; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; }`
-export const CountryTripList = styled.div`display: grid; gap: 10px;`
-export const CountryTripButton = styled.button`display: flex; align-items: center; justify-content: space-between; gap: 16px; border: 1px solid ${({ theme }) => theme.colors.border.default}; border-radius: 12px; padding: 14px 16px; background: ${({ theme }) => theme.colors.background.default}; text-align: left; cursor: pointer; strong { color: ${({ theme }) => theme.colors.text.strong}; } span { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; } @media (max-width: 560px) { align-items: flex-start; flex-direction: column; gap: 6px; }`
-export const CountryBadge = styled.span`align-self: flex-start; margin: 0 0 auto !important; border-radius: 999px; padding: 5px 8px; background: ${({ theme }) => theme.colors.brand.primary}; color: ${({ theme }) => theme.colors.background.default} !important; font-size: 11px !important; font-weight: 700;`
-export const Empty = styled.p`grid-column: 1 / -1; margin: 0; padding: 64px; border-radius: 20px; background: ${({ theme }) => theme.colors.background.default}; color: ${({ theme }) => theme.colors.text.muted}; text-align: center;`
-export const AchievementGrid = styled.div`display: grid; gap: 24px; grid-template-columns: repeat(4, minmax(0, 1fr)); @media (max-width: 760px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }`
-export const Achievement = styled.article<{ $completed: boolean }>`display: flex; min-height: 180px; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border-radius: 28px; background: ${({ theme }) => theme.colors.background.default}; box-shadow: ${({ theme }) => theme.shadows.subtle}; strong { color: ${({ $completed, theme }) => ($completed ? theme.colors.brand.strong : theme.colors.text.muted)}; font-size: 28px; } span { color: ${({ theme }) => theme.colors.text.strong}; font-size: 13px; font-weight: 600; }`
-export const AchievementStatus = styled.small`color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px;`
-export const AchievementNote = styled.p`margin: 16px 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; line-height: 1.5;`
+export const Page = styled.main`
+  width: 100%;
+  min-width: 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+`
+
+export const Header = styled.header`
+  margin-bottom: 24px;
+`
+
+export const Title = styled.h1`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 32px;
+  line-height: 40px;
+`
+
+export const Subtitle = styled.p`
+  margin: 6px 0 0;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 15px;
+  line-height: 22px;
+`
+
+export const State = styled.p`
+  padding: 64px 0;
+  color: ${({ theme }) => theme.colors.text.muted};
+  text-align: center;
+`
+
+export const MapBody = styled.div`
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  @media (max-width: 860px) { grid-template-columns: 1fr; }
+`
+
+export const MapCard = styled.section`
+  position: relative;
+  min-height: 580px;
+  border-radius: 28px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.muted};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  img { display: block; width: 100%; height: 420px; margin-top: 32px; object-fit: contain; }
+  @media (max-width: 560px) { min-height: 360px; padding: 16px; img { height: 260px; } }
+`
+
+export const SectionTitle = styled.h2`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 15px;
+  line-height: 20px;
+`
+
+export const MapLegend = styled.div`
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 150px;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: ${({ theme }) => theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 11px;
+  span { width: 8px; height: 8px; border-radius: 50%; background: ${({ theme }) => theme.colors.brand.primary}; }
+`
+
+export const CountryStats = styled.aside`
+  display: flex;
+  min-height: 580px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  border-radius: 28px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  h2 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 24px; }
+  > strong { color: ${({ theme }) => theme.colors.brand.strong}; font-size: 32px; }
+  p, > span { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; line-height: 18px; }
+  button { margin-top: auto; }
+  @media (max-width: 860px) { min-height: 280px; }
+`
+
+export const Badge = styled.span`
+  border-radius: 999px;
+  padding: 5px 8px;
+  background: ${({ theme }) => theme.colors.background.muted};
+  color: ${({ theme }) => theme.colors.brand.strong};
+  font-size: 11px;
+`
+
+export const CountryRecordsLayout = styled.div`
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 360px minmax(0, 1fr);
+  @media (max-width: 860px) { grid-template-columns: 1fr; }
+`
+
+export const CountryList = styled.section`
+  min-height: 460px;
+  border-radius: 20px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+`
+
+export const CountryRow = styled.button<{ $active: boolean }>`
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 8px;
+  padding: 0 12px;
+  background: ${({ $active, theme }) => ($active ? theme.colors.background.muted : 'transparent')};
+  color: ${({ theme }) => theme.colors.text.strong};
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+`
+
+export const CountryPhotos = styled.section`
+  display: grid;
+  align-content: start;
+  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  @media (max-width: 560px) { grid-template-columns: 1fr; }
+`
+
+export const CountryPhoto = styled.button`
+  overflow: hidden;
+  min-height: 230px;
+  border: 0;
+  border-radius: 20px;
+  padding: 0 0 16px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  color: ${({ theme }) => theme.colors.text.strong};
+  cursor: pointer;
+  text-align: left;
+  img { display: block; width: 100%; height: 128px; object-fit: cover; }
+  strong, span { display: block; padding-inline: 16px; }
+  strong { padding-top: 14px; font-size: 15px; }
+  span { padding-top: 4px; color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
+`
+
+export const AchievementStats = styled.section`
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 16px;
+  @media (max-width: 760px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+`
+
+export const AchievementStat = styled.article`
+  display: flex;
+  min-height: 120px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  border-radius: 16px;
+  padding: 16px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  small, span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
+  strong { color: ${({ theme }) => theme.colors.brand.strong}; font-size: 22px; }
+`
+
+export const AchievementMap = styled.section`
+  min-height: 470px;
+  border-radius: 28px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.muted};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  img { display: block; width: 100%; height: 390px; margin-top: 24px; object-fit: contain; }
+`
+
+export const Empty = styled.div`
+  display: grid;
+  min-height: 180px;
+  place-items: center;
+  grid-column: 1 / -1;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 13px;
+  text-align: center;
+`

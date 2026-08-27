@@ -34,12 +34,14 @@ import { Route as appAuthenticatedPlannerNewIndexRouteImport } from './routes/(a
 import { Route as appAuthenticatedPlannerProgressIndexRouteImport } from './routes/(app)/_authenticated/planner/progress/index'
 import { Route as appAuthenticatedPlannerVoteIndexRouteImport } from './routes/(app)/_authenticated/planner/vote/index'
 import { Route as appAuthenticatedProfileAchievementsIndexRouteImport } from './routes/(app)/_authenticated/profile/achievements/index'
+import { Route as appAuthenticatedProfileClaimIndexRouteImport } from './routes/(app)/_authenticated/profile/claim/index'
 import { Route as appAuthenticatedProfileCountriesIndexRouteImport } from './routes/(app)/_authenticated/profile/countries/index'
 import { Route as appAuthenticatedProfileEditIndexRouteImport } from './routes/(app)/_authenticated/profile/edit/index'
 import { Route as appAuthenticatedProfileMapIndexRouteImport } from './routes/(app)/_authenticated/profile/map/index'
 import { Route as appAuthenticatedRecordRecordIdIndexRouteImport } from './routes/(app)/_authenticated/record/$recordId/index'
 import { Route as appAuthenticatedRecordCalendarIndexRouteImport } from './routes/(app)/_authenticated/record/calendar/index'
 import { Route as appAuthenticatedRecordCameraIndexRouteImport } from './routes/(app)/_authenticated/record/camera/index'
+import { Route as appAuthenticatedRecordDeleteIndexRouteImport } from './routes/(app)/_authenticated/record/delete/index'
 import { Route as appAuthenticatedRecordMapIndexRouteImport } from './routes/(app)/_authenticated/record/map/index'
 import { Route as appAuthenticatedRecordReportIndexRouteImport } from './routes/(app)/_authenticated/record/report/index'
 import { Route as appAuthenticatedRecordWriteIndexRouteImport } from './routes/(app)/_authenticated/record/write/index'
@@ -49,6 +51,7 @@ import { Route as appAuthenticatedTripCardsTripIdIndexRouteImport } from './rout
 import { Route as appAuthenticatedTripCardsDeleteIndexRouteImport } from './routes/(app)/_authenticated/trip-cards/delete/index'
 import { Route as appAuthenticatedTripCardsNewIndexRouteImport } from './routes/(app)/_authenticated/trip-cards/new/index'
 import { Route as appAuthenticatedPlannerPlacePlaceIdIndexRouteImport } from './routes/(app)/_authenticated/planner/place/$placeId/index'
+import { Route as appAuthenticatedRecordRecordIdEditIndexRouteImport } from './routes/(app)/_authenticated/record/$recordId/edit/index'
 import { Route as appAuthenticatedRecordCameraImageIdIndexRouteImport } from './routes/(app)/_authenticated/record/camera/$imageId/index'
 import { Route as appAuthenticatedRecordCameraImageIdWriteIndexRouteImport } from './routes/(app)/_authenticated/record/camera/$imageId/write/index'
 
@@ -197,6 +200,12 @@ const appAuthenticatedProfileAchievementsIndexRoute =
     path: '/profile/achievements/',
     getParentRoute: () => appAuthenticatedRouteRoute,
   } as any)
+const appAuthenticatedProfileClaimIndexRoute =
+  appAuthenticatedProfileClaimIndexRouteImport.update({
+    id: '/profile/claim/',
+    path: '/profile/claim/',
+    getParentRoute: () => appAuthenticatedRouteRoute,
+  } as any)
 const appAuthenticatedProfileCountriesIndexRoute =
   appAuthenticatedProfileCountriesIndexRouteImport.update({
     id: '/profile/countries/',
@@ -231,6 +240,12 @@ const appAuthenticatedRecordCameraIndexRoute =
   appAuthenticatedRecordCameraIndexRouteImport.update({
     id: '/record/camera/',
     path: '/record/camera/',
+    getParentRoute: () => appAuthenticatedRouteRoute,
+  } as any)
+const appAuthenticatedRecordDeleteIndexRoute =
+  appAuthenticatedRecordDeleteIndexRouteImport.update({
+    id: '/record/delete/',
+    path: '/record/delete/',
     getParentRoute: () => appAuthenticatedRouteRoute,
   } as any)
 const appAuthenticatedRecordMapIndexRoute =
@@ -287,6 +302,12 @@ const appAuthenticatedPlannerPlacePlaceIdIndexRoute =
     path: '/planner/place/$placeId/',
     getParentRoute: () => appAuthenticatedRouteRoute,
   } as any)
+const appAuthenticatedRecordRecordIdEditIndexRoute =
+  appAuthenticatedRecordRecordIdEditIndexRouteImport.update({
+    id: '/record/$recordId/edit/',
+    path: '/record/$recordId/edit/',
+    getParentRoute: () => appAuthenticatedRouteRoute,
+  } as any)
 const appAuthenticatedRecordCameraImageIdIndexRoute =
   appAuthenticatedRecordCameraImageIdIndexRouteImport.update({
     id: '/record/camera/$imageId/',
@@ -325,12 +346,14 @@ export interface FileRoutesByFullPath {
   '/planner/progress/': typeof appAuthenticatedPlannerProgressIndexRoute
   '/planner/vote/': typeof appAuthenticatedPlannerVoteIndexRoute
   '/profile/achievements/': typeof appAuthenticatedProfileAchievementsIndexRoute
+  '/profile/claim/': typeof appAuthenticatedProfileClaimIndexRoute
   '/profile/countries/': typeof appAuthenticatedProfileCountriesIndexRoute
   '/profile/edit/': typeof appAuthenticatedProfileEditIndexRoute
   '/profile/map/': typeof appAuthenticatedProfileMapIndexRoute
   '/record/$recordId/': typeof appAuthenticatedRecordRecordIdIndexRoute
   '/record/calendar/': typeof appAuthenticatedRecordCalendarIndexRoute
   '/record/camera/': typeof appAuthenticatedRecordCameraIndexRoute
+  '/record/delete/': typeof appAuthenticatedRecordDeleteIndexRoute
   '/record/map/': typeof appAuthenticatedRecordMapIndexRoute
   '/record/report/': typeof appAuthenticatedRecordReportIndexRoute
   '/record/write/': typeof appAuthenticatedRecordWriteIndexRoute
@@ -340,6 +363,7 @@ export interface FileRoutesByFullPath {
   '/trip-cards/delete/': typeof appAuthenticatedTripCardsDeleteIndexRoute
   '/trip-cards/new/': typeof appAuthenticatedTripCardsNewIndexRoute
   '/planner/place/$placeId/': typeof appAuthenticatedPlannerPlacePlaceIdIndexRoute
+  '/record/$recordId/edit/': typeof appAuthenticatedRecordRecordIdEditIndexRoute
   '/record/camera/$imageId/': typeof appAuthenticatedRecordCameraImageIdIndexRoute
   '/record/camera/$imageId/write/': typeof appAuthenticatedRecordCameraImageIdWriteIndexRoute
 }
@@ -368,12 +392,14 @@ export interface FileRoutesByTo {
   '/planner/progress': typeof appAuthenticatedPlannerProgressIndexRoute
   '/planner/vote': typeof appAuthenticatedPlannerVoteIndexRoute
   '/profile/achievements': typeof appAuthenticatedProfileAchievementsIndexRoute
+  '/profile/claim': typeof appAuthenticatedProfileClaimIndexRoute
   '/profile/countries': typeof appAuthenticatedProfileCountriesIndexRoute
   '/profile/edit': typeof appAuthenticatedProfileEditIndexRoute
   '/profile/map': typeof appAuthenticatedProfileMapIndexRoute
   '/record/$recordId': typeof appAuthenticatedRecordRecordIdIndexRoute
   '/record/calendar': typeof appAuthenticatedRecordCalendarIndexRoute
   '/record/camera': typeof appAuthenticatedRecordCameraIndexRoute
+  '/record/delete': typeof appAuthenticatedRecordDeleteIndexRoute
   '/record/map': typeof appAuthenticatedRecordMapIndexRoute
   '/record/report': typeof appAuthenticatedRecordReportIndexRoute
   '/record/write': typeof appAuthenticatedRecordWriteIndexRoute
@@ -383,6 +409,7 @@ export interface FileRoutesByTo {
   '/trip-cards/delete': typeof appAuthenticatedTripCardsDeleteIndexRoute
   '/trip-cards/new': typeof appAuthenticatedTripCardsNewIndexRoute
   '/planner/place/$placeId': typeof appAuthenticatedPlannerPlacePlaceIdIndexRoute
+  '/record/$recordId/edit': typeof appAuthenticatedRecordRecordIdEditIndexRoute
   '/record/camera/$imageId': typeof appAuthenticatedRecordCameraImageIdIndexRoute
   '/record/camera/$imageId/write': typeof appAuthenticatedRecordCameraImageIdWriteIndexRoute
 }
@@ -413,12 +440,14 @@ export interface FileRoutesById {
   '/(app)/_authenticated/planner/progress/': typeof appAuthenticatedPlannerProgressIndexRoute
   '/(app)/_authenticated/planner/vote/': typeof appAuthenticatedPlannerVoteIndexRoute
   '/(app)/_authenticated/profile/achievements/': typeof appAuthenticatedProfileAchievementsIndexRoute
+  '/(app)/_authenticated/profile/claim/': typeof appAuthenticatedProfileClaimIndexRoute
   '/(app)/_authenticated/profile/countries/': typeof appAuthenticatedProfileCountriesIndexRoute
   '/(app)/_authenticated/profile/edit/': typeof appAuthenticatedProfileEditIndexRoute
   '/(app)/_authenticated/profile/map/': typeof appAuthenticatedProfileMapIndexRoute
   '/(app)/_authenticated/record/$recordId/': typeof appAuthenticatedRecordRecordIdIndexRoute
   '/(app)/_authenticated/record/calendar/': typeof appAuthenticatedRecordCalendarIndexRoute
   '/(app)/_authenticated/record/camera/': typeof appAuthenticatedRecordCameraIndexRoute
+  '/(app)/_authenticated/record/delete/': typeof appAuthenticatedRecordDeleteIndexRoute
   '/(app)/_authenticated/record/map/': typeof appAuthenticatedRecordMapIndexRoute
   '/(app)/_authenticated/record/report/': typeof appAuthenticatedRecordReportIndexRoute
   '/(app)/_authenticated/record/write/': typeof appAuthenticatedRecordWriteIndexRoute
@@ -428,6 +457,7 @@ export interface FileRoutesById {
   '/(app)/_authenticated/trip-cards/delete/': typeof appAuthenticatedTripCardsDeleteIndexRoute
   '/(app)/_authenticated/trip-cards/new/': typeof appAuthenticatedTripCardsNewIndexRoute
   '/(app)/_authenticated/planner/place/$placeId/': typeof appAuthenticatedPlannerPlacePlaceIdIndexRoute
+  '/(app)/_authenticated/record/$recordId/edit/': typeof appAuthenticatedRecordRecordIdEditIndexRoute
   '/(app)/_authenticated/record/camera/$imageId/': typeof appAuthenticatedRecordCameraImageIdIndexRoute
   '/(app)/_authenticated/record/camera/$imageId/write/': typeof appAuthenticatedRecordCameraImageIdWriteIndexRoute
 }
@@ -458,12 +488,14 @@ export interface FileRouteTypes {
     | '/planner/progress/'
     | '/planner/vote/'
     | '/profile/achievements/'
+    | '/profile/claim/'
     | '/profile/countries/'
     | '/profile/edit/'
     | '/profile/map/'
     | '/record/$recordId/'
     | '/record/calendar/'
     | '/record/camera/'
+    | '/record/delete/'
     | '/record/map/'
     | '/record/report/'
     | '/record/write/'
@@ -473,6 +505,7 @@ export interface FileRouteTypes {
     | '/trip-cards/delete/'
     | '/trip-cards/new/'
     | '/planner/place/$placeId/'
+    | '/record/$recordId/edit/'
     | '/record/camera/$imageId/'
     | '/record/camera/$imageId/write/'
   fileRoutesByTo: FileRoutesByTo
@@ -501,12 +534,14 @@ export interface FileRouteTypes {
     | '/planner/progress'
     | '/planner/vote'
     | '/profile/achievements'
+    | '/profile/claim'
     | '/profile/countries'
     | '/profile/edit'
     | '/profile/map'
     | '/record/$recordId'
     | '/record/calendar'
     | '/record/camera'
+    | '/record/delete'
     | '/record/map'
     | '/record/report'
     | '/record/write'
@@ -516,6 +551,7 @@ export interface FileRouteTypes {
     | '/trip-cards/delete'
     | '/trip-cards/new'
     | '/planner/place/$placeId'
+    | '/record/$recordId/edit'
     | '/record/camera/$imageId'
     | '/record/camera/$imageId/write'
   id:
@@ -545,12 +581,14 @@ export interface FileRouteTypes {
     | '/(app)/_authenticated/planner/progress/'
     | '/(app)/_authenticated/planner/vote/'
     | '/(app)/_authenticated/profile/achievements/'
+    | '/(app)/_authenticated/profile/claim/'
     | '/(app)/_authenticated/profile/countries/'
     | '/(app)/_authenticated/profile/edit/'
     | '/(app)/_authenticated/profile/map/'
     | '/(app)/_authenticated/record/$recordId/'
     | '/(app)/_authenticated/record/calendar/'
     | '/(app)/_authenticated/record/camera/'
+    | '/(app)/_authenticated/record/delete/'
     | '/(app)/_authenticated/record/map/'
     | '/(app)/_authenticated/record/report/'
     | '/(app)/_authenticated/record/write/'
@@ -560,6 +598,7 @@ export interface FileRouteTypes {
     | '/(app)/_authenticated/trip-cards/delete/'
     | '/(app)/_authenticated/trip-cards/new/'
     | '/(app)/_authenticated/planner/place/$placeId/'
+    | '/(app)/_authenticated/record/$recordId/edit/'
     | '/(app)/_authenticated/record/camera/$imageId/'
     | '/(app)/_authenticated/record/camera/$imageId/write/'
   fileRoutesById: FileRoutesById
@@ -749,6 +788,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAuthenticatedProfileAchievementsIndexRouteImport
       parentRoute: typeof appAuthenticatedRouteRoute
     }
+    '/(app)/_authenticated/profile/claim/': {
+      id: '/(app)/_authenticated/profile/claim/'
+      path: '/profile/claim'
+      fullPath: '/profile/claim/'
+      preLoaderRoute: typeof appAuthenticatedProfileClaimIndexRouteImport
+      parentRoute: typeof appAuthenticatedRouteRoute
+    }
     '/(app)/_authenticated/profile/countries/': {
       id: '/(app)/_authenticated/profile/countries/'
       path: '/profile/countries'
@@ -789,6 +835,13 @@ declare module '@tanstack/react-router' {
       path: '/record/camera'
       fullPath: '/record/camera/'
       preLoaderRoute: typeof appAuthenticatedRecordCameraIndexRouteImport
+      parentRoute: typeof appAuthenticatedRouteRoute
+    }
+    '/(app)/_authenticated/record/delete/': {
+      id: '/(app)/_authenticated/record/delete/'
+      path: '/record/delete'
+      fullPath: '/record/delete/'
+      preLoaderRoute: typeof appAuthenticatedRecordDeleteIndexRouteImport
       parentRoute: typeof appAuthenticatedRouteRoute
     }
     '/(app)/_authenticated/record/map/': {
@@ -854,6 +907,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAuthenticatedPlannerPlacePlaceIdIndexRouteImport
       parentRoute: typeof appAuthenticatedRouteRoute
     }
+    '/(app)/_authenticated/record/$recordId/edit/': {
+      id: '/(app)/_authenticated/record/$recordId/edit/'
+      path: '/record/$recordId/edit'
+      fullPath: '/record/$recordId/edit/'
+      preLoaderRoute: typeof appAuthenticatedRecordRecordIdEditIndexRouteImport
+      parentRoute: typeof appAuthenticatedRouteRoute
+    }
     '/(app)/_authenticated/record/camera/$imageId/': {
       id: '/(app)/_authenticated/record/camera/$imageId/'
       path: '/record/camera/$imageId'
@@ -892,12 +952,14 @@ interface appAuthenticatedRouteRouteChildren {
   appAuthenticatedPlannerProgressIndexRoute: typeof appAuthenticatedPlannerProgressIndexRoute
   appAuthenticatedPlannerVoteIndexRoute: typeof appAuthenticatedPlannerVoteIndexRoute
   appAuthenticatedProfileAchievementsIndexRoute: typeof appAuthenticatedProfileAchievementsIndexRoute
+  appAuthenticatedProfileClaimIndexRoute: typeof appAuthenticatedProfileClaimIndexRoute
   appAuthenticatedProfileCountriesIndexRoute: typeof appAuthenticatedProfileCountriesIndexRoute
   appAuthenticatedProfileEditIndexRoute: typeof appAuthenticatedProfileEditIndexRoute
   appAuthenticatedProfileMapIndexRoute: typeof appAuthenticatedProfileMapIndexRoute
   appAuthenticatedRecordRecordIdIndexRoute: typeof appAuthenticatedRecordRecordIdIndexRoute
   appAuthenticatedRecordCalendarIndexRoute: typeof appAuthenticatedRecordCalendarIndexRoute
   appAuthenticatedRecordCameraIndexRoute: typeof appAuthenticatedRecordCameraIndexRoute
+  appAuthenticatedRecordDeleteIndexRoute: typeof appAuthenticatedRecordDeleteIndexRoute
   appAuthenticatedRecordMapIndexRoute: typeof appAuthenticatedRecordMapIndexRoute
   appAuthenticatedRecordReportIndexRoute: typeof appAuthenticatedRecordReportIndexRoute
   appAuthenticatedRecordWriteIndexRoute: typeof appAuthenticatedRecordWriteIndexRoute
@@ -907,6 +969,7 @@ interface appAuthenticatedRouteRouteChildren {
   appAuthenticatedTripCardsDeleteIndexRoute: typeof appAuthenticatedTripCardsDeleteIndexRoute
   appAuthenticatedTripCardsNewIndexRoute: typeof appAuthenticatedTripCardsNewIndexRoute
   appAuthenticatedPlannerPlacePlaceIdIndexRoute: typeof appAuthenticatedPlannerPlacePlaceIdIndexRoute
+  appAuthenticatedRecordRecordIdEditIndexRoute: typeof appAuthenticatedRecordRecordIdEditIndexRoute
   appAuthenticatedRecordCameraImageIdIndexRoute: typeof appAuthenticatedRecordCameraImageIdIndexRoute
   appAuthenticatedRecordCameraImageIdWriteIndexRoute: typeof appAuthenticatedRecordCameraImageIdWriteIndexRoute
 }
@@ -943,6 +1006,8 @@ const appAuthenticatedRouteRouteChildren: appAuthenticatedRouteRouteChildren = {
   appAuthenticatedPlannerVoteIndexRoute: appAuthenticatedPlannerVoteIndexRoute,
   appAuthenticatedProfileAchievementsIndexRoute:
     appAuthenticatedProfileAchievementsIndexRoute,
+  appAuthenticatedProfileClaimIndexRoute:
+    appAuthenticatedProfileClaimIndexRoute,
   appAuthenticatedProfileCountriesIndexRoute:
     appAuthenticatedProfileCountriesIndexRoute,
   appAuthenticatedProfileEditIndexRoute: appAuthenticatedProfileEditIndexRoute,
@@ -953,6 +1018,8 @@ const appAuthenticatedRouteRouteChildren: appAuthenticatedRouteRouteChildren = {
     appAuthenticatedRecordCalendarIndexRoute,
   appAuthenticatedRecordCameraIndexRoute:
     appAuthenticatedRecordCameraIndexRoute,
+  appAuthenticatedRecordDeleteIndexRoute:
+    appAuthenticatedRecordDeleteIndexRoute,
   appAuthenticatedRecordMapIndexRoute: appAuthenticatedRecordMapIndexRoute,
   appAuthenticatedRecordReportIndexRoute:
     appAuthenticatedRecordReportIndexRoute,
@@ -969,6 +1036,8 @@ const appAuthenticatedRouteRouteChildren: appAuthenticatedRouteRouteChildren = {
     appAuthenticatedTripCardsNewIndexRoute,
   appAuthenticatedPlannerPlacePlaceIdIndexRoute:
     appAuthenticatedPlannerPlacePlaceIdIndexRoute,
+  appAuthenticatedRecordRecordIdEditIndexRoute:
+    appAuthenticatedRecordRecordIdEditIndexRoute,
   appAuthenticatedRecordCameraImageIdIndexRoute:
     appAuthenticatedRecordCameraImageIdIndexRoute,
   appAuthenticatedRecordCameraImageIdWriteIndexRoute:

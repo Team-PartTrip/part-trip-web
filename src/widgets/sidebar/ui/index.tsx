@@ -9,6 +9,7 @@ import SidebarItem from './sidebar-item/SidebarItem'
 import * as S from './Sidebar.style'
 
 interface Props {
+  accountName?: string
   logo?: ReactNode
   menus: SidebarMenuType[]
 }
@@ -24,7 +25,7 @@ function activeHref(pathname: string, menus: SidebarMenuType[]) {
   return menus.find((item) => pathname === item.href)?.href ?? paths.main
 }
 
-export default function Sidebar({ menus }: Props) {
+export default function Sidebar({ accountName = '내 PartTrip', menus }: Props) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false)
@@ -60,7 +61,7 @@ export default function Sidebar({ menus }: Props) {
           aria-label={isLoggedIn ? '로그아웃 메뉴' : '로그인'}
         >
           <S.Avatar aria-hidden="true">MS</S.Avatar>
-          <span>{isLoggedIn ? '내 PartTrip' : '로그인'}</span>
+          <span>{isLoggedIn ? accountName : '로그인'}</span>
         </S.AccountButton>
       </S.Aside>
 

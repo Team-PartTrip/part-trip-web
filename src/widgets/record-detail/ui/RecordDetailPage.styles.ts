@@ -115,6 +115,57 @@ export const RecordDescription = styled.p`
   line-height: 22px;
 `
 
+export const CommentEditLayout = styled.div`
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  @media (max-width: 860px) { grid-template-columns: 1fr; }
+`
+
+export const CommentPhoto = styled.section`
+  display: flex;
+  min-height: 380px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  border-radius: 20px;
+  padding: 16px;
+  background: var(--pt-bg-default);
+  box-shadow: 0 2px 12px rgb(16 42 66 / 8%);
+  img { display: block; width: 100%; height: 250px; border-radius: 12px; object-fit: cover; }
+  span { color: var(--pt-text-muted); font-size: 12px; }
+  button { min-height: 36px; border: 1px solid var(--pt-brand-primary); border-radius: 10px; padding: 0 14px; background: var(--pt-bg-default); color: var(--pt-brand-primary); cursor: not-allowed; font-size: 12px; font-weight: 600; opacity: .7; }
+`
+
+export const CommentForm = styled.form`
+  display: flex;
+  min-height: 380px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  border-radius: 20px;
+  padding: 24px;
+  background: var(--pt-bg-default);
+  box-shadow: 0 2px 12px rgb(16 42 66 / 8%);
+  h2 { margin: 0; color: var(--pt-text-strong); font-size: 15px; }
+  p { margin: 0; color: var(--pt-text-muted); font-size: 12px; }
+  textarea { width: 100%; min-height: 108px; resize: vertical; border: 1px solid var(--pt-border-default); border-radius: 12px; padding: 14px; color: var(--pt-text-strong); font: inherit; }
+  button { min-height: 46px; border: 0; border-radius: 10px; padding: 0 16px; background: var(--pt-brand-primary); color: var(--pt-text-inverse); cursor: pointer; font-weight: 600; }
+  small { color: var(--pt-status-error); font-size: 12px; }
+`
+
+export const EditHistory = styled.section`
+  margin-top: 24px;
+  border-radius: 20px;
+  padding: 24px;
+  background: var(--pt-bg-default);
+  box-shadow: 0 2px 12px rgb(16 42 66 / 8%);
+  h2 { margin: 0 0 12px; color: var(--pt-text-strong); font-size: 15px; }
+  div { display: flex; justify-content: space-between; border-bottom: 1px solid var(--pt-border-subtle); padding: 8px 0; font-size: 12px; }
+  div span, p { color: var(--pt-text-muted); }
+  p { margin: 12px 0 0; font-size: 11px; }
+`
+
 export const Body = styled.section`
   display: grid;
   grid-template-columns: 0.9fr 1.1fr;

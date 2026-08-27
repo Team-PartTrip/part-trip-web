@@ -1,0 +1,11 @@
+export type PlannerStep =
+  | 'list'
+  | 'create'
+  | 'group'
+  | 'destination'
+  | 'explore'
+  | 'vote'
+  | 'lineup'
+  | 'progress'
+  | 'final'
+  | 'place'

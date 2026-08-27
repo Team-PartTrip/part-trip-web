@@ -1,12 +1,18 @@
-import { useRef, useState, type ChangeEvent } from 'react'
+import { useState } from 'react'
 import {
   useForm,
-  useWatch,
   type SubmitErrorHandler,
   type SubmitHandler,
 } from 'react-hook-form'
 import { useNavigate } from '@tanstack/react-router'
-import { googleLogin, saveAuthTokens, sendVerificationCode, signUp, verifyCode, type SignUpRequestDto } from '@/entities/session/api'
+import {
+  googleLogin,
+  saveAuthTokens,
+  sendVerificationCode,
+  signUp,
+  verifyCode,
+  type SignUpRequestDto,
+} from '@/entities/session/api'
 import { paths } from '@/shared/config'
 import {
   authValidationRules,
@@ -19,13 +25,13 @@ import {
   sanitizeId,
   sanitizePassword,
   trimFormValue,
+  verificationCodeRules,
 } from '@/shared/utils'
 import { AuthForm as S, GoogleLoginControl } from '@/shared/ui'
 
 type SignUpStep = 'credentials' | 'verification'
 
 type CredentialsFormValues = {
-  email: string
   id: string
   password: string
   passwordConfirm: string
@@ -34,6 +40,7 @@ type CredentialsFormValues = {
 }
 
 type VerificationFormValues = {
+  email: string
   verificationCode: string
 }
 
@@ -46,34 +53,27 @@ const phoneNumberPattern = /^\+?[0-9-]{9,20}$/
 
 export function SignUpForm() {
   const navigate = useNavigate()
-  const codeInputRef = useRef<HTMLInputElement | null>(null)
   const [step, setStep] = useState<SignUpStep>('credentials')
   const [message, setMessage] = useState<FormMessage | null>(null)
-  const [isCodeInputFocused, setIsCodeInputFocused] = useState(false)
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
+  const [isSendingCode, setIsSendingCode] = useState(false)
 
   const credentialsForm = useForm<CredentialsFormValues>({
     defaultValues: {
-      email: '',
+      country: '',
       id: '',
       password: '',
       passwordConfirm: '',
       phoneNumber: '',
-      country: 'KR',
     },
   })
   const verificationForm = useForm<VerificationFormValues>({
     defaultValues: {
+      email: '',
       verificationCode: '',
     },
   })
 
-  const emailField = credentialsForm.register('email', {
-    required: '이메일을 입력해주세요.',
-    setValueAs: trimFormValue,
-    validate: (value) =>
-      emailPattern.test(value) || '올바른 이메일을 입력해주세요.',
-  })
   const idField = credentialsForm.register('id', {
     required: '아이디를 입력해주세요.',
     setValueAs: (value) => sanitizeId(trimFormValue(value)),
@@ -87,67 +87,35 @@ export function SignUpForm() {
   const passwordConfirmField = credentialsForm.register('passwordConfirm', {
     required: '비밀번호 확인을 입력해주세요.',
     setValueAs: (value) => sanitizePassword(trimFormValue(value)),
-    validate: (value, values) =>
-      value === values.password || '비밀번호가 일치하지 않습니다.',
+    validate: (value, values) => value === values.password || '비밀번호가 일치하지 않습니다.',
   })
   const phoneNumberField = credentialsForm.register('phoneNumber', {
     required: '전화번호를 입력해주세요.',
     setValueAs: trimFormValue,
-    validate: (value) =>
-      phoneNumberPattern.test(value) || '전화번호는 숫자와 하이픈으로 입력해주세요.',
+    validate: (value) => phoneNumberPattern.test(value) || '전화번호는 숫자와 하이픈으로 입력해주세요.',
   })
   const countryField = credentialsForm.register('country', {
     required: '국적을 입력해주세요.',
     setValueAs: trimFormValue,
   })
-  const verificationCodeField = verificationForm.register('verificationCode', {
-    required: '인증코드를 입력해주세요.',
-    minLength: {
-      value: 6,
-      message: '인증코드는 6자리로 입력해주세요.',
-    },
-    pattern: {
-      value: /^\d{6}$/,
-      message: '인증코드는 숫자 6자리로 입력해주세요.',
-    },
+  const emailField = verificationForm.register('email', {
+    required: '이메일을 입력해주세요.',
     setValueAs: trimFormValue,
+    validate: (value) => emailPattern.test(value) || '올바른 이메일을 입력해주세요.',
   })
+  const verificationCodeField = verificationForm.register('verificationCode', verificationCodeRules)
 
-  const handleCredentialsSubmit: SubmitHandler<CredentialsFormValues> = async ({
-    email,
-    password,
-    passwordConfirm,
-  }) => {
+  const handleCredentialsSubmit: SubmitHandler<CredentialsFormValues> = ({ password, passwordConfirm }) => {
     if (password !== passwordConfirm) {
-      setMessage({
-        text: '비밀번호가 일치하지 않습니다.',
-        tone: 'error',
-      })
+      setMessage({ text: '비밀번호가 일치하지 않습니다.', tone: 'error' })
       return
     }
-
-    try {
-      await sendVerificationCode({ email })
-      setMessage({
-        text: '인증코드를 발송했습니다.',
-        tone: 'success',
-      })
-      setStep('verification')
-    } catch (error) {
-      setMessage({
-        text: getErrorMessage(error),
-        tone: 'error',
-      })
-    }
+    setMessage(null)
+    setStep('verification')
   }
 
-  const handleCredentialsInvalid: SubmitErrorHandler<CredentialsFormValues> = (
-    errors,
-  ) => {
-    setMessage({
-      text: getFirstErrorMessage(errors),
-      tone: 'error',
-    })
+  const handleCredentialsInvalid: SubmitErrorHandler<CredentialsFormValues> = (errors) => {
+    setMessage({ text: getFirstErrorMessage(errors), tone: 'error' })
   }
 
   const handleGoogleSignup = async (code: string) => {
@@ -163,16 +131,28 @@ export function SignUpForm() {
     }
   }
 
-  const handleVerificationSubmit: SubmitHandler<VerificationFormValues> = async ({
-    verificationCode,
-  }) => {
-    const email = credentialsForm.getValues('email')
+  const handleSendVerificationCode = async () => {
+    const valid = await verificationForm.trigger('email')
+    const email = trimFormValue(verificationForm.getValues('email'))
+    if (!valid || !email) {
+      setMessage({ text: verificationForm.getFieldState('email').error?.message ?? '이메일을 입력해주세요.', tone: 'error' })
+      return
+    }
 
     try {
-      await verifyCode({
-        code: verificationCode,
-        email,
-      })
+      setIsSendingCode(true)
+      await sendVerificationCode({ email })
+      setMessage({ text: '인증번호를 발송했습니다.', tone: 'success' })
+    } catch (error) {
+      setMessage({ text: getErrorMessage(error), tone: 'error' })
+    } finally {
+      setIsSendingCode(false)
+    }
+  }
+
+  const handleVerificationSubmit: SubmitHandler<VerificationFormValues> = async ({ email, verificationCode }) => {
+    try {
+      await verifyCode({ code: verificationCode, email })
       const { country, id, password, phoneNumber } = credentialsForm.getValues()
       const payload: SignUpRequestDto = {
         myCountry: country,
@@ -185,117 +165,46 @@ export function SignUpForm() {
       await signUp(payload)
       navigate({ to: paths.login, replace: true })
     } catch (error) {
-      setMessage({
-        text: getErrorMessage(error),
-        tone: 'error',
-      })
+      setMessage({ text: getErrorMessage(error), tone: 'error' })
     }
   }
 
-  const handleVerificationInvalid: SubmitErrorHandler<VerificationFormValues> = (
-    errors,
-  ) => {
-    setMessage({
-      text: getFirstErrorMessage(errors),
-      tone: 'error',
-    })
+  const handleVerificationInvalid: SubmitErrorHandler<VerificationFormValues> = (errors) => {
+    setMessage({ text: getFirstErrorMessage(errors), tone: 'error' })
   }
 
-  const isCredentialsSubmitting = credentialsForm.formState.isSubmitting
-  const isCredentialsBusy = isCredentialsSubmitting || isGoogleSubmitting
+  const isCredentialsBusy = credentialsForm.formState.isSubmitting || isGoogleSubmitting
   const isVerificationSubmitting = verificationForm.formState.isSubmitting
-  const verificationCode =
-    useWatch({
-      control: verificationForm.control,
-      name: 'verificationCode',
-    }) ?? ''
-  const verificationCodeDigits = verificationCode.padEnd(6, '').slice(0, 6)
-  const activeCodeSlotIndex = Math.min(verificationCode.length, 5)
-
-  const handleVerificationCodeChange = (
-    event: ChangeEvent<HTMLInputElement>,
-  ) => {
-    const nextCode = event.currentTarget.value.replace(/\D/g, '').slice(0, 6)
-
-    verificationForm.setValue('verificationCode', nextCode, {
-      shouldDirty: true,
-      shouldTouch: true,
-      shouldValidate: false,
-    })
-  }
-
-  const focusCodeInput = () => {
-    codeInputRef.current?.focus()
-  }
 
   if (step === 'verification') {
     return (
-      <S.Container key="sign-up-verification">
+      <S.Container>
         <S.Header>
           <S.Brand>PartTrip</S.Brand>
-          <S.Title>인증번호 입력</S.Title>
+          <S.Title>이메일 인증</S.Title>
+          <S.Subtitle>이메일로 받은 인증번호를 입력하세요.</S.Subtitle>
         </S.Header>
-
         <S.Body>
           <S.VerificationCodeForm
-            aria-label="회원가입 인증"
+            aria-label="회원가입 이메일 인증"
             method="post"
             noValidate
-            onSubmit={verificationForm.handleSubmit(
-              handleVerificationSubmit,
-              handleVerificationInvalid,
-            )}
+            onSubmit={verificationForm.handleSubmit(handleVerificationSubmit, handleVerificationInvalid)}
           >
-            <S.CodeInputGroup
-              aria-label="인증코드 입력"
-              aria-disabled={isVerificationSubmitting}
-              onClick={focusCodeInput}
-            >
-              <S.CodeHiddenInput
-                {...verificationCodeField}
-                ref={(element) => {
-                  verificationCodeField.ref(element)
-                  codeInputRef.current = element
-                }}
-                aria-label="인증코드"
-                type="text"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                maxLength={6}
-                value={verificationCode}
-                onChange={handleVerificationCodeChange}
-                onFocus={() => setIsCodeInputFocused(true)}
-                onBlur={() => setIsCodeInputFocused(false)}
-                disabled={isVerificationSubmitting}
-                required
-              />
-              {Array.from({ length: 6 }, (_, index) => (
-                <S.CodeSlot
-                  key={index}
-                  aria-hidden="true"
-                  $active={
-                    isCodeInputFocused &&
-                    verificationCode.length < 6 &&
-                    index === activeCodeSlotIndex
-                  }
-                >
-                  {verificationCodeDigits[index]}
-                </S.CodeSlot>
-              ))}
-            </S.CodeInputGroup>
-
-            {message ? (
-              <S.Message $tone={message.tone} aria-live="polite">
-                {message.text}
-              </S.Message>
-            ) : null}
-
+            <S.Field>
+              <S.Input {...emailField} aria-label="이메일 주소" type="email" autoComplete="email" placeholder="이메일 주소를 입력하세요" disabled={isVerificationSubmitting || isSendingCode} required />
+              <S.FieldHint>인증번호를 받을 이메일</S.FieldHint>
+            </S.Field>
+            <S.Field>
+              <S.Input {...verificationCodeField} aria-label="인증번호" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="인증번호를 입력하세요" disabled={isVerificationSubmitting} required />
+              <S.FieldHint>6자리 인증번호</S.FieldHint>
+            </S.Field>
+            {message ? <S.Message $tone={message.tone} aria-live="polite">{message.text}</S.Message> : null}
             <S.Actions>
-              <S.PrimaryButton type="submit" disabled={isVerificationSubmitting}>
-                {isVerificationSubmitting ? '확인 중' : '회원가입'}
-              </S.PrimaryButton>
-              <S.SecondaryButton to={paths.login}>로그인 하기</S.SecondaryButton>
+              <S.PrimaryButton type="submit" disabled={isVerificationSubmitting}>{isVerificationSubmitting ? '확인 중' : '인증 완료'}</S.PrimaryButton>
+              <S.OutlineButton type="button" disabled={isVerificationSubmitting || isSendingCode} onClick={() => void handleSendVerificationCode()}>{isSendingCode ? '발송 중' : '인증번호 다시 보내기'}</S.OutlineButton>
             </S.Actions>
+            <S.Footer>회원가입과 비밀번호 변경에 동일하게 사용됩니다.</S.Footer>
           </S.VerificationCodeForm>
         </S.Body>
       </S.Container>
@@ -303,125 +212,41 @@ export function SignUpForm() {
   }
 
   return (
-    <S.Container key="sign-up-credentials">
+    <S.Container>
       <S.Header>
         <S.Brand>PartTrip</S.Brand>
         <S.Title>회원가입</S.Title>
+        <S.Subtitle>계정 정보를 입력하고 이메일을 인증하세요.</S.Subtitle>
       </S.Header>
-
       <S.Body>
-        <S.Form
-          aria-label="회원가입"
-          method="post"
-          noValidate
-          onSubmit={credentialsForm.handleSubmit(
-            handleCredentialsSubmit,
-            handleCredentialsInvalid,
-          )}
-        >
-          <S.Input
-            {...emailField}
-            aria-label="이메일"
-            type="email"
-            autoComplete="email"
-            placeholder="이메일을 입력하세요."
-            disabled={isCredentialsBusy}
-            required
-          />
-
-          <S.Input
-            {...countryField}
-            aria-label="국적"
-            type="text"
-            autoComplete="country-name"
-            placeholder="국적을 입력하세요."
-            maxLength={40}
-            disabled={isCredentialsBusy}
-            required
-          />
-
-          <S.Input
-            {...phoneNumberField}
-            aria-label="전화번호"
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            placeholder="전화번호를 입력하세요."
-            maxLength={20}
-            disabled={isCredentialsBusy}
-            required
-          />
-
-          <S.Input
-            {...idField}
-            aria-label="아이디"
-            type="text"
-            autoComplete="username"
-            placeholder="아이디를 입력하세요."
-            minLength={authValidationRules.id.minLength}
-            maxLength={authValidationRules.id.maxLength}
-            pattern={authValidationRules.id.pattern}
-            title="아이디는 영문 소문자와 숫자만 입력해주세요."
-            onChange={createSanitizedChangeHandler(idField, sanitizeId)}
-            disabled={isCredentialsBusy}
-            required
-          />
-
-          <S.Input
-            {...passwordField}
-            aria-label="비밀번호"
-            type="password"
-            autoComplete="new-password"
-            placeholder="비밀번호를 입력하세요."
-            minLength={authValidationRules.password.minLength}
-            maxLength={authValidationRules.password.maxLength}
-            pattern={authValidationRules.password.pattern}
-            title="비밀번호는 영문, 숫자, 특수문자 중 2종 이상을 포함해주세요."
-            onChange={createSanitizedChangeHandler(
-              passwordField,
-              sanitizePassword,
-            )}
-            disabled={isCredentialsBusy}
-            required
-          />
-
-          <S.Input
-            {...passwordConfirmField}
-            aria-label="비밀번호 확인"
-            type="password"
-            autoComplete="new-password"
-            placeholder="비밀번호를 다시 입력하세요."
-            minLength={authValidationRules.password.minLength}
-            maxLength={authValidationRules.password.maxLength}
-            pattern={authValidationRules.password.pattern}
-            title="비밀번호는 영문, 숫자, 특수문자 중 2종 이상을 포함해주세요."
-            onChange={createSanitizedChangeHandler(
-              passwordConfirmField,
-              sanitizePassword,
-            )}
-            disabled={isCredentialsBusy}
-            required
-          />
-
-          {message ? (
-            <S.Message $tone={message.tone} aria-live="polite">
-              {message.text}
-            </S.Message>
-          ) : null}
-
+        <S.Form aria-label="회원가입" method="post" noValidate onSubmit={credentialsForm.handleSubmit(handleCredentialsSubmit, handleCredentialsInvalid)}>
+          <S.Field>
+            <S.Input {...idField} aria-label="아이디" type="text" autoComplete="username" placeholder="아이디" minLength={authValidationRules.id.minLength} maxLength={authValidationRules.id.maxLength} pattern={authValidationRules.id.pattern} title="아이디는 영문 소문자와 숫자만 입력해주세요." onChange={createSanitizedChangeHandler(idField, sanitizeId)} disabled={isCredentialsBusy} required />
+            <S.FieldHint>6~20자 · 영문 소문자와 숫자</S.FieldHint>
+          </S.Field>
+          <S.Field>
+            <S.Input {...passwordField} aria-label="비밀번호" type="password" autoComplete="new-password" placeholder="비밀번호" minLength={authValidationRules.password.minLength} maxLength={authValidationRules.password.maxLength} pattern={authValidationRules.password.pattern} title="비밀번호는 영문, 숫자, 특수문자 중 2종 이상을 포함해주세요." onChange={createSanitizedChangeHandler(passwordField, sanitizePassword)} disabled={isCredentialsBusy} required />
+            <S.FieldHint>8~64자 · 영문 / 숫자 / 특수문자 중 2종 이상</S.FieldHint>
+          </S.Field>
+          <S.Field>
+            <S.Input {...passwordConfirmField} aria-label="비밀번호 확인" type="password" autoComplete="new-password" placeholder="비밀번호 확인" minLength={authValidationRules.password.minLength} maxLength={authValidationRules.password.maxLength} pattern={authValidationRules.password.pattern} title="비밀번호는 영문, 숫자, 특수문자 중 2종 이상을 포함해주세요." onChange={createSanitizedChangeHandler(passwordConfirmField, sanitizePassword)} disabled={isCredentialsBusy} required />
+            <S.FieldHint aria-hidden="true">&nbsp;</S.FieldHint>
+          </S.Field>
+          <S.Field>
+            <S.Input {...phoneNumberField} aria-label="전화번호" type="tel" inputMode="tel" autoComplete="tel" placeholder="🇰🇷 +82  전화번호를 입력하세요" maxLength={20} disabled={isCredentialsBusy} required />
+            <S.FieldHint aria-hidden="true">&nbsp;</S.FieldHint>
+          </S.Field>
+          <S.Field>
+            <S.Input {...countryField} aria-label="국적" type="text" autoComplete="country-name" placeholder="국적을 입력하세요" maxLength={40} disabled={isCredentialsBusy} required />
+            <S.FieldHint aria-hidden="true">&nbsp;</S.FieldHint>
+          </S.Field>
+          {message ? <S.Message $tone={message.tone} aria-live="polite">{message.text}</S.Message> : null}
           <S.Actions>
-            <S.PrimaryButton type="submit" disabled={isCredentialsBusy}>
-              {isCredentialsBusy ? '처리 중' : '다음'}
-            </S.PrimaryButton>
+            <S.PrimaryButton type="submit" disabled={isCredentialsBusy}>{isCredentialsBusy ? '처리 중' : '다음'}</S.PrimaryButton>
             <S.Divider>또는</S.Divider>
-            <GoogleLoginControl
-              disabled={isCredentialsBusy}
-              isSubmitting={isGoogleSubmitting}
-              onError={() => setMessage({ text: 'Google 회원가입에 실패했습니다.', tone: 'error' })}
-              onLogin={handleGoogleSignup}
-            />
-            <S.SecondaryButton to={paths.login}>로그인 하기</S.SecondaryButton>
+            <GoogleLoginControl label="Google로 가입하기" disabled={isCredentialsBusy} isSubmitting={isGoogleSubmitting} onError={() => setMessage({ text: 'Google 회원가입에 실패했습니다.', tone: 'error' })} onLogin={handleGoogleSignup} />
           </S.Actions>
+          <S.Footer>이미 계정이 있나요? <S.InlineLink to={paths.login}>로그인</S.InlineLink></S.Footer>
         </S.Form>
       </S.Body>
     </S.Container>

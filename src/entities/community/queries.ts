@@ -9,10 +9,12 @@ import {
   getReviews,
   type CommentResponseDto,
 } from './api'
-import { listSharedTrips, getSharedTripComments, getSharedTripDetail } from '../trip-card/api'
+import { getSharedTripComments, getSharedTripDetail, listSharedTrips } from '../trip-card/api'
 import { communityQueryKeys } from './query-keys'
+import { parseCommunityPostId, type CommunityPostKind } from './post-id'
 
-export type CommunityPostKind = 'board' | 'review' | 'trip'
+export { parseCommunityPostId } from './post-id'
+export type { CommunityPostKind } from './post-id'
 
 export type CommunityFeedPost = {
   author: string
@@ -98,14 +100,6 @@ export async function getCommunityFeed(category: string): Promise<CommunityFeedP
   }))
 }
 
-export function parseCommunityPostId(value: string): { id: number; type: CommunityPostKind } | null {
-  const [type, id] = value.split('-')
-  if ((type === 'board' || type === 'review' || type === 'trip') && Number.isFinite(Number(id))) {
-    return { id: Number(id), type }
-  }
-  return null
-}
-
 export async function getCommunityDetail(
   type: CommunityPostKind,
   id: number,
@@ -181,7 +175,6 @@ export function useCommunityFeedQuery(category: string) {
     queryFn: () => getCommunityFeed(category),
   }))
 }
-
 export function useCommunityDetailQuery(postId: string) {
   const parsed = parseCommunityPostId(postId)
   const query = useQuery(queryOptions({

@@ -99,6 +99,7 @@ export function LoginForm() {
       <S.Header>
         <S.Brand>PartTrip</S.Brand>
         <S.Title>로그인</S.Title>
+        <S.Subtitle>아이디와 비밀번호로 로그인하세요.</S.Subtitle>
       </S.Header>
 
       <S.Body>
@@ -113,7 +114,7 @@ export function LoginForm() {
             aria-label="아이디"
             type="text"
             autoComplete="username"
-            placeholder="아이디를 입력하세요."
+            placeholder="아이디를 입력하세요"
             minLength={authValidationRules.id.minLength}
             maxLength={authValidationRules.id.maxLength}
             pattern={authValidationRules.id.pattern}
@@ -128,7 +129,7 @@ export function LoginForm() {
             aria-label="비밀번호"
             type="password"
             autoComplete="current-password"
-            placeholder="비밀번호를 입력하세요."
+            placeholder="비밀번호를 입력하세요"
             minLength={authValidationRules.password.minLength}
             maxLength={authValidationRules.password.maxLength}
             pattern={authValidationRules.password.pattern}
@@ -162,7 +163,7 @@ export function LoginForm() {
               onError={() => setMessage({ text: 'Google 로그인에 실패했습니다.', tone: 'error' })}
               onLogin={handleGoogleLogin}
             />
-            <S.SecondaryButton to={paths.signUp} $filled>
+            <S.SecondaryButton to={paths.signUp}>
               회원가입
             </S.SecondaryButton>
           </S.Actions>

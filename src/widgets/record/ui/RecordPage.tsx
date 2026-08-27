@@ -1,95 +1,41 @@
-import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import {
-  figmaRecordDotonbori,
-  figmaRecordNamba,
-  figmaRecordOsakaCastle,
-} from '@/shared/assets'
-import { paths } from '@/shared/config'
 import { useMyTrips } from '@/entities/trip-plan'
-import { Button as PartTripButton, Select as PartTripSelect, Tab as PartTripTab, Tabs as PartTripTabs } from '@/shared/ui/parttrip'
+import { figmaRecordDotonbori, figmaRecordNamba, figmaRecordOsakaCastle } from '@/shared/assets'
+import { paths } from '@/shared/config'
+import { formatDate } from '@/shared/utils'
 import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './RecordPage.styles'
 
-type RecordTab = 'timeline' | 'photos'
-
-const fallbackImages = [figmaRecordNamba, figmaRecordOsakaCastle, figmaRecordDotonbori]
+const fallbackItems = [
+  { description: '도착 후 첫 번째로 남긴 기록', image: figmaRecordNamba, name: 'Namba', time: '09:20' },
+  { description: '도시의 풍경과 함께한 오후', image: figmaRecordOsakaCastle, name: 'Osaka Castle', time: '13:40' },
+  { description: '오늘의 마지막 기록', image: figmaRecordDotonbori, name: 'Dotonbori', time: '19:10' },
+]
 
 export function RecordPage() {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState<RecordTab>('timeline')
-  const [selectedTripId, setSelectedTripId] = useState('all')
   const { hasError, isLoading, trips } = useMyTrips()
-  const errorMessage = hasError ? '여행 기록을 불러오지 못했습니다.' : ''
-  const visibleTrips = selectedTripId === 'all'
-    ? trips
-    : trips.filter((trip) => String(trip.tripId) === selectedTripId)
 
   return (
     <AppShell>
       <S.Page>
-        <S.Header>
-          <div>
-            <S.Title>여행 기록</S.Title>
-            <S.Subtitle>여행의 순간을 날짜와 장소별로 다시 만나보세요.</S.Subtitle>
-          </div>
-          <S.HeaderActions>
-            <PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.recordMap })}>지도 보기</PartTripButton>
-            <PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.recordCalendar })}>캘린더</PartTripButton>
-            <PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.recordCamera })}>사진 분석</PartTripButton>
-            <PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.recordReport })}>리포트</PartTripButton>
-            <PartTripButton type="button" onClick={() => navigate({ to: paths.recordWrite })}>기록 작성</PartTripButton>
-          </S.HeaderActions>
-        </S.Header>
-
-        <S.FilterRow>
-          <label htmlFor="record-trip-filter">여행별 기록</label>
-          <PartTripSelect id="record-trip-filter" value={selectedTripId} onChange={(event) => setSelectedTripId(event.target.value)}>
-            <option value="all">전체 여행</option>
-            {trips.filter((trip) => trip.tripId != null).map((trip) => <option key={trip.tripId} value={trip.tripId}>{trip.title || `${trip.cityName || trip.countryName || '여행'} 기록`}</option>)}
-          </PartTripSelect>
-        </S.FilterRow>
-
-        <PartTripTabs aria-label="여행 기록 보기 방식">
-          <PartTripTab type="button" role="tab" aria-selected={activeTab === 'timeline'} $active={activeTab === 'timeline'} onClick={() => setActiveTab('timeline')}>여행별 기록</PartTripTab>
-          <PartTripTab type="button" role="tab" aria-selected={activeTab === 'photos'} $active={activeTab === 'photos'} onClick={() => setActiveTab('photos')}>사진 중심 목록</PartTripTab>
-        </PartTripTabs>
-
+        <S.Header><S.Title>여행 기록 타임라인</S.Title><S.Subtitle>장소와 사진을 시간순으로 다시 만나보세요.</S.Subtitle></S.Header>
         {isLoading ? <S.State aria-busy="true">여행 기록을 불러오는 중입니다.</S.State> : null}
-        {errorMessage ? <S.State role="alert">{errorMessage}</S.State> : null}
-        {!isLoading && !errorMessage && visibleTrips.length === 0 ? (
-          <S.Empty><strong>{selectedTripId === 'all' ? '아직 여행 기록이 없습니다.' : '선택한 여행에 기록이 없습니다.'}</strong><span>첫 여행 기록을 남겨보세요.</span></S.Empty>
-        ) : null}
-
-        {!isLoading && !errorMessage && visibleTrips.length > 0 && activeTab === 'timeline' ? (
-          <S.Timeline>
-            {visibleTrips.map((trip, index) => (
-              <S.TimelineItem key={trip.tripId ?? `${trip.title}-${index}`}>
-                <S.Dot aria-hidden="true" />
-                <S.RecordCard>
-                  <img src={trip.images?.[0] || fallbackImages[index % fallbackImages.length]} alt="" />
-                  <S.RecordCopy>
-                    <small>{trip.startDate?.replaceAll('-', '.')} · {trip.cityName || trip.countryName || '여행지'}</small>
-                    <h2>{trip.title || '제목 없는 여행 기록'}</h2>
-                    <p>{trip.content || '작성된 여행 메모가 없습니다.'}</p>
-                  </S.RecordCopy>
-                  <S.ViewButton type="button" disabled={!trip.tripId} onClick={() => trip.tripId && navigate({ params: { recordId: String(trip.tripId) }, to: '/record/$recordId' })}>보기</S.ViewButton>
-                </S.RecordCard>
-              </S.TimelineItem>
-            ))}
-          </S.Timeline>
-        ) : null}
-
-        {!isLoading && !errorMessage && visibleTrips.length > 0 && activeTab === 'photos' ? (
-          <S.PhotoGrid>
-            {visibleTrips.flatMap((trip, tripIndex) => (trip.images?.length ? trip.images : [fallbackImages[tripIndex % fallbackImages.length]]).map((image, imageIndex) => (
-              <button key={`${trip.tripId ?? tripIndex}-${imageIndex}`} type="button" onClick={() => trip.tripId && navigate({ params: { recordId: String(trip.tripId) }, to: '/record/$recordId' })}>
-                <img src={image} alt={`${trip.title || '여행'} 사진 ${imageIndex + 1}`} />
-              </button>
-            )))}
-          </S.PhotoGrid>
-        ) : null}
+        {hasError ? <S.State role="alert">여행 기록을 불러오지 못했습니다.</S.State> : null}
+        {!isLoading && !hasError && trips.length === 0 ? <S.Empty><strong>아직 여행 기록이 없습니다.</strong><span>첫 여행의 순간을 남겨보세요.</span></S.Empty> : null}
+        {!isLoading && !hasError ? trips.map((trip, tripIndex) => {
+          const items = trip.images?.length
+            ? trip.images.slice(0, 3).map((image, index) => ({
+                description: trip.content || fallbackItems[index]?.description,
+                image,
+                name: trip.places?.[index]?.placeName || fallbackItems[index]?.name || '여행 기록',
+                time: fallbackItems[index]?.time || '',
+              }))
+            : fallbackItems
+          return <S.TimelineCard key={trip.tripId ?? tripIndex}><S.TimelineHeading>{formatDate(trip.startDate)} · {trip.cityName || trip.countryName || '여행지'}</S.TimelineHeading><S.TimelineItems>{items.map((item, index) => <S.TimelineItem key={`${item.name}-${index}`}><S.Dot aria-hidden="true" /><img src={item.image} alt={`${item.name} 여행 사진`} /><S.TimelineCopy><small>{item.time}</small><strong>{item.name}</strong><span>{item.description}</span></S.TimelineCopy><S.ViewButton type="button" disabled={!trip.tripId} onClick={() => trip.tripId && navigate({ params: { recordId: String(trip.tripId) }, to: '/record/$recordId' })}>기록 보기</S.ViewButton></S.TimelineItem>)}</S.TimelineItems></S.TimelineCard>
+        }) : null}
+        {!isLoading && !hasError && trips.length > 0 ? <S.FooterActions><button type="button" onClick={() => navigate({ to: paths.recordMap })}>지도 보기</button><button type="button" onClick={() => navigate({ to: paths.recordCalendar })}>캘린더</button><button type="button" onClick={() => navigate({ to: paths.recordReport })}>리포트</button><button type="button" onClick={() => navigate({ to: paths.recordDelete })}>사진 삭제</button><button type="button" onClick={() => navigate({ to: paths.recordWrite })}>기록 작성</button></S.FooterActions> : null}
       </S.Page>
     </AppShell>
   )

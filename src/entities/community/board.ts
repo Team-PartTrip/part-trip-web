@@ -1,4 +1,7 @@
 import { apiClient } from '@/shared/libs/api-client'
+import type { CommentRequestDto, CommentResponseDto } from './types'
+
+export type { CommentRequestDto, CommentResponseDto } from './types'
 
 export type BoardRequestDto = {
   title?: string
@@ -18,22 +21,6 @@ export type BoardResponseDto = {
   commentCount?: number
   createDate?: string
   updateDate?: string
-}
-
-export type CommentRequestDto = {
-  content?: string
-  parentCommentId?: number
-}
-
-export type CommentResponseDto = {
-  commentId?: number
-  targetType?: string
-  targetId?: number
-  parentCommentId?: number
-  userId?: string
-  nickName?: string
-  content?: string
-  createDate?: string
 }
 
 export type PageResponseDtoBoardResponseDto = {

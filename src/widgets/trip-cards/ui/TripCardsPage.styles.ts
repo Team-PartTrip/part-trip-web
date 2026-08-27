@@ -1,26 +1,559 @@
-import styled from 'styled-components'
+import styled from "styled-components";
 
-export const Page = styled.div`width: min(100%, 1200px); margin: 0 auto;`
-export const Header = styled.header`display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; @media (max-width: 620px) { flex-direction: column; }`
-export const Title = styled.h1`margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 32px; line-height: 40px;`
-export const Subtitle = styled.p`margin: 6px 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 15px;`
-export const ActionRow = styled.div`display: flex; flex-wrap: wrap; gap: 8px;`
-export const Notice = styled.p`margin: 0 0 16px; border-radius: 12px; padding: 12px 16px; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; line-height: 1.6;`
-export const State = styled.p`padding: 64px 0; color: ${({ theme }) => theme.colors.text.muted}; text-align: center;`
-export const CardGrid = styled.div`display: grid; gap: 24px; grid-template-columns: repeat(3, minmax(0, 1fr)); @media (max-width: 900px) { grid-template-columns: repeat(2, minmax(0, 1fr)); } @media (max-width: 560px) { grid-template-columns: 1fr; }`
-export const Card = styled.button`overflow: hidden; border: 0; border-radius: 28px; padding: 0 0 20px; background: ${({ theme }) => theme.colors.background.default}; box-shadow: ${({ theme }) => theme.shadows.subtle}; color: ${({ theme }) => theme.colors.text.strong}; cursor: pointer; text-align: left; img { display: block; width: 100%; height: 170px; object-fit: cover; } div { display: flex; flex-direction: column; gap: 6px; padding: 16px 20px 0; } strong { font-size: 18px; } span, small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }`
-export const Empty = styled.p`margin: 0; padding: 64px; border-radius: 20px; background: ${({ theme }) => theme.colors.background.default}; color: ${({ theme }) => theme.colors.text.muted}; text-align: center;`
-export const Detail = styled.section`overflow: hidden; border-radius: 28px; background: ${({ theme }) => theme.colors.background.default}; box-shadow: ${({ theme }) => theme.shadows.subtle};`
-export const DetailHero = styled.div`display: grid; grid-template-columns: 1fr 1fr; align-items: stretch; img { display: block; width: 100%; height: 320px; object-fit: cover; } div { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 12px; padding: 32px; } h2, p { margin: 0; } h2 { color: ${({ theme }) => theme.colors.text.strong}; font-size: 28px; } p { color: ${({ theme }) => theme.colors.text.muted}; } @media (max-width: 700px) { grid-template-columns: 1fr; img { height: 220px; } }`
-export const Badge = styled.span`border-radius: 999px; padding: 4px 8px; background: var(--pt-bg-info); color: ${({ theme }) => theme.colors.brand.strong}; font-size: 12px;`
-export const DetailBody = styled.div`display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 24px 32px 32px; border-top: 1px solid ${({ theme }) => theme.colors.border.subtle}; h3 { margin: 0 0 4px; color: ${({ theme }) => theme.colors.text.strong}; font-size: 18px; } p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; }`
-export const SelectList = styled.section`display: flex; flex-direction: column; gap: 8px; border-radius: 28px; padding: 24px; background: ${({ theme }) => theme.colors.background.default}; box-shadow: ${({ theme }) => theme.shadows.subtle};`
-export const SelectRow = styled.div`display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle}; padding: 16px 0; div, label { display: flex; align-items: center; gap: 12px; } label { color: ${({ theme }) => theme.colors.text.strong}; } span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; } strong { color: ${({ theme }) => theme.colors.text.strong}; } input { width: 18px; height: 18px; }`
-export const CreateTabs = styled.div`display: flex; gap: 8px; margin-bottom: 16px; button { border: 1px solid ${({ theme }) => theme.colors.border.default}; border-radius: 10px; padding: 10px 14px; background: ${({ theme }) => theme.colors.background.default}; color: ${({ theme }) => theme.colors.text.muted}; cursor: pointer; } button[aria-pressed="true"] { border-color: ${({ theme }) => theme.colors.brand.primary}; background: ${({ theme }) => theme.colors.brand.primary}; color: ${({ theme }) => theme.colors.text.inverse}; }`
-export const Composer = styled.section`display: grid; gap: 16px; border-radius: 28px; padding: 24px; background: ${({ theme }) => theme.colors.background.default}; box-shadow: ${({ theme }) => theme.shadows.subtle}; form { display: grid; gap: 14px; } label { display: grid; gap: 6px; color: ${({ theme }) => theme.colors.text.strong}; font-size: 13px; font-weight: 600; } input[type="file"] { font-weight: 400; }`
-export const Form = styled.form``
-export const DateFields = styled.div`display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); @media (max-width: 560px) { grid-template-columns: 1fr; }`
-export const PreviewGrid = styled.div`display: grid; gap: 10px; grid-template-columns: repeat(4, minmax(0, 1fr)); @media (max-width: 560px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }`
-export const PreviewImage = styled.div`overflow: hidden; border-radius: 12px; background: ${({ theme }) => theme.colors.background.muted}; img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; } small { display: block; padding: 6px; color: ${({ theme }) => theme.colors.text.muted}; font-size: 10px; }`
-export const ErrorMessage = styled.p`margin: 0; color: ${({ theme }) => theme.colors.status.error}; font-size: 13px;`
-export const GeneratedCard = styled.article`display: grid; gap: 10px; border: 1px solid ${({ theme }) => theme.colors.border.subtle}; border-radius: 20px; padding: 20px; background: ${({ theme }) => theme.colors.background.subtle}; h2, p { margin: 0; } h2 { color: ${({ theme }) => theme.colors.text.strong}; font-size: 20px; } p { color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; line-height: 1.5; }`
+export const Page = styled.main`
+  width: 100%;
+  min-width: 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+`;
+
+export const Header = styled.header`
+  margin-bottom: 24px;
+`;
+
+export const Title = styled.h1`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 32px;
+  line-height: 40px;
+`;
+
+export const Subtitle = styled.p`
+  margin: 6px 0 0;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 15px;
+  line-height: 22px;
+`;
+
+export const Notice = styled.p`
+  margin: 0 0 16px;
+  border-radius: 12px;
+  padding: 12px 16px;
+  background: ${({ theme }) => theme.colors.background.muted};
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 13px;
+  line-height: 18px;
+`;
+
+export const State = styled.p`
+  padding: 64px 0;
+  color: ${({ theme }) => theme.colors.text.muted};
+  text-align: center;
+`;
+
+export const CardGrid = styled.div`
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const Card = styled.button`
+  overflow: hidden;
+  border: 0;
+  border-radius: 20px;
+  padding: 0;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  color: ${({ theme }) => theme.colors.text.strong};
+  cursor: pointer;
+  text-align: left;
+  img {
+    display: block;
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+  }
+`;
+
+export const CardBody = styled.div`
+  display: flex;
+  min-height: 148px;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px 24px;
+  strong {
+    font-size: 18px;
+    line-height: 24px;
+  }
+  > span {
+    color: ${({ theme }) => theme.colors.text.muted};
+    font-size: 13px;
+  }
+`;
+
+export const CardStatus = styled.div<{
+  $state: "planned" | "active" | "completed";
+}>`
+  display: flex;
+  justify-content: space-between;
+  color: ${({ $state, theme }) => ($state === "completed" ? theme.colors.brand.successStrong : $state === "active" ? theme.colors.brand.primary : theme.colors.brand.strong)};
+  font-size: 12px;
+  font-weight: 600;
+`;
+
+export const ActionRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+`;
+
+export const Empty = styled.div`
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+  border-radius: 20px;
+  background: ${({ theme }) => theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.text.muted};
+  text-align: center;
+`;
+
+export const DetailLayout = styled.div`
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 360px minmax(0, 1fr);
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const DetailTrip = styled.section`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+`;
+
+export const DetailTimeline = styled.section`
+  min-height: 560px;
+  border-radius: 20px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  > button {
+    margin-top: 16px;
+  }
+`;
+
+export const DetailHeading = styled.header`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  h2 {
+    margin: 0;
+    font-size: 15px;
+  }
+  span {
+    color: ${({ theme }) => theme.colors.text.muted};
+    font-size: 11px;
+  }
+`;
+
+export const PlaceTimeline = styled.article`
+  display: grid;
+  gap: 4px;
+  margin-top: 16px;
+  border-left: 2px solid ${({ theme }) => theme.colors.brand.primary};
+  padding-left: 12px;
+  strong {
+    font-size: 13px;
+  }
+  > span {
+    color: ${({ theme }) => theme.colors.text.muted};
+    font-size: 11px;
+  }
+`;
+
+export const PhotoSlots = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  span {
+    display: grid;
+    width: 80px;
+    height: 58px;
+    place-items: center;
+    border-radius: 8px;
+    background: ${({ theme }) => theme.colors.background.muted};
+    color: ${({ theme }) => theme.colors.brand.strong};
+    font-size: 10px;
+  }
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+  }
+`;
+
+export const Badge = styled.span`
+  border-radius: 999px;
+  padding: 5px 8px;
+  background: ${({ theme }) => theme.colors.background.muted};
+  color: ${({ theme }) => theme.colors.brand.strong};
+  font-size: 11px;
+`;
+
+export const CreateTabs = styled.nav`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  button {
+    height: 36px;
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
+    border-radius: 999px;
+    padding: 0 14px;
+    background: ${({ theme }) => theme.colors.background.default};
+    color: ${({ theme }) => theme.colors.text.muted};
+    cursor: pointer;
+    font-size: 12px;
+  }
+  button[aria-pressed="true"] {
+    border-color: ${({ theme }) => theme.colors.brand.primary};
+    background: ${({ theme }) => theme.colors.brand.primary};
+    color: ${({ theme }) => theme.colors.text.inverse};
+  }
+`;
+
+export const SelectList = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: 20px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+`;
+
+export const SelectRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  padding: 12px 0;
+  &:last-child {
+    border-bottom: 0;
+  }
+  div,
+  label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  label {
+    color: ${({ theme }) => theme.colors.text.strong};
+  }
+  span {
+    color: ${({ theme }) => theme.colors.text.muted};
+    font-size: 13px;
+  }
+  strong {
+    color: ${({ theme }) => theme.colors.text.strong};
+  }
+  input {
+    width: 18px;
+    height: 18px;
+  }
+`;
+
+export const Composer = styled.section`
+  display: grid;
+  gap: 16px;
+  border-radius: 20px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  form {
+    display: grid;
+    gap: 14px;
+  }
+  label {
+    display: grid;
+    gap: 6px;
+    color: ${({ theme }) => theme.colors.text.strong};
+    font-size: 13px;
+    font-weight: 600;
+  }
+  input[type="file"] {
+    font-weight: 400;
+  }
+`;
+
+export const CreateCardLayout = styled.div`
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const CreateFormPanel = styled.section`
+  min-height: 560px;
+  border-radius: 20px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+`;
+
+export const CardPreviewPanel = styled.section`
+  min-height: 560px;
+  border-radius: 20px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+`;
+
+export const FormHeading = styled.h2`
+  margin: 0 0 16px;
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 15px;
+`;
+
+export const PreviewCard = styled.article`
+  width: 360px;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 20px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  img {
+    display: block;
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+  }
+  > div {
+    display: flex;
+    min-height: 100px;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px;
+  }
+  h2 {
+    margin: 0;
+    color: ${({ theme }) => theme.colors.text.strong};
+    font-size: 16px;
+  }
+  span {
+    color: ${({ theme }) => theme.colors.text.muted};
+    font-size: 12px;
+  }
+`;
+
+export const Form = styled.form``;
+export const DateFields = styled.div`
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const PreviewGrid = styled.div`
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  @media (max-width: 560px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+`;
+
+export const PreviewImage = styled.div`
+  overflow: hidden;
+  border-radius: 12px;
+  background: ${({ theme }) => theme.colors.background.muted};
+  img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+  small {
+    display: block;
+    padding: 6px;
+    color: ${({ theme }) => theme.colors.text.muted};
+    font-size: 10px;
+  }
+`;
+
+export const ErrorMessage = styled.p`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.status.error};
+  font-size: 13px;
+`;
+
+export const GeneratedCard = styled.article`
+  display: grid;
+  gap: 10px;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 20px;
+  padding: 20px;
+  background: ${({ theme }) => theme.colors.background.subtle};
+  h2,
+  p {
+    margin: 0;
+  }
+  h2 {
+    color: ${({ theme }) => theme.colors.text.strong};
+    font-size: 20px;
+  }
+  p {
+    color: ${({ theme }) => theme.colors.text.muted};
+    font-size: 13px;
+    line-height: 18px;
+  }
+`;
+
+export const DeleteLayout = styled.div`
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const DeleteList = styled.section`
+  min-height: 370px;
+  border-radius: 20px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  h2 {
+    margin: 24px 0 8px;
+    font-size: 15px;
+  }
+`;
+
+export const Toolbar = styled.header`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  strong {
+    font-size: 12px;
+  }
+  button {
+    border: 0;
+    background: transparent;
+    color: ${({ theme }) => theme.colors.brand.primary};
+    cursor: pointer;
+    font-size: 11px;
+  }
+`;
+
+export const DeleteRow = styled.label<{ $selected: boolean }>`
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid
+    ${({ $selected, theme }) => ($selected ? theme.colors.brand.primary : theme.colors.border.subtle)};
+  border-radius: 12px;
+  margin-top: 8px;
+  padding: 8px;
+  background: ${({ $selected, theme }) => ($selected ? theme.colors.background.muted : theme.colors.background.default)};
+  cursor: pointer;
+  input {
+    width: 18px;
+    height: 18px;
+  }
+  > span {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border-radius: 8px;
+    background: ${({ theme }) => theme.colors.background.muted};
+    color: ${({ theme }) => theme.colors.text.muted};
+    font-size: 10px;
+  }
+  > div {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 4px;
+  }
+  strong {
+    font-size: 13px;
+  }
+  small {
+    color: ${({ theme }) => theme.colors.text.muted};
+    font-size: 11px;
+  }
+`;
+
+export const DeletePanel = styled.section`
+  display: flex;
+  min-height: 370px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  border-radius: 20px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  h2 {
+    margin: 0;
+    font-size: 15px;
+  }
+  > strong {
+    font-size: 12px;
+  }
+  > span {
+    color: ${({ theme }) => theme.colors.text.muted};
+    font-size: 11px;
+    line-height: 16px;
+  }
+`;
+
+export const Warning = styled.div`
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 4px;
+  border-radius: 12px;
+  padding: 12px;
+  background: ${({ theme }) => theme.colors.background.error};
+  color: ${({ theme }) => theme.colors.status.error};
+  strong {
+    font-size: 12px;
+  }
+  span {
+    color: ${({ theme }) => theme.colors.text.muted};
+    font-size: 10px;
+  }
+`;
+
+export const DeleteActions = styled.div`
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+`;
+
+export const DeleteButton = styled.button`
+  width: 100%;
+  min-height: 46px;
+  border: 0;
+  border-radius: 10px;
+  background: ${({ theme }) => theme.colors.status.error};
+  color: ${({ theme }) => theme.colors.text.inverse};
+  cursor: pointer;
+  font-weight: 600;
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+`;

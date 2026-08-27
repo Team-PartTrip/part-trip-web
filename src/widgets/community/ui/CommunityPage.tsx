@@ -1,15 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { useCommunityFeedQuery, type CommunityFeedPost } from '@/entities/community'
 import { resolveApiAssetUrl } from '@/entities/file/api'
 import catAvatarUrl from '@/shared/assets/community-avatar-cat.png'
 import dogAvatarUrl from '@/shared/assets/community-avatar-dog.png'
-import communityDaNangUrl from '@/shared/assets/community-destination-danang.jpg'
-import communitySwissUrl from '@/shared/assets/community-destination-swiss.jpg'
-import communityTokyoUrl from '@/shared/assets/community-destination-tokyo.jpg'
 import { paths } from '@/shared/config'
 import { AppShell } from '@/widgets/app-shell'
 
+import type { CommunityFeedPost } from '../model/feed'
+import { trendingDestinations } from '../model/trending'
+import { useCommunityFeedQuery } from '../model/useCommunityFeed'
 import * as S from './CommunityPage.styles'
 
 const categories = ['자유게시판', '여행 후기', '경로/일정 공유'] as const
@@ -73,9 +72,7 @@ export function CommunityPage() {
             <S.CreateButton type="button" onClick={() => navigate({ to: paths.communityWrite })}>⊕ 게시글 작성하기</S.CreateButton>
             <S.Trending>
               <header><h2>인기 여행지</h2><button type="button">전체보기</button></header>
-              <S.Destination><img src={communityTokyoUrl} alt="도쿄" /><div><strong>도쿄, 일본</strong><span>최근 24시간 1.2k+ 언급</span></div></S.Destination>
-              <S.Destination><img src={communityDaNangUrl} alt="다낭" /><div><strong>다낭, 베트남</strong><span>인기 급상승 중 🔥</span></div></S.Destination>
-              <S.Destination><img src={communitySwissUrl} alt="인터라켄" /><div><strong>인터라켄, 스위스</strong><span>여름 휴가 추천 1위</span></div></S.Destination>
+              {trendingDestinations.map((destination) => <S.Destination key={destination.name}><img src={destination.imageUrl} alt={destination.name.split(', ')[0]} /><div><strong>{destination.name}</strong><span>{destination.description}</span></div></S.Destination>)}
             </S.Trending>
           </S.Aside>
         </S.Layout>

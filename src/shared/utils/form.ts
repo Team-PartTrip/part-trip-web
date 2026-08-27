@@ -4,6 +4,19 @@ import type { FieldErrors, FieldValues, UseFormRegisterReturn } from 'react-hook
 export const trimFormValue = (value: unknown) =>
   typeof value === 'string' ? value.trim() : ''
 
+export const verificationCodeRules = {
+  required: '인증코드를 입력해주세요.',
+  minLength: {
+    value: 6,
+    message: '인증코드는 6자리로 입력해주세요.',
+  },
+  pattern: {
+    value: /^\d{6}$/,
+    message: '인증코드는 숫자 6자리로 입력해주세요.',
+  },
+  setValueAs: trimFormValue,
+}
+
 export function getFirstErrorMessage<TFormValues extends FieldValues>(
   errors: FieldErrors<TFormValues>,
 ) {

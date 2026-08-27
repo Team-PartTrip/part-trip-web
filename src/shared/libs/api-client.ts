@@ -11,13 +11,16 @@ import { notifyAuthExpired } from './auth-expiration.ts'
 
 export { AUTH_EXPIRED_EVENT } from './auth-expiration.ts'
 
+const REQUEST_TIMEOUT_MS = 100_000
+
 export const apiClient = axios.create({
   baseURL: import.meta.env?.VITE_API_BASE_URL ?? '',
-  timeout: 100000,
+  timeout: REQUEST_TIMEOUT_MS,
   headers: {
     'Content-Type': 'application/json',
-    // 무료 ngrok 도메인이 띄우는 브라우저 경고 페이지 우회
-    'ngrok-skip-browser-warning': 'true',
+    ...(import.meta.env?.DEV
+      ? { 'ngrok-skip-browser-warning': 'true' }
+      : {}),
   },
 })
 
@@ -47,7 +50,11 @@ async function requestNewTokens(refreshToken: string) {
   if (!refreshPromise) {
     const baseURL = apiClient.defaults.baseURL ?? ''
     refreshPromise = axios
-      .post<AuthTokens>(`${baseURL}/auth/refresh`, { refreshToken })
+      .post<AuthTokens>(
+        `${baseURL}/auth/refresh`,
+        { refreshToken },
+        { timeout: REQUEST_TIMEOUT_MS },
+      )
       .then(({ data }) => {
         saveAuthTokens(data)
         return data

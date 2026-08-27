@@ -1,89 +1,34 @@
-import { useState, type FormEvent } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { useCreateBoardMutation, useCreateReviewMutation } from '@/entities/community'
-import { useCountriesQuery } from '@/entities/travel'
-import { useMyTrips } from '@/entities/trip-plan'
-import { useShareTripMutation } from '@/entities/trip-card'
-import { useUploadImageMutation } from '@/entities/file'
 import { paths } from '@/shared/config'
 import { Button as PartTripButton, Input as PartTripInput, Select as PartTripSelect, Textarea as PartTripTextarea } from '@/shared/ui/parttrip'
 import { AppShell } from '@/widgets/app-shell'
 
+import { useCommunityWriteForm } from '../model/useCommunityWriteForm'
 import * as S from './CommunityWritePage.styles'
-
-const categories = ['자유게시판', '여행 후기', '경로/일정 공유'] as const
 
 export function CommunityWritePage() {
   const navigate = useNavigate()
-  const [title, setTitle] = useState('')
-  const [destination, setDestination] = useState('')
-  const [content, setContent] = useState('')
-  const [category, setCategory] = useState<(typeof categories)[number]>('자유게시판')
-  const [file, setFile] = useState<File | null>(null)
-  const [selectedTripId, setSelectedTripId] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const { trips, hasError: hasTripsError } = useMyTrips()
-  const countriesQuery = useCountriesQuery()
-  const countries = countriesQuery.data ?? []
-  const createBoardMutation = useCreateBoardMutation()
-  const createReviewMutation = useCreateReviewMutation()
-  const shareTripMutation = useShareTripMutation()
-  const uploadImageMutation = useUploadImageMutation()
-
-  const selectedTripValue = selectedTripId || (trips[0]?.tripId != null ? String(trips[0].tripId) : '')
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (category === '경로/일정 공유' && !selectedTripValue) {
-      setErrorMessage('공유할 여행 기록을 선택해주세요.')
-      return
-    }
-    if (category !== '경로/일정 공유' && (!title.trim() || !content.trim())) {
-      setErrorMessage('제목과 내용을 모두 입력해주세요.')
-      return
-    }
-
-    try {
-      setIsSubmitting(true)
-      setErrorMessage('')
-      const images = file ? [Object.values(await uploadImageMutation.mutateAsync(file))[0]].filter(Boolean) : []
-
-      if (category === '자유게시판') {
-        const post = await createBoardMutation.mutateAsync({
-          content: destination.trim() ? `[${destination.trim()}]\n${content.trim()}` : content.trim(),
-          images,
-          title: title.trim(),
-        })
-        navigate({ params: { postId: `board-${post.boardId}` }, to: '/community/$postId', replace: true })
-        return
-      }
-
-      if (category === '여행 후기') {
-        const normalizedDestination = destination.trim().toLocaleLowerCase()
-        const country = countries.find((item) =>
-          `${item.countryName ?? ''} ${item.cityName ?? ''}`.toLocaleLowerCase().includes(normalizedDestination),
-        ) ?? countries[0]
-        const post = await createReviewMutation.mutateAsync({
-          content: content.trim(),
-          countryInfoId: country?.countryInfoId,
-          images,
-          rating: 5,
-          title: title.trim(),
-        })
-        navigate({ params: { postId: `review-${post.reviewId}` }, to: '/community/$postId', replace: true })
-        return
-      }
-
-      const post = await shareTripMutation.mutateAsync({ tripId: Number(selectedTripValue) })
-      navigate({ params: { postId: `trip-${post.tripId}` }, to: '/community/$postId', replace: true })
-    } catch {
-      setErrorMessage('게시글을 등록하지 못했습니다. 다시 시도해주세요.')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+  const {
+    categories,
+    category,
+    content,
+    destination,
+    errorMessage,
+    file,
+    hasCountriesError,
+    hasTripsError,
+    handleSubmit,
+    isSubmitting,
+    selectedTripValue,
+    setCategory,
+    setContent,
+    setDestination,
+    setFile,
+    setSelectedTripId,
+    setTitle,
+    title,
+    trips,
+  } = useCommunityWriteForm()
 
   return (
     <AppShell>
@@ -113,7 +58,7 @@ export function CommunityWritePage() {
               </S.UploadArea>
             </>
           )}
-          {errorMessage || hasTripsError || countriesQuery.isError ? <S.ErrorMessage role="alert">{errorMessage || '작성에 필요한 정보를 불러오지 못했습니다.'}</S.ErrorMessage> : null}
+          {errorMessage || hasTripsError || hasCountriesError ? <S.ErrorMessage role="alert">{errorMessage || '작성에 필요한 정보를 불러오지 못했습니다.'}</S.ErrorMessage> : null}
           <S.Actions><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.community })}>취소</PartTripButton><PartTripButton type="submit" disabled={isSubmitting}>{isSubmitting ? '등록 중' : '게시글 등록'}</PartTripButton></S.Actions>
         </S.Form>
       </S.Content>

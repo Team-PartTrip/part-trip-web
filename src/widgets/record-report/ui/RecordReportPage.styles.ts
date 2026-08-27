@@ -1,17 +1,80 @@
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 
-export const Page = styled.main`width: min(100%, 1000px); margin: 0 auto;`
-export const Header = styled.header`display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; @media (max-width: 600px) { flex-direction: column; }`
-export const Title = styled.h1`margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 32px; line-height: 40px;`
-export const Subtitle = styled.p`margin: 6px 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 15px;`
-export const Actions = styled.div`display: flex; flex-wrap: wrap; gap: 8px;`
-export const Controls = styled.section`display: flex; align-items: center; gap: 12px; margin-bottom: 20px; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; select { min-width: 260px; } @media (max-width: 600px) { align-items: stretch; flex-direction: column; select { width: 100%; } }`
-export const FormatTabs = styled.div`display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;`
-export const FormatTab = styled.button<{ $active: boolean }>`border: 1px solid ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.border.default)}; border-radius: 999px; padding: 8px 14px; background: ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.background.default)}; color: ${({ $active, theme }) => ($active ? theme.colors.text.inverse : theme.colors.text.muted)}; cursor: pointer; font-size: 12px;`
-export const FormatHint = styled.p`margin: 0 0 16px; color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px;`
-export const Empty = styled.div`display: grid; min-height: 300px; place-items: center; border-radius: 24px; background: ${({ theme }) => theme.colors.background.default}; color: ${({ theme }) => theme.colors.text.muted}; text-align: center; box-shadow: ${({ theme }) => theme.shadows.subtle};`
-export const Report = styled.article<{ $format: 'pdf' | 'card' | 'school' }>`display: grid; gap: 24px; border-radius: 28px; padding: 32px; background: ${({ theme }) => theme.colors.background.default}; box-shadow: ${({ theme }) => theme.shadows.subtle}; ${({ $format }) => $format === 'card' ? css`max-width: 620px; margin: 0 auto; & > section { border-radius: 18px; padding: 20px; background: var(--pt-bg-subtle); }` : ''} ${({ $format }) => $format === 'school' ? css`font-family: Georgia, 'Noto Serif KR', serif; & > header { text-align: center; }` : ''} @media print { box-shadow: none; padding: 0; }`
-export const Hero = styled.header`display: grid; gap: 8px; border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle}; padding-bottom: 24px; h2, p { margin: 0; } h2 { color: ${({ theme }) => theme.colors.text.strong}; font-size: 28px; } p { color: ${({ theme }) => theme.colors.text.muted}; }`
-export const Section = styled.section`display: grid; gap: 10px; h3 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 18px; } p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; line-height: 1.6; }`
-export const PhotoGrid = styled.div`display: grid; gap: 12px; grid-template-columns: repeat(4, minmax(0, 1fr)); img { display: block; width: 100%; aspect-ratio: 1; border-radius: 14px; object-fit: cover; } @media (max-width: 600px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }`
-export const PlaceList = styled.ol`display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; li { border-left: 3px solid ${({ theme }) => theme.colors.brand.primary}; padding: 10px 12px; background: ${({ theme }) => theme.colors.background.subtle}; color: ${({ theme }) => theme.colors.text.muted}; } strong { color: ${({ theme }) => theme.colors.text.strong}; }`
+export const Page = styled.main`
+  width: 100%;
+  min-width: 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+`
+
+export const Header = styled.header`
+  margin-bottom: 24px;
+`
+
+export const Title = styled.h1`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 32px;
+  line-height: 40px;
+`
+
+export const Subtitle = styled.p`
+  margin: 6px 0 0;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 15px;
+  line-height: 22px;
+`
+
+export const Empty = styled.div`
+  display: flex;
+  min-height: 240px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: 20px;
+  background: ${({ theme }) => theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.text.muted};
+  text-align: center;
+  strong { color: ${({ theme }) => theme.colors.text.strong}; }
+  button { min-height: 36px; border: 1px solid ${({ theme }) => theme.colors.brand.strong}; border-radius: 10px; padding: 0 14px; background: ${({ theme }) => theme.colors.background.default}; color: ${({ theme }) => theme.colors.brand.strong}; cursor: pointer; font-size: 12px; font-weight: 600; }
+`
+
+export const ReportStats = styled.section`
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 24px;
+`
+
+export const Stat = styled.article`
+  display: flex;
+  min-height: 140px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 20px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  small, span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
+  strong { color: ${({ theme }) => theme.colors.brand.strong}; font-size: 28px; line-height: 32px; }
+`
+
+export const ReportPhotos = styled.section`
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  @media (max-width: 760px) { grid-template-columns: 1fr; }
+`
+
+export const ReportPhoto = styled.article`
+  overflow: hidden;
+  min-height: 340px;
+  border-radius: 20px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  img { display: block; width: 100%; height: 188px; object-fit: cover; }
+  strong, span { display: block; padding-inline: 24px; }
+  strong { padding-top: 18px; color: ${({ theme }) => theme.colors.text.strong}; font-size: 15px; }
+  span { padding-top: 4px; color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
+`

@@ -28,7 +28,7 @@ export const Header = styled.header`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
 `
 
 export const Brand = styled.span`
@@ -47,6 +47,14 @@ export const Title = styled.h1`
   text-align: center;
 `
 
+export const Subtitle = styled.p`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 15px;
+  line-height: 22px;
+  text-align: center;
+`
+
 export const Body = styled.div`
   display: flex;
   width: min(100%, 400px);
@@ -58,6 +66,19 @@ export const Form = styled.form<{ $spacious?: boolean }>`
   width: 100%;
   flex-direction: column;
   gap: ${({ $spacious }) => ($spacious ? '20px' : '14px')};
+`
+
+export const Field = styled.div`
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 6px;
+`
+
+export const FieldHint = styled.small`
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 12px;
+  line-height: 16px;
 `
 
 export const VerificationCodeForm = styled.form`
@@ -187,6 +208,19 @@ export const HintRow = styled.div`
 export const InlineLink = styled(Link)`
   color: ${({ theme }) => theme.colors.brand.primary};
   text-decoration: none;
+`
+
+export const Footer = styled.p`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 12px;
+  line-height: 16px;
+  text-align: center;
+
+  a {
+    color: ${({ theme }) => theme.colors.brand.primary};
+    text-decoration: none;
+  }
 `
 
 export const Message = styled.p<{ $tone?: 'error' | 'success' }>`

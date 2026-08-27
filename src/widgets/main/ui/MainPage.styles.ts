@@ -2,7 +2,9 @@ import styled from 'styled-components'
 
 export const Page = styled.div`
   width: min(100%, 1200px);
+  min-height: 840px;
   margin: 0 auto;
+  background: ${({ theme }) => theme.colors.background.default};
 `
 
 export const Header = styled.header`
@@ -164,6 +166,8 @@ export const InfoCard = styled.section`
   border-radius: 20px;
   padding: 20px 24px;
   background: ${({ theme }) => theme.colors.background.default};
+
+  ${LowerGrid} &:first-child { min-height: 147px; }
 `
 
 export const CardTitle = styled.h2`
@@ -242,13 +246,17 @@ export const RecommendationGrid = styled.div`
 
 export const Recommendation = styled.article`
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: 20px;
   background: ${({ theme }) => theme.colors.background.default};
 
-  img { display: block; width: 100%; height: 92px; object-fit: cover; }
   span, small { display: block; padding-inline: 20px; }
   span { padding-top: 14px; color: ${({ theme }) => theme.colors.text.strong}; font-size: 14px; font-weight: 600; }
   small { padding-top: 2px; padding-bottom: 14px; color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
+`
+
+export const RecommendationImage = styled.div<{ $imageUrl?: string }>`
+  height: 92px;
+  background: ${({ $imageUrl }) => ($imageUrl ? `url(${JSON.stringify($imageUrl)}) center / cover` : '#dee5f0')};
 `
 
 export const RecommendationEmpty = styled.p`
@@ -256,29 +264,4 @@ export const RecommendationEmpty = styled.p`
   margin: 0;
   color: ${({ theme }) => theme.colors.text.muted};
   font-size: 14px;
-`
-
-export const InsightGrid = styled.section`
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  margin-top: 32px;
-
-  @media (max-width: 1000px) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  @media (max-width: 640px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-`
-
-export const InsightCard = styled.article`
-  display: flex;
-  min-height: 120px;
-  flex-direction: column;
-  gap: 6px;
-  border-radius: 16px;
-  padding: 16px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-
-  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
-  strong { overflow: hidden; color: ${({ theme }) => theme.colors.text.strong}; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
-  span { overflow: hidden; color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 `

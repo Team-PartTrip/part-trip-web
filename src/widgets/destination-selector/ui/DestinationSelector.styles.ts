@@ -1,332 +1,148 @@
 import styled from 'styled-components'
 
 export const Root = styled.section`
-  display: flex;
-  flex-direction: column;
   width: 100%;
   min-width: 0;
-  min-height: 720px;
-  overflow: hidden;
-  background: transparent;
-`
-
-export const TopBar = styled.header`
-  display: flex;
-  width: 100%;
-  height: 4.375rem;
-  align-items: center;
-  gap: 3.875rem;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.soft};
-  padding-inline: 0 0;
-  background: transparent;
-
-  @media (max-width: 74.9375rem) {
-    gap: 1.5rem;
-    padding-inline: 0;
-  }
-
-  @media (max-width: 47.9375rem) {
-    height: 4rem;
-    gap: 0.75rem;
-    padding-inline: 0;
-  }
-`
-
-export const BackButton = styled.button`
-  display: inline-flex;
-  min-width: 8.0625rem;
-  align-items: center;
-  gap: 1rem;
-  border: 0;
-  padding: 0;
-  background: transparent;
   color: ${({ theme }) => theme.colors.text.strong};
-  cursor: pointer;
-  font: inherit;
-
-  > svg {
-    width: 0.7359375rem;
-    height: 1.25rem;
-    flex: 0 0 auto;
-  }
-
-  span {
-    font-size: 1.375rem;
-    font-weight: 700;
-    letter-spacing: -0.06875rem;
-    white-space: nowrap;
-  }
-
-  @media (max-width: 47.9375rem) {
-    min-width: auto;
-    gap: 0.25rem;
-
-    span {
-      font-size: 0.9375rem;
-    }
-  }
 `
 
-export const SearchLabel = styled.label`
-  display: flex;
-  width: min(57.6875rem, 100%);
-  height: 3rem;
-  align-items: center;
-  gap: 0.875rem;
-  border-radius: 999rem;
-  padding: 0 1rem;
-  background: var(--pt-bg-default);
-  color: var(--pt-text-muted);
+export const Header = styled.header`
+  margin-bottom: 24px;
+`
 
-  > svg {
-    width: 1.125rem;
-    height: 1.125rem;
-    flex: 0 0 auto;
-  }
+export const Title = styled.h1`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 32px;
+  line-height: 40px;
+`
 
-  input {
-    width: 100%;
-    min-width: 0;
-    border: 0;
-    outline: 0;
-    background: transparent;
-    color: var(--pt-text-strong);
-    font: inherit;
-    font-size: 0.875rem;
+export const Subtitle = styled.p`
+  margin: 6px 0 0;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 15px;
+  line-height: 22px;
+`
 
-    &::placeholder {
-      color: var(--pt-text-muted);
-    }
-  }
-
-  @media (max-width: 47.9375rem) {
-    height: 2.5rem;
-
-    input {
-      font-size: 0.75rem;
-    }
-  }
+export const Error = styled.p`
+  margin: 0 0 16px;
+  color: ${({ theme }) => theme.colors.status.error};
+  font-size: 13px;
 `
 
 export const Body = styled.div`
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  @media (max-width: 860px) { grid-template-columns: 1fr; }
+`
+
+export const FormCard = styled.section`
   display: flex;
-  min-height: 0;
-  flex: 1;
+  min-height: 486px;
   flex-direction: column;
-  width: 100%;
-  margin: 24px auto 0;
-
-  @media (max-width: 47.9375rem) {
-    width: calc(100% - 1.5rem);
-    margin-top: 0.75rem;
-  }
+  gap: 14px;
+  border-radius: 20px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
 `
 
-export const RecentSection = styled.section`
-  height: 8.9375rem;
-
-  @media (max-width: 47.9375rem) {
-    height: 5.75rem;
-  }
+export const PreviewCard = styled.section`
+  min-height: 486px;
+  border-radius: 20px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
 `
 
-export const SectionHeader = styled.div`
+export const SectionTitle = styled.h2`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 15px;
+  line-height: 20px;
+`
+
+export const Field = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  h2 {
-    margin: 0;
-    color: var(--pt-text-strong);
-    font-size: 1.25rem;
-    font-weight: 600;
-    line-height: 1.75rem;
-  }
-
-  button {
-    border: 0;
-    padding: 0;
-    background: transparent;
-    color: var(--pt-brand-primary);
-    cursor: pointer;
-    font: inherit;
-    font-size: 0.875rem;
-
-    &:disabled {
-      cursor: default;
-      opacity: 0.45;
-    }
-  }
-
-  @media (max-width: 47.9375rem) {
-    h2 { font-size: 1rem; }
-    button { font-size: 0.75rem; }
-  }
-`
-
-export const EmptyRecent = styled.p`
-  margin: 1.5rem 0 0;
-  color: var(--pt-text-muted);
-  font-size: 0.8125rem;
-`
-
-export const RecentChip = styled.div`
-  display: flex;
-  width: 10.28125rem;
-  height: 3.375rem;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-  border: 0.0625rem solid var(--pt-border-default);
-  border-radius: 0.625rem;
-  padding: 0.5rem 1rem;
-  background: var(--pt-bg-default);
-  box-shadow: 0 0.0625rem 0.125rem rgb(0 0 0 / 5%);
-
-  > span:first-child {
-    display: grid;
-    width: 2rem;
-    height: 1.5rem;
-    place-items: center;
-    border-radius: 0.25rem;
-    background: var(--pt-bg-soft);
-
-    img {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-  }
-
-  > span:nth-child(2) {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    color: var(--pt-text-strong);
-
-    strong { font-size: 0.75rem; font-weight: 500; }
-    small { font-size: 0.625rem; }
-  }
-
-  button {
-    display: grid;
-    border: 0;
-    padding: 0;
-    place-items: center;
-    background: transparent;
-    color: var(--pt-text-muted);
-    cursor: pointer;
-  }
-
-  @media (max-width: 47.9375rem) {
-    height: 2.75rem;
-    margin-top: 0.75rem;
-  }
-`
-
-export const PopularSection = styled.section`
-  display: flex;
-  min-height: 0;
-  flex: 1;
   flex-direction: column;
-  margin-top: 1.5625rem;
-
-  > h2 {
-    margin: 0 0 1.25rem;
-    color: var(--pt-text-strong);
-    font-size: 1.25rem;
-    font-weight: 600;
-    line-height: 1.75rem;
-  }
-
-  @media (max-width: 47.9375rem) {
-    margin-top: 0.5rem;
-
-    > h2 {
-      margin-bottom: 0.75rem;
-      font-size: 1rem;
-    }
-  }
+  gap: 6px;
+  label { color: ${({ theme }) => theme.colors.text.strong}; font-size: 12px; font-weight: 600; }
 `
 
 export const DestinationGrid = styled.div`
   display: grid;
-  min-height: 0;
-  overflow-y: auto;
-  padding-bottom: 1.25rem;
-  gap: 1.25rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-
-  @media (max-width: 63.9375rem) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 `
 
-export const ResultState = styled.p`
-  margin: 2rem 0;
-  color: var(--pt-text-muted);
-  text-align: center;
-`
-
-export const DestinationCard = styled.button<{ $imageUrl: string }>`
-  position: relative;
-  height: 14.5rem;
-  overflow: hidden;
-  border: 0;
-  border-radius: 2rem;
-  padding: 0;
-  background:
-    linear-gradient(0deg, rgb(0 0 0 / 80%), transparent 50%),
-    url('${({ $imageUrl }) => $imageUrl}') center / 104.35% 100% no-repeat;
-  box-shadow: 0 0.0625rem 0.125rem rgb(0 0 0 / 5%);
-  color: var(--pt-text-inverse);
+export const DestinationButton = styled.button<{ $active: boolean }>`
+  display: flex;
+  min-height: 58px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  border: 1px solid ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.border.default)};
+  border-radius: 12px;
+  padding: 0 12px;
+  background: ${({ $active, theme }) => ($active ? theme.colors.background.muted : theme.colors.background.default)};
+  color: ${({ theme }) => theme.colors.text.strong};
   cursor: pointer;
+  text-align: left;
+  strong { font-size: 13px; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
+`
 
-  &:hover:not(:disabled) {
-    transform: translateY(-0.1875rem);
-    box-shadow: 0 0.75rem 1.5rem rgb(13 31 64 / 15%);
-  }
+export const DateRange = styled.div`
+  display: grid;
+  align-items: center;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  span { color: ${({ theme }) => theme.colors.text.muted}; }
+`
 
-  &:disabled {
-    cursor: wait;
-    opacity: 0.7;
-  }
+export const MonthBar = styled.header`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 12px 0;
+  strong { font-size: 16px; }
+  span { display: flex; gap: 4px; }
+  button { width: 28px; height: 28px; border: 0; background: transparent; color: ${({ theme }) => theme.colors.brand.strong}; cursor: pointer; font-size: 18px; }
+`
 
-  > span {
-    position: absolute;
-    bottom: 1.5rem;
-    left: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+export const Weekdays = styled.div`
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 11px;
+  text-align: center;
+  span:first-child { color: ${({ theme }) => theme.colors.status.error}; }
+`
 
-    strong {
-      font-size: 1.25rem;
-      font-weight: 500;
-      line-height: 1.75rem;
-    }
+export const CalendarGrid = styled.div`
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(7, 1fr);
+`
 
-    small {
-      font-size: 0.875rem;
-      line-height: 1.25rem;
-    }
-  }
+export const CalendarCell = styled.div<{ $selected: boolean; $edge: boolean }>`
+  display: grid;
+  min-height: 44px;
+  place-items: center;
+  border-radius: 8px;
+  background: ${({ $selected, $edge, theme }) => $edge ? theme.colors.brand.primary : $selected ? theme.colors.background.muted : 'transparent'};
+  color: ${({ $edge, theme }) => $edge ? theme.colors.text.inverse : theme.colors.text.strong};
+  font-size: 11px;
+`
 
-  @media (max-width: 74.9375rem) {
-    height: clamp(9rem, 22vh, 14.5rem);
-  }
-
-  @media (max-width: 47.9375rem) {
-    height: clamp(7.5rem, 18vh, 9rem);
-    border-radius: 1.25rem;
-
-    > span {
-      bottom: 0.75rem;
-      left: 0.75rem;
-
-      strong { font-size: 0.9375rem; line-height: 1.25rem; }
-      small { font-size: 0.6875rem; line-height: 1rem; }
-    }
-  }
+export const DateSummary = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  color: ${({ theme }) => theme.colors.brand.strong};
+  font-size: 12px;
+  font-weight: 600;
 `

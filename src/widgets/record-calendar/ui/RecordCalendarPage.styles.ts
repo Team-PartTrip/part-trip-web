@@ -1,18 +1,129 @@
 import styled from 'styled-components'
 
-export const Page = styled.div`width: min(100%, 1200px); margin: 0 auto;`
-export const Header = styled.header`display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; @media (max-width: 600px) { flex-direction: column; }`
-export const Title = styled.h1`margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 32px; line-height: 40px;`
-export const Subtitle = styled.p`margin: 6px 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 15px;`
-export const BackButton = styled.button`min-height: 46px; border: 1px solid ${({ theme }) => theme.colors.brand.strong}; border-radius: 12px; padding: 12px 20px; background: ${({ theme }) => theme.colors.background.default}; color: ${({ theme }) => theme.colors.brand.strong}; cursor: pointer; font-weight: 600;`
-export const CalendarCard = styled.section`border-radius: 28px; padding: 24px; background: ${({ theme }) => theme.colors.background.default}; box-shadow: ${({ theme }) => theme.shadows.subtle};`
-export const MonthBar = styled.div`display: flex; align-items: center; justify-content: center; gap: 24px; margin-bottom: 24px; color: ${({ theme }) => theme.colors.text.strong}; button { width: 36px; height: 36px; border: 0; border-radius: 50%; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.brand.strong}; cursor: pointer; font-size: 24px; }`
-export const Weekdays = styled.div`display: grid; grid-template-columns: repeat(7, 1fr); color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; text-align: center; span { padding: 10px 0; }`
-export const Grid = styled.div`display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid ${({ theme }) => theme.colors.border.subtle}; border-left: 1px solid ${({ theme }) => theme.colors.border.subtle};`
-export const Cell = styled.div<{ $empty: boolean }>`position: relative; min-height: 100px; border-right: 1px solid ${({ theme }) => theme.colors.border.subtle}; border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle}; padding: 12px; background: ${({ $empty, theme }) => ($empty ? theme.colors.background.subtle : theme.colors.background.default)}; color: ${({ theme }) => theme.colors.text.strong}; font-size: 13px; @media (max-width: 560px) { min-height: 64px; padding: 8px; }`
-export const EventDot = styled.span`position: absolute; top: 36px; left: 50%; width: 8px; height: 8px; border-radius: 50%; background: ${({ theme }) => theme.colors.brand.primary}; transform: translateX(-50%);`
-export const Note = styled.p`margin: 16px 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; text-align: center;`
-export const EventFilters = styled.div`display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px;`
-export const EventFilter = styled.button<{ $active: boolean }>`border: 1px solid ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.border.default)}; border-radius: 999px; padding: 8px 12px; background: ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.background.default)}; color: ${({ $active, theme }) => ($active ? theme.colors.text.inverse : theme.colors.text.muted)}; cursor: pointer; font-size: 12px;`
-export const EventList = styled.div`display: grid; gap: 12px; margin-top: 16px;`
-export const EventCard = styled.article`border: 1px solid ${({ theme }) => theme.colors.border.subtle}; border-radius: 16px; padding: 16px; background: ${({ theme }) => theme.colors.background.subtle}; h3 { margin: 8px 0 6px; color: ${({ theme }) => theme.colors.text.strong}; font-size: 15px; } p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; line-height: 1.5; } small { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 11px; font-weight: 600; }`
+export const Page = styled.main`
+  width: 100%;
+  min-width: 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+`
+
+export const Header = styled.header`
+  margin-bottom: 24px;
+`
+
+export const Title = styled.h1`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 32px;
+  line-height: 40px;
+`
+
+export const Subtitle = styled.p`
+  margin: 6px 0 0;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 15px;
+  line-height: 22px;
+`
+
+export const CalendarLayout = styled.div`
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr);
+  @media (max-width: 860px) { grid-template-columns: 1fr; }
+`
+
+export const CalendarCard = styled.section`
+  min-height: 735px;
+  border-radius: 28px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+`
+
+export const MonthBar = styled.header`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  h2 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 18px; }
+  p { margin: 4px 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
+  span { display: flex; gap: 4px; }
+  button { width: 28px; height: 28px; border: 0; background: transparent; color: ${({ theme }) => theme.colors.brand.strong}; cursor: pointer; font-size: 18px; }
+`
+
+export const Weekdays = styled.div`
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 11px;
+  text-align: center;
+  span:first-child { color: ${({ theme }) => theme.colors.status.error}; }
+`
+
+export const CalendarGrid = styled.div`
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(7, 1fr);
+`
+
+export const Cell = styled.div<{ $empty: boolean; $inTrip: boolean }>`
+  position: relative;
+  min-height: 64px;
+  border-radius: 8px;
+  padding: 8px;
+  background: ${({ $empty, $inTrip, theme }) => $empty ? 'transparent' : $inTrip ? theme.colors.background.muted : theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 11px;
+  strong { font-weight: 500; }
+  &:nth-child(7n + 1) strong { color: ${({ theme }) => theme.colors.status.error}; }
+  @media (max-width: 560px) { min-height: 50px; padding: 6px; }
+`
+
+export const EventLabel = styled.span`
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  left: 6px;
+  overflow: hidden;
+  border-radius: 6px;
+  padding: 4px 2px;
+  background: ${({ theme }) => theme.colors.brand.primary};
+  color: ${({ theme }) => theme.colors.text.inverse};
+  font-size: 9px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`
+
+export const Note = styled.p`
+  margin: 16px 0 0;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 13px;
+  text-align: center;
+`
+
+export const FestivalList = styled.section`
+  min-height: 735px;
+  border-radius: 28px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  h2 { margin: 0 0 16px; color: ${({ theme }) => theme.colors.text.strong}; font-size: 15px; }
+  > button { margin-top: 24px; border: 0; background: transparent; color: ${({ theme }) => theme.colors.brand.primary}; cursor: pointer; font-size: 12px; font-weight: 600; }
+`
+
+export const FestivalRow = styled.article`
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-left: 2px solid ${({ theme }) => theme.colors.brand.primary};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  padding: 8px 0 8px 12px;
+  &:last-of-type { border-bottom: 0; }
+  div { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+  strong { overflow: hidden; color: ${({ theme }) => theme.colors.text.strong}; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+  span { overflow: hidden; color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+  small { flex: 0 0 auto; border-radius: 999px; padding: 4px 8px; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.brand.primary}; font-size: 10px; }
+`

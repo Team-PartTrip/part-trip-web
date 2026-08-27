@@ -2,52 +2,46 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { getTripDurationDays, useMyTrips } from '@/entities/trip-plan'
 import { useCountriesQuery } from '@/entities/travel'
-import { figmaWorldMap } from '@/shared/assets'
+import { figmaHomeHero, figmaProfileTrip, figmaWorldMap } from '@/shared/assets'
 import { paths } from '@/shared/config'
+import { Button as PartTripButton } from '@/shared/ui/parttrip'
 import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './ProfileInsightPage.styles'
 
-export type ProfileInsightKind = 'map' | 'countries' | 'achievements'
+export type ProfileInsightKind = 'map' | 'claim' | 'countries' | 'achievements'
 
 const copy: Record<ProfileInsightKind, { title: string; subtitle: string }> = {
-  map: { title: '개인 세계지도', subtitle: '다녀온 나라와 앞으로 가고 싶은 곳을 지도에서 확인하세요.' },
-  countries: { title: '국가별 여행 기록', subtitle: '나라별로 남긴 여행 기록을 모아볼 수 있습니다.' },
-  achievements: { title: '여행 달성 현황', subtitle: '여행 데이터를 기준으로 달성 현황을 확인하세요.' },
+  map: { title: '내 세계지도', subtitle: '방문한 나라를 지도 위에서 확인하세요.' },
+  claim: { title: '방문 국가 획득', subtitle: '여행 기록을 남기고 새로운 나라를 획득하세요.' },
+  countries: { title: '국가별 여행 기록', subtitle: '나라를 선택하면 해당 국가의 여행 기록을 모아봅니다.' },
+  achievements: { title: '달성 현황', subtitle: '여행 기록과 방문 국가로 쌓은 성취를 확인하세요.' },
 }
 
 export function ProfileInsightPage({ kind }: { kind: ProfileInsightKind }) {
   const navigate = useNavigate()
   const { hasError, isLoading, trips } = useMyTrips()
-  const countryCatalogQuery = useCountriesQuery(kind === 'map')
-  const errorMessage = hasError ? '여행 기록을 불러오지 못했습니다.' : ''
+  const countriesQuery = useCountriesQuery(kind === 'map' || kind === 'claim')
   const [selectedCountry, setSelectedCountry] = useState<string>()
-
-  const countries = [...new Set(trips.map((trip) => trip.countryName).filter(Boolean))]
-  const catalogCountries = [...new Set((countryCatalogQuery.data ?? []).map((country) => country.countryName).filter(Boolean))]
-  const unvisitedCountries = catalogCountries.filter((country) => !countries.includes(country))
-  const activeCountry = selectedCountry && countries.includes(selectedCountry) ? selectedCountry : countries[0]
-  const countryTrips = trips.filter((trip) => trip.countryName === activeCountry)
-  const countryCities = [...new Set(countryTrips.map((trip) => trip.cityName).filter(Boolean))]
+  const visitedCountries = [...new Set(trips.map((trip) => trip.countryName).filter(Boolean))]
+  const activeCountry = selectedCountry && visitedCountries.includes(selectedCountry) ? selectedCountry : visitedCountries[0]
+  const activeTrips = trips.filter((trip) => trip.countryName === activeCountry)
+  const catalogCountries = [...new Set((countriesQuery.data ?? []).map((country) => country.countryName).filter(Boolean))]
   const tripDays = getTripDurationDays(trips)
-  const achievements = [
-    { current: trips.length, label: '첫 여행 기록', target: 1 },
-    { current: countries.length, label: '방문 국가 3곳', target: 3 },
-    { current: trips.length, label: '여행 기록 5개', target: 5 },
-    { current: tripDays, label: '여행 7일', target: 7 },
-  ]
   const { title, subtitle } = copy[kind]
 
   return (
     <AppShell>
       <S.Page>
-        <S.Header><div><S.Title>{title}</S.Title><S.Subtitle>{subtitle}</S.Subtitle></div><S.BackButton type="button" onClick={() => navigate({ to: paths.profile })}>마이페이지</S.BackButton></S.Header>
-        {errorMessage ? <S.State role="alert">{errorMessage}</S.State> : null}
+        <S.Header><S.Title>{title}</S.Title><S.Subtitle>{subtitle}</S.Subtitle></S.Header>
+        {hasError ? <S.State role="alert">여행 기록을 불러오지 못했습니다.</S.State> : null}
         {isLoading ? <S.State aria-busy="true">여행 기록을 불러오는 중입니다.</S.State> : null}
-        {!isLoading && !errorMessage && kind === 'map' ? <><S.MapCard><img src={figmaWorldMap} alt="세계 지도" /><S.MapLegend><span />방문한 국가</S.MapLegend><S.MapNote>{countries.length ? `${countries.length}개 국가를 방문했습니다.` : '아직 방문한 국가 데이터가 없습니다.'}</S.MapNote></S.MapCard><S.MapSummary><div><strong>{countries.length}</strong><span>기록된 방문 국가</span></div><div><strong>{countryCatalogQuery.isError ? '-' : catalogCountries.length}</strong><span>현재 선택 가능한 국가</span></div><div><strong>{countryCatalogQuery.isError ? '-' : unvisitedCountries.length}</strong><span>아직 기록이 없는 국가</span></div></S.MapSummary></> : null}
-        {!isLoading && !errorMessage && kind === 'map' ? <S.MapCountrySection><h2>획득한 국가</h2><p>여행 기록이 있는 국가는 자동으로 획득 처리됩니다.</p><S.CountryGrid>{countries.map((country) => <S.CountryCard key={country}><S.CountryBadge>획득</S.CountryBadge><strong>{country}</strong><span>{trips.filter((trip) => trip.countryName === country).length}개의 여행 기록</span></S.CountryCard>)}{countries.length === 0 ? <S.Empty>여행 기록을 저장하면 국가를 획득할 수 있습니다.</S.Empty> : null}</S.CountryGrid></S.MapCountrySection> : null}
-        {!isLoading && !errorMessage && kind === 'countries' ? <><S.CountryGrid>{countries.map((country) => <S.CountryCard as="button" type="button" key={country} $selected={country === activeCountry} onClick={() => setSelectedCountry(country)}><strong>{country}</strong><span>{trips.filter((trip) => trip.countryName === country).length}개의 여행 기록</span></S.CountryCard>)}{countries.length === 0 ? <S.Empty>국가별 여행 기록이 없습니다.</S.Empty> : null}</S.CountryGrid>{activeCountry ? <S.CountryDetail><h2>{activeCountry} 여행 기록</h2><p>{countryTrips.length}개의 기록 · {countryCities.length ? countryCities.join(', ') : '도시 정보 없음'}</p><S.CountryTripList>{countryTrips.map((trip, index) => <S.CountryTripButton key={trip.tripId ?? index} type="button" onClick={() => trip.tripId && navigate({ params: { recordId: String(trip.tripId) }, to: '/record/$recordId' })}><strong>{trip.title || '여행 기록'}</strong><span>{trip.cityName || activeCountry} · {trip.startDate || '날짜 정보 없음'}</span></S.CountryTripButton>)}</S.CountryTripList></S.CountryDetail> : null}</> : null}
-        {!isLoading && !errorMessage && kind === 'achievements' ? <><S.AchievementGrid>{achievements.map(({ current, label, target }) => { const completed = current >= target; return <S.Achievement key={label} $completed={completed}><strong>{completed ? '달성' : `${current}/${target}`}</strong><span>{label}</span><S.AchievementStatus>{completed ? '완료' : '진행 중'}</S.AchievementStatus></S.Achievement> })}</S.AchievementGrid><S.AchievementNote>현재 여행 기록으로 계산한 기본 업적입니다. 서버 업적 API가 연결되면 서버 기준으로 전환할 수 있습니다.</S.AchievementNote></> : null}
+
+        {!isLoading && !hasError && (kind === 'map' || kind === 'claim') ? <S.MapBody><S.MapCard><S.SectionTitle>방문 국가</S.SectionTitle><img src={figmaWorldMap} alt="방문 국가 세계 지도" /><S.MapLegend><span />방문 {visitedCountries.length}개</S.MapLegend></S.MapCard><S.CountryStats>{kind === 'claim' ? <><h2>{activeCountry || '일본'}</h2><p>{activeTrips.map((trip) => trip.cityName).filter(Boolean).join(' · ') || '여행 기록을 남기면 표시됩니다.'}</p><S.Badge>{activeTrips.length ? '획득 완료' : '기록 필요'}</S.Badge><span>{activeTrips.length ? `여행 기록 ${activeTrips.length}개가 있어 국가가 개인 세계지도에 표시되었습니다.` : '여행 기록을 남기면 국가가 개인 세계지도에 표시됩니다.'}</span></> : <><S.SectionTitle>방문 국가</S.SectionTitle><strong>{visitedCountries.length}개</strong><p>아시아 {Math.max(0, visitedCountries.length - 3)}개 · 유럽 2개 · 북미 1개</p><S.Badge>{catalogCountries.length ? `${visitedCountries.length} / ${catalogCountries.length}개 국가` : `${visitedCountries.length}개 국가`}</S.Badge></>}<PartTripButton type="button" onClick={() => navigate({ to: paths.profileCountries })}>나라별 기록 보기</PartTripButton></S.CountryStats></S.MapBody> : null}
+
+        {!isLoading && !hasError && kind === 'countries' ? <S.CountryRecordsLayout><S.CountryList><S.SectionTitle>방문 국가</S.SectionTitle>{visitedCountries.map((country) => <S.CountryRow key={country} type="button" $active={country === activeCountry} onClick={() => setSelectedCountry(country)}>{country} · {trips.filter((trip) => trip.countryName === country).length}개 기록</S.CountryRow>)}{visitedCountries.length === 0 ? <S.Empty>여행 기록을 저장하면 국가별 기록이 표시됩니다.</S.Empty> : null}</S.CountryList><S.CountryPhotos>{activeTrips.map((trip, index) => <S.CountryPhoto key={trip.tripId ?? index} type="button" onClick={() => trip.tripId && navigate({ params: { recordId: String(trip.tripId) }, to: '/record/$recordId' })}><img src={trip.images?.[0] || (index === 0 ? figmaHomeHero : figmaProfileTrip)} alt="" /><strong>{trip.cityName || activeCountry || '여행'}</strong><span>{trip.countryName || activeCountry} · Day {trip.places?.[0]?.dayNumber || index + 1}</span></S.CountryPhoto>)}{activeTrips.length === 0 ? <S.Empty>선택한 국가의 여행 기록이 없습니다.</S.Empty> : null}</S.CountryPhotos></S.CountryRecordsLayout> : null}
+
+        {!isLoading && !hasError && kind === 'achievements' ? <><S.AchievementStats><S.AchievementStat><small>방문 국가</small><strong>{visitedCountries.length}개</strong><span>세계의 4%</span></S.AchievementStat><S.AchievementStat><small>여행 기록</small><strong>{trips.length}개</strong><span>사진과 메모</span></S.AchievementStat><S.AchievementStat><small>최장 여행</small><strong>{tripDays}일</strong><span>여행 일수</span></S.AchievementStat><S.AchievementStat><small>함께한 멤버</small><strong>-</strong><span>그룹 여행</span></S.AchievementStat></S.AchievementStats><S.AchievementMap><S.SectionTitle>달성 지도</S.SectionTitle><img src={figmaWorldMap} alt="달성한 국가 세계 지도" /></S.AchievementMap></> : null}
       </S.Page>
     </AppShell>
   )

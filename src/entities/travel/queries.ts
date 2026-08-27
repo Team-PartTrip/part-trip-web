@@ -96,7 +96,7 @@ export async function getDestinationData(): Promise<DestinationQueryData> {
   const [countries, popularPlaces, currentPlan] = await Promise.all([
     getCountries(),
     getPopularPlaces(),
-    getDday().catch(() => undefined),
+    getDday(),
   ])
   const destinations = countries.map((country, index) => ({
     country: country.countryName ?? '여행지',
@@ -149,17 +149,18 @@ export type MainTravelQueryData = {
 
 export function useMainTravelQuery() {
   const ddayQuery = useDdayQuery()
-  const countryName = ddayQuery.data?.countryName ?? '한국'
+  const countryName = ddayQuery.data?.countryName ?? ''
+  const hasCountry = Boolean(countryName)
   const results = useQueries({
     queries: [
-      { queryKey: travelQueryKeys.country(countryName), queryFn: () => getCountryInfo(countryName) },
-      { queryKey: travelQueryKeys.population(countryName), queryFn: () => getPopulationInfo(countryName) },
-      { queryKey: travelQueryKeys.tourPlaces(countryName), queryFn: () => getTourPlace(countryName) },
-      { queryKey: travelQueryKeys.food(countryName), queryFn: () => getFoodInfo(countryName) },
-      { queryKey: travelQueryKeys.festivals(countryName), queryFn: () => getFestivals(countryName) },
-      { queryKey: travelQueryKeys.phrase(countryName), queryFn: () => getTodayPhrase(countryName, 1), retry: false },
-      { queryKey: travelQueryKeys.weather(countryName), queryFn: () => getWeather(countryName), retry: false },
-      { queryKey: travelQueryKeys.exchangeRate(countryName), queryFn: () => getExchangeRate(countryName), retry: false },
+      { queryKey: travelQueryKeys.country(countryName), queryFn: () => getCountryInfo(countryName), enabled: hasCountry },
+      { queryKey: travelQueryKeys.population(countryName), queryFn: () => getPopulationInfo(countryName), enabled: hasCountry },
+      { queryKey: travelQueryKeys.tourPlaces(countryName), queryFn: () => getTourPlace(countryName), enabled: hasCountry },
+      { queryKey: travelQueryKeys.food(countryName), queryFn: () => getFoodInfo(countryName), enabled: hasCountry },
+      { queryKey: travelQueryKeys.festivals(countryName), queryFn: () => getFestivals(countryName), enabled: hasCountry },
+      { queryKey: travelQueryKeys.phrase(countryName), queryFn: () => getTodayPhrase(countryName, 1), enabled: hasCountry, retry: false },
+      { queryKey: travelQueryKeys.weather(countryName), queryFn: () => getWeather(countryName), enabled: hasCountry, retry: false },
+      { queryKey: travelQueryKeys.exchangeRate(countryName), queryFn: () => getExchangeRate(countryName), enabled: hasCountry, retry: false },
     ],
   })
   const [country, populationInfo, tourPlaces, foodInfo, festivals, phrase, weather, exchangeRate] = results

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 
 import type { MissionResponseDto } from '@/entities/mission/api'
+
+import { missionCalendarDays, missionCalendarTitle, missionWeekDays } from '../model/calendar'
 import * as S from './MissionPage.styles'
 
 type DialogShellProps = {
@@ -35,13 +37,6 @@ function DialogShell({ children, labelledBy, onClose }: DialogShellProps) {
   )
 }
 
-const weekDays = ['일', '월', '화', '수', '목', '금', '토']
-const may2026Days = [
-  ...Array.from({ length: 5 }, () => null),
-  ...Array.from({ length: 31 }, (_, index) => index + 1),
-  ...Array.from({ length: 6 }, () => null),
-]
-
 type CalendarDialogProps = {
   onClose: () => void
 }
@@ -60,14 +55,14 @@ export function CalendarDialog({ onClose }: CalendarDialogProps) {
       <S.CalendarContent>
         <S.CalendarHeading>
           <div>
-            <S.DialogTitle id="mission-calendar-title">2026년 5월 <small>▾</small></S.DialogTitle>
+            <S.DialogTitle id="mission-calendar-title">{missionCalendarTitle} <small>▾</small></S.DialogTitle>
             <S.Streak>연속출석 <strong>{attendedDays.size}일째</strong></S.Streak>
           </div>
           <S.CalendarLegend><span>□ 오늘</span><span>■ 출석</span></S.CalendarLegend>
         </S.CalendarHeading>
         <S.CalendarGrid>
-          {weekDays.map((day) => <S.WeekDay key={day}>{day}</S.WeekDay>)}
-          {may2026Days.map((day, index) => day === null
+          {missionWeekDays.map((day) => <S.WeekDay key={day}>{day}</S.WeekDay>)}
+          {missionCalendarDays.map((day, index) => day === null
             ? <span key={`empty-${index}`} />
             : (
               <S.CalendarDay

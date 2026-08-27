@@ -1,5 +1,5 @@
 import { apiClient } from '@/shared/libs/api-client'
-import { type CommentRequestDto, type CommentResponseDto } from '@/entities/community/board'
+import type { CommentRequestDto, CommentResponseDto } from './types'
 
 export type ReviewRequestDto = {
   countryInfoId?: number

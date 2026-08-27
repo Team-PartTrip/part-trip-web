@@ -1,18 +1,162 @@
 import styled from 'styled-components'
 
-export const Page = styled.div`width: min(100%, 1200px); margin: 0 auto;`
-export const Header = styled.header`display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; @media (max-width: 600px) { flex-direction: column; }`
-export const Title = styled.h1`margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 32px; line-height: 40px;`
-export const Subtitle = styled.p`margin: 6px 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 15px;`
-export const BackButton = styled.button`min-height: 46px; border: 1px solid ${({ theme }) => theme.colors.brand.strong}; border-radius: 12px; padding: 12px 20px; background: ${({ theme }) => theme.colors.background.default}; color: ${({ theme }) => theme.colors.brand.strong}; cursor: pointer; font-weight: 600;`
-export const ReadAll = styled.button`margin-left: auto; border: 0; padding: 8px 12px; background: transparent; color: ${({ theme }) => theme.colors.brand.primary}; cursor: pointer; font-size: 12px; &:disabled { cursor: not-allowed; opacity: .5; }`
-export const List = styled.section`margin-top: 24px; border-radius: 28px; padding: 24px; background: ${({ theme }) => theme.colors.background.default}; box-shadow: ${({ theme }) => theme.shadows.subtle};`
-export const Empty = styled.div`display: flex; min-height: 320px; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 16px; } span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; }`
-export const NotificationItem = styled.button<{ $read: boolean }>`display: grid; width: 100%; gap: 6px; border: 0; border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle}; padding: 18px 0; background: transparent; color: ${({ theme }) => theme.colors.text.strong}; cursor: pointer; text-align: left; opacity: ${({ $read }) => ($read ? 0.62 : 1)}; &:last-child { border-bottom: 0; } strong { font-size: 15px; } span, small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }`
-export const ErrorMessage = styled.p`margin: 0 0 16px; color: ${({ theme }) => theme.colors.status.error}; font-size: 13px;`
-export const Detail = styled.section`position: relative; min-height: 320px; border-radius: 28px; padding: 32px; background: ${({ theme }) => theme.colors.background.default}; box-shadow: ${({ theme }) => theme.shadows.subtle}; h2 { margin: 24px 0 12px; color: ${({ theme }) => theme.colors.text.strong}; } p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; line-height: 1.6; }`
-export const StatusDot = styled.span`display: block; width: 10px; height: 10px; border-radius: 50%; background: ${({ theme }) => theme.colors.brand.primary};`
-export const ActionRow = styled.div`display: flex; gap: 8px; margin-top: 28px;`
-export const SettingsCard = styled.section`border-radius: 28px; padding: 8px 24px; background: ${({ theme }) => theme.colors.background.default}; box-shadow: ${({ theme }) => theme.shadows.subtle};`
-export const SettingRow = styled.div`display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle}; padding: 20px 0; &:last-child { border-bottom: 0; } div { display: flex; flex-direction: column; gap: 4px; } strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 15px; } span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }`
-export const Toggle = styled.button<{ $active: boolean }>`min-width: 60px; min-height: 32px; border: 0; border-radius: 999px; padding: 0 12px; background: ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.border.soft)}; color: ${({ $active }) => ($active ? 'var(--pt-bg-default)' : 'var(--pt-text-muted)')}; cursor: pointer; font-size: 11px; font-weight: 600;`
+export const Page = styled.main`
+  width: 100%;
+  min-width: 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+`
+
+export const Header = styled.header`
+  margin-bottom: 24px;
+`
+
+export const Title = styled.h1`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 32px;
+  line-height: 40px;
+`
+
+export const Subtitle = styled.p`
+  margin: 6px 0 0;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 15px;
+  line-height: 22px;
+`
+
+export const ReadAll = styled.button`
+  margin-left: auto;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: ${({ theme }) => theme.colors.background.muted};
+  color: ${({ theme }) => theme.colors.brand.strong};
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  &:disabled { cursor: not-allowed; opacity: .5; }
+`
+
+export const List = styled.section`
+  margin-top: 24px;
+  border-radius: 20px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+`
+
+export const Empty = styled.div`
+  display: flex;
+  min-height: 300px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: ${({ theme }) => theme.colors.text.muted};
+  text-align: center;
+  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 13px; }
+  span { font-size: 12px; }
+`
+
+export const NotificationItem = styled.button<{ $read: boolean }>`
+  display: grid;
+  width: 100%;
+  min-height: 72px;
+  align-items: center;
+  gap: 12px;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  border: 0;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  padding: 14px 0;
+  background: transparent;
+  color: ${({ theme }) => theme.colors.text.strong};
+  cursor: pointer;
+  text-align: left;
+  &:last-child { border-bottom: 0; }
+  opacity: ${({ $read }) => ($read ? .62 : 1)};
+  > small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 10px; white-space: nowrap; }
+`
+
+export const StatusDot = styled.span<{ $read?: boolean }>`
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: ${({ $read, theme }) => ($read ? theme.colors.border.subtle : theme.colors.brand.primary)};
+`
+
+export const NotificationCopy = styled.span`
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+  span { overflow: hidden; color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+`
+
+export const ErrorMessage = styled.p`
+  margin: 0 0 16px;
+  color: ${({ theme }) => theme.colors.status.error};
+  font-size: 13px;
+`
+
+export const Detail = styled.section`
+  min-height: 320px;
+  border-radius: 20px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  h2 { margin: 0 0 12px; color: ${({ theme }) => theme.colors.text.strong}; font-size: 18px; }
+  > p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; line-height: 20px; }
+`
+
+export const Feedback = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  border-radius: 12px;
+  padding: 16px;
+  background: ${({ theme }) => theme.colors.background.muted};
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 12px;
+`
+
+export const ActionRow = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+`
+
+export const SettingsCard = styled.section`
+  border-radius: 20px;
+  padding: 8px 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+`
+
+export const SettingRow = styled.div`
+  display: flex;
+  min-height: 77px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  &:last-child { border-bottom: 0; }
+  > div { display: flex; flex-direction: column; gap: 4px; }
+  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 13px; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
+`
+
+export const Toggle = styled.button<{ $active: boolean }>`
+  position: relative;
+  width: 52px;
+  height: 30px;
+  flex: 0 0 52px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0;
+  background: ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.border.default)};
+  cursor: pointer;
+  &::after { position: absolute; top: 4px; left: ${({ $active }) => ($active ? '26px' : '4px')}; width: 22px; height: 22px; border-radius: 50%; background: ${({ theme }) => theme.colors.background.default}; content: ''; transition: left 120ms ease; }
+  &:disabled { cursor: not-allowed; opacity: .6; }
+`

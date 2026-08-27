@@ -1,4 +1,5 @@
 import { queryOptions, useQuery } from '@tanstack/react-query'
+import { isPositiveSafeInteger } from '@/shared/utils'
 import { getSharedTripDetail, listSharedTrips } from './api'
 import { tripCardQueryKeys } from './query-keys'
 
@@ -13,7 +14,7 @@ export const sharedTripQueryOptions = (tripId: number) =>
   queryOptions({
     queryKey: tripCardQueryKeys.detail(tripId),
     queryFn: () => getSharedTripDetail(tripId),
-    enabled: Number.isInteger(tripId),
+    enabled: isPositiveSafeInteger(tripId),
   })
 
 export function useSharedTripsQuery(enabled = true) {
