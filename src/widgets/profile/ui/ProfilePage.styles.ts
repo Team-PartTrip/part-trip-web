@@ -96,44 +96,50 @@ export const Stats = styled.div`
 export const LowerBody = styled.section`
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) 384px;
   margin-top: 24px;
   @media (max-width: 860px) { grid-template-columns: 1fr; }
 `
 
-export const RecentTrips = styled.section`
-  min-height: 240px;
-  border-radius: 20px;
-  padding: 24px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
+export const WorldMapSummary = styled.section`
+  display: flex;
+  min-height: 318px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  border-radius: 12px;
+  padding: 12px;
+  background: ${({ theme }) => theme.colors.background.muted};
+
+  ${SectionTitle} {
+    margin: 0;
+    font-size: 18px;
+    line-height: 24px;
+  }
+
+  p {
+    margin: 0;
+    color: ${({ theme }) => theme.colors.text.muted};
+    font-size: 15px;
+    line-height: 22px;
+  }
 `
 
-export const RecentGrid = styled.div`
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  @media (max-width: 560px) { grid-template-columns: 1fr; }
-`
-
-export const RecentTrip = styled.button`
-  overflow: hidden;
+export const WorldMapMore = styled.button`
+  width: 66px;
+  height: 34px;
   border: 0;
-  border-radius: 20px;
-  padding: 0 0 16px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-  color: ${({ theme }) => theme.colors.text.strong};
+  border-radius: 999px;
+  padding: 0;
+  background: ${({ theme }) => theme.colors.brand.primary};
+  color: ${({ theme }) => theme.colors.text.inverse};
   cursor: pointer;
-  text-align: left;
-  img { display: block; width: 100%; height: 128px; object-fit: cover; }
-  strong, span { display: block; padding-inline: 16px; }
-  strong { padding-top: 12px; font-size: 15px; }
-  span { padding-top: 4px; color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
+  font-size: 11px;
+  font-weight: 500;
 `
 
 export const SettingsCard = styled.section`
-  min-height: 240px;
+  min-height: 318px;
   border-radius: 20px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
@@ -156,13 +162,4 @@ export const SettingsButton = styled.button<{ $danger?: boolean }>`
   text-align: left;
   &:last-child { border-bottom: 0; }
   span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 18px; }
-`
-
-export const Empty = styled.div`
-  display: grid;
-  min-height: 160px;
-  place-items: center;
-  grid-column: 1 / -1;
-  color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 13px;
 `

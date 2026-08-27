@@ -280,35 +280,15 @@ export const MemberState = styled.span`
 
 export const InvitePanel = styled.section`
   display: flex;
-  min-height: 360px;
+  min-height: 420px;
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
-  border-radius: 20px;
+  border-radius: 28px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
   p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; }
-`
-
-export const InviteCode = styled.div`
-  width: 100%;
-  border-radius: 12px;
-  padding: 12px;
-  background: ${({ theme }) => theme.colors.background.muted};
-  color: ${({ theme }) => theme.colors.brand.strong};
-  font-size: 13px;
-  font-weight: 600;
-  overflow-wrap: anywhere;
-`
-
-export const InviteField = styled.div`
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: auto;
-  label { color: ${({ theme }) => theme.colors.text.strong}; font-size: 12px; font-weight: 600; }
 `
 
 export const PopularGrid = styled.div`
@@ -508,64 +488,38 @@ export const PanelActions = styled.div`
 `
 
 export const VoteBody = styled.div`
-  display: grid;
-  gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 456px;
-  @media (max-width: 860px) { grid-template-columns: 1fr; }
+  display: block;
 `
 
 export const CandidatePanel = styled.section`
-  min-height: 486px;
-  border-radius: 20px;
+  display: flex;
+  min-height: 541px;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: 28px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
-  h2 { margin: 0 0 8px; font-size: 15px; }
+  h2 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 18px; line-height: 24px; }
+  ${PlaceThumb} { border-radius: 12px; }
+  ${PlaceDetails} { strong { font-size: 15px; } span { font-size: 12px; } }
 `
 
 export const CandidateRow = styled.div`
   display: flex;
   min-height: 92px;
   align-items: center;
-  gap: 12px;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  &:last-child { border-bottom: 0; }
+  gap: 14px;
+  padding: 10px 0;
 `
 
-export const VoteMeta = styled.div`
+export const VoteMeta = styled.div<{ $selected?: boolean }>`
   display: flex;
   align-items: center;
   gap: 8px;
-  span { border-radius: 8px; padding: 6px 8px; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.brand.strong}; font-size: 11px; }
-  button { min-width: 48px; height: 32px; border: 1px solid ${({ theme }) => theme.colors.brand.strong}; border-radius: 8px; background: ${({ theme }) => theme.colors.background.default}; color: ${({ theme }) => theme.colors.brand.strong}; cursor: pointer; font-size: 11px; font-weight: 600; }
-  button[aria-pressed="true"] { background: ${({ theme }) => theme.colors.brand.primary}; color: ${({ theme }) => theme.colors.text.inverse}; }
-`
-
-export const VoteSummary = styled.section`
-  display: flex;
-  min-height: 486px;
-  flex-direction: column;
-  gap: 12px;
-  border-radius: 20px;
-  padding: 24px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-  h2 { margin: 0; font-size: 15px; }
-  > strong { font-size: 12px; }
-  > small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
-`
-
-export const Deadline = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  border-radius: 12px;
-  padding: 12px;
-  background: ${({ theme }) => theme.colors.background.muted};
-  color: ${({ theme }) => theme.colors.brand.strong};
-  font-size: 16px;
-  font-weight: 600;
-  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; font-weight: 400; }
+  span { border-radius: 8px; padding: 6px 8px; background: ${({ $selected, theme }) => ($selected ? theme.colors.brand.primary : theme.colors.background.muted)}; color: ${({ $selected, theme }) => ($selected ? theme.colors.text.inverse : theme.colors.brand.strong)}; font-size: 12px; font-weight: 600; }
+  button { min-width: 72px; height: 32px; border: 1px solid ${({ theme }) => theme.colors.border.default}; border-radius: 10px; padding: 0 16px; background: ${({ theme }) => theme.colors.background.default}; color: ${({ theme }) => theme.colors.text.muted}; cursor: pointer; font-size: 13px; font-weight: 600; }
+  button[aria-pressed="true"] { border-color: ${({ theme }) => theme.colors.background.muted}; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.brand.strong}; }
 `
 
 export const MemberAvatars = styled.div`
@@ -582,19 +536,6 @@ export const Notice = styled.p`
   color: ${({ theme }) => theme.colors.text.muted};
   font-size: 12px;
   line-height: 18px;
-`
-
-export const VoteGuidance = styled.p`
-  display: grid;
-  min-height: 93px;
-  place-items: center;
-  margin: 0;
-  border-radius: 12px;
-  padding: 12px;
-  background: ${({ theme }) => theme.colors.background.muted};
-  color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 12px;
-  text-align: center;
 `
 
 export const SelectedPlaces = styled.div`
@@ -713,7 +654,7 @@ export const FinalPlan = styled.section`
   min-height: 560px;
   flex-direction: column;
   gap: 12px;
-  border-radius: 20px;
+  border-radius: 28px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
@@ -758,31 +699,17 @@ export const FinalConfirmPanel = styled.section`
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
-  border-radius: 20px;
+  border-radius: 28px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
   p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; line-height: 20px; }
 `
 
-export const FinalChecklist = styled.div`
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  gap: 8px;
-  border-radius: 12px;
-  padding: 12px;
-  background: ${({ theme }) => theme.colors.background.muted};
-  color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 12px;
-  line-height: 18px;
-`
-
 export const FinalActions = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: auto;
 `
 
 export const Badge = styled.span`

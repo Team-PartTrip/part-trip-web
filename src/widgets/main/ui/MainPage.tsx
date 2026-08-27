@@ -39,8 +39,8 @@ export function MainPage() {
     <AppShell>
       <S.Page>
         <S.Header>
-          <S.Title>다음 여행을 준비하세요</S.Title>
-          <S.Subtitle>{profile?.name ? `${profile.name}님, ${destination || '다음'} 여행까지 남은 시간을 확인해보세요.` : '다음 여행까지 남은 시간을 확인해보세요.'}</S.Subtitle>
+          <S.Title>다가오는 여행</S.Title>
+          <S.Subtitle>{`${profile?.name || '민수'}님, ${destination || '오사카'} 여행까지 남은 시간을 확인해보세요.`}</S.Subtitle>
         </S.Header>
 
         {isError ? <S.Error role="alert">여행 정보를 불러오지 못했습니다.</S.Error> : null}
@@ -86,8 +86,8 @@ export function MainPage() {
               </S.InfoCard>
               <S.InfoCard>
                 <S.CardTitle>해야 할 일</S.CardTitle>
-                <S.TodoButton type="button" onClick={() => navigate({ to: paths.planner })}>
-                  <span>플래너에서 투표 이어가기</span><small>3건 대기 중</small><b>›</b>
+                <S.TodoButton type="button" onClick={() => navigate({ to: paths.recordCalendar })}>
+                  <span>축제 · 이벤트 캘린더</span><small>일본의 이번 달 일정</small><b>›</b>
                 </S.TodoButton>
                 <S.TodoButton type="button" onClick={() => navigate({ to: paths.record })}>
                   <span>체크리스트 작성</span><small>12개 중 8개 완료</small><b>›</b>

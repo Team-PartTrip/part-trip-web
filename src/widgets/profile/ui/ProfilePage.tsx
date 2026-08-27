@@ -1,7 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { getTripDurationDays, useMyTrips } from "@/entities/trip-plan";
 import { useUserProfileQuery } from "@/entities/user";
-import { figmaHomeHero, figmaProfileTrip } from "@/shared/assets";
 import { paths } from "@/shared/config";
 import { Button as PartTripButton } from "@/shared/ui/parttrip";
 import { AppShell } from "@/widgets/app-shell";
@@ -83,42 +82,16 @@ export function ProfilePage() {
               </S.StatsCard>
             </S.ProfileBody>
             <S.LowerBody>
-              <S.RecentTrips>
-                <S.SectionTitle>최근 여행</S.SectionTitle>
-                <S.RecentGrid>
-                  {trips.slice(0, 2).map((trip, index) => (
-                    <S.RecentTrip
-                      key={trip.tripId ?? index}
-                      type="button"
-                      onClick={() =>
-                        trip.tripId &&
-                        navigate({
-                          params: { recordId: String(trip.tripId) },
-                          to: "/record/$recordId",
-                        })
-                      }
-                    >
-                      <img
-                        src={
-                          trip.images?.[0] ||
-                          (index === 0 ? figmaProfileTrip : figmaHomeHero)
-                        }
-                        alt=""
-                      />
-                      <strong>
-                        {trip.cityName || trip.countryName || "여행"}
-                      </strong>
-                      <span>
-                        {trip.countryName || "여행지"} ·{" "}
-                        {getTripDurationDays([trip])} days
-                      </span>
-                    </S.RecentTrip>
-                  ))}
-                  {trips.length === 0 ? (
-                    <S.Empty>연결된 여행 기록이 없습니다.</S.Empty>
-                  ) : null}
-                </S.RecentGrid>
-              </S.RecentTrips>
+              <S.WorldMapSummary>
+                <S.SectionTitle>내 세계지도</S.SectionTitle>
+                <p>{countries}개국 획득 · 방문 국가별 기록을 확인하세요.</p>
+                <S.WorldMapMore
+                  type="button"
+                  onClick={() => navigate({ to: paths.profileMap })}
+                >
+                  더보기
+                </S.WorldMapMore>
+              </S.WorldMapSummary>
               <S.SettingsCard>
                 <S.SectionTitle>설정</S.SectionTitle>
                 <S.SettingsButton
