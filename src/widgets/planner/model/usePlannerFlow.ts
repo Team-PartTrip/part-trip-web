@@ -8,6 +8,7 @@ import {
   useCreatePlannerMutation,
   useCreateVoteMutation,
   useJoinPlannerMutation,
+  useSavePlannerTravelPlanMutation,
 } from '@/entities/planner'
 import { paths } from '@/shared/config'
 import { isPositiveSafeInteger } from '@/shared/utils'
@@ -23,12 +24,14 @@ const ACTIVE_PLANNER_ID_KEY = 'parttrip:active-planner-id'
 const PLANNER_SELECTED_KEY = 'parttrip:planner-selected'
 const PLANNER_CONFIRMED_KEY = 'parttrip:planner-confirmed'
 const ACTIVE_VOTE_ID_KEY = 'parttrip:active-vote-id'
+const PLANNER_INVITE_CODE_KEY = 'parttrip:planner-invite-code'
 
 export function usePlannerFlow(step: PlannerStep) {
   const navigate = useNavigate()
   const { placeId } = useParams({ strict: false })
   const savedGroupSettings = parsePlannerGroupSettings(sessionStorage.getItem(PLANNER_GROUP_SETTINGS_KEY))
   const activePlannerId = Number(sessionStorage.getItem(ACTIVE_PLANNER_ID_KEY))
+  const activeVoteId = Number(sessionStorage.getItem(ACTIVE_VOTE_ID_KEY))
   const [voteCategory, setVoteCategory] = useState<(typeof plannerCategories)[number]>('명소')
   const {
     countries,
@@ -42,7 +45,8 @@ export function usePlannerFlow(step: PlannerStep) {
     planners,
     setPlan,
     votes,
-  } = usePlannerData(step, voteCategory, activePlannerId)
+    voteDetail,
+  } = usePlannerData(step, voteCategory, activePlannerId, activeVoteId)
   const [selected, setSelected] = useState<number[]>(() =>
     parsePlannerSelectedIndexes(sessionStorage.getItem(PLANNER_SELECTED_KEY)),
   )
@@ -56,6 +60,9 @@ export function usePlannerFlow(step: PlannerStep) {
   const [memberCount, setMemberCount] = useState(() => String(savedGroupSettings.memberCount))
   const [isSolo, setIsSolo] = useState(() => savedGroupSettings.isSolo)
   const [inviteCode, setInviteCode] = useState('')
+  const [plannerInviteCode, setPlannerInviteCode] = useState(() =>
+    sessionStorage.getItem(PLANNER_INVITE_CODE_KEY) ?? '',
+  )
   const [lineupChoice, setLineupChoice] = useState<number | null>(null)
   const plannerConfirmationKey = `${PLANNER_CONFIRMED_KEY}:${activePlannerId}`
   const [isConfirmed, setIsConfirmed] = useState(() => sessionStorage.getItem(plannerConfirmationKey) === 'true')
@@ -63,14 +70,22 @@ export function usePlannerFlow(step: PlannerStep) {
   const createPlannerMutation = useCreatePlannerMutation()
   const createVoteMutation = useCreateVoteMutation()
   const joinPlannerMutation = useJoinPlannerMutation()
+  const savePlannerTravelPlanMutation = useSavePlannerTravelPlanMutation()
   const confirmVoteMutation = useConfirmVoteMutation()
   const castBallotMutation = useCastBallotMutation()
   const closeVoteMutation = useCloseVoteMutation()
-  const isSaving = createPlannerMutation.isPending
+  const isSaving = createPlannerMutation.isPending || savePlannerTravelPlanMutation.isPending
 
   useEffect(() => {
     sessionStorage.setItem(PLANNER_SELECTED_KEY, JSON.stringify(selected))
   }, [selected])
+
+  useEffect(() => {
+    if (step !== 'create') return
+    sessionStorage.removeItem(ACTIVE_PLANNER_ID_KEY)
+    sessionStorage.removeItem(ACTIVE_VOTE_ID_KEY)
+    sessionStorage.removeItem(PLANNER_INVITE_CODE_KEY)
+  }, [step])
 
   const continueTo = (next: string) => navigate({ to: next })
   const currentCountry = countries.find((country) =>
@@ -84,9 +99,12 @@ export function usePlannerFlow(step: PlannerStep) {
   const selectedHeadcount = headcount || String(plan?.headcount ?? 1)
   const selectedPlaces = places.flatMap((item, index) => selected.includes(index) ? [{ index, item }] : [])
   const place = places[Number(placeId)] || places[0]
-  const activeVoteId = Number(sessionStorage.getItem(ACTIVE_VOTE_ID_KEY))
-  const activeVote = votes.find((vote) => vote.voteId === activeVoteId) ??
-    votes.find((vote) => vote.category === voteCategory)
+  const categoryVote = votes.find((vote) => vote.category === voteCategory || vote.categoryLabel === voteCategory)
+  const activeVote = (voteDetail?.category === voteCategory || voteDetail?.categoryLabel === voteCategory ? voteDetail : undefined) ??
+    categoryVote ??
+    (voteDetail?.voteId === activeVoteId ? voteDetail : undefined) ??
+    votes.find((vote) => vote.voteId === activeVoteId)
+  const visiblePlannerInviteCode = plannerDetail?.inviteCode || plannerInviteCode
   const selectedPlace = lineupChoice == null ? undefined : places[lineupChoice]
   const selectedOptionId = selectedPlace
     ? activeVote?.options?.find((option) =>
@@ -114,25 +132,48 @@ export function usePlannerFlow(step: PlannerStep) {
     }
     try {
       const groupSettings = parsePlannerGroupSettings(sessionStorage.getItem(PLANNER_GROUP_SETTINGS_KEY))
-      const planner = await createPlannerMutation.mutateAsync({
-        cityName: nextCity,
-        countryName: nextCountry,
-        endDate: selectedEndDate,
-        isSolo: groupSettings.isSolo,
-        memberCount: groupSettings.isSolo ? 1 : nextHeadcount,
-        startDate: selectedStartDate,
-        title: plannerTitle.trim() || `${nextCity} 여행 계획`,
-      })
-      const plannerId = planner.plannerId
-      if (!isPositiveSafeInteger(plannerId)) throw new Error('plannerId is missing')
-      sessionStorage.setItem(ACTIVE_PLANNER_ID_KEY, String(plannerId))
-      setPlan({
-        cityName: planner.cityName ?? nextCity,
-        countryName: planner.countryName ?? nextCountry,
-        endDate: planner.endDate ?? selectedEndDate,
-        headcount: planner.memberCount ?? nextHeadcount,
-        startDate: planner.startDate ?? selectedStartDate,
-      })
+      if (isPositiveSafeInteger(activePlannerId)) {
+        const savedPlan = await savePlannerTravelPlanMutation.mutateAsync({
+          plannerId: activePlannerId,
+          payload: {
+            cityName: nextCity,
+            countryName: nextCountry,
+            endDate: selectedEndDate,
+            startDate: selectedStartDate,
+          },
+        })
+        setPlan({
+          cityName: savedPlan.cityName ?? nextCity,
+          countryName: savedPlan.countryName ?? nextCountry,
+          endDate: savedPlan.endDate ?? selectedEndDate,
+          headcount: plan?.headcount ?? nextHeadcount,
+          startDate: savedPlan.startDate ?? selectedStartDate,
+        })
+      } else {
+        const planner = await createPlannerMutation.mutateAsync({
+          cityName: nextCity,
+          countryName: nextCountry,
+          endDate: selectedEndDate,
+          isSolo: groupSettings.isSolo,
+          memberCount: groupSettings.isSolo ? 1 : nextHeadcount,
+          startDate: selectedStartDate,
+          title: plannerTitle.trim() || `${nextCity} 여행 계획`,
+        })
+        const plannerId = planner.plannerId
+        if (!isPositiveSafeInteger(plannerId)) throw new Error('plannerId is missing')
+        sessionStorage.setItem(ACTIVE_PLANNER_ID_KEY, String(plannerId))
+        if (planner.inviteCode) {
+          sessionStorage.setItem(PLANNER_INVITE_CODE_KEY, planner.inviteCode)
+          setPlannerInviteCode(planner.inviteCode)
+        }
+        setPlan({
+          cityName: planner.cityName ?? nextCity,
+          countryName: planner.countryName ?? nextCountry,
+          endDate: planner.endDate ?? selectedEndDate,
+          headcount: planner.memberCount ?? nextHeadcount,
+          startDate: planner.startDate ?? selectedStartDate,
+        })
+      }
       continueTo(paths.plannerProgress)
     } catch {
       setErrorMessage('여행 정보를 저장하지 못했습니다.')
@@ -169,7 +210,10 @@ export function usePlannerFlow(step: PlannerStep) {
   }
 
   const handleCreateVote = async () => {
-    if (activeVote) {
+    const currentVote = votes.find((vote) => vote.category === voteCategory || vote.categoryLabel === voteCategory) ??
+      (voteDetail?.category === voteCategory || voteDetail?.categoryLabel === voteCategory ? voteDetail : undefined)
+    if (isPositiveSafeInteger(currentVote?.voteId)) {
+      sessionStorage.setItem(ACTIVE_VOTE_ID_KEY, String(currentVote.voteId))
       navigate({ to: paths.plannerVote })
       return
     }
@@ -241,13 +285,24 @@ export function usePlannerFlow(step: PlannerStep) {
     }
     try {
       setErrorMessage('')
-      if (isPositiveSafeInteger(activeVote?.voteId) && isPositiveSafeInteger(selectedOptionId)) {
-        await confirmVoteMutation.mutateAsync({
-          plannerId: activePlannerId,
-          voteId: activeVote.voteId,
-          payload: { optionId: selectedOptionId },
-        })
+      const confirmTargets = votes.flatMap((vote) => {
+        const optionId = vote.confirmedOptionId ?? vote.options?.find((option) => option.confirmed)?.optionId
+        return isPositiveSafeInteger(vote.voteId) && isPositiveSafeInteger(optionId)
+          ? [{ optionId, voteId: vote.voteId }]
+          : []
+      })
+      if (confirmTargets.length === 0 && isPositiveSafeInteger(activeVote?.voteId) && isPositiveSafeInteger(selectedOptionId)) {
+        confirmTargets.push({ optionId: selectedOptionId, voteId: activeVote.voteId })
       }
+      if (confirmTargets.length === 0) {
+        setErrorMessage('확정할 투표 결과를 확인할 수 없습니다.')
+        return
+      }
+      await Promise.all(confirmTargets.map(({ optionId, voteId }) => confirmVoteMutation.mutateAsync({
+        plannerId: activePlannerId,
+        voteId,
+        payload: { optionId },
+      })))
       sessionStorage.setItem(plannerConfirmationKey, 'true')
       setIsConfirmed(true)
     } catch {
@@ -295,6 +350,7 @@ export function usePlannerFlow(step: PlannerStep) {
     plan,
     plannerCategories,
     plannerDetail,
+    plannerInviteCode: visiblePlannerInviteCode,
     plannerTitle,
     planners,
     saveDestination,

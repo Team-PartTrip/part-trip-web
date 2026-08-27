@@ -28,13 +28,6 @@ export const Subtitle = styled.p`
   line-height: 22px;
 `
 
-export const HeaderActions = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin-top: -84px;
-  margin-bottom: 40px;
-`
-
 export const Error = styled.p`
   margin: 0 0 16px;
   color: ${({ theme }) => theme.colors.status.error};
@@ -75,7 +68,7 @@ export const PlannerTabs = styled.nav`
 export const PlannerListLayout = styled.div`
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) 432px;
 
   @media (max-width: 860px) { grid-template-columns: 1fr; }
 `
@@ -83,20 +76,20 @@ export const PlannerListLayout = styled.div`
 export const PlanListPanel = styled.section`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 
-  h2 { margin: 0 0 8px; color: ${({ theme }) => theme.colors.text.strong}; font-size: 15px; }
+  h2 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 18px; line-height: 24px; }
 `
 
 export const PlanRow = styled.button<{ $selected: boolean }>`
   display: flex;
   width: 100%;
-  min-height: 72px;
+  min-height: 76px;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   border: 0;
   border-radius: 12px;
-  padding: 16px;
+  padding: 16px 20px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
   color: ${({ theme }) => theme.colors.text.strong};
@@ -106,9 +99,9 @@ export const PlanRow = styled.button<{ $selected: boolean }>`
 `
 
 export const PlanMarker = styled.span<{ $state: 'active' | 'planned' | 'completed' }>`
-  width: 10px;
-  height: 10px;
-  flex: 0 0 10px;
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
   border-radius: 50%;
   background: ${({ $state, theme }) => $state === 'active' ? theme.colors.brand.primary : $state === 'completed' ? theme.colors.brand.successStrong : theme.colors.brand.strong};
 `
@@ -120,7 +113,7 @@ export const PlanDetails = styled.span`
   flex-direction: column;
   gap: 4px;
 
-  strong { font-size: 14px; }
+  strong { font-size: 15px; line-height: 22px; }
   span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
 `
 
@@ -131,12 +124,13 @@ export const PlanStatus = styled.span<{ $state: 'active' | 'planned' | 'complete
 `
 
 export const SelectedPlanPanel = styled.section`
+  height: 640px;
   overflow: hidden;
   border-radius: 20px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
 
-  > img { display: block; width: 100%; height: 170px; object-fit: cover; }
+  > img { display: block; width: 100%; height: 180px; object-fit: cover; }
   > div { display: flex; min-height: 286px; flex-direction: column; align-items: flex-start; gap: 10px; padding: 20px 24px; }
   h2 { margin: 0; font-size: 18px; }
   p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; }
@@ -182,7 +176,7 @@ export const ActionRow = styled.div`
 export const TwoColumn = styled.div`
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) 456px;
 
   @media (max-width: 860px) { grid-template-columns: 1fr; }
 `
@@ -412,31 +406,36 @@ export const CategoryChip = styled.button<{ $active: boolean }>`
 export const PlaceBody = styled.div`
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) 456px;
   @media (max-width: 860px) { grid-template-columns: 1fr; }
 `
 
 export const PlaceListPanel = styled.section`
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  h2 { margin: 0 0 8px; font-size: 15px; }
+  min-height: 486px;
+  gap: 12px;
+  border-radius: 20px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  h2 { margin: 0; font-size: 18px; line-height: 24px; }
 `
 
 export const PlaceRow = styled.div`
   display: flex;
-  min-height: 64px;
+  min-height: 92px;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  padding: 8px 16px;
+  padding: 10px 0;
   background: ${({ theme }) => theme.colors.background.default};
 `
 
 export const PlaceThumb = styled.span<{ $imageUrl?: string }>`
-  width: 48px;
-  height: 48px;
-  flex: 0 0 48px;
+  width: 72px;
+  height: 72px;
+  flex: 0 0 72px;
   border-radius: 8px;
   background: ${({ $imageUrl }) => $imageUrl ? `url("${$imageUrl}") center / cover` : '#dee5f0'};
 `
@@ -453,7 +452,7 @@ export const PlaceDetails = styled.div`
 
 export const PlaceAction = styled.button<{ $active: boolean }>`
   min-width: 48px;
-  height: 32px;
+  height: 34px;
   border: 1px solid ${({ $active, theme }) => ($active ? theme.colors.background.muted : theme.colors.border.default)};
   border-radius: 8px;
   background: ${({ $active, theme }) => ($active ? theme.colors.background.muted : theme.colors.background.default)};
@@ -473,6 +472,20 @@ export const SelectedPanel = styled.section`
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
   h2 { margin: 0; font-size: 15px; }
+`
+
+export const SelectionGuidance = styled.div`
+  display: flex;
+  min-height: 196px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 12px;
+  padding: 16px;
+  background: ${({ theme }) => theme.colors.background.muted};
+
+  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 13px; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
 `
 
 export const SelectedRow = styled.div`
@@ -497,11 +510,12 @@ export const PanelActions = styled.div`
 export const VoteBody = styled.div`
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) 456px;
   @media (max-width: 860px) { grid-template-columns: 1fr; }
 `
 
 export const CandidatePanel = styled.section`
+  min-height: 486px;
   border-radius: 20px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
@@ -511,7 +525,7 @@ export const CandidatePanel = styled.section`
 
 export const CandidateRow = styled.div`
   display: flex;
-  min-height: 70px;
+  min-height: 92px;
   align-items: center;
   gap: 12px;
   border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
@@ -529,7 +543,7 @@ export const VoteMeta = styled.div`
 
 export const VoteSummary = styled.section`
   display: flex;
-  min-height: 330px;
+  min-height: 486px;
   flex-direction: column;
   gap: 12px;
   border-radius: 20px;
@@ -568,6 +582,19 @@ export const Notice = styled.p`
   color: ${({ theme }) => theme.colors.text.muted};
   font-size: 12px;
   line-height: 18px;
+`
+
+export const VoteGuidance = styled.p`
+  display: grid;
+  min-height: 93px;
+  place-items: center;
+  margin: 0;
+  border-radius: 12px;
+  padding: 12px;
+  background: ${({ theme }) => theme.colors.background.muted};
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 12px;
+  text-align: center;
 `
 
 export const SelectedPlaces = styled.div`
@@ -627,7 +654,7 @@ export const ProgressStat = styled.div`
 export const ProgressBody = styled.div`
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) 456px;
   @media (max-width: 860px) { grid-template-columns: 1fr; }
 `
 
@@ -677,7 +704,7 @@ export const ResponseRow = styled.div`
 export const FinalBody = styled.div`
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) 456px;
   @media (max-width: 860px) { grid-template-columns: 1fr; }
 `
 
@@ -727,7 +754,7 @@ export const FinalPlaceRow = styled.div`
 
 export const FinalConfirmPanel = styled.section`
   display: flex;
-  min-height: 360px;
+  min-height: 708px;
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
@@ -736,6 +763,26 @@ export const FinalConfirmPanel = styled.section`
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
   p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; line-height: 20px; }
+`
+
+export const FinalChecklist = styled.div`
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: 12px;
+  padding: 12px;
+  background: ${({ theme }) => theme.colors.background.muted};
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 12px;
+  line-height: 18px;
+`
+
+export const FinalActions = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
 `
 
 export const Badge = styled.span`
@@ -749,7 +796,7 @@ export const Badge = styled.span`
 export const PlaceDetailLayout = styled.div`
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) 456px;
   @media (max-width: 860px) { grid-template-columns: 1fr; }
 `
 

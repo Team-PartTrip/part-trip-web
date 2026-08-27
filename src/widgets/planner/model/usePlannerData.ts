@@ -5,6 +5,7 @@ import {
   usePlannerConfirmedPlacesQuery,
   usePlannerDetailQuery,
   usePlannerMembersQuery,
+  usePlannerVoteQuery,
   usePlannerVotesQuery,
 } from '@/entities/planner'
 import {
@@ -13,6 +14,7 @@ import {
   useTourPlacesQuery,
   type DdayResponseDto,
 } from '@/entities/travel'
+import { isPositiveSafeInteger } from '@/shared/utils'
 
 import type { PlannerStep } from './types'
 
@@ -20,6 +22,7 @@ export function usePlannerData(
   step: PlannerStep,
   category: string | undefined,
   activePlannerId: number,
+  activeVoteId: number,
 ) {
   const needsPlan =
     step === 'destination' ||
@@ -33,9 +36,12 @@ export function usePlannerData(
     step === 'lineup' ||
     step === 'final' ||
     step === 'place'
-  const needsPlannerDetail = step === 'progress' || step === 'final'
+  const needsPlannerDetail = step === 'group' || step === 'progress' || step === 'final'
   const needsMembers = step === 'group' || step === 'progress'
   const needsVotes = step === 'vote' || step === 'lineup' || step === 'progress' || step === 'final'
+  const needsVoteDetail = step === 'vote' &&
+    isPositiveSafeInteger(activePlannerId) &&
+    isPositiveSafeInteger(activeVoteId)
   const needsConfirmedPlaces = step === 'final'
   const [overriddenPlan, setOverriddenPlan] = useState<
     DdayResponseDto | undefined
@@ -49,6 +55,7 @@ export function usePlannerData(
   )
   const plannerMembersQuery = usePlannerMembersQuery(activePlannerId, needsMembers)
   const votesQuery = usePlannerVotesQuery(activePlannerId, needsVotes)
+  const voteDetailQuery = usePlannerVoteQuery(activePlannerId, activeVoteId, needsVoteDetail)
   const confirmedPlacesQuery = usePlannerConfirmedPlacesQuery(activePlannerId, needsConfirmedPlaces)
   const plannerPlan = plannerDetailQuery.data
     ? {
@@ -77,7 +84,8 @@ export function usePlannerData(
       plannerDetailQuery.isError ||
       plannerMembersQuery.isError ||
       confirmedPlacesQuery.isError ||
-      votesQuery.isError,
+      votesQuery.isError ||
+      voteDetailQuery.isError,
     isLoading:
       ddayQuery.isLoading ||
       countriesQuery.isLoading ||
@@ -86,7 +94,8 @@ export function usePlannerData(
       plannerDetailQuery.isLoading ||
       plannerMembersQuery.isLoading ||
       confirmedPlacesQuery.isLoading ||
-      votesQuery.isLoading,
+      votesQuery.isLoading ||
+      voteDetailQuery.isLoading,
     places: placesQuery.data ?? [],
     plan,
     plannerDetail: plannerDetailQuery.data,
@@ -94,6 +103,7 @@ export function usePlannerData(
     confirmedPlaces: confirmedPlacesQuery.data?.places ?? [],
     members: plannerMembersQuery.data ?? [],
     setPlan: setOverriddenPlan,
+    voteDetail: voteDetailQuery.data,
     votes: votesQuery.data ?? [],
   }
 }

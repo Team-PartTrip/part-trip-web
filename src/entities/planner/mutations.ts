@@ -71,7 +71,7 @@ export function useCloseVoteMutation() {
 export function useConfirmVoteMutation() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ plannerId, voteId, payload }: { plannerId: number; voteId: number; payload?: VoteConfirmRequestDto }) =>
+    mutationFn: ({ plannerId, voteId, payload }: { plannerId: number; voteId: number; payload: VoteConfirmRequestDto }) =>
       confirmVote(plannerId, voteId, payload),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }),
   })

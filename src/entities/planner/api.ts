@@ -167,7 +167,7 @@ export type VoteBallotResponseDto = {
 }
 
 export type VoteConfirmRequestDto = {
-  optionId?: number
+  optionId: number
 }
 
 export type VoteConfirmResponseDto = {
@@ -279,7 +279,7 @@ export async function closeVote(plannerId: number, voteId: number): Promise<Vote
 export async function confirmVote(
   plannerId: number,
   voteId: number,
-  payload?: VoteConfirmRequestDto,
+  payload: VoteConfirmRequestDto,
 ): Promise<VoteConfirmResponseDto> {
   const { data } = await apiClient.post<VoteConfirmResponseDto>(
     PLANNER_API_PATHS.confirmVote(plannerId, voteId),
