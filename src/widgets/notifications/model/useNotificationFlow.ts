@@ -12,6 +12,8 @@ import {
 } from '@/entities/notification'
 import { paths } from '@/shared/config'
 
+const ACTIVE_PLANNER_ID_KEY = 'parttrip:active-planner-id'
+
 export type NotificationMode = 'list' | 'detail' | 'settings'
 
 export function notificationDate(value?: string) {
@@ -56,6 +58,33 @@ export function useNotificationFlow(mode: NotificationMode) {
     navigate({ params: { notificationId: String(notification.notificationId) }, to: '/notifications/$notificationId' })
   }
 
+  const handleNotificationAction = async () => {
+    if (!detail) return
+    await handleMarkRead(detail.notificationId)
+    const linkType = detail.linkType?.trim().toLocaleUpperCase()
+    const linkId = detail.linkId
+
+    if (linkType === 'TRIP_CARD' && linkId != null) {
+      navigate({ params: { tripId: String(linkId) }, to: '/trip-cards/$tripId' })
+      return
+    }
+
+    if ((linkType === 'GROUP' || linkType === 'GROUP_INVITATION') && linkId != null) {
+      sessionStorage.setItem(ACTIVE_PLANNER_ID_KEY, String(linkId))
+      navigate({ to: paths.plannerProgress })
+      return
+    }
+
+    if (linkType === 'VOTE') {
+      navigate({ to: paths.planner })
+      return
+    }
+
+    if (linkType === 'WORLD_MAP') {
+      navigate({ to: paths.profileMap })
+    }
+  }
+
   const handleMarkAll = async () => {
     try {
       setActionError('')
@@ -87,6 +116,7 @@ export function useNotificationFlow(mode: NotificationMode) {
     handleMarkAll,
     handleMarkRead,
     handleNotificationClick,
+    handleNotificationAction,
     handleSettingToggle,
     hasUnread,
     markAllMutation,

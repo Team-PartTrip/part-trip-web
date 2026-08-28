@@ -19,12 +19,12 @@ export const MENUS: SidebarMenuType[] = [
     iconSrc: figmaPlannerIcon,
   },
   {
-    text: '여행기록',
+    text: '기록',
     href: paths.record,
     iconSrc: figmaRecordsIcon,
   },
   {
-    text: '마이페이지',
+    text: '마이',
     href: paths.profile,
     iconSrc: figmaProfileIcon,
   },

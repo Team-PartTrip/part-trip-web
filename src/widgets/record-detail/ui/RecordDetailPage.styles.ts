@@ -1,4 +1,32 @@
 import styled from 'styled-components'
+import { Skeleton } from '@/shared/ui/parttrip'
+
+export const LoadingLayout = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`
+
+export const LoadingHeader = styled(Skeleton)`
+  width: 220px;
+  height: 68px;
+`
+
+export const LoadingBody = styled.div`
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 432px;
+`
+
+export const LoadingPhoto = styled(Skeleton)`
+  height: 560px;
+  border-radius: 28px;
+`
+
+export const LoadingDetail = styled(Skeleton)`
+  height: 560px;
+  border-radius: 16px;
+`
 
 export const Page = styled.main`
   min-height: 100%;
@@ -20,9 +48,10 @@ export const TopBar = styled.header`
   justify-content: space-between;
   margin-bottom: 22px;
   gap: 16px;
-  h1 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 32px; line-height: 40px; }
-  p { margin: 6px 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 15px; }
-  > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; }
+  h1 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 30px; line-height: 38px; }
+  p { margin: 6px 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 15px; line-height: 22px; }
+  > div:first-child { display: flex; flex-direction: column; gap: 6px; }
+  > div:last-child:not(:first-child) { display: flex; flex-wrap: wrap; gap: 8px; }
   button { border: 0; border-radius: 10px; padding: 10px 14px; background: transparent; color: var(--pt-brand-primary); cursor: pointer; font: inherit; font-weight: 700; }
   button:last-child { background: var(--pt-brand-primary); color: var(--pt-text-inverse); }
 `
@@ -69,7 +98,7 @@ export const DetailBody = styled.section`
   display: grid;
   height: 560px;
   gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 456px;
+  grid-template-columns: minmax(0, 1fr) 432px;
   @media (max-width: 900px) { height: auto; grid-template-columns: 1fr; }
 `
 
@@ -90,13 +119,15 @@ export const RecordDetailCard = styled.section`
   align-items: flex-start;
   gap: 12px;
   overflow: hidden;
-  border-radius: 28px;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 16px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
   h1 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 26px; line-height: 32px; }
   p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 14px; }
-  button { margin-top: 4px; min-height: 46px; border: 1px solid ${({ theme }) => theme.colors.brand.strong}; border-radius: 12px; padding: 12px 24px; background: ${({ theme }) => theme.colors.background.default}; color: ${({ theme }) => theme.colors.brand.strong}; cursor: pointer; font-weight: 600; }
+  > span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
+  button { min-height: 46px; border: 1px solid ${({ theme }) => theme.colors.brand.strong}; border-radius: 12px; padding: 12px 24px; background: ${({ theme }) => theme.colors.background.default}; color: ${({ theme }) => theme.colors.brand.strong}; cursor: pointer; font-size: 15px; font-weight: 600; }
   @media (max-width: 900px) { height: auto; min-height: 260px; }
 `
 

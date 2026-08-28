@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from '@tanstack/react-router'
 import { getAccessToken } from '@/entities/session/api'
+import { figmaProfileIcon } from '@/shared/assets'
 import { paths } from '@/shared/config'
 
 import type { SidebarMenuType } from '../types/sidebar-item/sidebar-item'
@@ -10,12 +11,14 @@ import * as S from './Sidebar.style'
 
 interface Props {
   accountName?: string
+  isLoading?: boolean
   logo?: ReactNode
   menus: SidebarMenuType[]
 }
 
 function activeHref(pathname: string, menus: SidebarMenuType[]) {
-  if (pathname.startsWith(paths.planner) || pathname.startsWith(paths.tripCards)) return paths.planner
+  if (pathname.startsWith(paths.planner)) return paths.planner
+  if (pathname.startsWith(paths.tripCards)) return paths.record
   if (pathname.startsWith(paths.record)) return paths.record
   if (
     pathname.startsWith(paths.profile) ||
@@ -25,7 +28,7 @@ function activeHref(pathname: string, menus: SidebarMenuType[]) {
   return menus.find((item) => pathname === item.href)?.href ?? paths.main
 }
 
-export default function Sidebar({ accountName = '내 PartTrip', menus }: Props) {
+export default function Sidebar({ accountName = '내 PartTrip', isLoading = false, menus }: Props) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false)
@@ -60,8 +63,8 @@ export default function Sidebar({ accountName = '내 PartTrip', menus }: Props) 
           }}
           aria-label={isLoggedIn ? '로그아웃 메뉴' : '로그인'}
         >
-          <S.Avatar aria-hidden="true">MS</S.Avatar>
-          <span>{isLoggedIn ? accountName : '로그인'}</span>
+          {isLoading ? <S.AccountSkeleton aria-hidden="true" /> : <S.AccountIcon aria-hidden="true"><img src={figmaProfileIcon} alt="" /></S.AccountIcon>}
+          {isLoading ? <S.AccountNameSkeleton aria-hidden="true" /> : <span>{isLoggedIn ? accountName : '로그인'}</span>}
         </S.AccountButton>
       </S.Aside>
 

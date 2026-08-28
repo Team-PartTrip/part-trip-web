@@ -78,3 +78,12 @@ export const ReportPhoto = styled.article`
   strong { padding-top: 18px; color: ${({ theme }) => theme.colors.text.strong}; font-size: 15px; }
   span { padding-top: 4px; color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
 `
+
+export const ReportActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  button, a { min-height: 46px; border: 0; border-radius: 10px; padding: 0 24px; background: ${({ theme }) => theme.colors.brand.primary}; color: ${({ theme }) => theme.colors.text.inverse}; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; text-decoration: none; }
+  span { color: ${({ theme }) => theme.colors.status.error}; font-size: 12px; }
+  button:disabled { cursor: not-allowed; opacity: .6; }
+`

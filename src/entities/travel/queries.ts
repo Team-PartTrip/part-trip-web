@@ -3,25 +3,15 @@ import {
   getCountries,
   getCountryInfo,
   getDday,
-  getExchangeRate,
   getFestivals,
-  getFoodInfo,
   getPopularPlaces,
   getRecentSearches,
-  getPopulationInfo,
-  getTodayPhrase,
   getTourPlace,
-  getWeather,
   type CountryInfoResponseDto,
   type DdayResponseDto,
   type Destination,
-  type ExchangeRateResponseDto,
   type FestivalResponseDto,
-  type FoodInfoResponseDto,
-  type PopulationInfoResponseDto,
-  type TodayPhraseResponseDto,
   type TourPlaceResponseDto,
-  type WeatherResponseDto,
 } from './api'
 import { travelQueryKeys } from './query-keys'
 
@@ -32,10 +22,10 @@ const currencyByCountry: Record<string, string> = {
   태국: 'THB',
 }
 
-export const countriesQueryOptions = (enabled = true) =>
+export const countriesQueryOptions = (keyword = '', enabled = true) =>
   queryOptions({
-    queryKey: travelQueryKeys.countries(),
-    queryFn: getCountries,
+    queryKey: travelQueryKeys.countries(keyword),
+    queryFn: () => getCountries(keyword),
     enabled,
   })
 
@@ -53,8 +43,10 @@ export const festivalsQueryOptions = (countryName: string, year?: number, month?
     enabled: Boolean(countryName),
   })
 
-export function useCountriesQuery(enabled = true) {
-  return useQuery(countriesQueryOptions(enabled))
+export function useCountriesQuery(keywordOrEnabled: string | boolean = '', enabled = true) {
+  const keyword = typeof keywordOrEnabled === 'string' ? keywordOrEnabled : ''
+  const isEnabled = typeof keywordOrEnabled === 'boolean' ? keywordOrEnabled : enabled
+  return useQuery(countriesQueryOptions(keyword, isEnabled))
 }
 
 export function useDdayQuery(enabled = true) {
@@ -137,14 +129,9 @@ export function useDestinationDataQuery() {
 
 export type MainTravelQueryData = {
   country?: CountryInfoResponseDto
-  exchangeRate?: ExchangeRateResponseDto
   festivals: FestivalResponseDto[]
-  foodInfo: FoodInfoResponseDto[]
   plan?: DdayResponseDto
-  phrase?: TodayPhraseResponseDto
-  populationInfo: PopulationInfoResponseDto[]
   tourPlaces: TourPlaceResponseDto[]
-  weather?: WeatherResponseDto
 }
 
 export function useMainTravelQuery() {
@@ -154,30 +141,20 @@ export function useMainTravelQuery() {
   const results = useQueries({
     queries: [
       { queryKey: travelQueryKeys.country(countryName), queryFn: () => getCountryInfo(countryName), enabled: hasCountry },
-      { queryKey: travelQueryKeys.population(countryName), queryFn: () => getPopulationInfo(countryName), enabled: hasCountry },
       { queryKey: travelQueryKeys.tourPlaces(countryName), queryFn: () => getTourPlace(countryName), enabled: hasCountry },
-      { queryKey: travelQueryKeys.food(countryName), queryFn: () => getFoodInfo(countryName), enabled: hasCountry },
       { queryKey: travelQueryKeys.festivals(countryName), queryFn: () => getFestivals(countryName), enabled: hasCountry },
-      { queryKey: travelQueryKeys.phrase(countryName), queryFn: () => getTodayPhrase(countryName, 1), enabled: hasCountry, retry: false },
-      { queryKey: travelQueryKeys.weather(countryName), queryFn: () => getWeather(countryName), enabled: hasCountry, retry: false },
-      { queryKey: travelQueryKeys.exchangeRate(countryName), queryFn: () => getExchangeRate(countryName), enabled: hasCountry, retry: false },
     ],
   })
-  const [country, populationInfo, tourPlaces, foodInfo, festivals, phrase, weather, exchangeRate] = results
+  const [country, tourPlaces, festivals] = results
 
   return {
     data: {
       country: country.data,
-      exchangeRate: exchangeRate.data,
       festivals: festivals.data ?? [],
-      foodInfo: foodInfo.data ?? [],
       plan: ddayQuery.data,
-      phrase: phrase.data,
-      populationInfo: populationInfo.data ?? [],
       tourPlaces: tourPlaces.data ?? [],
-      weather: weather.data,
     } satisfies MainTravelQueryData,
-    isError: ddayQuery.isError || results.slice(0, 5).some((query) => query.isError),
+    isError: ddayQuery.isError || results.some((query) => query.isError),
     isLoading: ddayQuery.isLoading || results.some((query) => query.isLoading),
   }
 }

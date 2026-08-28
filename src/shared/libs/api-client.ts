@@ -24,6 +24,13 @@ export const apiClient = axios.create({
   },
 })
 
+export function resolveApiAssetUrl(url?: string): string | undefined {
+  if (!url || !url.startsWith('/')) return url
+  if (typeof window === 'undefined') return url
+  const apiBaseUrl = new URL(apiClient.defaults.baseURL ?? '/', window.location.origin)
+  return new URL(url, apiBaseUrl.origin).href
+}
+
 // 저장된 accessToken을 모든 요청 헤더에 자동 첨부
 apiClient.interceptors.request.use((config) => {
   const token = getAccessToken()

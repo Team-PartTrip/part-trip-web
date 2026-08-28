@@ -62,7 +62,7 @@ export function MissionPage() {
   return (
     <AppShell>
       <S.Page>
-      <S.Content>
+      {isLoading ? <S.LoadingLayout aria-busy="true" aria-label="미션 로딩 중"><S.LoadingCharacter /><S.LoadingPanel /></S.LoadingLayout> : <S.Content>
         <S.CharacterCard>
           <S.CardActions>
             <button type="button" aria-label="미션 일정 보기" onClick={() => setActiveDialog('calendar')}><CalendarIcon /></button>
@@ -77,7 +77,6 @@ export function MissionPage() {
         <S.MissionPanel>
           <S.Title>미션 <span>{isAllCompleted ? 'Complete' : 'New'}</span></S.Title>
           {errorMessage || missionsQuery.isError ? <S.ErrorMessage role="alert">{errorMessage || '미션 목록을 불러오지 못했습니다. 다시 시도해주세요.'}</S.ErrorMessage> : null}
-          {isLoading ? <S.StateMessage>미션을 불러오는 중입니다.</S.StateMessage> : null}
           {!isLoading && missions.length === 0 ? <S.StateMessage>진행할 미션이 없습니다.</S.StateMessage> : null}
           {!isLoading && missions.length > 0 ? (
             <S.MissionList>
@@ -101,7 +100,7 @@ export function MissionPage() {
             </S.MissionList>
           ) : null}
         </S.MissionPanel>
-      </S.Content>
+      </S.Content>}
       {activeDialog === 'calendar' ? <CalendarDialog onClose={() => setActiveDialog(null)} /> : null}
       {activeDialog === 'completed' ? (
         <CompletedMissionDialog completedMissions={completedMissions} onClose={() => setActiveDialog(null)} />

@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { Skeleton } from '@/shared/ui/parttrip'
 
 export const Page = styled.main`
   min-height: 100%;
@@ -69,6 +70,18 @@ export const FeedStatus = styled.p`
   margin: 2rem 0;
   color: var(--pt-text-muted);
   text-align: center;
+`
+
+export const FeedLoading = styled.div`
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+`
+
+export const LoadingPost = styled(Skeleton)`
+  height: 302px;
+  border-radius: 20px;
 `
 
 export const PostButton = styled.button`

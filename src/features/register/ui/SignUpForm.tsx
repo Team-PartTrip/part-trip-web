@@ -118,10 +118,10 @@ export function SignUpForm() {
     setMessage({ text: getFirstErrorMessage(errors), tone: 'error' })
   }
 
-  const handleGoogleSignup = async (code: string) => {
+  const handleGoogleSignup = async (idToken: string) => {
     try {
       setIsGoogleSubmitting(true)
-      const tokens = await googleLogin({ code })
+      const tokens = await googleLogin({ idToken })
       saveAuthTokens(tokens)
       navigate({ to: paths.main, replace: true })
     } catch (error) {

@@ -1,7 +1,26 @@
 import { Link } from '@tanstack/react-router'
-import styled, { css } from 'styled-components'
+import styled, { css, keyframes } from 'styled-components'
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost'
+
+const skeletonShimmer = keyframes`
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+`
+
+export const Skeleton = styled.span<{ $width?: string; $height?: string; $radius?: string }>`
+  display: block;
+  width: ${({ $width = '100%' }) => $width};
+  height: ${({ $height = '16px' }) => $height};
+  border-radius: ${({ $radius = '6px' }) => $radius};
+  background: linear-gradient(90deg, #edf3f8 25%, #f8fbfd 37%, #edf3f8 63%);
+  background-size: 400% 100%;
+  animation: ${skeletonShimmer} 1.4s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+`
 
 export const Page = styled.div`
   width: min(100%, 1200px);
@@ -44,7 +63,7 @@ const buttonStyle = css<{ $variant?: ButtonVariant }>`
   justify-content: center;
   gap: 8px;
   border: 1px solid transparent;
-  border-radius: ${({ theme }) => theme.radii.button};
+  border-radius: 14px;
   padding: 12px 24px;
   cursor: pointer;
   font-size: 15px;
@@ -56,7 +75,7 @@ const buttonStyle = css<{ $variant?: ButtonVariant }>`
   ${({ $variant, theme }) => {
     if ($variant === 'secondary') {
       return css`
-        border-color: ${theme.colors.brand.strong};
+        border-color: ${theme.colors.border.subtle};
         background: ${theme.colors.background.default};
         color: ${theme.colors.brand.strong};
 

@@ -11,20 +11,21 @@ export function parsePlannerGroupSettings(value: string | null): PlannerGroupSet
   try {
     const parsed: unknown = JSON.parse(value ?? '{}')
     const stored = isRecord(parsed) ? parsed : {}
+    const isSolo = stored.isSolo === true
     const memberCount = stored.memberCount
 
     return {
-      isSolo: stored.isSolo === true,
+      isSolo,
       memberCount:
         typeof memberCount === 'number' &&
         Number.isSafeInteger(memberCount) &&
         memberCount >= 1 &&
         memberCount <= 30
-          ? memberCount
-          : 1,
+          ? isSolo ? memberCount : Math.max(2, memberCount)
+          : isSolo ? 1 : 2,
     }
   } catch {
-    return { isSolo: false, memberCount: 1 }
+    return { isSolo: false, memberCount: 2 }
   }
 }
 

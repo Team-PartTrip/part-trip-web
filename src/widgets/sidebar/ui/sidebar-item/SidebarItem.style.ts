@@ -10,7 +10,7 @@ export const ItemLink = styled(Link)<{ $isParentActive: boolean }>`
   border-radius: 12px;
   padding: 0 8px;
   background: ${({ $isParentActive, theme }) => ($isParentActive ? theme.colors.background.muted : 'transparent')};
-  color: ${({ theme }) => theme.colors.text.muted};
+  color: ${({ $isParentActive, theme }) => ($isParentActive ? theme.colors.brand.primary : theme.colors.text.muted)};
   text-decoration: none;
   outline: none;
 
@@ -30,9 +30,9 @@ export const ItemLink = styled(Link)<{ $isParentActive: boolean }>`
 
 export const IconWrapper = styled.span`
   display: flex;
-  width: 20px;
-  height: 20px;
-  flex: 0 0 20px;
+  width: 25px;
+  height: 25px;
+  flex: 0 0 25px;
   align-items: center;
   justify-content: center;
 
@@ -45,9 +45,9 @@ export const IconWrapper = styled.span`
 
 export const Text = styled.span<{ $isParentActive: boolean }>`
   color: currentColor;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  line-height: 20px;
+  line-height: 22px;
   white-space: nowrap;
 
   @media (max-width: 47.9375rem) {

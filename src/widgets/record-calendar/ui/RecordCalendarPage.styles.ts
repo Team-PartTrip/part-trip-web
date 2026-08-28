@@ -27,12 +27,20 @@ export const Subtitle = styled.p`
 export const CalendarLayout = styled.div`
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr);
+  grid-template-columns: minmax(0, 720px) minmax(320px, 392px);
+  @media (max-width: 860px) { grid-template-columns: 1fr; }
+`
+
+export const LoadingLayout = styled.div`
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 720px) minmax(320px, 392px);
+
   @media (max-width: 860px) { grid-template-columns: 1fr; }
 `
 
 export const CalendarCard = styled.section`
-  min-height: 735px;
+  min-height: 650px;
   border-radius: 28px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
@@ -103,7 +111,7 @@ export const Note = styled.p`
 `
 
 export const FestivalList = styled.section`
-  min-height: 735px;
+  min-height: 650px;
   border-radius: 28px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
@@ -114,14 +122,15 @@ export const FestivalList = styled.section`
 
 export const FestivalRow = styled.article`
   display: flex;
-  min-height: 64px;
+  min-height: 144px;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border-left: 2px solid ${({ theme }) => theme.colors.brand.primary};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  padding: 8px 0 8px 12px;
-  &:last-of-type { border-bottom: 0; }
+  border-left: 5px solid ${({ theme }) => theme.colors.brand.primary};
+  border-radius: 12px;
+  padding: 16px 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
   div { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
   strong { overflow: hidden; color: ${({ theme }) => theme.colors.text.strong}; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
   span { overflow: hidden; color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }

@@ -59,7 +59,7 @@ export function CommunityPage() {
         <S.Tabs>{categories.map((item) => <button type="button" key={item} className={category === item ? 'active' : ''} onClick={() => handleCategoryChange(item)}>{item}</button>)}</S.Tabs>
         <S.Layout>
           <S.Feed>
-            {isLoading ? <S.FeedStatus>게시글을 불러오는 중입니다.</S.FeedStatus> : null}
+            {isLoading ? <S.FeedLoading aria-busy="true" aria-label="게시글 로딩 중"><S.LoadingPost /><S.LoadingPost /></S.FeedLoading> : null}
             {errorMessage ? <S.FeedStatus role="alert">{errorMessage}</S.FeedStatus> : null}
             {!isLoading && !errorMessage && posts.length === 0 ? <S.FeedStatus>등록된 게시글이 없습니다.</S.FeedStatus> : null}
             {columns.map((column, columnIndex) => (
@@ -71,7 +71,7 @@ export function CommunityPage() {
           <S.Aside>
             <S.CreateButton type="button" onClick={() => navigate({ to: paths.communityWrite })}>⊕ 게시글 작성하기</S.CreateButton>
             <S.Trending>
-              <header><h2>인기 여행지</h2><button type="button">전체보기</button></header>
+              <header><h2>인기 여행지</h2><button type="button" onClick={() => navigate({ to: paths.travelSelect })}>전체보기</button></header>
               {trendingDestinations.map((destination) => <S.Destination key={destination.name}><img src={destination.imageUrl} alt={destination.name.split(', ')[0]} /><div><strong>{destination.name}</strong><span>{destination.description}</span></div></S.Destination>)}
             </S.Trending>
           </S.Aside>

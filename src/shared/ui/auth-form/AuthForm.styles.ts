@@ -13,15 +13,27 @@ export const AuthPage = styled.main`
   min-height: 100dvh;
   place-items: center;
   padding: 40px 20px;
-  background: ${({ theme }) => theme.colors.background.default};
+  background: ${({ theme }) => theme.colors.background.subtle};
 `
 
 export const Container = styled.section`
   display: flex;
   width: min(100%, 560px);
+  min-height: 720px;
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  justify-content: center;
+  border: 1px solid #e6edf4;
+  border-radius: 16px;
+  padding: 32px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: 0 4px 14px rgb(15 33 51 / 5%);
+
+  @media (max-width: 600px) {
+    min-height: 0;
+    padding: 28px 20px;
+  }
 `
 
 export const Header = styled.header`
@@ -41,9 +53,9 @@ export const Brand = styled.span`
 export const Title = styled.h1`
   margin: 0;
   color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 700;
-  line-height: 40px;
+  line-height: 38px;
   text-align: center;
 `
 
@@ -138,7 +150,8 @@ export const PrimaryButton = styled.button<{ $strong?: boolean }>`
 
 export const SecondaryButton = styled(Link)<{ $filled?: boolean }>`
   ${buttonStyles}
-  border: 1px solid ${({ theme }) => theme.colors.brand.strong};
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 14px;
   background: ${({ $filled, theme }) => ($filled ? theme.colors.brand.primary : theme.colors.background.default)};
   color: ${({ $filled, theme }) => ($filled ? theme.colors.text.inverse : theme.colors.brand.strong)};
 
@@ -147,7 +160,8 @@ export const SecondaryButton = styled(Link)<{ $filled?: boolean }>`
 
 export const OutlineButton = styled.button`
   ${buttonStyles}
-  border: 1px solid ${({ theme }) => theme.colors.brand.strong};
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 14px;
   background: ${({ theme }) => theme.colors.background.default};
   color: ${({ theme }) => theme.colors.brand.strong};
 
@@ -165,11 +179,21 @@ export const CodeSendButton = styled.button`
 
 export const GoogleButton = styled.button`
   ${buttonStyles}
-  border: 1px solid ${({ theme }) => theme.colors.brand.strong};
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 14px;
   background: ${({ theme }) => theme.colors.background.default};
   color: ${({ theme }) => theme.colors.brand.strong};
 
   &:hover:not(:disabled) { background: ${({ theme }) => theme.colors.background.muted}; }
+`
+
+export const GoogleLoginContainer = styled.div`
+  display: flex;
+  width: 100%;
+  min-height: 54px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 `
 
 export const Actions = styled.div`

@@ -50,10 +50,33 @@ export type PlannerDetailResponseDto = {
 }
 
 export type PlannerMemberResponseDto = {
+  invitationId?: number
+  status?: string
   userId?: string
   nickName?: string
   role?: string
   joinedAt?: string
+}
+
+export type InvitePlannerMembersRequestDto = {
+  userIds: string[]
+}
+
+export type PlannerInvitationResponseDto = {
+  createdAt?: string
+  invitedByUserId?: string
+  invitedUserId?: string
+  invitationId?: number
+  plannerId?: number
+  plannerTitle?: string
+  respondedAt?: string
+  status?: string
+}
+
+export type PlannerInviteResponseDto = {
+  inviteLink?: string
+  invitedCount?: number
+  invitations?: PlannerInvitationResponseDto[]
 }
 
 export type JoinPlannerRequestDto = {
@@ -189,10 +212,49 @@ export type VoteCloseResponseDto = {
   tied?: boolean
 }
 
+export type VoteReminderResponseDto = {
+  message?: string
+  notifiedCount?: number
+}
+
+export type PlannerCartRequestDto = {
+  placeIds: number[]
+}
+
+export type RandomPlaceResponseDto = {
+  placeId?: number
+  placeName?: string
+}
+
+export type CreateVoteOptionRequestDto = {
+  placeName?: string
+  tourPlaceId?: number
+}
+
+export type VoteOptionResponseDto = VoteOptionStatusResponseDto & {
+  createdAt?: string
+  voteId?: number
+}
+
+export type PlannerConfirmResponseDto = {
+  confirmedSchedule?: ConfirmedPlaceResponseDto[]
+  plannerId?: number
+  tripCardId?: number
+}
+
 const PLANNER_API_PATHS = {
   base: '/planners',
   detail: (plannerId: number) => `/planners/${plannerId}`,
+  invitations: '/planners/invitations/me',
+  invitation: (invitationId: number, action: 'accept' | 'reject') => `/planners/invitations/${invitationId}/${action}`,
+  cancelInvitation: (plannerId: number, invitationId: number) => `/planners/${plannerId}/invitations/${invitationId}`,
   members: (plannerId: number) => `/planners/${plannerId}/members`,
+  member: (plannerId: number, memberUserId: string) => `/planners/${plannerId}/members/${memberUserId}`,
+  invite: (plannerId: number) => `/planners/${plannerId}/members`,
+  update: (plannerId: number) => `/planners/${plannerId}`,
+  cart: (plannerId: number) => `/planners/${plannerId}/cart`,
+  random: (plannerId: number) => `/planners/${plannerId}/cart/random`,
+  confirm: (plannerId: number) => `/planners/${plannerId}/confirm`,
   travelPlan: (plannerId: number) => `/planners/${plannerId}/travel-plan`,
   confirmedPlaces: (plannerId: number) => `/planners/${plannerId}/confirmed-places`,
   votes: (plannerId: number) => `/planners/${plannerId}/votes`,
@@ -200,6 +262,9 @@ const PLANNER_API_PATHS = {
   ballot: (plannerId: number, voteId: number) => `/planners/${plannerId}/votes/${voteId}/ballot`,
   closeVote: (plannerId: number, voteId: number) => `/planners/${plannerId}/votes/${voteId}/close`,
   confirmVote: (plannerId: number, voteId: number) => `/planners/${plannerId}/votes/${voteId}/confirm`,
+  options: (plannerId: number, voteId: number) => `/planners/${plannerId}/votes/${voteId}/options`,
+  option: (plannerId: number, voteId: number, optionId: number) => `/planners/${plannerId}/votes/${voteId}/options/${optionId}`,
+  remind: (plannerId: number) => `/planners/${plannerId}/votes/remind`,
   join: '/planners/join',
 } as const
 
@@ -218,9 +283,43 @@ export async function getPlannerDetail(plannerId: number): Promise<PlannerDetail
   return data
 }
 
+export async function updatePlanner(plannerId: number, payload: SavePlannerTravelPlanRequestDto): Promise<PlannerTravelPlanResponseDto> {
+  const { data } = await apiClient.patch<PlannerTravelPlanResponseDto>(PLANNER_API_PATHS.update(plannerId), payload)
+  return data
+}
+
 export async function getPlannerMembers(plannerId: number): Promise<PlannerMemberResponseDto[]> {
   const { data } = await apiClient.get<PlannerMemberResponseDto[]>(PLANNER_API_PATHS.members(plannerId))
   return data
+}
+
+export async function invitePlannerMembers(plannerId: number, payload: InvitePlannerMembersRequestDto): Promise<PlannerInviteResponseDto> {
+  const { data } = await apiClient.post<PlannerInviteResponseDto>(PLANNER_API_PATHS.invite(plannerId), payload)
+  return data
+}
+
+export async function getMyPlannerInvitations(): Promise<PlannerInvitationResponseDto[]> {
+  const { data } = await apiClient.get<PlannerInvitationResponseDto[]>(PLANNER_API_PATHS.invitations)
+  return data
+}
+
+export async function acceptPlannerInvitation(invitationId: number): Promise<PlannerInvitationResponseDto> {
+  const { data } = await apiClient.post<PlannerInvitationResponseDto>(PLANNER_API_PATHS.invitation(invitationId, 'accept'))
+  return data
+}
+
+export async function rejectPlannerInvitation(invitationId: number): Promise<PlannerInvitationResponseDto> {
+  const { data } = await apiClient.post<PlannerInvitationResponseDto>(PLANNER_API_PATHS.invitation(invitationId, 'reject'))
+  return data
+}
+
+export async function cancelPlannerInvitation(plannerId: number, invitationId: number): Promise<PlannerInvitationResponseDto> {
+  const { data } = await apiClient.delete<PlannerInvitationResponseDto>(PLANNER_API_PATHS.cancelInvitation(plannerId, invitationId))
+  return data
+}
+
+export async function removePlannerMember(plannerId: number, memberUserId: string): Promise<void> {
+  await apiClient.delete(PLANNER_API_PATHS.member(plannerId, memberUserId))
 }
 
 export async function savePlannerTravelPlan(
@@ -241,6 +340,21 @@ export async function getConfirmedPlaces(plannerId: number): Promise<PlannerFina
 
 export async function joinPlanner(payload: JoinPlannerRequestDto): Promise<PlannerJoinResponseDto> {
   const { data } = await apiClient.post<PlannerJoinResponseDto>(PLANNER_API_PATHS.join, payload)
+  return data
+}
+
+export async function addPlannerPlaces(plannerId: number, payload: PlannerCartRequestDto): Promise<string> {
+  const { data } = await apiClient.post<string>(PLANNER_API_PATHS.cart(plannerId), payload)
+  return data
+}
+
+export async function selectRandomPlannerPlace(plannerId: number): Promise<RandomPlaceResponseDto> {
+  const { data } = await apiClient.post<RandomPlaceResponseDto>(PLANNER_API_PATHS.random(plannerId))
+  return data
+}
+
+export async function confirmPlanner(plannerId: number): Promise<PlannerConfirmResponseDto> {
+  const { data } = await apiClient.post<PlannerConfirmResponseDto>(PLANNER_API_PATHS.confirm(plannerId))
   return data
 }
 
@@ -286,4 +400,18 @@ export async function confirmVote(
     payload,
   )
   return data
+}
+
+export async function remindPlannerMembers(plannerId: number): Promise<VoteReminderResponseDto> {
+  const { data } = await apiClient.post<VoteReminderResponseDto>(PLANNER_API_PATHS.remind(plannerId))
+  return data
+}
+
+export async function addVoteOption(plannerId: number, voteId: number, payload: CreateVoteOptionRequestDto): Promise<VoteOptionResponseDto> {
+  const { data } = await apiClient.post<VoteOptionResponseDto>(PLANNER_API_PATHS.options(plannerId, voteId), payload)
+  return data
+}
+
+export async function deleteVoteOption(plannerId: number, voteId: number, optionId: number): Promise<void> {
+  await apiClient.delete(PLANNER_API_PATHS.option(plannerId, voteId, optionId))
 }

@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { Skeleton } from '@/shared/ui/parttrip'
 
 export const SidebarWrapper = styled.aside`
   position: sticky;
@@ -28,7 +29,7 @@ export const Aside = styled.div`
   width: 100%;
   height: 100%;
   flex-direction: column;
-  padding: 23px;
+  padding: 20px 24px 24px;
 
   @media (max-width: 767px) {
     flex-direction: row;
@@ -39,12 +40,12 @@ export const Aside = styled.div`
 `
 
 export const LogoSection = styled.div`
-  height: 32px;
-  margin-bottom: 24px;
+  height: 34px;
+  margin-bottom: 26px;
 
   a {
     color: ${({ theme }) => theme.colors.brand.strong};
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 700;
     line-height: 32px;
     text-decoration: none;
@@ -101,4 +102,30 @@ export const Avatar = styled.span`
   color: ${({ theme }) => theme.colors.brand.strong};
   font-size: 11px;
   font-weight: 600;
+`
+
+export const AccountIcon = styled.span`
+  display: inline-flex;
+  width: 25px;
+  height: 25px;
+  flex: 0 0 25px;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+`
+
+export const AccountSkeleton = styled(Skeleton)`
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+`
+
+export const AccountNameSkeleton = styled(Skeleton)`
+  width: 128px;
+  height: 20px;
 `

@@ -1,4 +1,23 @@
 import styled from 'styled-components'
+import { Skeleton } from '@/shared/ui/parttrip'
+
+export const LoadingLayout = styled.div`
+  display: grid;
+  gap: 100px;
+  grid-template-columns: minmax(0, 592px) minmax(0, 478px);
+  align-items: start;
+`
+
+export const LoadingCharacter = styled(Skeleton)`
+  height: 525px;
+  margin-top: 197px;
+  border-radius: 20px;
+`
+
+export const LoadingPanel = styled(Skeleton)`
+  height: 525px;
+  border-radius: 20px;
+`
 
 export const Page = styled.main`
   min-height: 100%;

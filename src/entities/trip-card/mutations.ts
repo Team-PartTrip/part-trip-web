@@ -2,8 +2,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import {
   createSharedTripComment,
+  deleteTravelCards,
+  generateTravelCardReport,
   importTrip,
   shareTrip,
+  type TravelCardDeleteRequestDto,
+  type TravelCardReportRequestDto,
   type ShareTripRequestDto,
 } from './api'
 import { communityQueryKeys } from '@/entities/community/query-keys'
@@ -26,6 +30,20 @@ export function useImportTripMutation() {
       void queryClient.invalidateQueries({ queryKey: tripCardQueryKeys.all })
       return queryClient.invalidateQueries({ queryKey: tripPlanQueryKeys.all })
     },
+  })
+}
+
+export function useDeleteTravelCardsMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: TravelCardDeleteRequestDto) => deleteTravelCards(payload),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: tripCardQueryKeys.all }),
+  })
+}
+
+export function useGenerateTravelCardReportMutation() {
+  return useMutation({
+    mutationFn: ({ cardId, payload }: { cardId: number; payload: TravelCardReportRequestDto }) => generateTravelCardReport(cardId, payload),
   })
 }
 

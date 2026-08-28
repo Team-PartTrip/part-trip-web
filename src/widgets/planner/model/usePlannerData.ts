@@ -10,44 +10,43 @@ import {
 } from '@/entities/planner'
 import {
   useCountriesQuery,
-  useDdayQuery,
   useTourPlacesQuery,
-  type DdayResponseDto,
 } from '@/entities/travel'
 import { isPositiveSafeInteger } from '@/shared/utils'
 
 import type { PlannerStep } from './types'
+
+type PlannerPlan = {
+  cityName?: string
+  countryName?: string
+  endDate?: string
+  headcount?: number
+  startDate?: string
+}
 
 export function usePlannerData(
   step: PlannerStep,
   category: string | undefined,
   activePlannerId: number,
   activeVoteId: number,
+  countryKeyword = '',
 ) {
-  const needsPlan =
-    step === 'destination' ||
-    step === 'explore' ||
-    step === 'vote' ||
-    step === 'lineup' ||
-    step === 'place'
   const needsPlaces =
     step === 'explore' ||
     step === 'vote' ||
     step === 'lineup' ||
     step === 'final' ||
     step === 'place'
-  const needsPlannerDetail = step === 'group' || step === 'progress' || step === 'final'
+  const hasActivePlanner = isPositiveSafeInteger(activePlannerId)
+  const needsPlannerDetail = hasActivePlanner && step !== 'list' && step !== 'create'
   const needsMembers = step === 'group' || step === 'progress'
-  const needsVotes = step === 'vote' || step === 'lineup' || step === 'progress' || step === 'final'
+  const needsVotes = step === 'explore' || step === 'vote' || step === 'lineup' || step === 'progress' || step === 'final'
   const needsVoteDetail = step === 'vote' &&
     isPositiveSafeInteger(activePlannerId) &&
     isPositiveSafeInteger(activeVoteId)
   const needsConfirmedPlaces = step === 'final'
-  const [overriddenPlan, setOverriddenPlan] = useState<
-    DdayResponseDto | undefined
-  >()
-  const ddayQuery = useDdayQuery(needsPlan)
-  const countriesQuery = useCountriesQuery(step === 'destination')
+  const [overriddenPlan, setOverriddenPlan] = useState<PlannerPlan>()
+  const countriesQuery = useCountriesQuery(countryKeyword, step === 'destination')
   const plannersQuery = useMyPlannersQuery(step === 'list')
   const plannerDetailQuery = usePlannerDetailQuery(
     activePlannerId,
@@ -66,7 +65,7 @@ export function usePlannerData(
         startDate: plannerDetailQuery.data.startDate,
       }
     : undefined
-  const plan = overriddenPlan ?? plannerPlan ?? ddayQuery.data
+  const plan = overriddenPlan ?? plannerPlan
   const placesQuery = useTourPlacesQuery(
     plan?.countryName,
     plan?.cityName,
@@ -77,7 +76,6 @@ export function usePlannerData(
   return {
     countries: countriesQuery.data ?? [],
     hasError:
-      ddayQuery.isError ||
       countriesQuery.isError ||
       placesQuery.isError ||
       plannersQuery.isError ||
@@ -87,7 +85,6 @@ export function usePlannerData(
       votesQuery.isError ||
       voteDetailQuery.isError,
     isLoading:
-      ddayQuery.isLoading ||
       countriesQuery.isLoading ||
       placesQuery.isLoading ||
       plannersQuery.isLoading ||

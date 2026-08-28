@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/libs/api-client'
+import { requestWithMockFallback } from '@/shared/libs/api-fallback'
 
 export * from '@/shared/libs/token-storage'
 
@@ -51,6 +52,8 @@ export type GoogleLoginRequestDto = {
   code?: string
 }
 
+export type CheckUserIdResponseDto = Record<string, boolean>
+
 export type UserEntity = {
   userId: string
   userPwd?: string
@@ -68,6 +71,7 @@ export type UserEntity = {
 
 // === API Paths ===
 const AUTH_API_PATHS = {
+  checkId: '/auth/check-id',
   email: {
     sendCode: '/auth/email/send',
     verifyCode: '/auth/email/verify',
@@ -132,4 +136,14 @@ export async function logout(payload?: LogoutRequestDto): Promise<string> {
 
 export async function refresh(payload: RefreshRequestDto): Promise<TokenResponseDto> {
   return post<TokenResponseDto>(AUTH_API_PATHS.session.refresh, payload)
+}
+
+export async function checkUserId(userId: string): Promise<CheckUserIdResponseDto> {
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.get<CheckUserIdResponseDto>(AUTH_API_PATHS.checkId, { params: { userId } })
+      return data
+    },
+    () => ({ available: true }),
+  )
 }

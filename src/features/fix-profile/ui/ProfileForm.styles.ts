@@ -162,7 +162,7 @@ export const Field = styled.label`
   font-size: 12px;
   font-weight: 600;
 
-  input {
+  input, select {
     width: 100%;
     height: 42px;
     border: 1px solid var(--pt-border-subtle);
@@ -175,7 +175,7 @@ export const Field = styled.label`
     outline: none;
   }
 
-  input:focus { border-color: var(--pt-brand-primary); box-shadow: 0 0 0 3px rgb(26 110 191 / 12%); }
+  input:focus, select:focus { border-color: var(--pt-brand-primary); box-shadow: 0 0 0 3px rgb(26 110 191 / 12%); }
   input[aria-invalid='true'] { border-color: var(--pt-status-error); }
 `
 

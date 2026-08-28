@@ -142,7 +142,7 @@ export function TripCardPhotoComposer() {
             {errorMessage ? (
               <S.ErrorMessage role="alert">{errorMessage}</S.ErrorMessage>
             ) : null}
-            <PartTripButton type="submit">여행 카드 저장</PartTripButton>
+            <PartTripButton type="submit">여행 카드 초안 만들기</PartTripButton>
           </S.Form>
         </S.CreateFormPanel>
         <S.CardPreviewPanel>

@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/libs/api-client'
+import { requestWithMockFallback } from '@/shared/libs/api-fallback'
 import type { CommentRequestDto, CommentResponseDto } from './types'
 
 export type { CommentRequestDto, CommentResponseDto } from './types'
@@ -40,64 +41,153 @@ const BOARD_API_PATHS = {
   commentDetail: (commentId: number) => `/community/comments/${commentId}`,
 } as const
 
+let mockBoards: BoardResponseDto[] = []
+const mockBoardComments = new Map<number, CommentResponseDto[]>()
+
+function mockPage<T>(content: T[], params?: { page?: number; size?: number }) {
+  const page = params?.page ?? 0
+  const size = params?.size ?? content.length
+  return {
+    content: content.slice(page * size, page * size + size),
+    hasNext: false,
+    page,
+    size,
+    totalElements: content.length,
+    totalPages: content.length ? 1 : 0,
+  }
+}
+
 export async function getBoards(params?: {
   page?: number
   size?: number
 }): Promise<PageResponseDtoBoardResponseDto> {
-  const { data } = await apiClient.get<PageResponseDtoBoardResponseDto>(BOARD_API_PATHS.base, { params })
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.get<PageResponseDtoBoardResponseDto>(BOARD_API_PATHS.base, { params })
+      return data
+    },
+    () => mockPage(mockBoards, params),
+  )
 }
 
 export async function createBoard(payload: BoardRequestDto): Promise<BoardResponseDto> {
-  const { data } = await apiClient.post<BoardResponseDto>(BOARD_API_PATHS.base, payload)
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.post<BoardResponseDto>(BOARD_API_PATHS.base, payload)
+      return data
+    },
+    () => {
+      const board = { ...payload, boardId: Date.now(), commentCount: 0, likeCount: 0, nickName: '나', userId: 'mock-user' }
+      mockBoards = [board, ...mockBoards]
+      return board
+    },
+  )
 }
 
 export async function getBoard(boardId: number): Promise<BoardResponseDto> {
-  const { data } = await apiClient.get<BoardResponseDto>(BOARD_API_PATHS.detail(boardId))
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.get<BoardResponseDto>(BOARD_API_PATHS.detail(boardId))
+      return data
+    },
+    () => mockBoards.find((board) => board.boardId === boardId) ?? (() => { throw new Error('게시글을 찾을 수 없습니다.') })(),
+  )
 }
 
 export async function updateBoard(boardId: number, payload: BoardRequestDto): Promise<BoardResponseDto> {
-  const { data } = await apiClient.put<BoardResponseDto>(BOARD_API_PATHS.detail(boardId), payload)
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.put<BoardResponseDto>(BOARD_API_PATHS.detail(boardId), payload)
+      return data
+    },
+    () => {
+      const current = mockBoards.find((board) => board.boardId === boardId)
+      if (!current) throw new Error('게시글을 찾을 수 없습니다.')
+      const updated = { ...current, ...payload, boardId }
+      mockBoards = mockBoards.map((board) => board.boardId === boardId ? updated : board)
+      return updated
+    },
+  )
 }
 
 export async function deleteBoard(boardId: number): Promise<string> {
-  const { data } = await apiClient.delete<string>(BOARD_API_PATHS.detail(boardId))
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.delete<string>(BOARD_API_PATHS.detail(boardId))
+      return data
+    },
+    () => {
+      mockBoards = mockBoards.filter((board) => board.boardId !== boardId)
+      mockBoardComments.delete(boardId)
+      return '삭제되었습니다.'
+    },
+  )
 }
 
 export async function getMyBoards(params?: {
   page?: number
   size?: number
 }): Promise<PageResponseDtoBoardResponseDto> {
-  const { data } = await apiClient.get<PageResponseDtoBoardResponseDto>(BOARD_API_PATHS.mine, { params })
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.get<PageResponseDtoBoardResponseDto>(BOARD_API_PATHS.mine, { params })
+      return data
+    },
+    () => mockPage(mockBoards, params),
+  )
 }
 
 export async function getBoardComments(boardId: number): Promise<CommentResponseDto[]> {
-  const { data } = await apiClient.get<CommentResponseDto[]>(BOARD_API_PATHS.comments(boardId))
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.get<CommentResponseDto[]>(BOARD_API_PATHS.comments(boardId))
+      return data
+    },
+    () => mockBoardComments.get(boardId) ?? [],
+  )
 }
 
 export async function createBoardComment(
   boardId: number,
   payload: CommentRequestDto
 ): Promise<CommentResponseDto> {
-  const { data } = await apiClient.post<CommentResponseDto>(BOARD_API_PATHS.comments(boardId), payload)
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.post<CommentResponseDto>(BOARD_API_PATHS.comments(boardId), payload)
+      return data
+    },
+    () => {
+      const comment = { ...payload, commentId: Date.now(), createDate: new Date().toISOString(), targetId: boardId, userId: 'mock-user' }
+      mockBoardComments.set(boardId, [...(mockBoardComments.get(boardId) ?? []), comment])
+      return comment
+    },
+  )
 }
 
 export async function updateComment(
   commentId: number,
   payload: CommentRequestDto
 ): Promise<CommentResponseDto> {
-  const { data } = await apiClient.put<CommentResponseDto>(BOARD_API_PATHS.commentDetail(commentId), payload)
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.put<CommentResponseDto>(BOARD_API_PATHS.commentDetail(commentId), payload)
+      return data
+    },
+    () => ({ ...payload, commentId, userId: 'mock-user' }),
+  )
 }
 
 export async function deleteComment(commentId: number): Promise<string> {
-  const { data } = await apiClient.delete<string>(BOARD_API_PATHS.commentDetail(commentId))
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.delete<string>(BOARD_API_PATHS.commentDetail(commentId))
+      return data
+    },
+    () => {
+      for (const [boardId, comments] of mockBoardComments) {
+        mockBoardComments.set(boardId, comments.filter((comment) => comment.commentId !== commentId))
+      }
+      return '삭제되었습니다.'
+    },
+  )
 }

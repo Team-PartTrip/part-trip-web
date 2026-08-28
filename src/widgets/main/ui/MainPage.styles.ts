@@ -1,32 +1,46 @@
 import styled from 'styled-components'
+import { Skeleton } from '@/shared/ui/parttrip'
 
-export const Page = styled.div`
-  width: min(100%, 1200px);
-  min-height: 840px;
-  margin: 0 auto;
-  background: ${({ theme }) => theme.colors.background.default};
-`
-
-export const Header = styled.header`
+export const LoadingLayout = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 24px;
+  gap: 24px;
 `
 
-export const Title = styled.h1`
-  margin: 0;
+export const LoadingHero = styled(Skeleton)`
+  width: 100%;
+  height: 260px;
+  border-radius: 22px;
+`
+
+export const LoadingCalendar = styled(Skeleton)`
+  width: 100%;
+  height: 92px;
+  border-radius: 16px;
+`
+
+export const LoadingRecommendations = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  > div { display: grid; gap: 16px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+`
+
+export const LoadingHeading = styled(Skeleton)`
+  width: 102px;
+  height: 24px;
+`
+
+export const LoadingRecommendation = styled(Skeleton)`
+  height: 220px;
+  border-radius: 16px;
+`
+
+export const Page = styled.main`
+  width: 100%;
+  min-width: 0;
   color: ${({ theme }) => theme.colors.text.strong};
-  font-size: clamp(26px, 3vw, 32px);
-  font-weight: 700;
-  line-height: 40px;
-`
-
-export const Subtitle = styled.p`
-  margin: 0;
-  color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 15px;
-  line-height: 22px;
 `
 
 export const Error = styled.p`
@@ -36,232 +50,142 @@ export const Error = styled.p`
 `
 
 export const State = styled.p`
-  margin: 80px 0;
+  margin: 0 0 24px;
   color: ${({ theme }) => theme.colors.text.muted};
   text-align: center;
 `
 
-export const EmptyCard = styled.section`
+export const Hero = styled.section`
   display: flex;
-  min-height: 300px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  border-radius: 28px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-
-  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 18px; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 14px; }
-`
-
-export const HeroRow = styled.section`
-  display: grid;
-  gap: 24px;
-  grid-template-columns: 360px minmax(0, 1fr);
-  margin-bottom: 24px;
-
-  @media (max-width: 900px) { grid-template-columns: 1fr; }
-`
-
-export const TripCard = styled.article`
-  overflow: hidden;
-  border-radius: 28px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-`
-
-export const TripImage = styled.img`
-  display: block;
-  width: 100%;
-  height: 170px;
-  object-fit: cover;
-`
-
-export const TripBody = styled.div`
-  display: flex;
-  height: 148px;
-  flex-direction: column;
-  gap: 8px;
-  padding: 20px 24px;
-
-  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 18px; line-height: 24px; }
-  > span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; line-height: 18px; }
-`
-
-export const TripStatus = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin-top: 4px;
-  color: ${({ theme }) => theme.colors.brand.strong};
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 16px;
-`
-
-export const DdayCard = styled.section`
-  display: flex;
-  min-height: 318px;
+  min-height: 260px;
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
-  border-radius: 28px;
-  padding: 32px 36px;
-  background: ${({ theme }) => theme.colors.brand.strong};
+  box-sizing: border-box;
+  border: 1px solid rgb(13 74 132 / 12%);
+  border-radius: 22px;
+  padding: 32px;
+  background: ${({ theme }) => theme.colors.brand.primary};
   color: ${({ theme }) => theme.colors.text.inverse};
 `
 
 export const Eyebrow = styled.span`
-  font-size: 12px;
+  font-size: 18px;
   font-weight: 600;
-  line-height: 16px;
+  line-height: 22px;
+`
+
+export const HeroLabel = styled.span`
+  font-size: 13px;
+  line-height: 18px;
 `
 
 export const Dday = styled.strong`
-  font-size: clamp(40px, 5vw, 52px);
-  line-height: 60px;
+  font-size: 44px;
+  line-height: 53px;
 `
 
 export const Destination = styled.strong`
   font-size: 24px;
-  line-height: 32px;
+  line-height: 29px;
 `
 
-export const Dates = styled.span`
-  font-size: 15px;
-  line-height: 22px;
+export const HeroMeta = styled.span`
+  font-size: 13px;
+  line-height: 18px;
 `
 
-export const ActionButton = styled.button`
-  min-height: 46px;
-  border: 1px solid ${({ theme }) => theme.colors.brand.strong};
-  border-radius: 12px;
-  padding: 12px 24px;
-  background: ${({ theme }) => theme.colors.background.default};
-  color: ${({ theme }) => theme.colors.brand.strong};
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 600;
-
-  &:hover { background: ${({ theme }) => theme.colors.background.muted}; }
-
-  ${DdayCard} & { margin-top: 4px; }
-`
-
-export const LowerGrid = styled.section`
+export const CalendarCard = styled.button`
   display: grid;
-  gap: 24px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-bottom: 24px;
-
-  @media (max-width: 700px) { grid-template-columns: 1fr; }
-`
-
-export const InfoCard = styled.section`
-  display: flex;
-  min-height: 198px;
-  flex-direction: column;
-  gap: 12px;
-  border-radius: 20px;
-  padding: 20px 24px;
-  background: ${({ theme }) => theme.colors.background.default};
-
-  ${LowerGrid} &:first-child { min-height: 147px; }
-`
-
-export const CardTitle = styled.h2`
-  margin: 0;
-  color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 20px;
-`
-
-export const ProgressTrack = styled.div`
-  height: 8px;
-  overflow: hidden;
-  border-radius: 4px;
-  background: var(--pt-border-subtle);
-`
-
-export const ProgressBar = styled.div<{ $progress: number }>`
-  width: ${({ $progress }) => `${$progress}%`};
-  height: 100%;
-  border-radius: inherit;
-  background: ${({ theme }) => theme.colors.brand.primary};
-`
-
-export const StatusGrid = styled.div`
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-`
-
-export const StatusItem = styled.div`
-  display: flex;
-  flex-direction: column;
+  width: 100%;
+  min-height: 92px;
   align-items: center;
-  gap: 4px;
-  border-radius: 12px;
-  padding: 12px 4px;
-  background: ${({ theme }) => theme.colors.background.muted};
-  color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 11px;
-
-  b { color: ${({ theme }) => theme.colors.brand.successStrong}; font-size: 13px; }
-  b[data-warning='true'] { color: var(--pt-status-warning); }
-`
-
-export const TodoButton = styled.button`
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 2px 12px;
-  border: 0;
-  padding: 12px 0;
-  background: transparent;
+  gap: 16px;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  margin-top: 24px;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 16px;
+  padding: 20px 18px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
   color: ${({ theme }) => theme.colors.text.strong};
   cursor: pointer;
   text-align: left;
+  &:hover { background: ${({ theme }) => theme.colors.background.soft}; }
+`
 
-  span { font-size: 14px; font-weight: 600; }
-  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
-  b { grid-column: 2; grid-row: 1 / span 2; color: ${({ theme }) => theme.colors.text.muted}; font-size: 20px; }
+export const CalendarIcon = styled.span`
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 12px;
+  background: ${({ theme }) => theme.colors.background.muted};
+  img { width: 24px; height: 24px; }
+`
+
+export const CalendarCopy = styled.span`
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  strong { font-size: 16px; line-height: 19px; }
+  span { color: ${({ theme }) => theme.colors.brand.accent}; font-size: 13px; line-height: 18px; }
+`
+
+export const CalendarArrow = styled.span`
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 20px;
+  line-height: 24px;
 `
 
 export const Recommendations = styled.section`
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin-top: 16px;
+`
+
+export const SectionTitle = styled.h2`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 20px;
+  line-height: 24px;
 `
 
 export const RecommendationGrid = styled.div`
   display: grid;
-  gap: 24px;
+  gap: 16px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-
   @media (max-width: 700px) { grid-template-columns: 1fr; }
 `
 
 export const Recommendation = styled.article`
+  display: flex;
+  height: 220px;
+  box-sizing: border-box;
+  flex-direction: column;
+  gap: 14px;
   overflow: hidden;
-  border-radius: 20px;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 16px;
+  padding: 20px;
   background: ${({ theme }) => theme.colors.background.default};
-
-  span, small { display: block; padding-inline: 20px; }
-  span { padding-top: 14px; color: ${({ theme }) => theme.colors.text.strong}; font-size: 14px; font-weight: 600; }
-  small { padding-top: 2px; padding-bottom: 14px; color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  span { display: block; color: ${({ theme }) => theme.colors.text.strong}; font-size: 15px; font-weight: 600; line-height: 18px; }
 `
 
 export const RecommendationImage = styled.div<{ $imageUrl?: string }>`
-  height: 92px;
-  background: ${({ $imageUrl }) => ($imageUrl ? `url(${JSON.stringify($imageUrl)}) center / cover` : '#dee5f0')};
-`
-
-export const RecommendationEmpty = styled.p`
-  grid-column: 1 / -1;
-  margin: 0;
-  color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 14px;
+  display: grid;
+  height: 150px;
+  flex: 0 0 150px;
+  place-items: center;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 16px;
+  background-color: #ebf4fc;
+  background-image: ${({ $imageUrl }) => ($imageUrl ? `url(${JSON.stringify($imageUrl)})` : 'none')};
+  background-position: center;
+  background-size: cover;
+  color: ${({ theme }) => theme.colors.brand.strong};
+  font-size: 13px;
 `

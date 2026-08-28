@@ -5,6 +5,7 @@ import { useProfileSourceQuery } from '@/entities/user'
 import { resolveApiAssetUrl } from '@/entities/file/api'
 import catAvatarUrl from '@/shared/assets/community-avatar-cat.png'
 import { paths } from '@/shared/config'
+import { Skeleton } from '@/shared/ui/parttrip'
 import { AppShell } from '@/widgets/app-shell'
 
 import { useCommunityDetailActions } from '../model/useCommunityDetailActions'
@@ -63,7 +64,7 @@ export function CommunityDetailPage() {
 
         {errorMessage || postQuery.isError ? <S.StateCard role="alert">{errorMessage || '게시글을 불러오지 못했습니다.'}</S.StateCard> : null}
         {isLoading ? (
-          <S.StateCard aria-live="polite">게시글을 불러오고 있습니다.</S.StateCard>
+          <Skeleton aria-busy="true" aria-label="게시글 로딩 중" $height="560px" $radius="16px" />
         ) : post ? (
           <S.Layout>
             <S.Article>

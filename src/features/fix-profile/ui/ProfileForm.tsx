@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm, useWatch, type SubmitHandler } from 'react-hook-form'
 import { useNavigate } from '@tanstack/react-router'
-import { type UserProfile, useUpdateProfileMutation, useUploadProfileImageMutation } from '@/entities/user'
+import { type UserProfile, useTravelThemesQuery, useUpdateProfileMutation, useUploadProfileImageMutation } from '@/entities/user'
 import { paths } from '@/shared/config'
 import { useLockBodyScroll } from '@/shared/hooks'
 
@@ -18,6 +18,7 @@ type ProfileFormProps = {
 
 type ProfileFormValues = {
   name: string
+  themeId?: number
 }
 
 export function ProfileForm({ profile }: ProfileFormProps) {
@@ -30,9 +31,11 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const updateProfileMutation = useUpdateProfileMutation()
   const uploadProfileImageMutation = useUploadProfileImageMutation()
+  const { data: travelThemes = [] } = useTravelThemesQuery()
   const { register, handleSubmit, formState, control } = useForm<ProfileFormValues>({
     defaultValues: {
       name: profile.name || '',
+      themeId: profile.themeId,
     },
   })
   const previewName = useWatch({ control, name: 'name' })
@@ -98,7 +101,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
       await updateProfileMutation.mutateAsync({
         imgUrl: selectedPhoto ? uploadedUrl : avatarPreview || undefined,
         nickName: values.name.trim(),
-        themeId: profile.themeId,
+        themeId: values.themeId,
       })
       navigate({ to: paths.profile, replace: true })
     } catch {
@@ -156,6 +159,21 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                 aria-invalid={Boolean(formState.errors.name)}
               />
               {formState.errors.name ? <S.FieldError>{formState.errors.name.message}</S.FieldError> : null}
+            </S.Field>
+          </S.Section>
+
+          <S.Section>
+            <S.SectionHeading><strong>여행 타입</strong><span>프로필에 표시할 여행 타입을 선택하세요.</span></S.SectionHeading>
+            <S.Field>
+              <span>여행 타입</span>
+              <select
+                {...register('themeId', {
+                  setValueAs: (value) => value ? Number(value) : undefined,
+                })}
+              >
+                <option value="">기존 타입 유지</option>
+                {travelThemes.map((theme) => <option key={theme.themeId} value={theme.themeId}>{theme.themeName || theme.themeCode}</option>)}
+              </select>
             </S.Field>
           </S.Section>
 

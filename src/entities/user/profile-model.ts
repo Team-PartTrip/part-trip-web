@@ -1,4 +1,5 @@
 import { getProfile, getTravelThemes, type ProfileResponseDto, type TravelThemeResponseDto } from './api.ts'
+import { resolveApiAssetUrl } from '../../shared/libs/api-client.ts'
 
 export type UserProfile = {
   avatarUrl?: string
@@ -21,9 +22,9 @@ export function toUserProfile(
   const themeName = theme?.themeName ?? profile.themeName
   const themeDescription = theme?.description ?? profile.themeDescription
   return {
-    avatarUrl: profile.imgUrl,
+    avatarUrl: resolveApiAssetUrl(profile.imgUrl),
     bio: themeDescription,
-    characterImageUrl: theme?.imageUrl,
+    characterImageUrl: resolveApiAssetUrl(theme?.imageUrl),
     characterName: themeName,
     id: profile.userId,
     name: profile.nickName ?? '',

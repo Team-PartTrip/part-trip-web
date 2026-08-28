@@ -1,8 +1,3 @@
-import {
-  figmaCardActive,
-  figmaCardCompleted,
-  figmaCardJapan,
-} from "@/shared/assets";
 import { Button as PartTripButton } from "@/shared/ui/parttrip";
 import { AppShell } from "@/widgets/app-shell";
 
@@ -12,34 +7,6 @@ import {
 } from "../model/useTripCardsFlow";
 import { TripCardPhotoComposer } from "./TripCardPhotoComposer";
 import * as S from "./TripCardsPage.styles";
-
-const fallbackImages = [figmaCardJapan, figmaCardActive, figmaCardCompleted];
-
-type CardState = "planned" | "active" | "completed";
-
-function cardState(startDate?: string, endDate?: string): CardState {
-  const start = startDate ? Date.parse(startDate) : Number.NaN;
-  const end = endDate ? Date.parse(endDate) : Number.NaN;
-  if (Number.isFinite(end) && end < Date.now()) return "completed";
-  if (Number.isFinite(start) && start <= Date.now()) return "active";
-  return "planned";
-}
-
-function cardStatus(state: CardState) {
-  return state === "completed"
-    ? "완료"
-    : state === "active"
-      ? "진행 중"
-      : "예정 여행";
-}
-
-function cardDday(state: CardState, startDate?: string) {
-  if (state === "completed") return "Done";
-  if (state === "active") return "LIVE";
-  const start = startDate ? Date.parse(startDate) : Number.NaN;
-  if (!Number.isFinite(start)) return "-";
-  return `D-${Math.max(0, Math.ceil((start - Date.now()) / 86_400_000))}`;
-}
 
 export function TripCardsPage() {
   return <TripCardsFlow mode="list" />;
@@ -60,10 +27,8 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
     createTab,
     detail,
     handleDelete,
-    handleImport,
     handleShare,
     hasQueryError,
-    importMutation,
     isLoading,
     message,
     mine,
@@ -79,6 +44,7 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
   );
   const allSelected =
     allCardIds.length > 0 && selected.length === allCardIds.length;
+  const featuredCard = cards[0];
 
   const toggleAll = () => {
     setSelected(allSelected ? [] : allCardIds);
@@ -88,169 +54,77 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
     <AppShell>
       <S.Page>
         <S.Header>
-          <div>
+          {isLoading ? <S.LoadingHeader /> : <div>
             <S.Title>
               {mode === "detail"
-                ? detail?.title || "일본 오사카 여행팟"
+                ? detail?.title || "여행 카드"
                 : mode === "create"
-                  ? "여행 카드 만들기"
+                  ? "사진 · 코멘트 추가"
                   : mode === "delete"
                     ? "여행 카드 삭제"
-                    : "내 여행 카드"}
+                : "여행카드"}
             </S.Title>
-            <S.Subtitle>
+            {mode !== "list" ? <S.Subtitle>
               {mode === "delete"
                 ? "삭제할 여행 카드를 선택하세요. 여러 개를 한 번에 지울 수 있어요."
                 : mode === "create"
-                  ? "여행 사진과 기본 정보를 입력해 새로운 카드를 만드세요."
+                  ? "여행 카드는 여행 시작과 함께 자동으로 만들어져요."
                   : mode === "detail"
-                    ? "방문한 장소와 사진을 시간 순서로 확인하세요."
-                    : "예정된 여행과 지난 여행을 한눈에 관리하세요."}
-            </S.Subtitle>
-          </div>
+                    ? "방문 장소와 촬영 기록을 앱과 동일한 순서로 확인하세요."
+                : "여행의 순간을 카드 한 장에 모아보세요."}
+            </S.Subtitle> : null}
+          </div>}
         </S.Header>
         {message || hasQueryError ? (
           <S.Notice role={hasQueryError ? "alert" : "status"}>
             {message || "여행 카드를 불러오지 못했습니다."}
           </S.Notice>
         ) : null}
-        {isLoading ? (
-          <S.State aria-busy="true">여행 카드를 불러오는 중입니다.</S.State>
-        ) : null}
+        {isLoading ? <S.LoadingLayout aria-busy="true" aria-label="여행 카드 로딩 중"><S.LoadingCard /></S.LoadingLayout> : null}
 
         {mode === "list" && !isLoading ? (
-          <>
-            <S.CardGrid>
-              {cards.map((card, index) => {
-                const state = cardState(card.startDate, card.endDate);
-                return (
-                  <S.Card
-                    type="button"
-                    key={card.tripId ?? index}
-                    onClick={() =>
-                      card.tripId &&
-                      navigate({
-                        params: { tripId: String(card.tripId) },
-                        to: "/trip-cards/$tripId",
-                      })
-                    }
-                  >
-                    <img
-                      src={
-                        card.images?.[0] ||
-                        fallbackImages[index % fallbackImages.length]
-                      }
-                      alt=""
-                    />
-                    <S.CardBody>
-                      <strong>
-                        {card.title ||
-                          `${card.cityName || card.countryName || "여행"} 여행`}
-                      </strong>
-                      <span>
-                        {card.startDate || "-"} – {card.endDate || "-"}
-                      </span>
-                      <S.CardStatus $state={state}>
-                        <span>{cardStatus(state)}</span>
-                        <b>{cardDday(state, card.startDate)}</b>
-                      </S.CardStatus>
-                    </S.CardBody>
-                  </S.Card>
-                );
-              })}
-              {cards.length === 0 ? (
-                <S.Empty>공유된 여행 카드가 없습니다.</S.Empty>
-              ) : null}
-            </S.CardGrid>
-            <S.ActionRow>
-              <PartTripButton
+          <S.CarouselSection>
+            {featuredCard ? (
+              <S.TravelCard
                 type="button"
-                onClick={() => navigate({ to: paths.tripCardCreate })}
+                onClick={() => featuredCard.tripId && navigate({ params: { tripId: String(featuredCard.tripId) }, to: "/trip-cards/$tripId" })}
               >
-                여행카드 공유하기
-              </PartTripButton>
-              <PartTripButton
-                type="button"
-                $variant="secondary"
-                onClick={() => navigate({ to: paths.tripCardDelete })}
-              >
-                카드 선택 · 삭제
-              </PartTripButton>
-            </S.ActionRow>
-          </>
+                <S.TravelCardImage>
+                  {featuredCard.images?.[0] ? <img src={featuredCard.images[0]} alt="" /> : <span>이미지 없음</span>}
+                </S.TravelCardImage>
+                <S.TravelCardInfo>
+                  <S.TravelCardTitle>
+                    <span><strong>{(featuredCard.cityName || featuredCard.countryName || "여행").toUpperCase()}</strong><small>{[featuredCard.countryName, featuredCard.startDate, featuredCard.endDate].filter(Boolean).join(" · ") || "여행 일정 정보 없음"}</small></span>
+                    <S.FavoriteBadge aria-label="즐겨찾기">★</S.FavoriteBadge>
+                  </S.TravelCardTitle>
+                  <S.MetricList>
+                    <span><small>함께한 사람</small><strong>정보 없음</strong></span>
+                    <span><small>방문 장소</small><strong>{featuredCard.places?.length ?? 0}곳</strong></span>
+                    <span><small>남긴 사진</small><strong>{featuredCard.images?.length ?? 0}장</strong></span>
+                    <span><small>이동 거리</small><strong>정보 없음</strong></span>
+                  </S.MetricList>
+                </S.TravelCardInfo>
+              </S.TravelCard>
+            ) : <S.Empty>공유된 여행 카드가 없습니다.</S.Empty>}
+            <S.Pagination aria-label="여행 카드 페이지"><span className="active" /></S.Pagination>
+            <PartTripButton type="button" onClick={() => navigate({ to: paths.tripCardCreate })}>여행카드 공유하기</PartTripButton>
+          </S.CarouselSection>
         ) : null}
 
         {mode === "detail" && !isLoading ? (
           <S.DetailLayout>
             {detail ? (
               <>
-                <S.DetailTrip>
-                  <S.Card>
-                    <img src={detail.images?.[0] || figmaCardJapan} alt="" />
-                    <S.CardBody>
-                      <strong>{detail.title || "오사카 여행"}</strong>
-                      <span>
-                        {detail.startDate || "-"} – {detail.endDate || "-"}
-                      </span>
-                      <S.CardStatus
-                        $state={cardState(detail.startDate, detail.endDate)}
-                      >
-                        <span>
-                          {cardStatus(
-                            cardState(detail.startDate, detail.endDate),
-                          )}
-                        </span>
-                        <b>
-                          {cardDday(
-                            cardState(detail.startDate, detail.endDate),
-                            detail.startDate,
-                          )}
-                        </b>
-                      </S.CardStatus>
-                    </S.CardBody>
-                  </S.Card>
-                  <PartTripButton type="button" $variant="secondary">
-                    여행 정보 수정
-                  </PartTripButton>
-                </S.DetailTrip>
-                <S.DetailTimeline>
-                  <S.DetailHeading>
-                    <h2>여행 타임라인</h2>
-                    <span>
-                      장소 {detail.places?.length ?? 0} · 사진{" "}
-                      {detail.images?.length ?? 0}
-                    </span>
-                  </S.DetailHeading>
-                  {(detail.places ?? []).map((place, index) => (
-                    <S.PlaceTimeline key={place.tripPlaceId ?? index}>
-                      <strong>{place.placeName || "장소"}</strong>
-                      <span>
-                        DAY {place.dayNumber ?? index + 1} ·{" "}
-                        {place.placeSub || "상세 주소 · 별점 등 정보"}
-                      </span>
-                      <S.PhotoSlots>
-                        <span>
-                          {detail.images?.[index] ? (
-                            <img src={detail.images[index]} alt="" />
-                          ) : null}
-                        </span>
-                        <span>+ 사진 추가</span>
-                      </S.PhotoSlots>
-                    </S.PlaceTimeline>
-                  ))}
-                  {!detail.places?.length ? (
-                    <S.Empty>등록된 일정이 없습니다.</S.Empty>
-                  ) : null}
-                  <PartTripButton
-                    type="button"
-                    disabled={importMutation.isPending}
-                    onClick={() => void handleImport()}
-                  >
-                    {importMutation.isPending
-                      ? "가져오는 중"
-                      : "내 여행으로 가져오기"}
-                  </PartTripButton>
-                </S.DetailTimeline>
+                <S.PlaceOverview>
+                  <S.DetailHeading><h2>방문 장소</h2></S.DetailHeading>
+                  <S.PlaceOverviewImage>{detail.images?.[0] ? <img src={detail.images[0]} alt="" /> : <span>장소 이미지 없음</span>}</S.PlaceOverviewImage>
+                  <S.PlaceCopy><strong>{detail.places?.[0]?.placeName || "장소 정보 없음"}</strong><span>{detail.places?.[0]?.placeSub || "상세 주소 정보 없음"}</span><small>{[detail.startDate, detail.cityName || detail.countryName].filter(Boolean).join(" | ") || "여행 정보 없음"}</small></S.PlaceCopy>
+                </S.PlaceOverview>
+                <S.CapturedInfo>
+                  <S.CapturedPanel><h2>촬영된 이미지</h2><S.CapturedImage>{detail.images?.[0] ? <img src={detail.images[0]} alt="" /> : <span>촬영된 이미지 없음</span>}</S.CapturedImage><small>{detail.startDate || "촬영일 정보 없음"}</small></S.CapturedPanel>
+                  <S.CapturedPanel><h2>사진에 포함된 위치 정보</h2><strong>{detail.places?.[0]?.placeName || "위치 정보 없음"}</strong><small>{[detail.startDate, detail.cityName || detail.countryName].filter(Boolean).join(" | ") || "여행 정보 없음"}</small></S.CapturedPanel>
+                  <S.AddPhoto><PartTripButton type="button" onClick={() => navigate({ to: paths.tripCardCreate })}>사진 추가하기</PartTripButton><small>갤러리에서 기록하고 싶은 사진 업로드</small></S.AddPhoto>
+                </S.CapturedInfo>
               </>
             ) : (
               <S.Empty>여행 카드를 찾을 수 없습니다.</S.Empty>

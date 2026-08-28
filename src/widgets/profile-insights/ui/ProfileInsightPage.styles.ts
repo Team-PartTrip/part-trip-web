@@ -1,20 +1,29 @@
 import styled from 'styled-components'
+import { Skeleton } from '@/shared/ui/parttrip'
 
-export const Page = styled.main`
+export const Page = styled.main<{ $wide?: boolean }>`
   width: 100%;
   min-width: 0;
+  width: ${({ $wide }) => ($wide ? 'calc(100% + 32px)' : '100%')};
+  margin-left: ${({ $wide }) => ($wide ? '-32px' : '0')};
   color: ${({ theme }) => theme.colors.text.strong};
+
+  @media (max-width: 767px) {
+    width: 100%;
+    margin-left: 0;
+  }
 `
 
 export const Header = styled.header`
+  padding-inline: 24px;
   margin-bottom: 24px;
 `
 
 export const Title = styled.h1`
   margin: 0;
   color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 32px;
-  line-height: 40px;
+  font-size: 30px;
+  line-height: 38px;
 `
 
 export const Subtitle = styled.p`
@@ -30,22 +39,39 @@ export const State = styled.p`
   text-align: center;
 `
 
+export const LoadingLayout = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`
+
+export const LoadingHeader = styled(Skeleton)`
+  width: 220px;
+  height: 38px;
+`
+
+export const LoadingGrid = styled.div`
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+`
+
+export const LoadingPanel = styled(Skeleton)`
+  height: 460px;
+  border-radius: 16px;
+`
+
+export const LoadingSingle = styled(Skeleton)`
+  width: 100%;
+  height: 460px;
+  border-radius: 16px;
+`
+
 export const MapBody = styled.div`
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 752px) 360px;
   @media (max-width: 860px) { grid-template-columns: 1fr; }
-`
-
-export const MapCard = styled.section`
-  position: relative;
-  min-height: 580px;
-  border-radius: 28px;
-  padding: 24px;
-  background: ${({ theme }) => theme.colors.background.muted};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-  img { display: block; width: 100%; height: 420px; margin-top: 32px; object-fit: contain; }
-  @media (max-width: 560px) { min-height: 360px; padding: 16px; img { height: 260px; } }
 `
 
 export const SectionTitle = styled.h2`
@@ -55,33 +81,55 @@ export const SectionTitle = styled.h2`
   line-height: 20px;
 `
 
+export const MapCard = styled.section`
+  position: relative;
+  min-height: 590px;
+  box-sizing: border-box;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 16px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  > ${SectionTitle} { margin: 0 0 8px; color: ${({ theme }) => theme.colors.brand.primary}; font-size: 14px; line-height: 20px; }
+  img { display: block; width: 100%; height: 470px; box-sizing: border-box; border: 1px solid rgba(216, 221, 221, .55); border-radius: 16px; background: ${({ theme }) => theme.colors.background.default}; object-fit: contain; }
+  @media (max-width: 560px) { min-height: 360px; padding: 16px; img { height: 260px; } }
+`
+
 export const MapLegend = styled.div`
-  position: absolute;
-  bottom: 24px;
-  left: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 40px;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 12px;
+`
+
+export const LegendItem = styled.span`
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-width: 150px;
-  border-radius: 8px;
-  padding: 8px 12px;
-  background: ${({ theme }) => theme.colors.background.default};
-  color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 11px;
-  span { width: 8px; height: 8px; border-radius: 50%; background: ${({ theme }) => theme.colors.brand.primary}; }
+`
+
+export const LegendDot = styled.span<{ $visited?: boolean }>`
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: ${({ $visited, theme }) => ($visited ? theme.colors.brand.primary : '#dce7ef')};
 `
 
 export const CountryStats = styled.aside`
   display: flex;
-  min-height: 580px;
+  min-height: 0;
+  align-self: start;
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
-  border-radius: 28px;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 16px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
-  h2 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 24px; }
+  h2 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 18px; line-height: 24px; }
   > strong { color: ${({ theme }) => theme.colors.brand.strong}; font-size: 32px; }
   p, > span { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; line-height: 18px; }
   button { margin-top: auto; }
@@ -99,8 +147,99 @@ export const Badge = styled.span`
 export const CountryRecordsLayout = styled.div`
   display: grid;
   gap: 24px;
-  grid-template-columns: 360px minmax(0, 1fr);
+  grid-template-columns: 360px minmax(0, 816px);
   @media (max-width: 860px) { grid-template-columns: 1fr; }
+`
+
+export const CountrySummaryCard = styled.section`
+  position: relative;
+  min-height: 460px;
+  box-sizing: border-box;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 16px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  h2 { margin: 18px 0 6px; color: ${({ theme }) => theme.colors.text.strong}; font-size: 28px; line-height: 34px; }
+  > p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; line-height: 18px; }
+`
+
+export const CountryCode = styled.strong`
+  display: inline-flex;
+  width: 48px;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: ${({ theme }) => theme.colors.brand.primary};
+  color: ${({ theme }) => theme.colors.text.inverse};
+  font-size: 14px;
+  box-shadow: 0 4px 10px rgb(26 110 191 / 16%);
+`
+
+export const CountryMetrics = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 52px;
+  > div { display: flex; flex-direction: column; gap: 8px; }
+  strong { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 24px; line-height: 30px; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
+`
+
+export const CountryProgress = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 42px;
+  > div { height: 10px; }
+  > span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; font-weight: 600; }
+`
+
+export const CountryRecordsPanel = styled.section`
+  min-height: 460px;
+  box-sizing: border-box;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 16px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  > ${SectionTitle} { margin-bottom: 12px; font-size: 18px; line-height: 24px; }
+  > ${SectionTitle}:not(:first-child) { margin-top: 28px; }
+`
+
+export const CityTabs = styled.div`
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  button { height: 36px; border: 0; border-radius: 12px; padding: 0 16px; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.brand.primary}; cursor: pointer; font-size: 12px; font-weight: 600; }
+  button.active { background: ${({ theme }) => theme.colors.background.muted}; }
+`
+
+export const CountryRecordList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+`
+
+export const CountryRecordRow = styled.button`
+  position: relative;
+  display: flex;
+  min-height: 72px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid #dceaf7;
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: ${({ theme }) => theme.colors.background.muted};
+  color: ${({ theme }) => theme.colors.text.strong};
+  cursor: pointer;
+  text-align: left;
+  strong, span { display: block; }
+  strong { font-size: 15px; }
+  span { margin-top: 6px; color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
+  b { color: ${({ theme }) => theme.colors.text.muted}; font-size: 18px; font-weight: 600; }
 `
 
 export const CountryList = styled.section`
@@ -191,4 +330,226 @@ export const Empty = styled.div`
   color: ${({ theme }) => theme.colors.text.muted};
   font-size: 13px;
   text-align: center;
+`
+
+export const CountrySummaryList = styled.div`
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+`
+
+export const CountrySummaryRow = styled.div`
+  display: flex;
+  min-height: 76px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-radius: 12px;
+  padding: 16px;
+  background: ${({ theme }) => theme.colors.background.soft};
+  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 16px; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
+  b { margin-left: 8px; font-size: 18px; font-weight: 400; }
+`
+
+export const MoreLink = styled.button`
+  align-self: flex-start;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: ${({ theme }) => theme.colors.brand.primary};
+  cursor: pointer;
+  font-size: 11px;
+`
+
+export const ClaimBody = styled.main`
+  display: flex;
+  min-height: 640px;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+`
+
+export const ClaimCountry = styled.strong`
+  display: grid;
+  width: 72px;
+  height: 72px;
+  place-items: center;
+  border-radius: 12px;
+  background: ${({ theme }) => theme.colors.brand.primary};
+  color: ${({ theme }) => theme.colors.text.inverse};
+  font-size: 18px;
+`
+
+export const ClaimNew = styled.span`
+  border-radius: 8px;
+  padding: 5px 12px;
+  background: ${({ theme }) => theme.colors.brand.primary};
+  color: ${({ theme }) => theme.colors.text.inverse};
+  font-size: 10px;
+  font-weight: 700;
+`
+
+export const ClaimTitle = styled.h2`
+  margin: 4px 0 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 30px;
+  line-height: 38px;
+`
+
+export const ClaimSubtitle = styled.p`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 14px;
+  line-height: 20px;
+`
+
+export const ClaimInfo = styled.section`
+  display: flex;
+  width: min(100%, 620px);
+  box-sizing: border-box;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 8px;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 16px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  text-align: left;
+`
+
+export const InfoRow = styled.div`
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 48px minmax(0, 1fr);
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
+  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 13px; }
+`
+
+export const ClaimNotice = styled.p`
+  height: 44px;
+  box-sizing: border-box;
+  margin: 0;
+  border: 1px solid rgb(255 122 53 / 18%);
+  border-radius: 16px;
+  padding: 12px;
+  background: #fff7f1;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 12px;
+`
+
+export const ClaimProgress = styled.section`
+  display: flex;
+  width: min(100%, 620px);
+  box-sizing: border-box;
+  flex-direction: column;
+  gap: 16px;
+  border: 1px solid #dee5f0;
+  border-radius: 18px;
+  padding: 24px;
+  background: ${({ theme }) => theme.colors.background.default};
+  text-align: left;
+  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 14px; }
+  strong b { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 15px; }
+`
+
+export const ActionRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+`
+
+export const ProgressTrack = styled.div`
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: ${({ theme }) => theme.colors.background.muted};
+`
+
+export const ProgressBar = styled.span<{ $progress: number }>`
+  display: block;
+  width: ${({ $progress }) => `${Math.max(0, Math.min(100, $progress))}%`};
+  height: 100%;
+  border-radius: inherit;
+  background: ${({ theme }) => theme.colors.brand.primary};
+`
+
+export const AchievementSummary = styled.section`
+  display: flex;
+  min-height: 220px;
+  box-sizing: border-box;
+  align-items: center;
+  gap: 40px;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 16px;
+  padding: 28px 40px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  @media (max-width: 560px) { align-items: flex-start; flex-direction: column; }
+`
+
+export const AchievementCount = styled.div<{ $progress: number }>`
+  position: relative;
+  display: flex;
+  width: 164px;
+  height: 164px;
+  flex: 0 0 164px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: ${({ $progress, theme }) => `conic-gradient(${theme.colors.brand.primary} ${$progress}%, ${theme.colors.background.muted} 0)`};
+
+  &::before {
+    position: absolute;
+    inset: 24px;
+    border-radius: 50%;
+    background: ${({ theme }) => theme.colors.background.default};
+    content: '';
+  }
+
+  strong, span { position: relative; z-index: 1; }
+  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 28px; line-height: 34px; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
+`
+
+export const AchievementCopy = styled.div`
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
+  strong { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 20px; line-height: 26px; }
+  b { color: ${({ theme }) => theme.colors.brand.success}; font-size: 11px; }
+  em { display: block; width: 300px; height: 42px; box-sizing: border-box; border-radius: 8px; padding: 13px 16px; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.text.strong}; font-size: 10px; font-style: normal; text-align: center; }
+`
+
+export const ContinentSection = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+
+  > ${SectionTitle} { margin-bottom: 0; font-size: 20px; line-height: 24px; }
+`
+
+export const ContinentRow = styled.div`
+  display: flex;
+  min-height: 58px;
+  box-sizing: border-box;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: center;
+  border-radius: 12px;
+  padding: 14px;
+  background: transparent;
+  > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 11px; }
+  > div span { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 10px; }
 `

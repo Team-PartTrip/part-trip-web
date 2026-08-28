@@ -6,7 +6,7 @@ export const appTheme = {
       info: '#e8f2ff',
       muted: '#ebf4fc',
       soft: '#f7f9fb',
-      subtle: '#f7fafd',
+      subtle: '#f8fbfd',
       warning: '#fff3e8',
     },
     border: {
@@ -18,7 +18,7 @@ export const appTheme = {
     brand: {
       primary: '#1a6ebf',
       primaryHover: '#0d4a84',
-      accent: '#0d4a84',
+      accent: '#ff7a35',
       strong: '#0d4a84',
       secondary: '#536579',
       success: '#087f5b',
@@ -37,9 +37,9 @@ export const appTheme = {
     text: {
       default: '#1a3d5c',
       inverse: '#ffffff',
-      muted: '#536579',
-      placeholder: '#91a2b5',
-      strong: '#1a3d5c',
+      muted: '#63788c',
+      placeholder: '#9aa7b4',
+      strong: '#17334d',
     },
   },
   radii: {

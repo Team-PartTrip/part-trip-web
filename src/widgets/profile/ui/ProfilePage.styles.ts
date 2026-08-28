@@ -1,20 +1,23 @@
 import styled from 'styled-components'
+import { Skeleton } from '@/shared/ui/parttrip'
 
 export const Page = styled.main`
-  width: 100%;
   min-width: 0;
+  width: calc(100% + 32px);
+  margin-left: -32px;
   color: ${({ theme }) => theme.colors.text.strong};
 `
 
 export const Header = styled.header`
+  padding: 0 24px;
   margin-bottom: 24px;
 `
 
 export const Title = styled.h1`
   margin: 0;
   color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 32px;
-  line-height: 40px;
+  font-size: 30px;
+  line-height: 38px;
 `
 
 export const Subtitle = styled.p`
@@ -30,26 +33,73 @@ export const State = styled.p`
   text-align: center;
 `
 
+export const LoadingLayout = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`
+
+export const LoadingRow = styled.div`
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 420px minmax(0, 1fr);
+`
+
+export const LoadingLower = styled.div`
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 384px;
+`
+
+export const LoadingCard = styled(Skeleton)`
+  height: 260px;
+  border-radius: 16px;
+`
+
+export const LoadingStats = styled(Skeleton)`
+  height: 260px;
+  border-radius: 16px;
+`
+
+export const LoadingMap = styled(Skeleton)`
+  height: 260px;
+  border-radius: 16px;
+`
+
+export const LoadingSettings = styled(Skeleton)`
+  height: 260px;
+  border-radius: 16px;
+`
+
+export const ModalBackdrop = styled.div`
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  background: transparent;
+`
+
 export const ProfileBody = styled.section`
   display: grid;
   gap: 24px;
   grid-template-columns: 420px minmax(0, 1fr);
-  min-height: 240px;
+  min-height: 260px;
   @media (max-width: 860px) { grid-template-columns: 1fr; }
 `
 
 export const ProfileCard = styled.article`
   display: flex;
-  min-height: 240px;
+  min-height: 260px;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: flex-start;
-  gap: 10px;
-  border-radius: 20px;
+  gap: 12px;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 16px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
-  h2 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 18px; }
-  p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; }
+  h2 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 24px; line-height: 32px; }
+  p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 14px; line-height: 20px; }
 `
 
 export const Avatar = styled.div`
@@ -67,8 +117,10 @@ export const Avatar = styled.div`
 `
 
 export const StatsCard = styled.section`
-  min-height: 240px;
-  border-radius: 20px;
+  min-height: 260px;
+  box-sizing: border-box;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 16px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
@@ -77,20 +129,29 @@ export const StatsCard = styled.section`
 export const SectionTitle = styled.h2`
   margin: 0 0 16px;
   color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 15px;
-  line-height: 20px;
+  font-size: 18px;
+  line-height: 24px;
 `
 
 export const Stats = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  height: 168px;
+  display: flex;
+  gap: 16px;
+  height: 106px;
   align-items: center;
-  > div { display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; align-content: center; justify-content: center; gap: 6px; border-right: 1px solid ${({ theme }) => theme.colors.border.subtle}; }
-  > div:last-child { border-right: 0; }
-  small { grid-column: 1 / -1; color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
-  span { align-self: end; color: ${({ theme }) => theme.colors.brand.strong}; font-size: 13px; font-weight: 700; }
-  strong { color: ${({ theme }) => theme.colors.brand.strong}; font-size: 24px; line-height: 28px; }
+  > div {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    height: 100%;
+    box-sizing: border-box;
+    flex-direction: column;
+    gap: 12px;
+    border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+    border-radius: 16px;
+    padding: 24px;
+  }
+  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; line-height: 16px; }
+  strong { color: ${({ theme }) => theme.colors.brand.strong}; font-size: 24px; line-height: 30px; }
 `
 
 export const LowerBody = styled.section`
@@ -102,21 +163,38 @@ export const LowerBody = styled.section`
 `
 
 export const WorldMapSummary = styled.section`
-  display: flex;
-  min-height: 318px;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  border-radius: 12px;
+  position: relative;
+  display: block;
+  min-height: 260px;
+  box-sizing: border-box;
+  border: 1px solid #dceaf7;
+  border-radius: 16px;
   padding: 12px;
   background: ${({ theme }) => theme.colors.background.muted};
 
-  ${SectionTitle} {
-    margin: 0;
-    font-size: 18px;
-    line-height: 24px;
+  img {
+    display: block;
+    position: absolute;
+    top: 57px;
+    right: 16px;
+    width: 360px;
+    height: 180px;
+    object-fit: contain;
   }
 
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+    img { height: 160px; }
+  }
+`
+
+export const WorldMapCopy = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+
+  ${SectionTitle} { margin: 0; font-size: 18px; line-height: 24px; }
   p {
     margin: 0;
     color: ${({ theme }) => theme.colors.text.muted};
@@ -126,30 +204,38 @@ export const WorldMapSummary = styled.section`
 `
 
 export const WorldMapMore = styled.button`
-  width: 66px;
-  height: 34px;
+  width: 132px;
+  height: 44px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 12px;
   padding: 0;
   background: ${({ theme }) => theme.colors.brand.primary};
   color: ${({ theme }) => theme.colors.text.inverse};
   cursor: pointer;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
 `
 
 export const SettingsCard = styled.section`
-  min-height: 318px;
-  border-radius: 20px;
-  padding: 24px;
+  min-height: 260px;
+  box-sizing: border-box;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 16px;
+  padding: 20px 24px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
+
+  > ${SectionTitle} {
+    margin-bottom: 0;
+    font-size: 15px;
+    line-height: 20px;
+  }
 `
 
 export const SettingsButton = styled.button<{ $danger?: boolean }>`
   display: flex;
   width: 100%;
-  min-height: 36px;
+  min-height: 49px;
   align-items: center;
   justify-content: space-between;
   border: 0;

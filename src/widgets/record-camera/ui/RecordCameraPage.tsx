@@ -76,13 +76,13 @@ export function RecordCameraPage() {
     <AppShell>
       <S.Page>
         <S.Header><div><S.Title>촬영 기록 분석</S.Title><S.Subtitle>사진을 올리면 장소와 여행 정보를 분석합니다.</S.Subtitle></div><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.record })}>여행 기록</PartTripButton></S.Header>
-        <S.Form onSubmit={(event) => void handleSubmit(event)}>
+        {isLoading ? <S.LoadingCard aria-busy="true" aria-label="여행 기록 로딩 중" /> : <S.Form onSubmit={(event) => void handleSubmit(event)}>
           <S.Field><label htmlFor="camera-travel">여행</label><PartTripSelect id="camera-travel" value={travelId} onChange={(event) => setTravelId(event.target.value)} disabled={isLoading}><option value="">여행을 선택하세요</option>{trips.map((trip) => <option key={trip.tripId} value={trip.tripId}>{trip.title || `${trip.cityName || trip.countryName || '여행'} 기록`}</option>)}</PartTripSelect></S.Field>
           <S.Field><label htmlFor="camera-image">사진</label><input id="camera-image" type="file" accept="image/*" onChange={(event) => setImageFile(event.target.files?.[0] ?? null)} /><small>{imageFile?.name || '분석할 사진을 선택하세요.'}</small></S.Field>
           <S.LocationBox><div><strong>촬영 위치</strong><span>{latitude != null && longitude != null ? `${latitude.toFixed(5)}, ${longitude.toFixed(5)}` : '위치가 입력되지 않았습니다.'}</span></div><PartTripButton type="button" $variant="secondary" onClick={() => void handleLocation()}>현재 위치 가져오기</PartTripButton></S.LocationBox>
           {errorMessage ? <S.Error role="alert">{errorMessage}</S.Error> : null}
           <PartTripButton type="submit" disabled={isSubmitting || isLoading}>{isSubmitting ? '분석 요청 중' : '사진 분석하기'}</PartTripButton>
-        </S.Form>
+        </S.Form>}
       </S.Page>
     </AppShell>
   )
@@ -104,9 +104,8 @@ export function RecordCameraDetailPage() {
     <AppShell>
       <S.Page>
         <S.Header><div><S.Title>촬영 기록 상세</S.Title><S.Subtitle>분석된 장소와 설명을 확인하세요.</S.Subtitle></div><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.recordCamera })}>사진 다시 올리기</PartTripButton></S.Header>
-        {isLoading ? <S.State aria-busy="true">분석 결과를 불러오는 중입니다.</S.State> : null}
         {errorMessage ? <S.Error role="alert">{errorMessage}</S.Error> : null}
-        {result ? <S.DetailCard><S.Badge>분석 완료</S.Badge><h2>{result.title || result.designation || '분석된 장소'}</h2><p>{result.era || result.current_status || ''}</p><S.DetailGrid><div><small>개요</small><span>{result.overview || '개요가 없습니다.'}</span></div><div><small>배경</small><span>{result.background || '배경 정보가 없습니다.'}</span></div><div><small>특징</small><span>{result.features || '특징 정보가 없습니다.'}</span></div><div><small>출처</small><span>{result.sourceName || '출처 정보가 없습니다.'}</span></div></S.DetailGrid><PartTripButton type="button" disabled={result.photoId == null} onClick={() => navigate({ params: { imageId: String(imageId) }, to: '/record/camera/$imageId/write' })}>코멘트 작성</PartTripButton></S.DetailCard> : null}
+        {isLoading ? <S.LoadingCard aria-busy="true" aria-label="분석 결과 로딩 중" /> : result ? <S.DetailCard><S.Badge>분석 완료</S.Badge><h2>{result.title || result.designation || '분석된 장소'}</h2><p>{result.era || result.current_status || ''}</p><S.DetailGrid><div><small>개요</small><span>{result.overview || '개요가 없습니다.'}</span></div><div><small>배경</small><span>{result.background || '배경 정보가 없습니다.'}</span></div><div><small>특징</small><span>{result.features || '특징 정보가 없습니다.'}</span></div><div><small>출처</small><span>{result.sourceName || '출처 정보가 없습니다.'}</span></div></S.DetailGrid><PartTripButton type="button" disabled={result.photoId == null} onClick={() => navigate({ params: { imageId: String(imageId) }, to: '/record/camera/$imageId/write' })}>코멘트 작성</PartTripButton></S.DetailCard> : null}
       </S.Page>
     </AppShell>
   )
@@ -157,9 +156,8 @@ export function RecordCameraWritePage() {
     <AppShell>
       <S.Page>
         <S.Header><div><S.Title>{saved ? '기록 저장 완료' : '코멘트 작성'}</S.Title><S.Subtitle>{saved ? '촬영 기록이 저장되었습니다.' : '분석 결과에 나만의 코멘트를 남겨보세요.'}</S.Subtitle></div><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ params: { imageId: String(imageId) }, to: '/record/camera/$imageId' })}>상세로 돌아가기</PartTripButton></S.Header>
-        {isLoading ? <S.State aria-busy="true">기록 정보를 준비하는 중입니다.</S.State> : null}
         {errorMessage || queryErrorMessage ? <S.Error role="alert">{errorMessage || queryErrorMessage}</S.Error> : null}
-        {saved ? <S.DetailCard><S.Badge>저장 완료</S.Badge><h2>{saved.commTitle || titleValue}</h2><p>{saved.commContent || contentValue}</p><PartTripButton type="button" onClick={() => navigate({ to: paths.record })}>여행 기록으로 이동</PartTripButton></S.DetailCard> : <S.Form onSubmit={(event) => void handleSubmit(event)}><S.Field><label htmlFor="camera-title">제목</label><PartTripInput id="camera-title" value={titleValue} onChange={(event) => setTitle(event.target.value)} placeholder="기록 제목" /></S.Field><S.Field><label htmlFor="camera-date">촬영일</label><PartTripInput id="camera-date" type="date" value={photoDateValue} onChange={(event) => setPhotoDate(event.target.value)} /></S.Field><S.Field><label htmlFor="camera-content">코멘트</label><PartTripTextarea id="camera-content" value={contentValue} onChange={(event) => setContent(event.target.value)} placeholder="이 장소에서의 기억을 남겨보세요." /></S.Field><PartTripButton type="submit" disabled={isSaving || isLoading}>{isSaving ? '저장 중' : '기록 저장'}</PartTripButton></S.Form>}
+        {isLoading ? <S.LoadingCard aria-busy="true" aria-label="기록 정보 로딩 중" /> : saved ? <S.DetailCard><S.Badge>저장 완료</S.Badge><h2>{saved.commTitle || titleValue}</h2><p>{saved.commContent || contentValue}</p><PartTripButton type="button" onClick={() => navigate({ to: paths.record })}>여행 기록으로 이동</PartTripButton></S.DetailCard> : <S.Form onSubmit={(event) => void handleSubmit(event)}><S.Field><label htmlFor="camera-title">제목</label><PartTripInput id="camera-title" value={titleValue} onChange={(event) => setTitle(event.target.value)} placeholder="기록 제목" /></S.Field><S.Field><label htmlFor="camera-date">촬영일</label><PartTripInput id="camera-date" type="date" value={photoDateValue} onChange={(event) => setPhotoDate(event.target.value)} /></S.Field><S.Field><label htmlFor="camera-content">코멘트</label><PartTripTextarea id="camera-content" value={contentValue} onChange={(event) => setContent(event.target.value)} placeholder="이 장소에서의 기억을 남겨보세요." /></S.Field><PartTripButton type="submit" disabled={isSaving || isLoading}>{isSaving ? '저장 중' : '기록 저장'}</PartTripButton></S.Form>}
       </S.Page>
     </AppShell>
   )

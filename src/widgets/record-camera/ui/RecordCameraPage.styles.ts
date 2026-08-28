@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { Skeleton } from '@/shared/ui/parttrip'
 
 export const Page = styled.div`width: min(100%, 1200px); margin: 0 auto;`
 export const Header = styled.header`display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; @media (max-width: 620px) { flex-direction: column; }`
@@ -9,6 +10,7 @@ export const Field = styled.label`display: flex; flex-direction: column; gap: 8p
 export const LocationBox = styled.div`display: flex; align-items: center; justify-content: space-between; gap: 16px; border-radius: 16px; padding: 16px; background: ${({ theme }) => theme.colors.background.muted}; div { display: flex; flex-direction: column; gap: 4px; } span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; } @media (max-width: 520px) { align-items: flex-start; flex-direction: column; }`
 export const Error = styled.p`margin: 0; color: ${({ theme }) => theme.colors.status.error}; font-size: 13px;`
 export const State = styled.p`padding: 64px 0; color: ${({ theme }) => theme.colors.text.muted}; text-align: center;`
+export const LoadingCard = styled(Skeleton)`width: min(100%, 900px); height: 360px; border-radius: 16px;`
 export const DetailCard = styled.section`display: flex; max-width: 900px; flex-direction: column; align-items: flex-start; gap: 14px; border-radius: 28px; padding: 32px; background: ${({ theme }) => theme.colors.background.default}; box-shadow: ${({ theme }) => theme.shadows.subtle}; h2 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 26px; } p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; line-height: 1.7; white-space: pre-line; }`
 export const Badge = styled.span`border-radius: 999px; padding: 4px 8px; background: var(--pt-bg-info); color: ${({ theme }) => theme.colors.brand.strong}; font-size: 12px;`
 export const DetailGrid = styled.div`display: grid; width: 100%; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 8px 0; div { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid ${({ theme }) => theme.colors.border.subtle}; padding-top: 12px; } small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; } span { color: ${({ theme }) => theme.colors.text.strong}; font-size: 14px; line-height: 1.6; } @media (max-width: 600px) { grid-template-columns: 1fr; }`

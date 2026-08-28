@@ -1,8 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import styled from 'styled-components'
-import searchIcon from '@/shared/assets/figma/search.svg'
-
-export { searchIcon }
+import { Skeleton } from '@/shared/ui/parttrip'
 
 export const Root = styled.div`
   display: flex;
@@ -37,43 +35,6 @@ export const Topbar = styled.header`
     height: 64px;
     flex-basis: 64px;
     padding: 0 16px;
-  }
-`
-
-export const SearchForm = styled.form`
-  display: flex;
-  width: min(360px, 50vw);
-  height: 44px;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid ${({ theme }) => theme.colors.border.soft};
-  border-radius: 999px;
-  padding: 0 16px;
-  background: ${({ theme }) => theme.colors.background.subtle};
-
-  img {
-    width: 18px;
-    height: 18px;
-    flex: 0 0 18px;
-  }
-
-  input {
-    width: 100%;
-    min-width: 0;
-    border: 0;
-    padding: 0;
-    background: transparent;
-    color: ${({ theme }) => theme.colors.text.strong};
-    font-size: 14px;
-    outline: 0;
-
-    &::placeholder {
-      color: ${({ theme }) => theme.colors.text.muted};
-    }
-  }
-
-  @media (max-width: 480px) {
-    width: 100%;
   }
 `
 
@@ -112,16 +73,17 @@ export const ProfileLink = styled(Link)`
   text-decoration: none;
 `
 
+export const ProfileSkeleton = styled(Skeleton)`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+`
+
 export const Main = styled.main`
   min-width: 0;
   flex: 1;
-  padding: 40px;
+  padding: 72px;
   background: ${({ theme }) => theme.colors.background.subtle};
-
-  & > * {
-    min-height: 822px;
-    background: ${({ theme }) => theme.colors.background.default};
-  }
 
   @media (max-width: 1100px) {
     padding: 28px;
@@ -129,7 +91,5 @@ export const Main = styled.main`
 
   @media (max-width: 767px) {
     padding: 24px 16px;
-
-    & > * { min-height: auto; }
   }
 `

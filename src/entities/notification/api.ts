@@ -1,8 +1,11 @@
 import { apiClient } from '@/shared/libs/api-client'
+import { requestWithMockFallback } from '@/shared/libs/api-fallback'
 
 export const notificationTypes = [
   'VOTE_PARTICIPATED',
   'VOTE_DEADLINE',
+  'VOTE_REMINDER',
+  'GROUP_INVITED',
   'GROUP_INVITE_ACCEPTED',
   'PHOTO_ORGANIZED',
   'COUNTRY_ACQUIRED',
@@ -55,12 +58,16 @@ const NOTIFICATION_API_PATHS = {
   unreadCount: '/notifications/unread-count',
 } as const
 
+let mockNotificationSettings: NotificationSettingResponseDto[] = notificationTypes.map((type) => ({ enabled: true, type }))
+
 export async function getNotifications(params?: {
   category?: NotificationFilter
   cursor?: number
   size?: number
 }): Promise<NotificationPageResponseDto> {
-  const { data } = await apiClient.get<NotificationPageResponseDto>(NOTIFICATION_API_PATHS.base, { params })
+  const { data } = await apiClient.get<NotificationPageResponseDto>(NOTIFICATION_API_PATHS.base, {
+    params: { cursor: params?.cursor, size: params?.size, type: params?.category ?? 'ALL' },
+  })
   return data
 }
 
@@ -74,15 +81,31 @@ export async function markAllNotificationsAsRead(): Promise<UnreadCountResponseD
 }
 
 export async function getNotificationSettings(): Promise<NotificationSettingResponseDto[]> {
-  const { data } = await apiClient.get<NotificationSettingResponseDto[]>(NOTIFICATION_API_PATHS.settings)
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.get<NotificationSettingResponseDto[]>(NOTIFICATION_API_PATHS.settings)
+      return data
+    },
+    () => mockNotificationSettings,
+  )
 }
 
 export async function updateNotificationSettings(
   payload: NotificationSettingUpdateRequestDto,
 ): Promise<NotificationSettingResponseDto[]> {
-  const { data } = await apiClient.put<NotificationSettingResponseDto[]>(NOTIFICATION_API_PATHS.settings, payload)
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.put<NotificationSettingResponseDto[]>(NOTIFICATION_API_PATHS.settings, payload)
+      return data
+    },
+    () => {
+      const enabledByType = new Map(payload.settings.map((setting) => [setting.type, setting.enabled]))
+      mockNotificationSettings = mockNotificationSettings.map((setting) => setting.type && enabledByType.has(setting.type)
+        ? { ...setting, enabled: enabledByType.get(setting.type) }
+        : setting)
+      return mockNotificationSettings
+    },
+  )
 }
 
 export async function getUnreadNotificationCount(): Promise<UnreadCountResponseDto> {

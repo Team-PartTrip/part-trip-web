@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/libs/api-client'
+import { requestWithMockFallback } from '@/shared/libs/api-fallback'
 
 export * from './board'
 export * from './review'
@@ -14,6 +15,11 @@ export type LikeResponseDto = {
 }
 
 export async function toggleLike(payload: LikeRequestDto): Promise<LikeResponseDto> {
-  const { data } = await apiClient.post<LikeResponseDto>('/community/likes', payload)
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.post<LikeResponseDto>('/community/likes', payload)
+      return data
+    },
+    () => ({ likeCount: 1, liked: true }),
+  )
 }

@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/libs/api-client'
+import { requestWithMockFallback } from '@/shared/libs/api-fallback'
 import type { CommentRequestDto, CommentResponseDto } from './types'
 
 export type ReviewRequestDto = {
@@ -42,52 +43,126 @@ const REVIEW_API_PATHS = {
   comments: (reviewId: number) => `/community/reviews/${reviewId}/comments`,
 } as const
 
+let mockReviews: ReviewResponseDto[] = []
+const mockReviewComments = new Map<number, CommentResponseDto[]>()
+
+function mockPage<T>(content: T[], params?: { page?: number; size?: number }) {
+  const page = params?.page ?? 0
+  const size = params?.size ?? content.length
+  return {
+    content: content.slice(page * size, page * size + size),
+    hasNext: false,
+    page,
+    size,
+    totalElements: content.length,
+    totalPages: content.length ? 1 : 0,
+  }
+}
+
 export async function getReviews(params?: {
   countryInfoId?: number
   page?: number
   size?: number
 }): Promise<PageResponseDtoReviewResponseDto> {
-  const { data } = await apiClient.get<PageResponseDtoReviewResponseDto>(REVIEW_API_PATHS.base, { params })
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.get<PageResponseDtoReviewResponseDto>(REVIEW_API_PATHS.base, { params })
+      return data
+    },
+    () => mockPage(mockReviews, params),
+  )
 }
 
 export async function createReview(payload: ReviewRequestDto): Promise<ReviewResponseDto> {
-  const { data } = await apiClient.post<ReviewResponseDto>(REVIEW_API_PATHS.base, payload)
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.post<ReviewResponseDto>(REVIEW_API_PATHS.base, payload)
+      return data
+    },
+    () => {
+      const review = { ...payload, cityName: '여행지', countryName: '국가', createDate: new Date().toISOString(), commentCount: 0, likeCount: 0, nickName: '나', reviewId: Date.now(), userId: 'mock-user' }
+      mockReviews = [review, ...mockReviews]
+      return review
+    },
+  )
 }
 
 export async function getReview(reviewId: number): Promise<ReviewResponseDto> {
-  const { data } = await apiClient.get<ReviewResponseDto>(REVIEW_API_PATHS.detail(reviewId))
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.get<ReviewResponseDto>(REVIEW_API_PATHS.detail(reviewId))
+      return data
+    },
+    () => mockReviews.find((review) => review.reviewId === reviewId) ?? (() => { throw new Error('여행 후기를 찾을 수 없습니다.') })(),
+  )
 }
 
 export async function updateReview(reviewId: number, payload: ReviewRequestDto): Promise<ReviewResponseDto> {
-  const { data } = await apiClient.put<ReviewResponseDto>(REVIEW_API_PATHS.detail(reviewId), payload)
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.put<ReviewResponseDto>(REVIEW_API_PATHS.detail(reviewId), payload)
+      return data
+    },
+    () => {
+      const current = mockReviews.find((review) => review.reviewId === reviewId)
+      if (!current) throw new Error('여행 후기를 찾을 수 없습니다.')
+      const updated = { ...current, ...payload, reviewId }
+      mockReviews = mockReviews.map((review) => review.reviewId === reviewId ? updated : review)
+      return updated
+    },
+  )
 }
 
 export async function deleteReview(reviewId: number): Promise<string> {
-  const { data } = await apiClient.delete<string>(REVIEW_API_PATHS.detail(reviewId))
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.delete<string>(REVIEW_API_PATHS.detail(reviewId))
+      return data
+    },
+    () => {
+      mockReviews = mockReviews.filter((review) => review.reviewId !== reviewId)
+      mockReviewComments.delete(reviewId)
+      return '삭제되었습니다.'
+    },
+  )
 }
 
 export async function getMyReviews(params?: {
   page?: number
   size?: number
 }): Promise<PageResponseDtoReviewResponseDto> {
-  const { data } = await apiClient.get<PageResponseDtoReviewResponseDto>(REVIEW_API_PATHS.mine, { params })
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.get<PageResponseDtoReviewResponseDto>(REVIEW_API_PATHS.mine, { params })
+      return data
+    },
+    () => mockPage(mockReviews, params),
+  )
 }
 
 export async function getReviewComments(reviewId: number): Promise<CommentResponseDto[]> {
-  const { data } = await apiClient.get<CommentResponseDto[]>(REVIEW_API_PATHS.comments(reviewId))
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.get<CommentResponseDto[]>(REVIEW_API_PATHS.comments(reviewId))
+      return data
+    },
+    () => mockReviewComments.get(reviewId) ?? [],
+  )
 }
 
 export async function createReviewComment(
   reviewId: number,
   payload: CommentRequestDto
 ): Promise<CommentResponseDto> {
-  const { data } = await apiClient.post<CommentResponseDto>(REVIEW_API_PATHS.comments(reviewId), payload)
-  return data
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.post<CommentResponseDto>(REVIEW_API_PATHS.comments(reviewId), payload)
+      return data
+    },
+    () => {
+      const comment = { ...payload, commentId: Date.now(), createDate: new Date().toISOString(), targetId: reviewId, userId: 'mock-user' }
+      mockReviewComments.set(reviewId, [...(mockReviewComments.get(reviewId) ?? []), comment])
+      return comment
+    },
+  )
 }

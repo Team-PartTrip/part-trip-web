@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { Skeleton } from '@/shared/ui/parttrip'
 
 export const Page = styled.main`
   width: 100%;
@@ -7,6 +8,10 @@ export const Page = styled.main`
 `
 
 export const Header = styled.header`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
   margin-bottom: 24px;
 `
 
@@ -25,12 +30,13 @@ export const Subtitle = styled.p`
 `
 
 export const ReadAll = styled.button`
-  margin-left: auto;
+  width: 112px;
+  height: 48px;
   border: 0;
-  border-radius: 8px;
-  padding: 8px 12px;
-  background: ${({ theme }) => theme.colors.background.muted};
-  color: ${({ theme }) => theme.colors.brand.strong};
+  border-radius: 14px;
+  padding: 0 14px;
+  background: ${({ theme }) => theme.colors.brand.primary};
+  color: ${({ theme }) => theme.colors.text.inverse};
   cursor: pointer;
   font-size: 11px;
   font-weight: 600;
@@ -38,11 +44,51 @@ export const ReadAll = styled.button`
 `
 
 export const List = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   margin-top: 24px;
-  border-radius: 20px;
-  padding: 24px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  padding: 0;
+`
+
+export const LoadingList = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+`
+
+export const LoadingRow = styled(Skeleton)`
+  height: 72px;
+  border-radius: 14px;
+`
+
+export const NotificationTabs = styled.nav`
+  display: flex;
+  gap: 28px;
+  button {
+    min-width: 88px;
+    height: 36px;
+    border: 0;
+    border-radius: 12px;
+    padding: 0 16px;
+    background: ${({ theme }) => theme.colors.background.muted};
+    color: ${({ theme }) => theme.colors.brand.primary};
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  button.active {
+    background: ${({ theme }) => theme.colors.brand.primary};
+    color: ${({ theme }) => theme.colors.text.inverse};
+  }
+`
+
+export const SectionLabel = styled.h2`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 15px;
+  line-height: 18px;
 `
 
 export const Empty = styled.div`
@@ -64,22 +110,21 @@ export const NotificationItem = styled.button<{ $read: boolean }>`
   min-height: 72px;
   align-items: center;
   gap: 12px;
-  grid-template-columns: 10px minmax(0, 1fr) auto;
-  border: 0;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  padding: 14px 0;
-  background: transparent;
+  grid-template-columns: 8px minmax(0, 1fr) auto;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 14px;
+  padding: 16px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
   color: ${({ theme }) => theme.colors.text.strong};
   cursor: pointer;
   text-align: left;
-  &:last-child { border-bottom: 0; }
   opacity: ${({ $read }) => ($read ? .62 : 1)};
-  > small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 10px; white-space: nowrap; }
 `
 
 export const StatusDot = styled.span<{ $read?: boolean }>`
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: ${({ $read, theme }) => ($read ? theme.colors.border.subtle : theme.colors.brand.primary)};
 `
@@ -91,6 +136,19 @@ export const NotificationCopy = styled.span`
   gap: 4px;
   strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
   span { overflow: hidden; color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+`
+
+export const NotificationCategory = styled.span`
+  width: 92px;
+  height: 36px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  padding: 10px;
+  background: ${({ theme }) => theme.colors.background.muted};
+  color: ${({ theme }) => theme.colors.brand.primary};
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
 `
 
 export const ErrorMessage = styled.p`
@@ -107,6 +165,12 @@ export const Detail = styled.section`
   box-shadow: ${({ theme }) => theme.shadows.subtle};
   h2 { margin: 0 0 12px; color: ${({ theme }) => theme.colors.text.strong}; font-size: 18px; }
   > p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; line-height: 20px; }
+`
+
+export const LoadingDetail = styled(Skeleton)`
+  width: min(100%, 860px);
+  height: 560px;
+  border-radius: 16px;
 `
 
 export const Feedback = styled.div`
@@ -132,6 +196,12 @@ export const SettingsCard = styled.section`
   padding: 8px 24px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
+`
+
+export const LoadingSettings = styled(Skeleton)`
+  width: 100%;
+  height: 360px;
+  border-radius: 16px;
 `
 
 export const SettingRow = styled.div`

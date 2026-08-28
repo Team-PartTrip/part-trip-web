@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
 
-import { useImportTripMutation, useSharedTripQuery, useSharedTripsQuery, useShareTripMutation } from '@/entities/trip-card'
+import { useDeleteTravelCardsMutation, useImportTripMutation, useSharedTripQuery, useSharedTripsQuery, useShareTripMutation } from '@/entities/trip-card'
 import { useMyTrips } from '@/entities/trip-plan'
 import { paths } from '@/shared/config'
 
@@ -29,6 +29,7 @@ export function useTripCardsFlow(mode: TripCardsMode) {
   const myTripsQuery = useMyTrips(mode === 'create')
   const shareMutation = useShareTripMutation()
   const importMutation = useImportTripMutation()
+  const deleteMutation = useDeleteTravelCardsMutation()
   const cards = [...(sharedTripsQuery.data?.content ?? [])]
     .filter((card) => card.tripId == null || !hiddenTripIds.includes(card.tripId))
     .sort((a, b) => (b.startDate ?? b.createDate ?? '').localeCompare(a.startDate ?? a.createDate ?? ''))
@@ -57,21 +58,27 @@ export function useTripCardsFlow(mode: TripCardsMode) {
     }
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     const nextIds = addHiddenTripIds(hiddenTripIds, selected)
     if (nextIds.length === hiddenTripIds.length) {
       setMessage('삭제할 여행 카드를 선택해주세요.')
       return
     }
-    window.localStorage.setItem(HIDDEN_TRIP_CARDS_KEY, JSON.stringify(nextIds))
-    setHiddenTripIds(nextIds)
-    setSelected([])
-    setMessage('선택한 카드가 이 브라우저에서 삭제되었습니다.')
+    try {
+      await deleteMutation.mutateAsync({ cardIds: selected })
+      window.localStorage.setItem(HIDDEN_TRIP_CARDS_KEY, JSON.stringify(nextIds))
+      setHiddenTripIds(nextIds)
+      setSelected([])
+      setMessage('선택한 카드가 삭제되었습니다.')
+    } catch {
+      setMessage('여행 카드를 삭제하지 못했습니다.')
+    }
   }
 
   return {
     cards,
     createTab,
+    deleteMutation,
     detail,
     handleDelete,
     handleImport,

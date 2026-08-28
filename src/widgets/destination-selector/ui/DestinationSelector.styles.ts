@@ -1,4 +1,27 @@
 import styled from 'styled-components'
+import { Skeleton } from '@/shared/ui/parttrip'
+
+export const LoadingLayout = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`
+
+export const LoadingHeader = styled(Skeleton)`
+  width: 220px;
+  height: 38px;
+`
+
+export const LoadingBody = styled.div`
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+`
+
+export const LoadingPanel = styled(Skeleton)`
+  height: 486px;
+  border-radius: 16px;
+`
 
 export const Root = styled.section`
   width: 100%;

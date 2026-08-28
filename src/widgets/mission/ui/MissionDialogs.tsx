@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import type { MissionResponseDto } from '@/entities/mission/api'
 
-import { missionCalendarDays, missionCalendarTitle, missionWeekDays } from '../model/calendar'
+import { missionWeekDays } from '../model/calendar'
 import * as S from './MissionPage.styles'
 
 type DialogShellProps = {
@@ -42,9 +42,15 @@ type CalendarDialogProps = {
 }
 
 export function CalendarDialog({ onClose }: CalendarDialogProps) {
+  const [month] = useState(() => new Date())
   const [selectedDay, setSelectedDay] = useState(12)
   const [attendedDays, setAttendedDays] = useState(() => new Set([8, 9, 10, 11]))
   const isAttended = attendedDays.has(selectedDay)
+  const calendarDays = useMemo<Array<number | null>>(() => {
+    const leadingDays = new Date(month.getFullYear(), month.getMonth(), 1).getDay()
+    const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate()
+    return [...Array(leadingDays).fill(null), ...Array.from({ length: daysInMonth }, (_, index) => index + 1)]
+  }, [month])
 
   const handleAttendance = () => {
     setAttendedDays((current) => new Set(current).add(selectedDay))
@@ -55,14 +61,14 @@ export function CalendarDialog({ onClose }: CalendarDialogProps) {
       <S.CalendarContent>
         <S.CalendarHeading>
           <div>
-            <S.DialogTitle id="mission-calendar-title">{missionCalendarTitle} <small>▾</small></S.DialogTitle>
+            <S.DialogTitle id="mission-calendar-title">{month.getFullYear()}년 {month.getMonth() + 1}월</S.DialogTitle>
             <S.Streak>연속출석 <strong>{attendedDays.size}일째</strong></S.Streak>
           </div>
           <S.CalendarLegend><span>□ 오늘</span><span>■ 출석</span></S.CalendarLegend>
         </S.CalendarHeading>
         <S.CalendarGrid>
           {missionWeekDays.map((day) => <S.WeekDay key={day}>{day}</S.WeekDay>)}
-          {missionCalendarDays.map((day, index) => day === null
+          {calendarDays.map((day, index) => day === null
             ? <span key={`empty-${index}`} />
             : (
               <S.CalendarDay
@@ -71,7 +77,7 @@ export function CalendarDialog({ onClose }: CalendarDialogProps) {
                 $attended={attendedDays.has(day)}
                 $selected={selectedDay === day}
                 onClick={() => setSelectedDay(day)}
-                aria-label={`5월 ${day}일${attendedDays.has(day) ? ', 출석 완료' : ''}`}
+                aria-label={`${month.getMonth() + 1}월 ${day}일${attendedDays.has(day) ? ', 출석 완료' : ''}`}
               >
                 {day}
               </S.CalendarDay>

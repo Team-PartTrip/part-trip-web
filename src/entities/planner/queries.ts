@@ -5,6 +5,7 @@ import {
   getMyPlanners,
   getPlannerDetail,
   getPlannerMembers,
+  getMyPlannerInvitations,
   getVote,
   getVotes,
 } from './api'
@@ -19,6 +20,13 @@ export const myPlannersQueryOptions = (enabled = true) =>
 
 export function useMyPlannersQuery(enabled = true) {
   return useQuery(myPlannersQueryOptions(enabled))
+}
+
+export const plannerInvitationsQueryOptions = (enabled = true) =>
+  queryOptions({ queryKey: plannerQueryKeys.invitations(), queryFn: getMyPlannerInvitations, enabled })
+
+export function usePlannerInvitationsQuery(enabled = true) {
+  return useQuery(plannerInvitationsQueryOptions(enabled))
 }
 
 export const plannerDetailQueryOptions = (plannerId: number, enabled = true) =>
