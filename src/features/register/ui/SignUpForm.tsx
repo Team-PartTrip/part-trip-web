@@ -6,6 +6,7 @@ import {
 } from 'react-hook-form'
 import { useNavigate } from '@tanstack/react-router'
 import {
+  checkUserId,
   googleLogin,
   saveAuthTokens,
   sendVerificationCode,
@@ -57,6 +58,9 @@ export function SignUpForm() {
   const [message, setMessage] = useState<FormMessage | null>(null)
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
   const [isSendingCode, setIsSendingCode] = useState(false)
+  const [isCheckingId, setIsCheckingId] = useState(false)
+  const [checkedId, setCheckedId] = useState('')
+  const [isUserIdAvailable, setIsUserIdAvailable] = useState<boolean>()
 
   const credentialsForm = useForm<CredentialsFormValues>({
     defaultValues: {
@@ -105,9 +109,13 @@ export function SignUpForm() {
   })
   const verificationCodeField = verificationForm.register('verificationCode', verificationCodeRules)
 
-  const handleCredentialsSubmit: SubmitHandler<CredentialsFormValues> = ({ password, passwordConfirm }) => {
+  const handleCredentialsSubmit: SubmitHandler<CredentialsFormValues> = ({ id, password, passwordConfirm }) => {
     if (password !== passwordConfirm) {
       setMessage({ text: '비밀번호가 일치하지 않습니다.', tone: 'error' })
+      return
+    }
+    if (checkedId !== id || isUserIdAvailable !== true) {
+      setMessage({ text: '아이디 중복확인을 완료해주세요.', tone: 'error' })
       return
     }
     setMessage(null)
@@ -116,6 +124,35 @@ export function SignUpForm() {
 
   const handleCredentialsInvalid: SubmitErrorHandler<CredentialsFormValues> = (errors) => {
     setMessage({ text: getFirstErrorMessage(errors), tone: 'error' })
+  }
+
+  const handleIdChange = createSanitizedChangeHandler(idField, (value) => {
+    const sanitized = sanitizeId(value)
+    setCheckedId('')
+    setIsUserIdAvailable(undefined)
+    return sanitized
+  })
+
+  const handleCheckId = async () => {
+    const userId = sanitizeId(trimFormValue(credentialsForm.getValues('id')))
+    const validationError = getIdValidationError(userId)
+    if (validationError) {
+      setMessage({ text: validationError, tone: 'error' })
+      return
+    }
+    try {
+      setIsCheckingId(true)
+      const result = await checkUserId(userId)
+      const [responseKey, responseValue] = Object.entries(result)[0] ?? []
+      const available = responseKey?.toLowerCase().includes('duplicate') ? responseValue !== true : responseValue === true
+      setCheckedId(userId)
+      setIsUserIdAvailable(available)
+      setMessage({ text: available ? '사용할 수 있는 아이디입니다.' : '이미 사용 중인 아이디입니다.', tone: available ? 'success' : 'error' })
+    } catch (error) {
+      setMessage({ text: getErrorMessage(error), tone: 'error' })
+    } finally {
+      setIsCheckingId(false)
+    }
   }
 
   const handleGoogleSignup = async (idToken: string) => {
@@ -221,8 +258,8 @@ export function SignUpForm() {
       <S.Body>
         <S.Form aria-label="회원가입" method="post" noValidate onSubmit={credentialsForm.handleSubmit(handleCredentialsSubmit, handleCredentialsInvalid)}>
           <S.Field>
-            <S.Input {...idField} aria-label="아이디" type="text" autoComplete="username" placeholder="아이디" minLength={authValidationRules.id.minLength} maxLength={authValidationRules.id.maxLength} pattern={authValidationRules.id.pattern} title="아이디는 영문 소문자와 숫자만 입력해주세요." onChange={createSanitizedChangeHandler(idField, sanitizeId)} disabled={isCredentialsBusy} required />
-            <S.FieldHint>6~20자 · 영문 소문자와 숫자</S.FieldHint>
+            <S.IdInputRow><S.Input {...idField} aria-label="아이디" type="text" autoComplete="username" placeholder="아이디" minLength={authValidationRules.id.minLength} maxLength={authValidationRules.id.maxLength} pattern={authValidationRules.id.pattern} title="아이디는 영문 소문자와 숫자만 입력해주세요." onChange={handleIdChange} disabled={isCredentialsBusy} required /><S.CodeSendButton type="button" onClick={() => void handleCheckId()} disabled={isCredentialsBusy || isCheckingId}>{isCheckingId ? '확인 중' : '중복확인'}</S.CodeSendButton></S.IdInputRow>
+            {checkedId && isUserIdAvailable !== undefined ? <S.FieldHint>{checkedId} · {isUserIdAvailable ? '사용 가능' : '사용 불가'}{isUserIdAvailable ? '' : ' · 다른 아이디를 입력해주세요.'}</S.FieldHint> : <S.FieldHint>6~20자 · 영문 소문자와 숫자</S.FieldHint>}
           </S.Field>
           <S.Field>
             <S.Input {...passwordField} aria-label="비밀번호" type="password" autoComplete="new-password" placeholder="비밀번호" minLength={authValidationRules.password.minLength} maxLength={authValidationRules.password.maxLength} pattern={authValidationRules.password.pattern} title="비밀번호는 영문, 숫자, 특수문자 중 2종 이상을 포함해주세요." onChange={createSanitizedChangeHandler(passwordField, sanitizePassword)} disabled={isCredentialsBusy} required />

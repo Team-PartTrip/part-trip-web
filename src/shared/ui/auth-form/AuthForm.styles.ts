@@ -177,6 +177,16 @@ export const CodeSendButton = styled.button`
   font-size: 12px;
 `
 
+export const IdInputRow = styled.div`
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+
+  ${Input} { flex: 1; }
+  ${CodeSendButton} { width: auto; flex: 0 0 auto; white-space: nowrap; }
+`
+
 export const GoogleButton = styled.button`
   ${buttonStyles}
   border: 1px solid ${({ theme }) => theme.colors.border.subtle};

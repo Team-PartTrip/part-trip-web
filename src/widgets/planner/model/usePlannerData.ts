@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import {
   useMyPlannersQuery,
+  usePlannerInvitationsQuery,
   usePlannerConfirmedPlacesQuery,
   usePlannerDetailQuery,
   usePlannerMembersQuery,
@@ -40,6 +41,7 @@ export function usePlannerData(
   const hasActivePlanner = isPositiveSafeInteger(activePlannerId)
   const needsPlannerDetail = hasActivePlanner && step !== 'list' && step !== 'create'
   const needsMembers = step === 'group' || step === 'progress'
+  const needsInvitations = step === 'group'
   const needsVotes = step === 'explore' || step === 'vote' || step === 'lineup' || step === 'progress' || step === 'final'
   const needsVoteDetail = step === 'vote' &&
     isPositiveSafeInteger(activePlannerId) &&
@@ -53,6 +55,7 @@ export function usePlannerData(
     needsPlannerDetail,
   )
   const plannerMembersQuery = usePlannerMembersQuery(activePlannerId, needsMembers)
+  const plannerInvitationsQuery = usePlannerInvitationsQuery(needsInvitations)
   const votesQuery = usePlannerVotesQuery(activePlannerId, needsVotes)
   const voteDetailQuery = usePlannerVoteQuery(activePlannerId, activeVoteId, needsVoteDetail)
   const confirmedPlacesQuery = usePlannerConfirmedPlacesQuery(activePlannerId, needsConfirmedPlaces)
@@ -99,6 +102,9 @@ export function usePlannerData(
     planners: plannersQuery.data ?? [],
     confirmedPlaces: confirmedPlacesQuery.data?.places ?? [],
     members: plannerMembersQuery.data ?? [],
+    invitations: plannerInvitationsQuery.data ?? [],
+    invitationError: plannerInvitationsQuery.isError,
+    invitationLoading: plannerInvitationsQuery.isLoading,
     setPlan: setOverriddenPlan,
     voteDetail: voteDetailQuery.data,
     votes: votesQuery.data ?? [],

@@ -3,17 +3,24 @@ import { useNavigate, useParams } from '@tanstack/react-router'
 
 import {
   getVotes,
+  useAcceptPlannerInvitationMutation,
   useAddPlannerPlacesMutation,
   useAddVoteOptionMutation,
   useCastBallotMutation,
   useCloseVoteMutation,
+  useConfirmVoteMutation,
   useConfirmPlannerMutation,
   useCreatePlannerMutation,
   useCreateVoteMutation,
+  useDeleteVoteOptionMutation,
+  useCancelPlannerInvitationMutation,
+  useInvitePlannerMembersMutation,
   useJoinPlannerMutation,
+  useRemovePlannerMemberMutation,
+  useRejectPlannerInvitationMutation,
   useRemindPlannerMembersMutation,
   useSelectRandomPlannerPlaceMutation,
-  useUpdatePlannerMutation,
+  useSavePlannerTravelPlanMutation,
 } from '@/entities/planner'
 import type { CountryInfoResponseDto } from '@/entities/travel'
 import { paths } from '@/shared/config'
@@ -64,7 +71,10 @@ export function usePlannerFlow(step: PlannerStep) {
     countries,
     confirmedPlaces,
     hasError,
+    invitationError,
+    invitationLoading,
     isLoading,
+    invitations,
     members,
     places,
     plan,
@@ -97,7 +107,12 @@ export function usePlannerFlow(step: PlannerStep) {
   const createPlannerMutation = useCreatePlannerMutation()
   const createVoteMutation = useCreateVoteMutation()
   const joinPlannerMutation = useJoinPlannerMutation()
-  const updatePlannerMutation = useUpdatePlannerMutation()
+  const savePlannerTravelPlanMutation = useSavePlannerTravelPlanMutation()
+  const invitePlannerMembersMutation = useInvitePlannerMembersMutation()
+  const acceptPlannerInvitationMutation = useAcceptPlannerInvitationMutation()
+  const rejectPlannerInvitationMutation = useRejectPlannerInvitationMutation()
+  const cancelPlannerInvitationMutation = useCancelPlannerInvitationMutation()
+  const removePlannerMemberMutation = useRemovePlannerMemberMutation()
   const addPlannerPlacesMutation = useAddPlannerPlacesMutation()
   const addVoteOptionMutation = useAddVoteOptionMutation()
   const remindPlannerMembersMutation = useRemindPlannerMembersMutation()
@@ -105,7 +120,9 @@ export function usePlannerFlow(step: PlannerStep) {
   const confirmPlannerMutation = useConfirmPlannerMutation()
   const castBallotMutation = useCastBallotMutation()
   const closeVoteMutation = useCloseVoteMutation()
-  const isSaving = createPlannerMutation.isPending || updatePlannerMutation.isPending
+  const confirmVoteMutation = useConfirmVoteMutation()
+  const deleteVoteOptionMutation = useDeleteVoteOptionMutation()
+  const isSaving = createPlannerMutation.isPending || savePlannerTravelPlanMutation.isPending
 
   useEffect(() => {
     sessionStorage.setItem(PLANNER_SELECTED_KEY, JSON.stringify(selected))
@@ -199,7 +216,7 @@ export function usePlannerFlow(step: PlannerStep) {
     try {
       const groupSettings = parsePlannerGroupSettings(sessionStorage.getItem(PLANNER_GROUP_SETTINGS_KEY))
       if (isPositiveSafeInteger(activePlannerId)) {
-        const savedPlan = await updatePlannerMutation.mutateAsync({
+        const savedPlan = await savePlannerTravelPlanMutation.mutateAsync({
           plannerId: activePlannerId,
           payload: {
             cityName: nextCity,
@@ -280,6 +297,81 @@ export function usePlannerFlow(step: PlannerStep) {
     }
   }
 
+  const handleInviteMembers = async (userIds: string[]) => {
+    const normalizedUserIds = [...new Set(userIds.map((userId) => userId.trim()).filter(Boolean))]
+    if (!canManagePlanner || !isPositiveSafeInteger(activePlannerId) || normalizedUserIds.length === 0) {
+      setErrorMessage('초대할 아이디와 플래너 정보를 확인해주세요.')
+      return false
+    }
+    try {
+      setErrorMessage('')
+      await invitePlannerMembersMutation.mutateAsync({
+        payload: { userIds: normalizedUserIds },
+        plannerId: activePlannerId,
+      })
+      return true
+    } catch {
+      setErrorMessage('멤버를 초대하지 못했습니다.')
+      return false
+    }
+  }
+
+  const handleAcceptPlannerInvitation = async (invitationId?: number) => {
+    if (!isPositiveSafeInteger(invitationId)) {
+      setErrorMessage('초대 정보를 확인할 수 없습니다.')
+      return
+    }
+    try {
+      setErrorMessage('')
+      const invitation = await acceptPlannerInvitationMutation.mutateAsync(invitationId)
+      if (isPositiveSafeInteger(invitation.plannerId)) {
+        sessionStorage.setItem(ACTIVE_PLANNER_ID_KEY, String(invitation.plannerId))
+        navigate({ to: paths.plannerProgress })
+      }
+    } catch {
+      setErrorMessage('초대를 수락하지 못했습니다.')
+    }
+  }
+
+  const handleRejectPlannerInvitation = async (invitationId?: number) => {
+    if (!isPositiveSafeInteger(invitationId)) {
+      setErrorMessage('초대 정보를 확인할 수 없습니다.')
+      return
+    }
+    try {
+      setErrorMessage('')
+      await rejectPlannerInvitationMutation.mutateAsync(invitationId)
+    } catch {
+      setErrorMessage('초대를 거절하지 못했습니다.')
+    }
+  }
+
+  const handleCancelPlannerInvitation = async (invitationId?: number) => {
+    if (!canManagePlanner || !isPositiveSafeInteger(activePlannerId) || !isPositiveSafeInteger(invitationId)) {
+      setErrorMessage('취소할 초대 정보를 확인할 수 없습니다.')
+      return
+    }
+    try {
+      setErrorMessage('')
+      await cancelPlannerInvitationMutation.mutateAsync({ invitationId, plannerId: activePlannerId })
+    } catch {
+      setErrorMessage('초대를 취소하지 못했습니다.')
+    }
+  }
+
+  const handleRemovePlannerMember = async (memberUserId?: string) => {
+    if (!canManagePlanner || !isPositiveSafeInteger(activePlannerId) || !memberUserId?.trim()) {
+      setErrorMessage('내보낼 멤버 정보를 확인할 수 없습니다.')
+      return
+    }
+    try {
+      setErrorMessage('')
+      await removePlannerMemberMutation.mutateAsync({ memberUserId: memberUserId.trim(), plannerId: activePlannerId })
+    } catch {
+      setErrorMessage('멤버를 내보내지 못했습니다.')
+    }
+  }
+
   const handleSaveCandidates = async () => {
     const plannerId = Number(sessionStorage.getItem(ACTIVE_PLANNER_ID_KEY))
     const placeIds = [...new Set(selectedPlaces
@@ -353,6 +445,33 @@ export function usePlannerFlow(step: PlannerStep) {
       setSelectedOptionId(optionId)
     } catch {
       setErrorMessage('투표를 저장하지 못했습니다.')
+    }
+  }
+
+  const handleConfirmVote = async (voteId?: number, optionId?: number) => {
+    const vote = votes.find((item) => item.voteId === voteId)
+    if (!canManagePlanner || !isPositiveSafeInteger(activePlannerId) || !isPositiveSafeInteger(voteId) || !isPositiveSafeInteger(optionId) || normalizeVoteStatus(vote?.status) !== 'CLOSED') {
+      setErrorMessage('확정할 마감 투표 정보를 확인할 수 없습니다.')
+      return
+    }
+    try {
+      setErrorMessage('')
+      await confirmVoteMutation.mutateAsync({ payload: { optionId }, plannerId: activePlannerId, voteId })
+    } catch {
+      setErrorMessage('투표 결과를 확정하지 못했습니다.')
+    }
+  }
+
+  const handleDeleteVoteOption = async (optionId?: number) => {
+    if (!isPositiveSafeInteger(activePlannerId) || !isPositiveSafeInteger(activeVote?.voteId) || !isPositiveSafeInteger(optionId) || normalizeVoteStatus(activeVote.status) !== 'OPEN') {
+      setErrorMessage('삭제할 후보 정보를 확인할 수 없습니다.')
+      return
+    }
+    try {
+      setErrorMessage('')
+      await deleteVoteOptionMutation.mutateAsync({ optionId, plannerId: activePlannerId, voteId: activeVote.voteId })
+    } catch {
+      setErrorMessage('후보를 삭제하지 못했습니다.')
     }
   }
 
@@ -456,12 +575,19 @@ export function usePlannerFlow(step: PlannerStep) {
     continueTo,
     endDate,
     errorMessage,
+    handleAcceptPlannerInvitation,
     handleConfirmPlan,
+    handleConfirmVote,
     handleCastBallot,
     handleCloseVote,
+    handleDeleteVoteOption,
     handleDestinationSelect,
+    handleInviteMembers,
     handleJoinPlanner,
     handleRemindMembers,
+    handleCancelPlannerInvitation,
+    handleRemovePlannerMember,
+    handleRejectPlannerInvitation,
     handleSaveCandidates,
     handleRandomLineup,
     handleRemoveFromLineup,
@@ -469,6 +595,9 @@ export function usePlannerFlow(step: PlannerStep) {
     hasError,
     headcount,
     inviteCode,
+    invitationError,
+    invitationLoading,
+    invitations,
     isConfirmed,
     isLoading,
     isSaving,
@@ -515,12 +644,19 @@ export function usePlannerFlow(step: PlannerStep) {
     voteCategory,
     votes,
     confirmPlannerMutation,
+    confirmVoteMutation,
     createVoteMutation,
+    deleteVoteOptionMutation,
     addPlannerPlacesMutation,
     addVoteOptionMutation,
     castBallotMutation,
     closeVoteMutation,
     joinPlannerMutation,
+    invitePlannerMembersMutation,
+    acceptPlannerInvitationMutation,
+    rejectPlannerInvitationMutation,
+    cancelPlannerInvitationMutation,
+    removePlannerMemberMutation,
     remindPlannerMembersMutation,
     selectRandomPlannerPlaceMutation,
     remindFeedback,

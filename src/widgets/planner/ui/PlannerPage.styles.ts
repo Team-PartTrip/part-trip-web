@@ -470,6 +470,50 @@ export const InvitePanel = styled.section`
   p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; }
 `
 
+export const InvitationPanel = styled(InvitePanel)`
+  width: 100%;
+  box-sizing: border-box;
+  background: ${({ theme }) => theme.colors.background.muted};
+  box-shadow: none;
+`
+
+export const InvitationRow = styled.div`
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  padding: 8px 0;
+
+  &:last-child { border-bottom: 0; }
+  strong { flex: 1; color: ${({ theme }) => theme.colors.text.strong}; font-size: 13px; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
+`
+
+export const SmallActionButton = styled.button`
+  min-height: 30px;
+  border: 1px solid ${({ theme }) => theme.colors.border.default};
+  border-radius: 8px;
+  padding: 0 9px;
+  background: ${({ theme }) => theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.brand.strong};
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+
+  &:disabled { cursor: not-allowed; opacity: .5; }
+`
+
+export const InviteMemberRow = styled.div`
+  display: grid;
+  width: 100%;
+  align-items: end;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+
+  @media (max-width: 620px) { grid-template-columns: 1fr; }
+`
+
 export const InviteLinkRow = styled.div`
   display: grid;
   width: 100%;
@@ -863,6 +907,17 @@ export const CandidateRow = styled.div<{ $selected?: boolean }>`
   box-shadow: ${({ theme }) => theme.shadows.subtle};
 `
 
+export const DeleteOptionButton = styled.button`
+  border: 0;
+  padding: 4px;
+  background: transparent;
+  color: ${({ theme }) => theme.colors.text.muted};
+  cursor: pointer;
+  font-size: 11px;
+
+  &:disabled { cursor: not-allowed; opacity: .5; }
+`
+
 export const VoteMeta = styled.div<{ $selected?: boolean }>`
   display: flex;
   min-width: 120px;
@@ -977,6 +1032,27 @@ export const StatusLine = styled.div`
   > span { border-radius: 8px; padding: 6px; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.brand.strong}; text-align: center; }
   strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   small { color: ${({ theme }) => theme.colors.text.muted}; }
+`
+
+export const ConfirmOptions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 0 10px;
+`
+
+export const ConfirmOptionButton = styled.button<{ $confirmed?: boolean }>`
+  min-height: 30px;
+  border: 1px solid ${({ $confirmed, theme }) => ($confirmed ? theme.colors.brand.primary : theme.colors.border.default)};
+  border-radius: 8px;
+  padding: 0 9px;
+  background: ${({ $confirmed, theme }) => ($confirmed ? theme.colors.background.muted : theme.colors.background.default)};
+  color: ${({ $confirmed, theme }) => ($confirmed ? theme.colors.brand.primary : theme.colors.text.muted)};
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+
+  &:disabled { cursor: not-allowed; opacity: .55; }
 `
 
 export const MemberResponses = styled.section`

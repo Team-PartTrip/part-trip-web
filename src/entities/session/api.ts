@@ -1,5 +1,4 @@
 import { apiClient } from '@/shared/libs/api-client'
-import { requestWithMockFallback } from '@/shared/libs/api-fallback'
 
 export * from '@/shared/libs/token-storage'
 
@@ -139,11 +138,6 @@ export async function refresh(payload: RefreshRequestDto): Promise<TokenResponse
 }
 
 export async function checkUserId(userId: string): Promise<CheckUserIdResponseDto> {
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.get<CheckUserIdResponseDto>(AUTH_API_PATHS.checkId, { params: { userId } })
-      return data
-    },
-    () => ({ available: true }),
-  )
+  const { data } = await apiClient.get<CheckUserIdResponseDto>(AUTH_API_PATHS.checkId, { params: { userId } })
+  return data
 }

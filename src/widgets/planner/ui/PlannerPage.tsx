@@ -75,6 +75,7 @@ function PlannerFlowPage({ step }: Props) {
   const [plannerTab, setPlannerTab] = useState<PlannerTab>('active')
   const [travelStyle, setTravelStyle] = useState('맛집')
   const [isInviteOpen, setIsInviteOpen] = useState(false)
+  const [inviteUserIds, setInviteUserIds] = useState('')
   const {
     addPlannerPlacesMutation,
     addVoteOptionMutation,
@@ -86,19 +87,36 @@ function PlannerFlowPage({ step }: Props) {
     countries,
     continueTo,
     confirmPlannerMutation,
+    confirmVoteMutation,
     createVoteMutation,
+    deleteVoteOptionMutation,
     errorMessage,
+    handleAcceptPlannerInvitation,
     handleCastBallot,
     handleCloseVote,
     handleConfirmPlan,
+    handleConfirmVote,
+    handleDeleteVoteOption,
     handleDestinationSelect,
+    handleInviteMembers,
     handleJoinPlanner,
     handleRemindMembers,
+    handleCancelPlannerInvitation,
+    handleRemovePlannerMember,
+    handleRejectPlannerInvitation,
     handleSaveCandidates,
     handleRandomLineup,
     handleSelectPlanner,
     hasError,
     inviteCode,
+    invitationError,
+    invitationLoading,
+    invitations,
+    invitePlannerMembersMutation,
+    acceptPlannerInvitationMutation,
+    rejectPlannerInvitationMutation,
+    cancelPlannerInvitationMutation,
+    removePlannerMemberMutation,
     isConfirmed,
     isLoading,
     isRemindAvailable,
@@ -159,6 +177,7 @@ function PlannerFlowPage({ step }: Props) {
   const currentUserName = profile?.name || '사용자'
   const currentUserInitial = currentUserName.slice(0, 2).toUpperCase() || 'MS'
   const otherMembers = members.filter((member) => profile?.id ? member.userId !== profile.id : member.nickName !== currentUserName)
+  const pendingInvitations = invitations.filter((invitation) => !['ACCEPTED', 'REJECTED', 'CANCELED', 'CANCELLED'].includes(voteStatus(invitation.status)))
   const voteOptions = activeVote?.options ?? []
   const confirmedCount = votes.filter((vote) => vote.confirmedOptionId != null || voteStatus(vote.status) === 'CONFIRMED').length
   const votingCount = votes.filter((vote) => voteStatus(vote.status) === 'OPEN').length
@@ -166,6 +185,7 @@ function PlannerFlowPage({ step }: Props) {
   const canVote = voteStatus(activeVote?.status) === 'OPEN' && activeVote?.deadlinePassed !== true
   const myVoteCount = voteOptions.some((option) => option.selectedByMe === true) ? 1 : 0
   const isSavingCandidates = createVoteMutation.isPending || addPlannerPlacesMutation.isPending || addVoteOptionMutation.isPending || selectRandomPlannerPlaceMutation.isPending
+  const isManagingMembers = invitePlannerMembersMutation.isPending || acceptPlannerInvitationMutation.isPending || rejectPlannerInvitationMutation.isPending || cancelPlannerInvitationMutation.isPending || removePlannerMemberMutation.isPending
   const finalPlaces = confirmedPlaces.length ? confirmedPlaces : selectedPlaces.map(({ item }) => ({ category: item.category, categoryLabel: item.category, placeName: item.placeName, voteCount: undefined }))
   const handleCalendarDay = (day: number) => {
     const date = `${calendarMonth.getFullYear()}-${String(calendarMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
@@ -188,6 +208,69 @@ function PlannerFlowPage({ step }: Props) {
     setSelected([])
     sessionStorage.removeItem('parttrip:active-vote-id')
   }
+
+  const groupManagementPanel = step === 'group' ? (
+    <>
+      {invitationLoading ? <S.InvitationPanel><S.SectionTitle>받은 플래너 초대</S.SectionTitle><S.Notice>초대 정보를 불러오는 중입니다.</S.Notice></S.InvitationPanel> : invitationError ? <S.InvitationPanel><S.SectionTitle>받은 플래너 초대</S.SectionTitle><S.Notice>초대 정보를 불러오지 못했습니다.</S.Notice></S.InvitationPanel> : pendingInvitations.length ? <S.InvitationPanel>
+        <S.SectionTitle>받은 플래너 초대</S.SectionTitle>
+        {pendingInvitations.map((invitation, index) => <S.InvitationRow key={invitation.invitationId ?? index}>
+          <strong>{invitation.plannerTitle || `플래너 #${invitation.plannerId ?? '-'}`}</strong>
+          <span>{invitation.invitedByUserId || '그룹장'}님의 초대</span>
+          <S.SmallActionButton type="button" disabled={isManagingMembers} onClick={() => void handleAcceptPlannerInvitation(invitation.invitationId)}>수락</S.SmallActionButton>
+          <S.SmallActionButton type="button" disabled={isManagingMembers} onClick={() => void handleRejectPlannerInvitation(invitation.invitationId)}>거절</S.SmallActionButton>
+        </S.InvitationRow>)}
+      </S.InvitationPanel> : null}
+      <S.InvitePanel>
+        <S.SectionTitle>멤버 관리</S.SectionTitle>
+        {canManagePlanner ? <S.InviteMemberRow>
+          <S.StepField>
+            <label htmlFor="planner-member-ids">아이디로 초대</label>
+            <PartTripInput id="planner-member-ids" value={inviteUserIds} onChange={(event) => setInviteUserIds(event.target.value)} placeholder="아이디를 쉼표로 구분해 입력하세요" />
+            <S.FieldHint>여러 명은 쉼표나 공백으로 구분합니다.</S.FieldHint>
+          </S.StepField>
+          <PartTripButton type="button" disabled={isManagingMembers || !inviteUserIds.trim()} onClick={() => { void handleInviteMembers(inviteUserIds.split(/[,\s]+/)).then((succeeded) => { if (succeeded) setInviteUserIds('') }) }}>{invitePlannerMembersMutation.isPending ? '초대 중' : '멤버 초대'}</PartTripButton>
+        </S.InviteMemberRow> : <S.Notice>플래너를 만든 뒤 그룹장이 멤버를 아이디로 초대할 수 있습니다.</S.Notice>}
+        {members.length ? <S.MemberList>{otherMembers.map((member, index) => {
+          const memberStatus = voteStatus(member.status)
+          const isPendingMember = member.invitationId != null && !['ACCEPTED', 'JOINED', 'ACTIVE'].includes(memberStatus)
+          return <S.MemberRow key={`${member.userId ?? member.nickName}-${index}`}>
+            <S.Avatar>{(member.nickName || member.userId || '멤버').slice(0, 2).toUpperCase()}</S.Avatar>
+            <S.MemberDetails><strong>{member.nickName || member.userId || '멤버'}</strong><span>{memberStatus || '상태 확인 중'}</span></S.MemberDetails>
+            {canManagePlanner && isPendingMember ? <S.SmallActionButton type="button" disabled={isManagingMembers} onClick={() => { if (window.confirm('이 초대를 취소할까요?')) void handleCancelPlannerInvitation(member.invitationId) }}>초대 취소</S.SmallActionButton> : canManagePlanner && member.userId ? <S.SmallActionButton type="button" disabled={isManagingMembers} onClick={() => { if (window.confirm('이 멤버를 내보낼까요?')) void handleRemovePlannerMember(member.userId) }}>내보내기</S.SmallActionButton> : null}
+          </S.MemberRow>
+        })}</S.MemberList> : null}
+      </S.InvitePanel>
+    </>
+  ) : null
+
+  const closedVotes = votes.filter((vote) => voteStatus(vote.status) === 'CLOSED')
+  const progressManagementPanel = step === 'progress' ? (
+    <S.InvitePanel>
+      <S.SectionTitle>마감 투표 확정</S.SectionTitle>
+      {closedVotes.length ? closedVotes.map((vote, index) => {
+        const options = vote.options ?? []
+        const highestVoteCount = Math.max(...options.map((option) => option.voteCount ?? 0), 0)
+        const topOptions = options.filter((option) => (option.voteCount ?? 0) === highestVoteCount)
+        return <div key={vote.voteId ?? index}>
+          <S.StatusLine><span>{vote.categoryLabel || vote.category || '카테고리'}</span><strong>{vote.confirmedOptionId ? '확정 후보 선택됨' : '확정할 후보를 선택하세요'}</strong><small>마감</small></S.StatusLine>
+          <S.ConfirmOptions>{topOptions.map((option, optionIndex) => <S.ConfirmOptionButton key={option.optionId ?? optionIndex} type="button" $confirmed={option.optionId === vote.confirmedOptionId || option.confirmed === true} disabled={!canManagePlanner || confirmVoteMutation.isPending || option.optionId == null || vote.confirmedOptionId != null} onClick={() => void handleConfirmVote(vote.voteId, option.optionId)}>{option.placeName || '장소'} · {option.voteCount ?? 0}표</S.ConfirmOptionButton>)}</S.ConfirmOptions>
+        </div>
+      }) : <S.Notice>마감된 투표가 없습니다.</S.Notice>}
+      <S.ActionRow><PartTripButton type="button" $variant="secondary" onClick={() => flowNavigate({ to: paths.plannerGroup })}>그룹 관리</PartTripButton></S.ActionRow>
+    </S.InvitePanel>
+  ) : null
+
+  const voteOptionManagementPanel = step === 'vote' && activeVote ? (
+    <S.InvitePanel>
+      <S.SectionTitle>후보 관리</S.SectionTitle>
+      {voteOptions.map((option, index) => <S.InvitationRow key={option.optionId ?? index}>
+        <strong>{option.placeName || '장소'}</strong>
+        <span>{option.voteCount ?? 0}표</span>
+        {(canManagePlanner || option.addedByUserId === profile?.id) && voteStatus(activeVote.status) === 'OPEN' ? <S.DeleteOptionButton type="button" disabled={deleteVoteOptionMutation.isPending || option.optionId == null} onClick={() => { if (window.confirm('이 후보를 삭제할까요?')) void handleDeleteVoteOption(option.optionId) }}>후보 삭제</S.DeleteOptionButton> : null}
+      </S.InvitationRow>)}
+      {!voteOptions.length ? <S.Notice>삭제할 후보가 없습니다.</S.Notice> : null}
+    </S.InvitePanel>
+  ) : null
 
   return (
     <AppShell>
@@ -217,6 +300,10 @@ function PlannerFlowPage({ step }: Props) {
         ) : null}
 
         {step === 'create' ? <S.StepCard><S.StepNumber>01</S.StepNumber><h2>여행을 함께 계획해보세요.</h2><p>기존 여행 정보 설정을 재사용하거나 새로 시작할 수 있습니다.</p><S.ActionRow><PartTripButton type="button" onClick={() => continueTo(paths.plannerGroup)}>그룹 정하기</PartTripButton><PartTripButton type="button" $variant="secondary" onClick={() => continueTo(paths.plannerDestination)}>여행지 설정</PartTripButton></S.ActionRow></S.StepCard> : null}
+
+        {groupManagementPanel}
+        {progressManagementPanel}
+        {voteOptionManagementPanel}
 
         {step === 'group' ? <S.GroupForm as="form" onSubmit={saveGroupSettings}><S.GroupTypeRow><S.GroupTypeButton type="button" $active={isSolo} onClick={() => setIsSolo(true)}>혼자 여행</S.GroupTypeButton><S.GroupTypeButton type="button" $active={!isSolo} onClick={() => setIsSolo(false)}>함께 여행 · 선택됨</S.GroupTypeButton></S.GroupTypeRow><S.CountRow><label htmlFor="planner-member-count">나를 포함한 인원</label><S.Stepper><button type="button" aria-label="인원 줄이기" onClick={() => setMemberCount(String(Math.max(1, Number(memberCount) - 1)))} disabled={isSolo}>−</button><span id="planner-member-count">{isSolo ? 1 : memberCount}</span><button type="button" aria-label="인원 늘리기" onClick={() => setMemberCount(String(Math.min(30, Number(memberCount) + 1)))} disabled={isSolo}>+</button></S.Stepper></S.CountRow>{isInviteOpen ? <S.InvitePanel><S.SectionTitle>초대하기</S.SectionTitle>{plannerInviteLink ? <S.InviteLinkRow><PartTripInput aria-label="생성된 초대 링크" value={plannerInviteLink} readOnly /><PartTripButton type="button" $variant="secondary" onClick={() => void navigator.clipboard?.writeText(plannerInviteLink)}>링크 복사</PartTripButton></S.InviteLinkRow> : <S.Notice>플래너를 생성하면 멤버 초대 링크가 표시됩니다.</S.Notice>}<S.InviteCodeRow><S.StepField><label htmlFor="planner-invite-code">초대 코드로 참여</label><PartTripInput id="planner-invite-code" value={inviteCode} onChange={(event) => setInviteCode(event.target.value)} placeholder="초대 코드를 입력하세요" /></S.StepField><PartTripButton type="button" $variant="secondary" disabled={joinPlannerMutation.isPending} onClick={() => void handleJoinPlanner()}>{joinPlannerMutation.isPending ? '참여 중' : '그룹 참여'}</PartTripButton></S.InviteCodeRow></S.InvitePanel> : null}<S.MemberPanel><S.SectionTitle>함께할 사람</S.SectionTitle><S.MemberList><S.MemberRow><S.Avatar>{currentUserInitial}</S.Avatar><S.MemberDetails><strong>{currentUserName}</strong><span>나</span></S.MemberDetails><S.MemberState>나</S.MemberState></S.MemberRow>{otherMembers.map((member, index) => <S.MemberRow key={`${member.userId ?? member.nickName}-${index}`}><S.Avatar>{(member.nickName || member.userId || '멤버').slice(0, 2).toUpperCase()}</S.Avatar><S.MemberDetails><strong>{member.nickName || member.userId || '멤버'}</strong><span>멤버</span></S.MemberDetails><S.MemberState>{member.role || '초대 대기'}</S.MemberState></S.MemberRow>)}</S.MemberList></S.MemberPanel><S.GroupActions><PartTripButton type="button" $variant="secondary" onClick={() => setIsInviteOpen((current) => !current)}>{isInviteOpen ? "초대 닫기" : "+ 링크로 초대하기"}</PartTripButton><PartTripButton type="submit">다음: 여행지</PartTripButton></S.GroupActions></S.GroupForm> : null}
 

@@ -313,9 +313,8 @@ export async function rejectPlannerInvitation(invitationId: number): Promise<Pla
   return data
 }
 
-export async function cancelPlannerInvitation(plannerId: number, invitationId: number): Promise<PlannerInvitationResponseDto> {
-  const { data } = await apiClient.delete<PlannerInvitationResponseDto>(PLANNER_API_PATHS.cancelInvitation(plannerId, invitationId))
-  return data
+export async function cancelPlannerInvitation(plannerId: number, invitationId: number): Promise<void> {
+  await apiClient.delete(PLANNER_API_PATHS.cancelInvitation(plannerId, invitationId))
 }
 
 export async function removePlannerMember(plannerId: number, memberUserId: string): Promise<void> {
