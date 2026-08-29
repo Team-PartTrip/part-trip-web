@@ -1520,6 +1520,17 @@ function PlannerFlowPage({ step }: Props) {
                       </S.ResponseRow>
                     ))}
                     <S.ActionRow>
+                      {!isConfirmed ? (
+                        <PartTripButton
+                          type="button"
+                          $variant="secondary"
+                          onClick={() =>
+                            flowNavigate({ to: paths.plannerExplore })
+                          }
+                        >
+                          {votes.length ? "후보 장소 관리" : "장소 후보 추가"}
+                        </PartTripButton>
+                      ) : null}
                       <PartTripButton
                         type="button"
                         disabled={

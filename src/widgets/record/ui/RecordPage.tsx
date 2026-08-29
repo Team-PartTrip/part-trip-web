@@ -17,7 +17,7 @@ export function RecordPage() {
     id: trip.tripId,
     title: trip.title || `${trip.cityName || trip.countryName || '여행'} 여행`,
     date: `${formatDate(trip.startDate)} – ${formatDate(trip.endDate)}`,
-    photoCount: trip.images?.length ?? 0,
+    photoCount: trip.photoCount ?? trip.images?.length ?? 0,
     active: Boolean(trip.startDate && trip.endDate && trip.startDate <= today && today <= trip.endDate),
   }))
   const filteredRecords = records.filter((record) => year === 'all' || record.date.startsWith(year))

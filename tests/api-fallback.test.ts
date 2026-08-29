@@ -10,13 +10,14 @@ function axiosError(status: number) {
   })
 }
 
-test('명세 endpoint가 서버에 없으면 mock fallback을 사용한다', async () => {
-  const result = await requestWithMockFallback(
-    async () => { throw axiosError(404) },
-    () => 'mock result',
+test('실제 API의 404 오류를 mock으로 숨기지 않는다', async () => {
+  await assert.rejects(
+    requestWithMockFallback(
+      async () => { throw axiosError(404) },
+      () => 'mock result',
+    ),
+    /HTTP 404/,
   )
-
-  assert.equal(result, 'mock result')
 })
 
 test('서버 오류는 mock으로 숨기지 않는다', async () => {
@@ -29,17 +30,11 @@ test('서버 오류는 mock으로 숨기지 않는다', async () => {
   )
 })
 
-test('Swagger에 없는 API는 서버 요청 없이 mock을 사용한다', async () => {
-  let requested = false
+test('기본 모드에서는 실제 API 응답을 사용한다', async () => {
   const result = await requestWithMockFallback(
-    async () => {
-      requested = true
-      return 'server result'
-    },
+    async () => 'server result',
     () => 'mock result',
-    { mockFirst: true },
   )
 
-  assert.equal(result, 'mock result')
-  assert.equal(requested, false)
+  assert.equal(result, 'server result')
 })

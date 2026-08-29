@@ -8,7 +8,7 @@ export function plannerStatusKey(status?: string): PlannerStatusKey {
   const value = normalizeStatus(status)
 
   if (value === 'DONE' || value === 'COMPLETED' || value.includes('완료')) return 'completed'
-  if (value === 'VOTING' || value === 'TRAVELING' || value === 'ACTIVE' || value === 'IN_PROGRESS' || value.includes('진행')) return 'active'
+  if (value === 'PLANNING' || value === 'VOTING' || value === 'TRAVELING' || value === 'ACTIVE' || value === 'IN_PROGRESS' || value.includes('진행')) return 'active'
   return 'planned'
 }
 

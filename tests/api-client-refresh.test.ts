@@ -54,3 +54,25 @@ test('401 응답이면 refresh 후 원래 요청을 새 access token으로 재�
     apiClient.defaults.adapter = previousApiAdapter
   }
 })
+
+test('보호 API는 access token 없이 요청하지 않는다', async () => {
+  const storage = createStorage()
+  const previousStorage = globalThis.localStorage
+  const previousApiAdapter = apiClient.defaults.adapter
+  let requested = false
+
+  apiClient.defaults.adapter = async (config) => {
+    requested = true
+    return { config, data: {}, headers: {}, status: 200, statusText: 'OK' }
+  }
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: storage })
+
+  try {
+    await assert.rejects(apiClient.get('/private'), /로그인이 필요합니다/)
+    assert.equal(requested, false)
+  } finally {
+    clearAuthTokens()
+    Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: previousStorage })
+    apiClient.defaults.adapter = previousApiAdapter
+  }
+})

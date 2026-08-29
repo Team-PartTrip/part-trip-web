@@ -31,9 +31,18 @@ export function resolveApiAssetUrl(url?: string): string | undefined {
   return new URL(url, apiBaseUrl.origin).href
 }
 
+function isAuthRequest(url?: string) {
+  return url?.includes('/auth/') ?? false
+}
+
 // 저장된 accessToken을 모든 요청 헤더에 자동 첨부
 apiClient.interceptors.request.use((config) => {
   const token = getAccessToken()
+
+  if (!token && !isAuthRequest(config.url)) {
+    expireSession()
+    return Promise.reject(new Error('로그인이 필요합니다.'))
+  }
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
@@ -77,6 +86,15 @@ async function requestNewTokens(refreshToken: string) {
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: unknown) => {
+    if (
+      axios.isAxiosError(error) &&
+      error.response?.status === 403 &&
+      !getAccessToken() &&
+      !isAuthRequest(error.config?.url)
+    ) {
+      expireSession()
+    }
+
     if (!axios.isAxiosError(error) || error.response?.status !== 401 || !error.config) {
       return Promise.reject(error)
     }
