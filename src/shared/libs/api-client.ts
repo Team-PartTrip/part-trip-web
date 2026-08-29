@@ -32,7 +32,14 @@ export function resolveApiAssetUrl(url?: string): string | undefined {
 }
 
 function isAuthRequest(url?: string) {
-  return url?.includes('/auth/') ?? false
+  if (!url) return false
+
+  try {
+    const pathname = new URL(url, 'https://parttrip.invalid').pathname
+    return pathname === '/auth' || pathname.startsWith('/auth/')
+  } catch {
+    return false
+  }
 }
 
 // 보호 API 요청에만 저장된 accessToken을 자동 첨부

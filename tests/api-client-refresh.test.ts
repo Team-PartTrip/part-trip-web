@@ -81,10 +81,10 @@ test('인증 API에는 저장된 access token을 첨부하지 않는다', async 
   const storage = createStorage()
   const previousStorage = globalThis.localStorage
   const previousApiAdapter = apiClient.defaults.adapter
-  let authorization: unknown
+  const authorizations: Array<[string, unknown]> = []
 
   apiClient.defaults.adapter = async (config) => {
-    authorization = config.headers.Authorization
+    authorizations.push([config.url ?? '', config.headers.Authorization])
     return { config, data: {}, headers: {}, status: 200, statusText: 'OK' }
   }
   Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: storage })
@@ -92,11 +92,62 @@ test('인증 API에는 저장된 access token을 첨부하지 않는다', async 
 
   try {
     await apiClient.post('/auth/login', {})
-    assert.equal(authorization, undefined)
+    await apiClient.get('/auth/login?next=/private')
+    await apiClient.get('/users?redirect=/auth/login')
+    await apiClient.get('/admin/auth/audit')
+    assert.deepEqual(authorizations, [
+      ['/auth/login', undefined],
+      ['/auth/login?next=/private', undefined],
+      ['/users?redirect=/auth/login', 'Bearer stale-access'],
+      ['/admin/auth/audit', 'Bearer stale-access'],
+    ])
   } finally {
     clearAuthTokens()
     Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: previousStorage })
     apiClient.defaults.adapter = previousApiAdapter
+  }
+})
+
+test('access token이 없는 인증 API 요청은 세션 만료 없이 허용한다', async () => {
+  const storage = createStorage()
+  const previousStorage = globalThis.localStorage
+  const previousWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
+  const previousApiAdapter = apiClient.defaults.adapter
+  let requested = false
+  let expiredEvents = 0
+  let authorization: unknown
+
+  Object.defineProperty(globalThis, 'window', {
+    configurable: true,
+    value: {
+      dispatchEvent: () => {
+        expiredEvents += 1
+        return true
+      },
+      localStorage: createStorage(),
+      sessionStorage: storage,
+    },
+  })
+  apiClient.defaults.adapter = async (config) => {
+    requested = true
+    authorization = config.headers.Authorization
+    return { config, data: {}, headers: {}, status: 200, statusText: 'OK' }
+  }
+
+  try {
+    await apiClient.post('/auth/login', {})
+    assert.equal(requested, true)
+    assert.equal(authorization, undefined)
+    assert.equal(expiredEvents, 0)
+  } finally {
+    clearAuthTokens()
+    Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: previousStorage })
+    apiClient.defaults.adapter = previousApiAdapter
+    if (previousWindow) {
+      Object.defineProperty(globalThis, 'window', previousWindow)
+    } else {
+      Reflect.deleteProperty(globalThis, 'window')
+    }
   }
 })
 
