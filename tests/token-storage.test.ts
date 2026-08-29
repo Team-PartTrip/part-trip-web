@@ -38,7 +38,7 @@ test('로그아웃 시 두 토큰을 모두 제거한다', () => {
 test('브라우저 기본 저장소는 sessionStorage를 사용하고 legacy 토큰을 제거한다', () => {
   const sessionStorage = createStorage()
   const legacyStorage = createStorage()
-  const previousWindow = globalThis.window
+  const previousWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
   legacyStorage.setItem(ACCESS_TOKEN_KEY, 'legacy-access')
   legacyStorage.setItem(REFRESH_TOKEN_KEY, 'legacy-refresh')
   Object.defineProperty(globalThis, 'window', {
@@ -55,6 +55,10 @@ test('브라우저 기본 저장소는 sessionStorage를 사용하고 legacy 토
     assert.equal(legacyStorage.getItem(REFRESH_TOKEN_KEY), null)
   } finally {
     clearAuthTokens()
-    Object.defineProperty(globalThis, 'window', { configurable: true, value: previousWindow })
+    if (previousWindow) {
+      Object.defineProperty(globalThis, 'window', previousWindow)
+    } else {
+      Reflect.deleteProperty(globalThis, 'window')
+    }
   }
 })

@@ -79,7 +79,7 @@ test('보호 API는 access token 없이 요청하지 않는다', async () => {
 
 test('원격 인증 갱신은 HTTPS가 아니면 차단한다', async () => {
   const storage = createStorage()
-  const previousWindow = globalThis.window
+  const previousWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
   const previousApiAdapter = apiClient.defaults.adapter
   const previousBaseURL = apiClient.defaults.baseURL
   let requested = 0
@@ -108,6 +108,10 @@ test('원격 인증 갱신은 HTTPS가 아니면 차단한다', async () => {
     clearAuthTokens()
     apiClient.defaults.adapter = previousApiAdapter
     apiClient.defaults.baseURL = previousBaseURL
-    Object.defineProperty(globalThis, 'window', { configurable: true, value: previousWindow })
+    if (previousWindow) {
+      Object.defineProperty(globalThis, 'window', previousWindow)
+    } else {
+      Reflect.deleteProperty(globalThis, 'window')
+    }
   }
 })
