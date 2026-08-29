@@ -40,12 +40,15 @@ export function usePlannerData(
     step === 'place'
   const hasActivePlanner = isPositiveSafeInteger(activePlannerId)
   const needsPlannerDetail = hasActivePlanner && step !== 'list' && step !== 'create'
-  const needsMembers = step === 'group' || step === 'progress'
+  const needsMembers = step === 'group' || step === 'progress' || step === 'final'
+  const requiresMembers = step === 'group' || step === 'progress'
   const needsInvitations = step === 'group'
   const needsVotes = step === 'explore' || step === 'vote' || step === 'lineup' || step === 'progress' || step === 'final'
+  const requiresVotes = step === 'vote' || step === 'progress'
   const needsVoteDetail = step === 'vote' &&
     isPositiveSafeInteger(activePlannerId) &&
     isPositiveSafeInteger(activeVoteId)
+  const requiresVoteList = requiresVotes && !needsVoteDetail
   const needsConfirmedPlaces = step === 'final'
   const [overriddenPlan, setOverriddenPlan] = useState<PlannerPlan>()
   const countriesQuery = useCountriesQuery(countryKeyword, step === 'destination')
@@ -75,6 +78,7 @@ export function usePlannerData(
     category,
     needsPlaces,
   )
+  const canUseVoteDetail = step === 'vote' && Boolean(voteDetailQuery.data)
 
   return {
     countries: countriesQuery.data ?? [],
@@ -83,19 +87,19 @@ export function usePlannerData(
       placesQuery.isError ||
       plannersQuery.isError ||
       plannerDetailQuery.isError ||
-      plannerMembersQuery.isError ||
+      (requiresMembers && plannerMembersQuery.isError) ||
       confirmedPlacesQuery.isError ||
-      votesQuery.isError ||
-      voteDetailQuery.isError,
+      (requiresVotes && votesQuery.isError && !canUseVoteDetail) ||
+      (step === 'vote' && needsVoteDetail && voteDetailQuery.isError),
     isLoading:
       countriesQuery.isLoading ||
       placesQuery.isLoading ||
       plannersQuery.isLoading ||
       plannerDetailQuery.isLoading ||
-      plannerMembersQuery.isLoading ||
+      (requiresMembers && plannerMembersQuery.isLoading) ||
       confirmedPlacesQuery.isLoading ||
-      votesQuery.isLoading ||
-      voteDetailQuery.isLoading,
+      (requiresVoteList && votesQuery.isLoading) ||
+      (needsVoteDetail && voteDetailQuery.isLoading),
     places: placesQuery.data ?? [],
     plan,
     plannerDetail: plannerDetailQuery.data,

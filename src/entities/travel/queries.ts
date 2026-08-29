@@ -27,6 +27,7 @@ export const countriesQueryOptions = (keyword = '', enabled = true) =>
     queryKey: travelQueryKeys.countries(keyword),
     queryFn: () => getCountries(keyword),
     enabled,
+    placeholderData: (previousData) => previousData,
   })
 
 export const ddayQueryOptions = (enabled = true) =>

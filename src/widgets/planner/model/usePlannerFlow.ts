@@ -14,7 +14,6 @@ import {
   useCreateVoteMutation,
   useDeleteVoteOptionMutation,
   useCancelPlannerInvitationMutation,
-  useInvitePlannerMembersMutation,
   useJoinPlannerMutation,
   useRemovePlannerMemberMutation,
   useRejectPlannerInvitationMutation,
@@ -100,6 +99,7 @@ export function usePlannerFlow(step: PlannerStep) {
   const [manualPlaceName, setManualPlaceName] = useState('')
   const [selectedOptionId, setSelectedOptionId] = useState<number>()
   const [lineupChoice, setLineupChoice] = useState<number | null>(null)
+  const [lineupMode, setLineupMode] = useState<'direct' | 'random'>('direct')
   const plannerConfirmationKey = `${PLANNER_CONFIRMED_KEY}:${activePlannerId}`
   const [hasConfirmedLocally, setHasConfirmedLocally] = useState(() => step !== 'create' && sessionStorage.getItem(plannerConfirmationKey) === 'true')
   const [errorMessage, setErrorMessage] = useState('')
@@ -108,7 +108,6 @@ export function usePlannerFlow(step: PlannerStep) {
   const createVoteMutation = useCreateVoteMutation()
   const joinPlannerMutation = useJoinPlannerMutation()
   const savePlannerTravelPlanMutation = useSavePlannerTravelPlanMutation()
-  const invitePlannerMembersMutation = useInvitePlannerMembersMutation()
   const acceptPlannerInvitationMutation = useAcceptPlannerInvitationMutation()
   const rejectPlannerInvitationMutation = useRejectPlannerInvitationMutation()
   const cancelPlannerInvitationMutation = useCancelPlannerInvitationMutation()
@@ -294,25 +293,6 @@ export function usePlannerFlow(step: PlannerStep) {
       navigate({ to: paths.plannerProgress })
     } catch {
       setErrorMessage('초대 코드로 여행 그룹에 참여하지 못했습니다.')
-    }
-  }
-
-  const handleInviteMembers = async (userIds: string[]) => {
-    const normalizedUserIds = [...new Set(userIds.map((userId) => userId.trim()).filter(Boolean))]
-    if (!canManagePlanner || !isPositiveSafeInteger(activePlannerId) || normalizedUserIds.length === 0) {
-      setErrorMessage('초대할 아이디와 플래너 정보를 확인해주세요.')
-      return false
-    }
-    try {
-      setErrorMessage('')
-      await invitePlannerMembersMutation.mutateAsync({
-        payload: { userIds: normalizedUserIds },
-        plannerId: activePlannerId,
-      })
-      return true
-    } catch {
-      setErrorMessage('멤버를 초대하지 못했습니다.')
-      return false
     }
   }
 
@@ -504,7 +484,10 @@ export function usePlannerFlow(step: PlannerStep) {
 
   const handleRemoveFromLineup = (index: number) => {
     setSelected((current) => current.filter((item) => item !== index))
-    if (lineupChoice === index) setLineupChoice(null)
+    if (lineupChoice === index) {
+      setLineupChoice(null)
+      setLineupMode('direct')
+    }
   }
 
   const handleRandomLineup = async () => {
@@ -527,6 +510,7 @@ export function usePlannerFlow(step: PlannerStep) {
       const randomPlace = await selectRandomPlannerPlaceMutation.mutateAsync(plannerId)
       const choiceIndex = places.findIndex((item) => item.tourPlaceId === randomPlace.placeId)
       if (choiceIndex < 0) throw new Error('random place is not in the current category')
+      setLineupMode('random')
       setLineupChoice(choiceIndex)
       setSelected([choiceIndex])
     } catch {
@@ -582,7 +566,6 @@ export function usePlannerFlow(step: PlannerStep) {
     handleCloseVote,
     handleDeleteVoteOption,
     handleDestinationSelect,
-    handleInviteMembers,
     handleJoinPlanner,
     handleRemindMembers,
     handleCancelPlannerInvitation,
@@ -604,6 +587,7 @@ export function usePlannerFlow(step: PlannerStep) {
     isSolo,
     isRemindAvailable,
     lineupChoice,
+    lineupMode,
     manualPlaceName,
     navigate,
     paths,
@@ -634,6 +618,7 @@ export function usePlannerFlow(step: PlannerStep) {
     setInviteCode,
     setIsSolo,
     setLineupChoice,
+    setLineupMode,
     setMemberCount,
     setPlannerTitle,
     setSelected,
@@ -652,7 +637,6 @@ export function usePlannerFlow(step: PlannerStep) {
     castBallotMutation,
     closeVoteMutation,
     joinPlannerMutation,
-    invitePlannerMembersMutation,
     acceptPlannerInvitationMutation,
     rejectPlannerInvitationMutation,
     cancelPlannerInvitationMutation,

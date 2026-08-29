@@ -94,6 +94,7 @@ export type PlannerJoinResponseDto = {
 
 export type CreateVoteRequestDto = {
   category: string
+  placeId?: number
   deadline?: string
 }
 
@@ -106,6 +107,7 @@ export type VoteCreateResponseDto = {
   status?: string
   deadline?: string
   createdAt?: string
+  count?: number
 }
 
 export type SavePlannerTravelPlanRequestDto = {

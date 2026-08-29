@@ -26,7 +26,7 @@ export const LoadingBody = styled(Skeleton)`
   border-radius: 16px;
 `
 
-export const Header = styled.header`
+export const Header = styled.header<{ $final?: boolean }>`
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -34,6 +34,12 @@ export const Header = styled.header`
   gap: 20px;
   padding-inline: 24px;
   margin-bottom: 24px;
+
+  ${({ $final }) => $final && `
+    min-height: 32px;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  `}
 
   > button {
     width: 112px;
@@ -189,7 +195,9 @@ export const PlanAside = styled.span`
   align-items: center;
   gap: 8px;
   justify-content: flex-end;
-  min-width: 160px;
+  min-width: 300px;
+
+  @media (max-width: 700px) { min-width: auto; }
 `
 
 export const RowArrow = styled.span`
@@ -238,6 +246,7 @@ export const FlowStepper = styled.nav`
 `
 
 export const FlowStep = styled.span<{ $active: boolean; $complete: boolean }>`
+  position: relative;
   flex: 0 0 auto;
   border-radius: 999px;
   padding: 7px 12px;
@@ -246,6 +255,16 @@ export const FlowStep = styled.span<{ $active: boolean; $complete: boolean }>`
   font-size: 10px;
   font-weight: 600;
   white-space: nowrap;
+
+  &:not(:last-child)::after {
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 8px);
+    width: 16px;
+    height: 1px;
+    background: #b8d6f2;
+    content: '';
+  }
 `
 
 export const GroupForm = styled.form`
@@ -335,11 +354,58 @@ export const ActionRow = styled.div`
   margin-top: auto;
 `
 
+export const FullWidthAction = styled.button`
+  width: 100%;
+  height: 48px;
+  margin-top: 0;
+  border: 0;
+  border-radius: 12px;
+  padding: 14px;
+  background: ${({ theme }) => theme.colors.brand.primary};
+  box-shadow: 0 4px 5px rgb(26 110 191 / 16%);
+  color: ${({ theme }) => theme.colors.text.inverse};
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+
+  &:disabled { cursor: not-allowed; opacity: .55; }
+`
+
 export const TwoColumn = styled.div`
   display: grid;
   gap: 24px;
   grid-template-columns: minmax(0, 1fr) 456px;
 
+  @media (max-width: 860px) { grid-template-columns: 1fr; }
+`
+
+export const LineupModeRow = styled.nav`
+  display: flex;
+  gap: 16px;
+
+  button {
+    min-width: 110px;
+    height: 36px;
+    border: 0;
+    border-radius: 12px;
+    background: ${({ theme }) => theme.colors.background.muted};
+    color: ${({ theme }) => theme.colors.brand.primary};
+    font-size: 12px;
+  }
+
+  button[data-active="true"] {
+    background: ${({ theme }) => theme.colors.brand.primary};
+    color: ${({ theme }) => theme.colors.text.inverse};
+    box-shadow: 0 4px 5px rgb(26 110 191 / 16%);
+  }
+`
+
+export const CartBody = styled.div`
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 760px) minmax(0, 352px);
+
+  @media (max-width: 1180px) { grid-template-columns: minmax(0, 1fr) minmax(280px, 352px); }
   @media (max-width: 860px) { grid-template-columns: 1fr; }
 `
 
@@ -394,6 +460,8 @@ export const SegmentButton = styled.button<{ $active: boolean }>`
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
+
+  &:disabled { cursor: not-allowed; opacity: .55; }
 `
 
 export const Stepper = styled.div`
@@ -437,6 +505,27 @@ export const Avatar = styled.span`
   border-radius: 50%;
   background: ${({ theme }) => theme.colors.background.muted};
   color: ${({ theme }) => theme.colors.brand.strong};
+  font-size: 11px;
+  font-weight: 600;
+`
+
+export const PlanMemberAvatars = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  ${Avatar} { width: 34px; height: 34px; flex-basis: 34px; font-size: 11px; }
+`
+
+export const PlanMemberOverflow = styled.span`
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: ${({ theme }) => theme.colors.background.muted};
+  color: ${({ theme }) => theme.colors.text.muted};
   font-size: 11px;
   font-weight: 600;
 `
@@ -834,14 +923,15 @@ export const PlaceAction = styled.button<{ $active: boolean }>`
 
 export const SelectedPanel = styled.section`
   display: flex;
-  min-height: 486px;
+  min-height: 560px;
   flex-direction: column;
-  gap: 12px;
-  border-radius: 20px;
-  padding: 24px;
+  gap: 14px;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 16px;
+  padding: 20px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
-  h2 { margin: 0; font-size: 15px; }
+  h2 { margin: 0; font-size: 18px; }
 `
 
 export const SelectionGuidance = styled.div`
@@ -955,15 +1045,31 @@ export const ActionFeedback = styled.p`
 export const SelectedPlaces = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 14px;
 `
 
 export const SelectedPlaceRow = styled.div`
   display: flex;
+  min-height: 72px;
   align-items: center;
-  gap: 10px;
-  padding: 10px 0;
-  small { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 11px; }
+  justify-content: space-between;
+  gap: 12px;
+  border-radius: 12px;
+  padding: 12px;
+  background: ${({ theme }) => theme.colors.background.muted};
+  ${PlaceDetails} { gap: 4px; strong { font-size: 15px; } span { font-size: 12px; } }
+  button {
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: ${({ theme }) => theme.colors.text.muted};
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+  }
 `
 
 export const PlaceMarker = styled.span`
@@ -976,11 +1082,12 @@ export const PlaceMarker = styled.span`
 
 export const NextPanel = styled.section`
   display: flex;
-  min-height: 360px;
+  min-height: 300px;
   flex-direction: column;
   gap: 12px;
-  border-radius: 20px;
-  padding: 24px;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 16px;
+  padding: 20px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
   p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; line-height: 20px; }
@@ -996,21 +1103,20 @@ export const ProgressStats = styled.div`
 
 export const ProgressStat = styled.div`
   display: flex;
-  min-height: 62px;
+  min-height: 112px;
   flex-direction: column;
   justify-content: center;
   border: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  border-radius: 12px;
-  padding: 12px 16px;
-  strong { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 24px; line-height: 28px; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
+  border-radius: 16px;
+  padding: 24px;
+  strong { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 28px; line-height: 34px; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
 `
 
 export const ProgressBody = styled.div`
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 456px;
-  @media (max-width: 860px) { grid-template-columns: 1fr; }
+  grid-template-columns: minmax(0, 1fr);
 `
 
 export const CategoryStatusPanel = styled.section`
@@ -1077,40 +1183,6 @@ export const ResponseRow = styled.div`
   span { color: ${({ theme }) => theme.colors.brand.successStrong}; font-size: 11px; }
 `
 
-export const FinalBody = styled.div`
-  display: grid;
-  gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 456px;
-  @media (max-width: 860px) { grid-template-columns: 1fr; }
-`
-
-export const FinalPlan = styled.section`
-  display: flex;
-  min-height: 560px;
-  flex-direction: column;
-  gap: 12px;
-  border-radius: 28px;
-  padding: 24px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-`
-
-export const FinalTripCard = styled.article`
-  width: 360px;
-  max-width: 100%;
-  overflow: hidden;
-  border-radius: 28px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-  img { display: block; width: 100%; height: 170px; object-fit: cover; }
-  > div { display: flex; min-height: 100px; flex-direction: column; gap: 6px; padding: 16px; }
-  h2, p { margin: 0; }
-  h2 { font-size: 16px; }
-  p { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
-  small { color: ${({ theme }) => theme.colors.brand.strong}; font-size: 11px; font-weight: 600; }
-  small b { float: right; }
-`
-
 export const FinalPlaceList = styled.div`
   display: flex;
   flex-direction: column;
@@ -1121,30 +1193,103 @@ export const FinalPlaceRow = styled.div`
   display: grid;
   align-items: center;
   gap: 8px;
-  grid-template-columns: 48px minmax(0, 1fr) auto;
-  min-height: 36px;
-  font-size: 12px;
-  small { color: ${({ theme }) => theme.colors.text.muted}; }
-  span { border-radius: 8px; padding: 6px 8px; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.brand.strong}; font-size: 11px; }
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  min-height: 56px;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  font-size: 13px;
+  &:last-child { border-bottom: 0; }
+  small { width: 64px; border-radius: 8px; padding: 6px 8px; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.brand.strong}; font-size: 11px; text-align: center; }
+  span { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 13px; font-weight: 600; }
 `
 
-export const FinalConfirmPanel = styled.section`
+export const FinalConfirmBody = styled.div`
   display: flex;
-  min-height: 708px;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 12px;
-  border-radius: 28px;
+  align-items: center;
+  gap: 18px;
+  min-height: 758px;
+  text-align: center;
+`
+
+export const SuccessMark = styled.span`
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border-radius: 12px;
+  background: ${({ theme }) => theme.colors.brand.primary};
+  box-shadow: 0 4px 5px rgb(26 110 191 / 16%);
+  color: ${({ theme }) => theme.colors.text.inverse};
+  font-size: 28px;
+  font-weight: 700;
+`
+
+export const FinalTitle = styled.h1`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 30px;
+  line-height: 38px;
+`
+
+export const FinalTripTitle = styled.h2`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 20px;
+  line-height: 26px;
+`
+
+export const FinalDate = styled.p`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 13px;
+`
+
+export const FinalMembers = styled.div`
+  display: flex;
+  gap: 8px;
+  min-height: 40px;
+
+  ${Avatar} { width: 36px; height: 36px; flex-basis: 36px; font-size: 12px; }
+`
+
+export const FinalMemberSummary = styled.p`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 13px;
+`
+
+export const FinalSchedulePanel = styled.section`
+  display: flex;
+  width: min(700px, 100%);
+  min-height: 292px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+  box-sizing: border-box;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 16px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
-  p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; line-height: 20px; }
 `
 
 export const FinalActions = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: 12px;
+
+  > button { width: 244px; height: 48px; }
+
+  @media (max-width: 560px) {
+    width: 100%;
+    flex-direction: column;
+    > button { width: 100%; }
+  }
+`
+
+export const FinalHint = styled.p`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 12px;
 `
 
 export const Badge = styled.span`
