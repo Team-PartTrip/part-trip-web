@@ -2,16 +2,13 @@ import { useDeferredValue, useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
 
 import {
-  getVotes,
   useAcceptPlannerInvitationMutation,
   useAddPlannerPlacesMutation,
-  useAddVoteOptionMutation,
   useCastBallotMutation,
   useCloseVoteMutation,
   useConfirmVoteMutation,
   useConfirmPlannerMutation,
   useCreatePlannerMutation,
-  useCreateVoteMutation,
   useDeleteVoteOptionMutation,
   useCancelPlannerInvitationMutation,
   useJoinPlannerMutation,
@@ -19,7 +16,7 @@ import {
   useRejectPlannerInvitationMutation,
   useRemindPlannerMembersMutation,
   useSelectRandomPlannerPlaceMutation,
-  useSavePlannerTravelPlanMutation,
+  useUpdatePlannerMutation,
 } from '@/entities/planner'
 import type { CountryInfoResponseDto } from '@/entities/travel'
 import { paths } from '@/shared/config'
@@ -96,7 +93,6 @@ export function usePlannerFlow(step: PlannerStep) {
   const [plannerInviteCode, setPlannerInviteCode] = useState(() =>
     step === 'create' ? '' : sessionStorage.getItem(PLANNER_INVITE_CODE_KEY) ?? '',
   )
-  const [manualPlaceName, setManualPlaceName] = useState('')
   const [selectedOptionId, setSelectedOptionId] = useState<number>()
   const [lineupChoice, setLineupChoice] = useState<number | null>(null)
   const [lineupMode, setLineupMode] = useState<'direct' | 'random'>('direct')
@@ -105,15 +101,13 @@ export function usePlannerFlow(step: PlannerStep) {
   const [errorMessage, setErrorMessage] = useState('')
   const [remindFeedback, setRemindFeedback] = useState('')
   const createPlannerMutation = useCreatePlannerMutation()
-  const createVoteMutation = useCreateVoteMutation()
   const joinPlannerMutation = useJoinPlannerMutation()
-  const savePlannerTravelPlanMutation = useSavePlannerTravelPlanMutation()
+  const updatePlannerMutation = useUpdatePlannerMutation()
   const acceptPlannerInvitationMutation = useAcceptPlannerInvitationMutation()
   const rejectPlannerInvitationMutation = useRejectPlannerInvitationMutation()
   const cancelPlannerInvitationMutation = useCancelPlannerInvitationMutation()
   const removePlannerMemberMutation = useRemovePlannerMemberMutation()
   const addPlannerPlacesMutation = useAddPlannerPlacesMutation()
-  const addVoteOptionMutation = useAddVoteOptionMutation()
   const remindPlannerMembersMutation = useRemindPlannerMembersMutation()
   const selectRandomPlannerPlaceMutation = useSelectRandomPlannerPlaceMutation()
   const confirmPlannerMutation = useConfirmPlannerMutation()
@@ -121,7 +115,7 @@ export function usePlannerFlow(step: PlannerStep) {
   const closeVoteMutation = useCloseVoteMutation()
   const confirmVoteMutation = useConfirmVoteMutation()
   const deleteVoteOptionMutation = useDeleteVoteOptionMutation()
-  const isSaving = createPlannerMutation.isPending || savePlannerTravelPlanMutation.isPending
+  const isSaving = createPlannerMutation.isPending || updatePlannerMutation.isPending
 
   useEffect(() => {
     sessionStorage.setItem(PLANNER_SELECTED_KEY, JSON.stringify(selected))
@@ -183,7 +177,6 @@ export function usePlannerFlow(step: PlannerStep) {
     setVoteCategory(category)
     setSelected([])
     setSelectedOptionId(undefined)
-    setManualPlaceName('')
   }
 
   const handleStartDateChange = (value: string) => {
@@ -213,60 +206,36 @@ export function usePlannerFlow(step: PlannerStep) {
       return
     }
     try {
-      const groupSettings = parsePlannerGroupSettings(sessionStorage.getItem(PLANNER_GROUP_SETTINGS_KEY))
-      if (isPositiveSafeInteger(activePlannerId)) {
-        const savedPlan = await savePlannerTravelPlanMutation.mutateAsync({
-          plannerId: activePlannerId,
-          payload: {
-            cityName: nextCity,
-            countryName: nextCountry,
-            endDate: selectedEndDate,
-            startDate: selectedStartDate,
-          },
-        })
-        setPlan({
-          cityName: savedPlan.cityName ?? nextCity,
-          countryName: savedPlan.countryName ?? nextCountry,
-          endDate: savedPlan.endDate ?? selectedEndDate,
-          headcount: plan?.headcount ?? nextHeadcount,
-          startDate: savedPlan.startDate ?? selectedStartDate,
-        })
-      } else {
-        const planner = await createPlannerMutation.mutateAsync({
+      if (!isPositiveSafeInteger(activePlannerId)) {
+        setErrorMessage('먼저 여행 그룹을 저장해주세요.')
+        return
+      }
+      const savedPlan = await updatePlannerMutation.mutateAsync({
+        plannerId: activePlannerId,
+        payload: {
           cityName: nextCity,
           countryName: nextCountry,
           endDate: selectedEndDate,
-          isSolo: groupSettings.isSolo,
-          memberCount: groupSettings.isSolo ? 1 : nextHeadcount,
           startDate: selectedStartDate,
-          title: plannerTitle.trim() || `${nextCity} 여행 계획`,
-        })
-        const plannerId = planner.plannerId
-        if (!isPositiveSafeInteger(plannerId)) throw new Error('plannerId is missing')
-        sessionStorage.setItem(ACTIVE_PLANNER_ID_KEY, String(plannerId))
-        if (planner.inviteCode) {
-          sessionStorage.setItem(PLANNER_INVITE_CODE_KEY, planner.inviteCode)
-          setPlannerInviteCode(planner.inviteCode)
-        }
-        setPlan({
-          cityName: planner.cityName ?? nextCity,
-          countryName: planner.countryName ?? nextCountry,
-          endDate: planner.endDate ?? selectedEndDate,
-          headcount: planner.memberCount ?? nextHeadcount,
-          startDate: planner.startDate ?? selectedStartDate,
-        })
-      }
+        },
+      })
+      setPlan({
+        cityName: savedPlan.cityName ?? nextCity,
+        countryName: savedPlan.countryName ?? nextCountry,
+        endDate: savedPlan.endDate ?? selectedEndDate,
+        headcount: plan?.headcount ?? nextHeadcount,
+        startDate: savedPlan.startDate ?? selectedStartDate,
+      })
       sessionStorage.removeItem(ACTIVE_VOTE_ID_KEY)
       sessionStorage.setItem(ACTIVE_VOTE_CATEGORY_KEY, voteCategory)
       setSelected([])
-      setManualPlaceName('')
       continueTo(paths.plannerExplore)
     } catch {
       setErrorMessage('여행 정보를 저장하지 못했습니다.')
     }
   }
 
-  const saveGroupSettings = (event: FormEvent<HTMLFormElement>) => {
+  const saveGroupSettings = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const nextMemberCount = isSolo ? 1 : Number(memberCount)
     const minimumMemberCount = isSolo ? 1 : 2
@@ -274,9 +243,26 @@ export function usePlannerFlow(step: PlannerStep) {
       setErrorMessage(isSolo ? '혼자 여행은 1명으로 설정해주세요.' : '함께 여행은 2명에서 30명 사이로 입력해주세요.')
       return
     }
-    sessionStorage.setItem(PLANNER_GROUP_SETTINGS_KEY, JSON.stringify({ isSolo, memberCount: nextMemberCount }))
-    setErrorMessage('')
-    navigate({ to: paths.plannerDestination })
+    try {
+      setErrorMessage('')
+      sessionStorage.setItem(PLANNER_GROUP_SETTINGS_KEY, JSON.stringify({ isSolo, memberCount: nextMemberCount }))
+      if (!isPositiveSafeInteger(activePlannerId)) {
+        const planner = await createPlannerMutation.mutateAsync({
+          isSolo,
+          memberCount: nextMemberCount,
+          title: plannerTitle.trim() || '나의 여행 계획',
+        })
+        if (!isPositiveSafeInteger(planner.plannerId)) throw new Error('plannerId is missing')
+        sessionStorage.setItem(ACTIVE_PLANNER_ID_KEY, String(planner.plannerId))
+        if (planner.inviteCode) {
+          sessionStorage.setItem(PLANNER_INVITE_CODE_KEY, planner.inviteCode)
+          setPlannerInviteCode(planner.inviteCode)
+        }
+      }
+      navigate({ to: paths.plannerDestination })
+    } catch {
+      setErrorMessage('여행 그룹을 저장하지 못했습니다.')
+    }
   }
 
   const handleJoinPlanner = async () => {
@@ -357,53 +343,23 @@ export function usePlannerFlow(step: PlannerStep) {
     const placeIds = [...new Set(selectedPlaces
       .map(({ item }) => item.tourPlaceId)
       .filter((placeId): placeId is number => isPositiveSafeInteger(placeId)))]
-    const manualName = manualPlaceName.trim()
 
     if (!isPositiveSafeInteger(plannerId)) {
       setErrorMessage('먼저 여행 계획을 저장해주세요.')
       return
     }
-    if (placeIds.length === 0 && !manualName) {
-      setErrorMessage('검색 결과를 선택하거나 직접 장소를 입력해주세요.')
+    if (placeIds.length === 0) {
+      setErrorMessage('검색 결과를 선택해주세요.')
       return
     }
 
     try {
       setErrorMessage('')
-      if (placeIds.length > 0) {
-        await addPlannerPlacesMutation.mutateAsync({ plannerId, payload: { placeIds } })
-      }
-
-      if (manualName) {
-        let vote = activeVote
-        if (!isPositiveSafeInteger(vote?.voteId) && placeIds.length > 0) {
-          const refreshedVotes = await getVotes(plannerId)
-          vote = refreshedVotes.find((item) => item.category === voteCategory || item.categoryLabel === voteCategory)
-        }
-        if (vote && normalizeVoteStatus(vote.status) !== '' && normalizeVoteStatus(vote.status) !== 'OPEN') {
-          throw new Error('closed vote')
-        }
-        if (!isPositiveSafeInteger(vote?.voteId)) {
-          if (!canManagePlanner) {
-            setErrorMessage('그룹장이 먼저 해당 카테고리 투표를 시작해주세요.')
-            return
-          }
-          vote = await createVoteMutation.mutateAsync({ plannerId, payload: { category: voteCategory } })
-        }
-        if (!isPositiveSafeInteger(vote.voteId)) throw new Error('voteId is missing')
-        await addVoteOptionMutation.mutateAsync({
-          payload: { placeName: manualName },
-          plannerId,
-          voteId: vote.voteId,
-        })
-        sessionStorage.setItem(ACTIVE_VOTE_ID_KEY, String(vote.voteId))
-      } else {
-        sessionStorage.removeItem(ACTIVE_VOTE_ID_KEY)
-      }
+      await addPlannerPlacesMutation.mutateAsync({ plannerId, payload: { placeIds } })
+      sessionStorage.removeItem(ACTIVE_VOTE_ID_KEY)
 
       sessionStorage.setItem(ACTIVE_VOTE_CATEGORY_KEY, voteCategory)
       setSelected([])
-      setManualPlaceName('')
       navigate({ to: paths.plannerVote })
     } catch {
       setErrorMessage('후보를 저장하지 못했습니다.')
@@ -546,7 +502,6 @@ export function usePlannerFlow(step: PlannerStep) {
     sessionStorage.removeItem(ACTIVE_VOTE_ID_KEY)
     setSelected([])
     setSelectedOptionId(undefined)
-    setManualPlaceName('')
     navigate({ to: paths.plannerProgress })
   }
 
@@ -588,7 +543,6 @@ export function usePlannerFlow(step: PlannerStep) {
     isRemindAvailable,
     lineupChoice,
     lineupMode,
-    manualPlaceName,
     navigate,
     paths,
     place,
@@ -623,17 +577,14 @@ export function usePlannerFlow(step: PlannerStep) {
     setPlannerTitle,
     setSelected,
     setStartDate: handleStartDateChange,
-    setManualPlaceName,
     setVoteCategory: handleVoteCategoryChange,
     startDate,
     voteCategory,
     votes,
     confirmPlannerMutation,
     confirmVoteMutation,
-    createVoteMutation,
     deleteVoteOptionMutation,
     addPlannerPlacesMutation,
-    addVoteOptionMutation,
     castBallotMutation,
     closeVoteMutation,
     joinPlannerMutation,

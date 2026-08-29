@@ -1,6 +1,5 @@
 import { apiClient } from '@/shared/libs/api-client'
 import { requestWithMockFallback } from '@/shared/libs/api-fallback'
-import { getMockLikeState } from '@/entities/community/mock-state'
 import type { CommentRequestDto, CommentResponseDto } from '@/entities/community/types'
 
 export type ShareTripRequestDto = {
@@ -62,13 +61,14 @@ export type TravelCardTimelineItemDto = {
   address?: string
   comment?: string
   date?: string
+  entryId?: number
   imageUrl?: string
   latitude?: number
   longitude?: number
   placeName?: string
   rating?: number
   takenAt?: string
-  type?: 'PLACE' | 'PHOTO'
+  type?: 'PLACE' | 'PHOTO' | 'NO_INFO_PHOTO'
 }
 
 export type TravelCardDetailDto = {
@@ -91,16 +91,12 @@ export type TravelCardEntryResponseDto = {
   takenAt?: string
 }
 
+export type TravelCardEntryCommentRequestDto = {
+  comment: string
+}
+
 export type TravelCardDeleteRequestDto = {
   cardIds: number[]
-}
-
-export type TravelCardReportRequestDto = {
-  type: string
-}
-
-export type TravelCardReportResponseDto = {
-  reportUrl?: string
 }
 
 const SHARED_TRIP_API_PATHS = {
@@ -114,7 +110,7 @@ const TRAVEL_CARD_API_PATHS = {
   base: '/travel-cards',
   detail: (cardId: number) => `/travel-cards/${cardId}`,
   entries: (cardId: number) => `/travel-cards/${cardId}/entries`,
-  report: (cardId: number) => `/travel-cards/${cardId}/report`,
+  entry: (cardId: number, entryId: number) => `/travel-cards/${cardId}/entries/${entryId}`,
 } as const
 
 type MockTravelCard = TravelCardListItemDto & TravelCardDetailDto
@@ -152,7 +148,7 @@ export function toSharedTrip(card: TravelCardListItemDto | TravelCardDetailDto):
     title: destination ? `${destination} 여행` : undefined,
     tripId: card.cardId,
   }
-  return card.cardId == null ? sharedTrip : { ...sharedTrip, ...getMockLikeState('TRIP', card.cardId, sharedTrip.liked, sharedTrip.likeCount) }
+  return sharedTrip
 }
 
 function getMockTravelCard(cardId?: number): MockTravelCard {
@@ -162,59 +158,35 @@ function getMockTravelCard(cardId?: number): MockTravelCard {
 }
 
 export async function listTravelCards(): Promise<TravelCardListItemDto[]> {
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.get<TravelCardListItemDto[]>(TRAVEL_CARD_API_PATHS.base)
-      return data
-    },
-    () => mockTravelCards,
-  )
+  const { data } = await apiClient.get<TravelCardListItemDto[]>(TRAVEL_CARD_API_PATHS.base)
+  return data
 }
 
 export async function getTravelCard(cardId: number): Promise<TravelCardDetailDto> {
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.get<TravelCardDetailDto>(TRAVEL_CARD_API_PATHS.detail(cardId))
-      return data
-    },
-    () => getMockTravelCard(cardId),
-  )
+  const { data } = await apiClient.get<TravelCardDetailDto>(TRAVEL_CARD_API_PATHS.detail(cardId))
+  return data
 }
 
 export async function createTravelCardEntry(cardId: number, payload: TravelCardEntryRequestDto): Promise<TravelCardEntryResponseDto> {
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.postForm<TravelCardEntryResponseDto>(TRAVEL_CARD_API_PATHS.entries(cardId), payload)
-      return data
-    },
-    () => ({ entryId: Date.now(), imageUrl: URL.createObjectURL(payload.imageFile), takenAt: new Date(payload.imageFile.lastModified).toISOString() }),
-  )
+  const { data } = await apiClient.postForm<TravelCardEntryResponseDto>(TRAVEL_CARD_API_PATHS.entries(cardId), payload)
+  return data
 }
 
 export async function deleteTravelCards(payload: TravelCardDeleteRequestDto): Promise<string> {
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.delete<string>(TRAVEL_CARD_API_PATHS.base, { data: payload })
-      return data
-    },
-    () => {
-      for (const cardId of payload.cardIds) {
-        const index = mockTravelCards.findIndex((card) => card.cardId === cardId)
-        if (index >= 0) mockTravelCards.splice(index, 1)
-      }
-      return '삭제되었습니다.'
-    },
-  )
+  const { data } = await apiClient.delete<string>(TRAVEL_CARD_API_PATHS.base, { data: payload })
+  return data
 }
 
-export async function generateTravelCardReport(cardId: number, payload: TravelCardReportRequestDto): Promise<TravelCardReportResponseDto> {
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.post<TravelCardReportResponseDto>(TRAVEL_CARD_API_PATHS.report(cardId), payload)
-      return data
-    },
-    () => ({ reportUrl: `/mock/travel-cards/${cardId}/report?type=${encodeURIComponent(payload.type)}` }),
-  )
+export async function deleteTravelCardEntry(cardId: number, entryId: number): Promise<void> {
+  await apiClient.delete(TRAVEL_CARD_API_PATHS.entry(cardId, entryId))
+}
+
+export async function updateTravelCardEntryComment(
+  cardId: number,
+  entryId: number,
+  payload: TravelCardEntryCommentRequestDto,
+): Promise<void> {
+  await apiClient.patch(TRAVEL_CARD_API_PATHS.entry(cardId, entryId), payload)
 }
 
 export async function listSharedTrips(params?: {

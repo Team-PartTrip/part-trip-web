@@ -234,7 +234,6 @@ function PlannerFlowPage({ step }: Props) {
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const {
     addPlannerPlacesMutation,
-    addVoteOptionMutation,
     activeVote,
     castBallotMutation,
     canManagePlanner,
@@ -244,7 +243,6 @@ function PlannerFlowPage({ step }: Props) {
     continueTo,
     confirmPlannerMutation,
     confirmVoteMutation,
-    createVoteMutation,
     deleteVoteOptionMutation,
     errorMessage,
     handleAcceptPlannerInvitation,
@@ -279,7 +277,6 @@ function PlannerFlowPage({ step }: Props) {
     isSolo,
     lineupChoice,
     lineupMode,
-    manualPlaceName,
     memberCount,
     members,
     navigate,
@@ -301,7 +298,6 @@ function PlannerFlowPage({ step }: Props) {
     selectedPlaces,
     selectedOptionId,
     selectedStartDate,
-    setManualPlaceName,
     remindFeedback,
     remindPlannerMembersMutation,
     selectRandomPlannerPlaceMutation,
@@ -386,9 +382,7 @@ function PlannerFlowPage({ step }: Props) {
     ? 1
     : 0;
   const isSavingCandidates =
-    createVoteMutation.isPending ||
     addPlannerPlacesMutation.isPending ||
-    addVoteOptionMutation.isPending ||
     selectRandomPlannerPlaceMutation.isPending;
   const isManagingMembers =
     acceptPlannerInvitationMutation.isPending ||
@@ -753,13 +747,6 @@ function PlannerFlowPage({ step }: Props) {
                   >
                     그룹 정하기
                   </PartTripButton>
-                  <PartTripButton
-                    type="button"
-                    $variant="secondary"
-                    onClick={() => continueTo(paths.plannerDestination)}
-                  >
-                    여행지 설정
-                  </PartTripButton>
                 </S.ActionRow>
               </S.StepCard>
             ) : null}
@@ -767,7 +754,7 @@ function PlannerFlowPage({ step }: Props) {
             {voteOptionManagementPanel}
 
             {step === "group" ? (
-              <S.GroupForm as="form" onSubmit={saveGroupSettings}>
+              <S.GroupForm as="form" onSubmit={(event) => void saveGroupSettings(event)}>
                 <S.GroupTypeRow>
                   <S.GroupTypeButton
                     type="button"
@@ -911,7 +898,7 @@ function PlannerFlowPage({ step }: Props) {
                   >
                     {isInviteOpen ? "초대 닫기" : "+ 링크로 초대하기"}
                   </PartTripButton>
-                  <PartTripButton type="submit">다음: 여행지</PartTripButton>
+                  <PartTripButton type="submit" disabled={isSaving}>{isSaving ? "저장 중" : "다음: 여행지"}</PartTripButton>
                 </S.GroupActions>
               </S.GroupForm>
             ) : null}
@@ -1205,31 +1192,12 @@ function PlannerFlowPage({ step }: Props) {
                     {places.length === 0 ? (
                       <S.Empty>연동된 장소 후보가 없습니다.</S.Empty>
                     ) : null}
-                    <S.DirectCandidate>
-                      <label htmlFor="planner-manual-place">
-                        직접 후보 입력
-                      </label>
-                      <PartTripInput
-                        id="planner-manual-place"
-                        value={manualPlaceName}
-                        onChange={(event) =>
-                          setManualPlaceName(event.target.value)
-                        }
-                        placeholder="장소 이름을 직접 입력하세요"
-                      />
-                      <S.FieldHint>
-                        {canManagePlanner
-                          ? "검색 후보를 선택하거나 직접 입력한 뒤 저장하세요."
-                          : "그룹장이 투표를 시작한 후 직접 후보를 추가할 수 있어요."}
-                      </S.FieldHint>
-                    </S.DirectCandidate>
                     <S.PanelActions>
                       <PartTripButton
                         type="button"
                         disabled={
                           isSavingCandidates ||
-                          (selectedPlaces.length === 0 &&
-                            !manualPlaceName.trim())
+                          selectedPlaces.length === 0
                         }
                         onClick={() => void handleSaveCandidates()}
                       >

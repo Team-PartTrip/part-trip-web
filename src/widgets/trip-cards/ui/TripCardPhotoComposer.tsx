@@ -1,8 +1,10 @@
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { figmaCardJapan } from "@/shared/assets";
+import { useCreateTravelCardEntryMutation } from "@/entities/trip-card";
+import type { TripPlanResponseDto } from "@/entities/trip-plan";
+import { resolveApiAssetUrl } from "@/shared/libs/api-client";
 import {
   Button as PartTripButton,
-  Input as PartTripInput,
   Textarea as PartTripTextarea,
 } from "@/shared/ui/parttrip";
 
@@ -10,28 +12,17 @@ import * as S from "./TripCardsPage.styles";
 
 type PhotoDraft = { file: File; url: string };
 
-type GeneratedDraft = {
-  content: string;
-  endDate: string;
-  photos: PhotoDraft[];
-  startDate: string;
-  title: string;
-};
+type Props = { cards: TripPlanResponseDto[] };
 
-function dateValue(timestamp: number) {
-  return new Date(timestamp).toISOString().slice(0, 10);
-}
-
-export function TripCardPhotoComposer() {
+export function TripCardPhotoComposer({ cards }: Props) {
   const [photos, setPhotos] = useState<PhotoDraft[]>([]);
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [selectedCardId, setSelectedCardId] = useState("");
+  const [comment, setComment] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [generatedDraft, setGeneratedDraft] = useState<GeneratedDraft | null>(
-    null,
-  );
+  const [successMessage, setSuccessMessage] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const createEntryMutation = useCreateTravelCardEntryMutation();
+  const selectedCard = cards.find((card) => String(card.tripId) === selectedCardId);
 
   useEffect(
     () => () => photos.forEach(({ url }) => URL.revokeObjectURL(url)),
@@ -45,40 +36,39 @@ export function TripCardPhotoComposer() {
       .sort((a, b) => a.file.lastModified - b.file.lastModified);
     photos.forEach(({ url }) => URL.revokeObjectURL(url));
     setPhotos(nextPhotos);
-    setGeneratedDraft(null);
+    setSuccessMessage("");
     setErrorMessage(
       nextPhotos.length === 0 ? "이미지 파일을 하나 이상 선택해주세요." : "",
     );
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!title.trim() || photos.length === 0) {
-      setErrorMessage("제목과 이미지를 입력해주세요.");
+    const cardId = Number(selectedCardId);
+    if (!Number.isSafeInteger(cardId) || cardId <= 0) {
+      setErrorMessage("사진을 추가할 여행 카드를 선택해주세요.");
       return;
     }
-    const nextStartDate = startDate || dateValue(photos[0].file.lastModified);
-    const nextEndDate =
-      endDate ||
-      dateValue(
-        photos.at(-1)?.file.lastModified ?? photos[0].file.lastModified,
-      );
-    if (nextStartDate > nextEndDate) {
-      setErrorMessage("종료일은 시작일보다 빠를 수 없습니다.");
+    if (photos.length === 0) {
+      setErrorMessage("이미지 파일을 하나 이상 선택해주세요.");
       return;
     }
-    setErrorMessage("");
-    setStartDate(nextStartDate);
-    setEndDate(nextEndDate);
-    setGeneratedDraft({
-      content:
-        content.trim() ||
-        "사진 파일의 촬영 시각을 기준으로 생성한 여행 기록 초안입니다.",
-      endDate: nextEndDate,
-      photos,
-      startDate: nextStartDate,
-      title: title.trim(),
-    });
+    try {
+      setErrorMessage("");
+      setSuccessMessage("");
+      for (const photo of photos) {
+        await createEntryMutation.mutateAsync({
+          cardId,
+          payload: { comment: comment.trim(), imageFile: photo.file },
+        });
+      }
+      setSuccessMessage(`${photos.length}장의 사진을 여행 카드에 추가했습니다.`);
+      setPhotos([]);
+      setComment("");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch {
+      setErrorMessage("사진을 여행 카드에 추가하지 못했습니다.");
+    }
   };
 
   return (
@@ -86,34 +76,18 @@ export function TripCardPhotoComposer() {
       <S.CreateCardLayout>
         <S.CreateFormPanel>
           <S.FormHeading>기본 정보</S.FormHeading>
-          <S.Form onSubmit={handleSubmit}>
+          <S.Form onSubmit={(event) => void handleSubmit(event)}>
             <label>
-              여행 이름
-              <PartTripInput
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                placeholder="오사카 여행"
-                maxLength={60}
-              />
-            </label>
-            <label>
-              여행 기간
-              <S.DateFields>
-                <PartTripInput
-                  type="date"
-                  value={startDate}
-                  onChange={(event) => setStartDate(event.target.value)}
-                />
-                <PartTripInput
-                  type="date"
-                  value={endDate}
-                  onChange={(event) => setEndDate(event.target.value)}
-                />
-              </S.DateFields>
+              여행 카드
+              <select value={selectedCardId} onChange={(event) => setSelectedCardId(event.target.value)} disabled={createEntryMutation.isPending}>
+                <option value="">사진을 추가할 여행 카드를 선택하세요</option>
+                {cards.map((card) => <option key={card.tripId} value={card.tripId}>{card.title || `${card.cityName || card.countryName || "여행"} 기록`}</option>)}
+              </select>
             </label>
             <label>
               사진 선택
               <input
+                ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 multiple
@@ -132,44 +106,34 @@ export function TripCardPhotoComposer() {
             <label>
               코멘트
               <PartTripTextarea
-                value={content}
-                onChange={(event) => setContent(event.target.value)}
+                value={comment}
+                onChange={(event) => setComment(event.target.value)}
                 placeholder="이 사진에 대해 짧게 남겨보세요."
-                maxLength={100}
+                maxLength={500}
               />
             </label>
-            <small>{content.length} / 100</small>
+            <small>{comment.length} / 500</small>
             {errorMessage ? (
               <S.ErrorMessage role="alert">{errorMessage}</S.ErrorMessage>
             ) : null}
-            <PartTripButton type="submit">여행 카드 초안 만들기</PartTripButton>
+            {successMessage ? <S.SuccessMessage role="status">{successMessage}</S.SuccessMessage> : null}
+            <PartTripButton type="submit" disabled={createEntryMutation.isPending || !selectedCardId || photos.length === 0}>{createEntryMutation.isPending ? "업로드 중" : "여행 카드에 추가"}</PartTripButton>
           </S.Form>
         </S.CreateFormPanel>
         <S.CardPreviewPanel>
           <S.FormHeading>미리보기</S.FormHeading>
           <S.PreviewCard>
-            <img src={photos[0]?.url || figmaCardJapan} alt="" />
+            <img src={resolveApiAssetUrl(selectedCard?.images?.[0]) || photos[0]?.url || figmaCardJapan} alt="" />
             <div>
-              <h2>{title || "오사카 여행"}</h2>
+              <h2>{selectedCard?.title || `${selectedCard?.cityName || selectedCard?.countryName || "여행"} 기록`}</h2>
               <span>
-                {startDate && endDate
-                  ? `${startDate} – ${endDate}`
-                  : "Japan · 5 days"}
+                {selectedCard ? `${selectedCard.startDate || "-"} – ${selectedCard.endDate || "-"} · 사진 ${selectedCard.photoCount ?? 0}장` : "여행 카드를 선택하세요"}
               </span>
             </div>
           </S.PreviewCard>
         </S.CardPreviewPanel>
       </S.CreateCardLayout>
-      {generatedDraft ? (
-        <S.GeneratedCard>
-          <S.Badge>프론트 초안</S.Badge>
-          <h2>{generatedDraft.title}</h2>
-          <p>
-            {generatedDraft.startDate} – {generatedDraft.endDate}
-          </p>
-          <p>{generatedDraft.content}</p>
-        </S.GeneratedCard>
-      ) : null}
+      {cards.length === 0 ? <S.ErrorMessage role="status">추가할 여행 카드가 없습니다. 여행 계획을 확정하면 카드가 생성됩니다.</S.ErrorMessage> : null}
     </S.Composer>
   );
 }

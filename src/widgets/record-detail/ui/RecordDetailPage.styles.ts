@@ -64,29 +64,6 @@ export const ErrorMessage = styled.p`
   color: var(--pt-status-error);
 `
 
-export const EditForm = styled.form`
-  display: grid;
-  gap: 18px;
-  border: 1px solid var(--pt-border-subtle);
-  border-radius: 24px;
-  padding: 28px;
-  background: var(--pt-bg-default);
-  h1 { margin: 0; }
-  label { display: grid; gap: 8px; font-weight: 700; }
-  input, textarea { width: 100%; border: 1px solid var(--pt-border-default); border-radius: 10px; padding: 12px; font: inherit; }
-  textarea { min-height: 180px; resize: vertical; }
-  > div:last-child { display: flex; justify-content: flex-end; gap: 8px; }
-  button { border: 0; border-radius: 9px; padding: 10px 18px; cursor: pointer; }
-  button[type='submit'] { background: var(--pt-brand-primary); color: var(--pt-text-inverse); }
-`
-
-export const DateFields = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  @media (max-width: 36rem) { grid-template-columns: 1fr; }
-`
-
 export const Layout = styled.div`
   display: grid;
   grid-template-columns: 1fr;

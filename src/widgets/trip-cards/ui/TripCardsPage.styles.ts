@@ -529,15 +529,6 @@ export const PreviewCard = styled.article`
 `;
 
 export const Form = styled.form``;
-export const DateFields = styled.div`
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  @media (max-width: 560px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
 export const PreviewGrid = styled.div`
   display: grid;
   gap: 10px;
@@ -571,26 +562,10 @@ export const ErrorMessage = styled.p`
   font-size: 13px;
 `;
 
-export const GeneratedCard = styled.article`
-  display: grid;
-  gap: 10px;
-  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  border-radius: 20px;
-  padding: 20px;
-  background: ${({ theme }) => theme.colors.background.subtle};
-  h2,
-  p {
-    margin: 0;
-  }
-  h2 {
-    color: ${({ theme }) => theme.colors.text.strong};
-    font-size: 20px;
-  }
-  p {
-    color: ${({ theme }) => theme.colors.text.muted};
-    font-size: 13px;
-    line-height: 18px;
-  }
+export const SuccessMessage = styled.p`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.status.success};
+  font-size: 13px;
 `;
 
 export const DeleteLayout = styled.div`

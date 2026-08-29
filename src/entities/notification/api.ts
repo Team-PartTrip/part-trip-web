@@ -23,6 +23,7 @@ export type NotificationResponseDto = {
   body?: string
   linkType?: string
   linkId?: number
+  isRead?: boolean
   read?: boolean
   createdAt?: string
 }
@@ -68,7 +69,10 @@ export async function getNotifications(params?: {
   const { data } = await apiClient.get<NotificationPageResponseDto>(NOTIFICATION_API_PATHS.base, {
     params: { cursor: params?.cursor, size: params?.size, type: params?.category ?? 'ALL' },
   })
-  return data
+  return {
+    ...data,
+    items: data.items?.map((item) => ({ ...item, isRead: item.isRead ?? item.read })),
+  }
 }
 
 export async function markNotificationAsRead(notificationId: number): Promise<void> {

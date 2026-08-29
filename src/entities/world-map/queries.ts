@@ -2,10 +2,10 @@ import { queryOptions, useQuery } from '@tanstack/react-query'
 import { getWorldMap, getWorldMapCountry, getWorldMapStats } from './api'
 import { worldMapQueryKeys } from './query-keys'
 
-export const worldMapQueryOptions = () => queryOptions({ queryKey: worldMapQueryKeys.map(), queryFn: getWorldMap })
+export const worldMapQueryOptions = (enabled = true) => queryOptions({ queryKey: worldMapQueryKeys.map(), queryFn: getWorldMap, enabled })
 
-export function useWorldMapQuery() {
-  return useQuery(worldMapQueryOptions())
+export function useWorldMapQuery(enabled = true) {
+  return useQuery(worldMapQueryOptions(enabled))
 }
 
 export const worldMapCountryQueryOptions = (countryCode: string) => queryOptions({ queryKey: worldMapQueryKeys.country(countryCode), queryFn: () => getWorldMapCountry(countryCode), enabled: Boolean(countryCode) })

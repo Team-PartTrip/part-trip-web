@@ -2,12 +2,15 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import {
   createSharedTripComment,
+  createTravelCardEntry,
+  deleteTravelCardEntry,
   deleteTravelCards,
-  generateTravelCardReport,
   importTrip,
   shareTrip,
+  updateTravelCardEntryComment,
   type TravelCardDeleteRequestDto,
-  type TravelCardReportRequestDto,
+  type TravelCardEntryCommentRequestDto,
+  type TravelCardEntryRequestDto,
   type ShareTripRequestDto,
 } from './api'
 import { communityQueryKeys } from '@/entities/community/query-keys'
@@ -41,9 +44,36 @@ export function useDeleteTravelCardsMutation() {
   })
 }
 
-export function useGenerateTravelCardReportMutation() {
+export function useCreateTravelCardEntryMutation() {
+  const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ cardId, payload }: { cardId: number; payload: TravelCardReportRequestDto }) => generateTravelCardReport(cardId, payload),
+    mutationFn: ({ cardId, payload }: { cardId: number; payload: TravelCardEntryRequestDto }) => createTravelCardEntry(cardId, payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: tripCardQueryKeys.all })
+      void queryClient.invalidateQueries({ queryKey: tripPlanQueryKeys.all })
+    },
+  })
+}
+
+export function useDeleteTravelCardEntryMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ cardId, entryId }: { cardId: number; entryId: number }) => deleteTravelCardEntry(cardId, entryId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: tripCardQueryKeys.all })
+      void queryClient.invalidateQueries({ queryKey: tripPlanQueryKeys.all })
+    },
+  })
+}
+
+export function useUpdateTravelCardEntryCommentMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ cardId, entryId, payload }: { cardId: number; entryId: number; payload: TravelCardEntryCommentRequestDto }) => updateTravelCardEntryComment(cardId, entryId, payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: tripCardQueryKeys.all })
+      void queryClient.invalidateQueries({ queryKey: tripPlanQueryKeys.all })
+    },
   })
 }
 

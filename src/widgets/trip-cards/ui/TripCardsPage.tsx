@@ -180,7 +180,7 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
                 ) : null}
               </S.SelectList>
             ) : (
-              <TripCardPhotoComposer />
+              <TripCardPhotoComposer cards={mine} />
             )}
           </>
         ) : null}

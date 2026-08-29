@@ -6,22 +6,6 @@ import {
   type TravelCardListItemDto,
 } from '@/entities/trip-card/api'
 
-export type TripPlanPlaceRequestDto = {
-  dayNumber?: number
-  placeName?: string
-  placeSub?: string
-}
-
-export type TripPlanRequestDto = {
-  title?: string
-  countryInfoId?: number
-  startDate?: string
-  endDate?: string
-  content?: string
-  images?: string[]
-  places?: TripPlanPlaceRequestDto[]
-}
-
 export type TripPlanPlaceResponseDto = {
   tripPlaceId?: number
   dayNumber?: number
@@ -50,11 +34,10 @@ export type TripPlanResponseDto = {
   isPublic?: boolean
   createDate?: string
   places?: TripPlanPlaceResponseDto[]
+  timeline?: TravelCardDetailDto['timeline']
 }
 
 const TRIP_API_PATHS = {
-  detail: (tripId: number) => `/trips/${tripId}`,
-  base: '/trips',
   cards: '/travel-cards',
 } as const
 
@@ -62,7 +45,10 @@ function toTripPlan(
   card?: TravelCardListItemDto,
   detail?: TravelCardDetailDto,
 ): TripPlanResponseDto {
-  const timeline = detail?.timeline ?? []
+  const timeline = (detail?.timeline ?? []).map((item) => ({
+    ...item,
+    imageUrl: resolveApiAssetUrl(item.imageUrl) ?? item.imageUrl,
+  }))
   const destination = card?.cityName || card?.countryName
   const images = timeline.flatMap((item) => {
     const imageUrl = resolveApiAssetUrl(item.imageUrl)
@@ -92,6 +78,7 @@ function toTripPlan(
     startDate: detail?.startDate ?? card?.startDate,
     title: destination ? `${destination} 여행` : undefined,
     tripId: card?.cardId ?? detail?.cardId,
+    timeline,
   }
 }
 
@@ -101,16 +88,6 @@ export async function getTrip(tripId: number): Promise<TripPlanResponseDto> {
     getTravelCard(tripId),
   ])
   return toTripPlan(cards.find((card) => card.cardId === tripId), detail)
-}
-
-export async function createTrip(payload: TripPlanRequestDto): Promise<TripPlanResponseDto> {
-  const { data } = await apiClient.post<TripPlanResponseDto>(TRIP_API_PATHS.base, payload)
-  return data
-}
-
-export async function updateTrip(tripId: number, payload: TripPlanRequestDto): Promise<TripPlanResponseDto> {
-  const { data } = await apiClient.put<TripPlanResponseDto>(TRIP_API_PATHS.detail(tripId), payload)
-  return data
 }
 
 export async function deleteTrip(tripId: number): Promise<string> {

@@ -4,10 +4,6 @@ export type CreatePlannerRequestDto = {
   title: string
   memberCount: number
   isSolo: boolean
-  countryName?: string
-  cityName?: string
-  startDate?: string
-  endDate?: string
 }
 
 export type PlannerCreateResponseDto = {
@@ -94,19 +90,14 @@ export type PlannerJoinResponseDto = {
 
 export type CreateVoteRequestDto = {
   category: string
-  placeId?: number
-  deadline?: string
+  placeId: number
 }
 
 export type VoteCreateResponseDto = {
   voteId?: number
   plannerId?: number
-  planId?: number
   category?: string
-  categoryLabel?: string
   status?: string
-  deadline?: string
-  createdAt?: string
   count?: number
 }
 
@@ -228,16 +219,6 @@ export type RandomPlaceResponseDto = {
   placeName?: string
 }
 
-export type CreateVoteOptionRequestDto = {
-  placeName?: string
-  tourPlaceId?: number
-}
-
-export type VoteOptionResponseDto = VoteOptionStatusResponseDto & {
-  createdAt?: string
-  voteId?: number
-}
-
 export type PlannerConfirmResponseDto = {
   confirmedSchedule?: ConfirmedPlaceResponseDto[]
   plannerId?: number
@@ -257,14 +238,12 @@ const PLANNER_API_PATHS = {
   cart: (plannerId: number) => `/planners/${plannerId}/cart`,
   random: (plannerId: number) => `/planners/${plannerId}/cart/random`,
   confirm: (plannerId: number) => `/planners/${plannerId}/confirm`,
-  travelPlan: (plannerId: number) => `/planners/${plannerId}/travel-plan`,
   confirmedPlaces: (plannerId: number) => `/planners/${plannerId}/confirmed-places`,
   votes: (plannerId: number) => `/planners/${plannerId}/votes`,
   vote: (plannerId: number, voteId: number) => `/planners/${plannerId}/votes/${voteId}`,
   ballot: (plannerId: number, voteId: number) => `/planners/${plannerId}/votes/${voteId}/ballot`,
   closeVote: (plannerId: number, voteId: number) => `/planners/${plannerId}/votes/${voteId}/close`,
   confirmVote: (plannerId: number, voteId: number) => `/planners/${plannerId}/votes/${voteId}/confirm`,
-  options: (plannerId: number, voteId: number) => `/planners/${plannerId}/votes/${voteId}/options`,
   option: (plannerId: number, voteId: number, optionId: number) => `/planners/${plannerId}/votes/${voteId}/options/${optionId}`,
   remind: (plannerId: number) => `/planners/${plannerId}/votes/remind`,
   join: '/planners/join',
@@ -321,17 +300,6 @@ export async function cancelPlannerInvitation(plannerId: number, invitationId: n
 
 export async function removePlannerMember(plannerId: number, memberUserId: string): Promise<void> {
   await apiClient.delete(PLANNER_API_PATHS.member(plannerId, memberUserId))
-}
-
-export async function savePlannerTravelPlan(
-  plannerId: number,
-  payload: SavePlannerTravelPlanRequestDto,
-): Promise<PlannerTravelPlanResponseDto> {
-  const { data } = await apiClient.put<PlannerTravelPlanResponseDto>(
-    PLANNER_API_PATHS.travelPlan(plannerId),
-    payload,
-  )
-  return data
 }
 
 export async function getConfirmedPlaces(plannerId: number): Promise<PlannerFinalResponseDto> {
@@ -405,11 +373,6 @@ export async function confirmVote(
 
 export async function remindPlannerMembers(plannerId: number): Promise<VoteReminderResponseDto> {
   const { data } = await apiClient.post<VoteReminderResponseDto>(PLANNER_API_PATHS.remind(plannerId))
-  return data
-}
-
-export async function addVoteOption(plannerId: number, voteId: number, payload: CreateVoteOptionRequestDto): Promise<VoteOptionResponseDto> {
-  const { data } = await apiClient.post<VoteOptionResponseDto>(PLANNER_API_PATHS.options(plannerId, voteId), payload)
   return data
 }
 

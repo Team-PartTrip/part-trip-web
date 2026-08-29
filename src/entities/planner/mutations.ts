@@ -4,24 +4,19 @@ import {
   castBallot,
   acceptPlannerInvitation,
   addPlannerPlaces,
-  addVoteOption,
   cancelPlannerInvitation,
   closeVote,
   confirmPlanner,
   confirmVote,
   createPlanner,
-  createVote,
   deleteVoteOption,
   joinPlanner,
   remindPlannerMembers,
   rejectPlannerInvitation,
   removePlannerMember,
-  savePlannerTravelPlan,
   selectRandomPlannerPlace,
   updatePlanner,
-  type CreateVoteOptionRequestDto,
   type CreatePlannerRequestDto,
-  type CreateVoteRequestDto,
   type JoinPlannerRequestDto,
   type PlannerCartRequestDto,
   type SavePlannerTravelPlanRequestDto,
@@ -50,23 +45,6 @@ export function useUpdatePlannerMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ plannerId, payload }: { plannerId: number; payload: SavePlannerTravelPlanRequestDto }) => updatePlanner(plannerId, payload),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
-  })
-}
-
-export function useCreateVoteMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ plannerId, payload }: { plannerId: number; payload: CreateVoteRequestDto }) => createVote(plannerId, payload),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
-  })
-}
-
-export function useSavePlannerTravelPlanMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ plannerId, payload }: { plannerId: number; payload: SavePlannerTravelPlanRequestDto }) =>
-      savePlannerTravelPlan(plannerId, payload),
     onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
   })
 }
@@ -124,14 +102,6 @@ export function useConfirmPlannerMutation() {
 
 export function useRemindPlannerMembersMutation() {
   return useMutation({ mutationFn: (plannerId: number) => remindPlannerMembers(plannerId) })
-}
-
-export function useAddVoteOptionMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ plannerId, voteId, payload }: { plannerId: number; voteId: number; payload: CreateVoteOptionRequestDto }) => addVoteOption(plannerId, voteId, payload),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
-  })
 }
 
 export function useDeleteVoteOptionMutation() {

@@ -827,16 +827,6 @@ export const PlaceListHeader = styled.header`
   button { border: 0; padding: 0; background: transparent; color: ${({ theme }) => theme.colors.brand.primary}; cursor: pointer; font-weight: 600; }
 `
 
-export const DirectCandidate = styled.div`
-  display: flex;
-  max-width: 520px;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 4px;
-
-  label { color: ${({ theme }) => theme.colors.text.strong}; font-size: 12px; font-weight: 600; }
-`
-
 export const PlaceRow = styled.div<{ $active?: boolean }>`
   display: flex;
   min-height: 102px;

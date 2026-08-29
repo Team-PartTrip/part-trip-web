@@ -1,6 +1,1 @@
-export type {
-  TripPlanPlaceRequestDto,
-  TripPlanPlaceResponseDto,
-  TripPlanRequestDto,
-  TripPlanResponseDto,
-} from './api'
+export type { TripPlanPlaceResponseDto, TripPlanResponseDto } from './api'

@@ -20,6 +20,7 @@ export type RefreshRequestDto = {
 export type TokenResponseDto = {
   accessToken: string
   refreshToken: string
+  surveyCompleted?: boolean
 }
 
 export type EmailVerifyRequestDto = {

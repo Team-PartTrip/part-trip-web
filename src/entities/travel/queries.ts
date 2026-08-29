@@ -4,8 +4,6 @@ import {
   getCountryInfo,
   getDday,
   getFestivals,
-  getPopularPlaces,
-  getRecentSearches,
   getTourPlace,
   type CountryInfoResponseDto,
   type DdayResponseDto,
@@ -86,9 +84,8 @@ export type DestinationQueryData = {
 }
 
 export async function getDestinationData(): Promise<DestinationQueryData> {
-  const [countries, popularPlaces, currentPlan] = await Promise.all([
+  const [countries, currentPlan] = await Promise.all([
     getCountries(),
-    getPopularPlaces(),
     getDday(),
   ])
   const destinations = countries.map((country, index) => ({
@@ -99,21 +96,9 @@ export async function getDestinationData(): Promise<DestinationQueryData> {
     imageUrl: country.imageUrl,
     name: country.cityName || country.countryName || '여행지',
   }))
-  const popularIds = new Set(popularPlaces.map((place) => place.countryInfoId))
-  const recentSearches = await getRecentSearches()
-
   return {
-    destinations: [...destinations].sort(
-      (a, b) => Number(popularIds.has(b.countryInfoId)) - Number(popularIds.has(a.countryInfoId)),
-    ),
-    recentDestinations: recentSearches.map((item, index) => ({
-      country: item.countryName ?? '여행지',
-      currency: currencyByCountry[item.countryName ?? ''] ?? '',
-      id: `recent-${item.recentSearchId ?? index}`,
-      imageUrl: item.imageUrl,
-      name: item.cityName || item.countryName || '여행지',
-      recentSearchId: item.recentSearchId,
-    })),
+    destinations,
+    recentDestinations: [],
     travelPlanId: currentPlan?.travelPlanId,
   }
 }
