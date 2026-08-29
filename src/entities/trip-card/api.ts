@@ -17,10 +17,12 @@ export type PageResponseDtoSharedTripResponseDto = {
 }
 
 export type SharedTripPlaceResponseDto = {
+  address?: string
   tripPlaceId?: number
   dayNumber?: number
   placeName?: string
   placeSub?: string
+  rating?: number
 }
 
 export type SharedTripResponseDto = {
@@ -38,9 +40,12 @@ export type SharedTripResponseDto = {
   likeCount?: number
   liked?: boolean
   commentCount?: number
+  coverImageUrl?: string
   isPublic?: boolean
   createDate?: string
+  photoCount?: number
   places?: SharedTripPlaceResponseDto[]
+  timeline?: TravelCardTimelineItemDto[]
 }
 
 export type TravelCardListItemDto = {
@@ -53,15 +58,24 @@ export type TravelCardListItemDto = {
   startDate?: string
 }
 
-export type TravelCardDetailDto = TravelCardListItemDto & {
-  timeline?: Array<{
-    cityName?: string
-    comment?: string
-    imageUrl?: string
-    placeName?: string
-    takenAt?: string
-    type?: 'PLACE' | 'PHOTO'
-  }>
+export type TravelCardTimelineItemDto = {
+  address?: string
+  comment?: string
+  date?: string
+  imageUrl?: string
+  latitude?: number
+  longitude?: number
+  placeName?: string
+  rating?: number
+  takenAt?: string
+  type?: 'PLACE' | 'PHOTO'
+}
+
+export type TravelCardDetailDto = {
+  cardId?: number
+  endDate?: string
+  startDate?: string
+  timeline?: TravelCardTimelineItemDto[]
 }
 
 export type TravelCardEntryRequestDto = {
@@ -103,7 +117,9 @@ const TRAVEL_CARD_API_PATHS = {
   report: (cardId: number) => `/travel-cards/${cardId}/report`,
 } as const
 
-const mockTravelCards: TravelCardDetailDto[] = [
+type MockTravelCard = TravelCardListItemDto & TravelCardDetailDto
+
+const mockTravelCards: MockTravelCard[] = [
   { cardId: 1, cityName: '오사카', countryName: '일본', endDate: '2026-08-27', photoCount: 24, startDate: '2026-08-23', timeline: [{ placeName: '도톤보리', type: 'PLACE' }, { placeName: '오사카성', type: 'PLACE' }] },
   { cardId: 2, cityName: '도쿄', countryName: '일본', endDate: '2026-05-12', photoCount: 16, startDate: '2026-05-10', timeline: [{ placeName: '시부야', type: 'PLACE' }] },
   { cardId: 3, cityName: '제주', countryName: '대한민국', endDate: '2025-12-24', photoCount: 42, startDate: '2025-12-20', timeline: [{ placeName: '성산일출봉', type: 'PLACE' }] },
@@ -111,22 +127,35 @@ const mockTravelCards: TravelCardDetailDto[] = [
 
 const mockSharedTripComments = new Map<number, CommentResponseDto[]>()
 
-function toSharedTrip(card: TravelCardListItemDto): SharedTripResponseDto {
-  const detail = card as TravelCardDetailDto
+export function toSharedTrip(card: TravelCardListItemDto | TravelCardDetailDto): SharedTripResponseDto {
+  const listCard = 'cityName' in card ? card : undefined
+  const timeline = 'timeline' in card ? card.timeline ?? [] : []
+  const timelineImages = timeline.flatMap((item) => item.imageUrl ? [item.imageUrl] : [])
+  const images = timelineImages.length ? timelineImages : listCard?.coverImageUrl ? [listCard.coverImageUrl] : []
+  const destination = listCard?.cityName || listCard?.countryName
   const sharedTrip: SharedTripResponseDto = {
-    cityName: card.cityName,
-    countryName: card.countryName,
+    cityName: listCard?.cityName,
+    countryName: listCard?.countryName,
+    coverImageUrl: listCard?.coverImageUrl,
     endDate: card.endDate,
-    images: detail.timeline?.flatMap((item) => item.imageUrl ? [item.imageUrl] : []) ?? [],
-    places: detail.timeline?.filter((item) => item.type === 'PLACE').map((item, index) => ({ dayNumber: index + 1, placeName: item.placeName })) ?? [],
+    images,
+    photoCount: listCard?.photoCount ?? timeline.filter((item) => item.type === 'PHOTO').length,
+    places: timeline.filter((item) => item.type === 'PLACE').map((item, index) => ({
+      address: item.address,
+      dayNumber: index + 1,
+      placeName: item.placeName,
+      placeSub: item.address,
+      rating: item.rating,
+    })),
     startDate: card.startDate,
-    title: `${card.cityName || card.countryName || '여행'} 여행`,
+    timeline,
+    title: destination ? `${destination} 여행` : undefined,
     tripId: card.cardId,
   }
   return card.cardId == null ? sharedTrip : { ...sharedTrip, ...getMockLikeState('TRIP', card.cardId, sharedTrip.liked, sharedTrip.likeCount) }
 }
 
-function getMockTravelCard(cardId?: number) {
+function getMockTravelCard(cardId?: number): MockTravelCard {
   const card = mockTravelCards.find((item) => item.cardId === cardId)
   if (!card) throw new Error('여행 카드를 찾을 수 없습니다.')
   return card
@@ -207,7 +236,24 @@ export async function shareTrip(payload: ShareTripRequestDto): Promise<SharedTri
 }
 
 export async function getSharedTripDetail(tripId: number): Promise<SharedTripResponseDto> {
-  return toSharedTrip(await getTravelCard(tripId))
+  const [detail, cards] = await Promise.all([getTravelCard(tripId), listTravelCards()])
+  const listCard = cards.find((card) => card.cardId === tripId)
+  const listView: SharedTripResponseDto = listCard ? toSharedTrip(listCard) : {}
+  const detailView = toSharedTrip(detail)
+  const hasTimeline = (detail.timeline?.length ?? 0) > 0
+  return {
+    ...listView,
+    ...detailView,
+    cityName: detailView.cityName ?? listView.cityName,
+    countryName: detailView.countryName ?? listView.countryName,
+    coverImageUrl: detailView.coverImageUrl ?? listView.coverImageUrl,
+    endDate: detailView.endDate ?? listView.endDate,
+    images: detailView.images?.length ? detailView.images : listView.images,
+    photoCount: hasTimeline ? detailView.photoCount : listView.photoCount,
+    places: detailView.places?.length ? detailView.places : listView.places,
+    startDate: detailView.startDate ?? listView.startDate,
+    title: detailView.title ?? listView.title,
+  }
 }
 
 export async function importTrip(tripId: number): Promise<SharedTripResponseDto> {

@@ -1,4 +1,5 @@
 import { Button as PartTripButton } from "@/shared/ui/parttrip";
+import { resolveApiAssetUrl } from "@/entities/file/api";
 import { AppShell } from "@/widgets/app-shell";
 
 import {
@@ -45,6 +46,10 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
   const allSelected =
     allCardIds.length > 0 && selected.length === allCardIds.length;
   const featuredCard = cards[0];
+  const detailTimeline = detail?.timeline ?? [];
+  const firstPlace = detailTimeline.find((item) => item.type === "PLACE" && item.placeName) ?? detailTimeline.find((item) => item.placeName);
+  const firstPhoto = detailTimeline.find((item) => item.type === "PHOTO" && item.imageUrl) ?? detailTimeline.find((item) => item.imageUrl);
+  const featuredImage = featuredCard?.coverImageUrl || featuredCard?.images?.[0];
 
   const toggleAll = () => {
     setSelected(allSelected ? [] : allCardIds);
@@ -90,7 +95,7 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
                 onClick={() => featuredCard.tripId && navigate({ params: { tripId: String(featuredCard.tripId) }, to: "/trip-cards/$tripId" })}
               >
                 <S.TravelCardImage>
-                  {featuredCard.images?.[0] ? <img src={featuredCard.images[0]} alt="" /> : <span>이미지 없음</span>}
+                  {featuredImage ? <img src={resolveApiAssetUrl(featuredImage) || featuredImage} alt="여행 카드 표지" /> : <span>이미지 없음</span>}
                 </S.TravelCardImage>
                 <S.TravelCardInfo>
                   <S.TravelCardTitle>
@@ -100,7 +105,7 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
                   <S.MetricList>
                     <span><small>함께한 사람</small><strong>정보 없음</strong></span>
                     <span><small>방문 장소</small><strong>{featuredCard.places?.length ?? 0}곳</strong></span>
-                    <span><small>남긴 사진</small><strong>{featuredCard.images?.length ?? 0}장</strong></span>
+                    <span><small>남긴 사진</small><strong>{featuredCard.photoCount ?? featuredCard.images?.length ?? 0}장</strong></span>
                     <span><small>이동 거리</small><strong>정보 없음</strong></span>
                   </S.MetricList>
                 </S.TravelCardInfo>
@@ -117,13 +122,14 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
               <>
                 <S.PlaceOverview>
                   <S.DetailHeading><h2>방문 장소</h2></S.DetailHeading>
-                  <S.PlaceOverviewImage>{detail.images?.[0] ? <img src={detail.images[0]} alt="" /> : <span>장소 이미지 없음</span>}</S.PlaceOverviewImage>
-                  <S.PlaceCopy><strong>{detail.places?.[0]?.placeName || "장소 정보 없음"}</strong><span>{detail.places?.[0]?.placeSub || "상세 주소 정보 없음"}</span><small>{[detail.startDate, detail.cityName || detail.countryName].filter(Boolean).join(" | ") || "여행 정보 없음"}</small></S.PlaceCopy>
+                  <S.PlaceOverviewImage>{firstPhoto?.imageUrl ? <img src={resolveApiAssetUrl(firstPhoto.imageUrl) || firstPhoto.imageUrl} alt={firstPlace?.placeName ? `${firstPlace.placeName} 여행 사진` : "여행 사진"} /> : <span>장소 이미지 없음</span>}</S.PlaceOverviewImage>
+                  <S.PlaceCopy><strong>{firstPlace?.placeName || "장소 정보 없음"}</strong><span>{firstPlace?.address || "상세 주소 정보 없음"}</span><small>{[firstPlace?.date || detail.startDate, firstPlace?.rating == null ? "" : `★ ${firstPlace.rating}`].filter(Boolean).join(" | ") || "여행 정보 없음"}</small></S.PlaceCopy>
                 </S.PlaceOverview>
                 <S.CapturedInfo>
-                  <S.CapturedPanel><h2>촬영된 이미지</h2><S.CapturedImage>{detail.images?.[0] ? <img src={detail.images[0]} alt="" /> : <span>촬영된 이미지 없음</span>}</S.CapturedImage><small>{detail.startDate || "촬영일 정보 없음"}</small></S.CapturedPanel>
-                  <S.CapturedPanel><h2>사진에 포함된 위치 정보</h2><strong>{detail.places?.[0]?.placeName || "위치 정보 없음"}</strong><small>{[detail.startDate, detail.cityName || detail.countryName].filter(Boolean).join(" | ") || "여행 정보 없음"}</small></S.CapturedPanel>
+                  <S.CapturedPanel><h2>촬영된 이미지</h2><S.CapturedImage>{firstPhoto?.imageUrl ? <img src={resolveApiAssetUrl(firstPhoto.imageUrl) || firstPhoto.imageUrl} alt="여행 사진" /> : <span>촬영된 이미지 없음</span>}</S.CapturedImage><small>{firstPhoto?.takenAt || firstPhoto?.date || detail.startDate || "촬영일 정보 없음"}</small></S.CapturedPanel>
+                  <S.CapturedPanel><h2>사진에 포함된 위치 정보</h2><strong>{firstPlace?.placeName || "위치 정보 없음"}</strong><small>{[firstPlace?.address, firstPlace?.rating == null ? "" : `★ ${firstPlace.rating}`].filter(Boolean).join(" | ") || "위치 정보 없음"}</small></S.CapturedPanel>
                   <S.AddPhoto><PartTripButton type="button" onClick={() => navigate({ to: paths.tripCardCreate })}>사진 추가하기</PartTripButton><small>갤러리에서 기록하고 싶은 사진 업로드</small></S.AddPhoto>
+                  <S.DetailTimeline><S.DetailHeading><h2>여행 기록 타임라인</h2><span>{detailTimeline.length}개</span></S.DetailHeading>{detailTimeline.map((item, index) => <S.PlaceTimeline key={`${item.date || item.takenAt || "timeline"}-${item.placeName || item.comment || index}`}><strong>{item.type === "PHOTO" ? "사진 기록" : item.placeName || "방문 장소"}</strong><span>{[item.date || item.takenAt, item.address, item.rating == null ? "" : `★ ${item.rating}`, item.latitude == null || item.longitude == null ? "" : `${item.latitude}, ${item.longitude}`].filter(Boolean).join(" · ") || "상세 정보 없음"}</span>{item.comment ? <span>{item.comment}</span> : null}</S.PlaceTimeline>)}{detailTimeline.length === 0 ? <S.Empty>아직 기록된 타임라인이 없습니다.</S.Empty> : null}</S.DetailTimeline>
                 </S.CapturedInfo>
               </>
             ) : (
@@ -218,7 +224,7 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
                     <strong>{card.title || "여행 카드"}</strong>
                     <small>
                       {card.startDate || "-"} – {card.endDate || "-"} · 사진{" "}
-                      {card.images?.length ?? 0}장
+                      {card.photoCount ?? card.images?.length ?? 0}장
                     </small>
                   </div>
                 </S.DeleteRow>
