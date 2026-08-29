@@ -129,7 +129,7 @@ apiClient.interceptors.response.use(
     const refreshToken = getRefreshToken()
     const isRefreshRequest = originalRequest.url?.includes('/auth/refresh')
 
-    if (originalRequest._retry || !refreshToken || isRefreshRequest) {
+    if (originalRequest._retry || !refreshToken || isRefreshRequest || isAuthRequest(originalRequest.url)) {
       expireSession()
       return Promise.reject(error)
     }

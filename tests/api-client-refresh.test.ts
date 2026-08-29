@@ -151,6 +151,34 @@ test('access token이 없는 인증 API 요청은 세션 만료 없이 허용한
   }
 })
 
+test('인증 API의 401 응답은 refresh 후 재시도하지 않는다', async () => {
+  const storage = createStorage()
+  const previousStorage = globalThis.localStorage
+  const previousAxiosAdapter = axios.defaults.adapter
+  const previousApiAdapter = apiClient.defaults.adapter
+  const requests: string[] = []
+  const adapter: AxiosAdapter = async (config) => {
+    requests.push(config.url ?? '')
+    const response = { config, data: {}, headers: {}, status: 401, statusText: 'Unauthorized' }
+    return Promise.reject(new AxiosError('Unauthorized', AxiosError.ERR_BAD_REQUEST, config, undefined, response))
+  }
+
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: storage })
+  axios.defaults.adapter = adapter
+  apiClient.defaults.adapter = adapter
+  saveAuthTokens({ accessToken: 'stale-access', refreshToken: 'refresh-1' })
+
+  try {
+    await assert.rejects(apiClient.post('/auth/login', {}))
+    assert.deepEqual(requests, ['/auth/login'])
+  } finally {
+    clearAuthTokens()
+    Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: previousStorage })
+    axios.defaults.adapter = previousAxiosAdapter
+    apiClient.defaults.adapter = previousApiAdapter
+  }
+})
+
 test('원격 인증 갱신은 HTTPS가 아니면 차단한다', async () => {
   const storage = createStorage()
   const previousWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
