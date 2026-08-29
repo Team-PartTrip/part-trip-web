@@ -1,6 +1,7 @@
 import { apiClient } from '@/shared/libs/api-client'
 import { requestWithMockFallback } from '@/shared/libs/api-fallback'
 import type { CommentRequestDto, CommentResponseDto } from './types'
+import { getMockLikeState } from './mock-state'
 
 export type ReviewRequestDto = {
   countryInfoId?: number
@@ -69,7 +70,7 @@ export async function getReviews(params?: {
       const { data } = await apiClient.get<PageResponseDtoReviewResponseDto>(REVIEW_API_PATHS.base, { params })
       return data
     },
-    () => mockPage(mockReviews, params),
+    () => mockPage(mockReviews.map((review) => review.reviewId == null ? review : { ...review, ...getMockLikeState('REVIEW', review.reviewId, review.liked, review.likeCount) }), params),
   )
 }
 
@@ -93,7 +94,11 @@ export async function getReview(reviewId: number): Promise<ReviewResponseDto> {
       const { data } = await apiClient.get<ReviewResponseDto>(REVIEW_API_PATHS.detail(reviewId))
       return data
     },
-    () => mockReviews.find((review) => review.reviewId === reviewId) ?? (() => { throw new Error('여행 후기를 찾을 수 없습니다.') })(),
+    () => {
+      const review = mockReviews.find((item) => item.reviewId === reviewId)
+      if (!review) throw new Error('여행 후기를 찾을 수 없습니다.')
+      return review.reviewId == null ? review : { ...review, ...getMockLikeState('REVIEW', review.reviewId, review.liked, review.likeCount) }
+    },
   )
 }
 

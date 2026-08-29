@@ -12,6 +12,7 @@ import {
   useCreateVoteMutation,
   useJoinPlannerMutation,
   useRemindPlannerMembersMutation,
+  useSelectRandomPlannerPlaceMutation,
   useUpdatePlannerMutation,
 } from '@/entities/planner'
 import type { CountryInfoResponseDto } from '@/entities/travel'
@@ -90,7 +91,7 @@ export function usePlannerFlow(step: PlannerStep) {
   const [selectedOptionId, setSelectedOptionId] = useState<number>()
   const [lineupChoice, setLineupChoice] = useState<number | null>(null)
   const plannerConfirmationKey = `${PLANNER_CONFIRMED_KEY}:${activePlannerId}`
-  const [isConfirmed, setIsConfirmed] = useState(() => step !== 'create' && sessionStorage.getItem(plannerConfirmationKey) === 'true')
+  const [hasConfirmedLocally, setHasConfirmedLocally] = useState(() => step !== 'create' && sessionStorage.getItem(plannerConfirmationKey) === 'true')
   const [errorMessage, setErrorMessage] = useState('')
   const [remindFeedback, setRemindFeedback] = useState('')
   const createPlannerMutation = useCreatePlannerMutation()
@@ -100,6 +101,7 @@ export function usePlannerFlow(step: PlannerStep) {
   const addPlannerPlacesMutation = useAddPlannerPlacesMutation()
   const addVoteOptionMutation = useAddVoteOptionMutation()
   const remindPlannerMembersMutation = useRemindPlannerMembersMutation()
+  const selectRandomPlannerPlaceMutation = useSelectRandomPlannerPlaceMutation()
   const confirmPlannerMutation = useConfirmPlannerMutation()
   const castBallotMutation = useCastBallotMutation()
   const closeVoteMutation = useCloseVoteMutation()
@@ -131,13 +133,14 @@ export function usePlannerFlow(step: PlannerStep) {
   const selectedHeadcount = headcount ?? String(plannerDetail?.memberCount ?? savedGroupSettings.memberCount)
   const selectedPlaces = places.flatMap((item, index) => selected.includes(index) ? [{ index, item }] : [])
   const placeParam = Number(placeId)
-  const place = places.find((item) => item.tourPlaceId === placeParam) || places[placeParam] || places[0]
+  const place = places.find((item) => item.tourPlaceId === placeParam)
   const categoryVote = votes.find((vote) => vote.category === voteCategory || vote.categoryLabel === voteCategory)
   const activeVote = (voteDetail?.category === voteCategory || voteDetail?.categoryLabel === voteCategory ? voteDetail : undefined) ??
     categoryVote ??
     (voteDetail?.voteId === activeVoteId ? voteDetail : undefined) ??
     votes.find((vote) => vote.voteId === activeVoteId)
   const visiblePlannerInviteCode = plannerDetail?.inviteCode || plannerInviteCode
+  const isConfirmed = hasConfirmedLocally || normalizeVoteStatus(plannerDetail?.status) === 'CONFIRMED'
   const plannerInviteLink = visiblePlannerInviteCode && typeof window !== 'undefined'
     ? `${window.location.origin}/planner/group?inviteCode=${encodeURIComponent(visiblePlannerInviteCode)}`
     : ''
@@ -309,7 +312,10 @@ export function usePlannerFlow(step: PlannerStep) {
           throw new Error('closed vote')
         }
         if (!isPositiveSafeInteger(vote?.voteId)) {
-          if (!canManagePlanner) throw new Error('owner required')
+          if (!canManagePlanner) {
+            setErrorMessage('그룹장이 먼저 해당 카테고리 투표를 시작해주세요.')
+            return
+          }
           vote = await createVoteMutation.mutateAsync({ plannerId, payload: { category: voteCategory } })
         }
         if (!isPositiveSafeInteger(vote.voteId)) throw new Error('voteId is missing')
@@ -382,15 +388,31 @@ export function usePlannerFlow(step: PlannerStep) {
     if (lineupChoice === index) setLineupChoice(null)
   }
 
-  const handleRandomLineup = () => {
+  const handleRandomLineup = async () => {
     if (selectedPlaces.length === 0) {
       setErrorMessage('먼저 장바구니에 장소를 담아주세요.')
       return
     }
-    const choice = selectedPlaces[Math.floor(Math.random() * selectedPlaces.length)]
-    setLineupChoice(choice.index)
-    setSelected([choice.index])
-    setErrorMessage('')
+    const plannerId = Number(sessionStorage.getItem(ACTIVE_PLANNER_ID_KEY))
+    const placeIds = selectedPlaces
+      .map(({ item }) => item.tourPlaceId)
+      .filter((placeId): placeId is number => isPositiveSafeInteger(placeId))
+    if (!isPositiveSafeInteger(plannerId) || placeIds.length === 0) {
+      setErrorMessage('랜덤으로 선택할 장소 정보를 확인할 수 없습니다.')
+      return
+    }
+
+    try {
+      setErrorMessage('')
+      await addPlannerPlacesMutation.mutateAsync({ plannerId, payload: { placeIds } })
+      const randomPlace = await selectRandomPlannerPlaceMutation.mutateAsync(plannerId)
+      const choiceIndex = places.findIndex((item) => item.tourPlaceId === randomPlace.placeId)
+      if (choiceIndex < 0) throw new Error('random place is not in the current category')
+      setLineupChoice(choiceIndex)
+      setSelected([choiceIndex])
+    } catch {
+      setErrorMessage('랜덤 장소를 선택하지 못했습니다.')
+    }
   }
 
   const handleConfirmPlan = async () => {
@@ -406,7 +428,7 @@ export function usePlannerFlow(step: PlannerStep) {
       }
       await confirmPlannerMutation.mutateAsync(activePlannerId)
       sessionStorage.setItem(plannerConfirmationKey, 'true')
-      setIsConfirmed(true)
+      setHasConfirmedLocally(true)
     } catch {
       setErrorMessage('최종 계획을 확정하지 못했습니다.')
     }
@@ -500,6 +522,7 @@ export function usePlannerFlow(step: PlannerStep) {
     closeVoteMutation,
     joinPlannerMutation,
     remindPlannerMembersMutation,
+    selectRandomPlannerPlaceMutation,
     remindFeedback,
     members,
     memberCount,

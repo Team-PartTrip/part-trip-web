@@ -1,5 +1,6 @@
 import { apiClient } from '@/shared/libs/api-client'
 import { requestWithMockFallback } from '@/shared/libs/api-fallback'
+import { getMockLikeState } from './mock-state'
 import type { CommentRequestDto, CommentResponseDto } from './types'
 
 export type { CommentRequestDto, CommentResponseDto } from './types'
@@ -66,7 +67,7 @@ export async function getBoards(params?: {
       const { data } = await apiClient.get<PageResponseDtoBoardResponseDto>(BOARD_API_PATHS.base, { params })
       return data
     },
-    () => mockPage(mockBoards, params),
+    () => mockPage(mockBoards.map((board) => board.boardId == null ? board : { ...board, ...getMockLikeState('BOARD', board.boardId, board.liked, board.likeCount) }), params),
   )
 }
 
@@ -90,7 +91,11 @@ export async function getBoard(boardId: number): Promise<BoardResponseDto> {
       const { data } = await apiClient.get<BoardResponseDto>(BOARD_API_PATHS.detail(boardId))
       return data
     },
-    () => mockBoards.find((board) => board.boardId === boardId) ?? (() => { throw new Error('게시글을 찾을 수 없습니다.') })(),
+    () => {
+      const board = mockBoards.find((item) => item.boardId === boardId)
+      if (!board) throw new Error('게시글을 찾을 수 없습니다.')
+      return board.boardId == null ? board : { ...board, ...getMockLikeState('BOARD', board.boardId, board.liked, board.likeCount) }
+    },
   )
 }
 
@@ -173,7 +178,17 @@ export async function updateComment(
       const { data } = await apiClient.put<CommentResponseDto>(BOARD_API_PATHS.commentDetail(commentId), payload)
       return data
     },
-    () => ({ ...payload, commentId, userId: 'mock-user' }),
+    () => {
+      for (const [boardId, comments] of mockBoardComments) {
+        const index = comments.findIndex((comment) => comment.commentId === commentId)
+        if (index >= 0) {
+          const updated = { ...comments[index], ...payload, commentId, userId: 'mock-user' }
+          mockBoardComments.set(boardId, comments.map((comment, commentIndex) => commentIndex === index ? updated : comment))
+          return updated
+        }
+      }
+      throw new Error('댓글을 찾을 수 없습니다.')
+    },
   )
 }
 

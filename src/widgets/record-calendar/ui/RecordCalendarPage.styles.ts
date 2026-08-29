@@ -39,6 +39,12 @@ export const LoadingLayout = styled.div`
   @media (max-width: 860px) { grid-template-columns: 1fr; }
 `
 
+export const State = styled.p`
+  padding: 80px 0;
+  color: ${({ theme }) => theme.colors.status.error};
+  text-align: center;
+`
+
 export const CalendarCard = styled.section`
   min-height: 650px;
   border-radius: 28px;

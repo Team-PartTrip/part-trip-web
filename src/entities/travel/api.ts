@@ -124,13 +124,27 @@ const mockFestivals: FestivalResponseDto[] = [
   { festivalId: 3, title: '구로몬 야시장', category: '마켓', startDate: '2026-08-27', startTime: '17:00', location: '구로몬 시장' },
 ]
 
-const mockDday: DdayResponseDto = {
+let mockDday: DdayResponseDto = {
   cityName: '오사카',
   countryName: '일본',
   dday: 'D-3',
   endDate: '2026-08-27',
   headcount: 4,
   startDate: '2026-08-23',
+  travelPlanId: 1,
+}
+
+function getMockDday(startDate?: string, endDate?: string) {
+  if (!startDate || !endDate) return '쉬는 중'
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const start = new Date(`${startDate}T00:00:00`)
+  const end = new Date(`${endDate}T00:00:00`)
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return '쉬는 중'
+  const days = Math.round((start.getTime() - today.getTime()) / 86_400_000)
+  if (days > 0) return `D-${days}`
+  if (days === 0) return 'D-Day'
+  return today <= end ? '여행 중' : '여행 종료'
 }
 
 export async function saveTravelPlan(payload: TravelPlanRequestDto): Promise<DdayResponseDto> {
@@ -139,14 +153,22 @@ export async function saveTravelPlan(payload: TravelPlanRequestDto): Promise<Dda
       const { data } = await apiClient.post<DdayResponseDto>(MAIN_API_PATHS.travelPlan, payload)
       return data
     },
-    () => ({ ...mockDday, ...payload, dday: 'D-3' }),
+    () => {
+      mockDday = { ...mockDday, ...payload, dday: getMockDday(payload.startDate, payload.endDate) }
+      return mockDday
+    },
   )
 }
 
 export async function changeTravelCountry(payload: TravelChangeRequestDto): Promise<void> {
   await requestWithMockFallback(
     async () => { await apiClient.patch(MAIN_API_PATHS.travelChange, payload) },
-    () => undefined,
+    () => {
+      const country = mockCountries.find((item) => item.countryInfoId === payload.countryInfoId)
+      if (country) {
+        mockDday = { ...mockDday, cityName: country.cityName, countryName: country.countryName }
+      }
+    },
   )
 }
 
@@ -161,7 +183,7 @@ export async function getDday(): Promise<DdayResponseDto | undefined> {
         throw error
       }
     },
-    () => mockDday,
+    () => ({ ...mockDday, dday: getMockDday(mockDday.startDate, mockDday.endDate) }),
   )
 }
 
@@ -177,7 +199,11 @@ export async function getTourPlace(
       })
       return data
     },
-    () => mockTourPlaces.filter((place) => !category || place.category === category),
+    () => mockTourPlaces.filter((place) =>
+      (!countryName || countryName === '일본')
+      && (!cityName || cityName === '오사카')
+      && (!category || place.category === category),
+    ),
   )
 }
 
@@ -191,7 +217,13 @@ export async function getFestivals(
       const { data } = await apiClient.get<FestivalResponseDto[]>(MAIN_API_PATHS.festivals, { params: { countryName, month, year } })
       return data
     },
-    () => mockFestivals,
+    () => mockFestivals.filter((festival) => {
+      const date = festival.startDate ? new Date(`${festival.startDate}T00:00:00`) : undefined
+      return countryName === '일본'
+        && date != null
+        && (year == null || date.getFullYear() === year)
+        && (month == null || date.getMonth() + 1 === month)
+    }),
   )
 }
 

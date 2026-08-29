@@ -56,20 +56,48 @@ const WORLD_MAP_API_PATHS = {
   stats: '/world-map/stats',
 } as const
 
-const mockVisited = [
+let mockVisited = [
   { cities: ['오사카', '도쿄'], countryCode: 'JP', countryName: '일본', visitCount: 3 },
   { cities: ['타이베이'], countryCode: 'TW', countryName: '대만', visitCount: 1 },
   { cities: ['파리'], countryCode: 'FR', countryName: '프랑스', visitCount: 1 },
 ]
 
-const mockContinents = [
-  { acquiredCount: 4, continent: '아시아', totalCount: 48 },
-  { acquiredCount: 1, continent: '유럽', totalCount: 44 },
-  { acquiredCount: 0, continent: '북아메리카', totalCount: 23 },
-  { acquiredCount: 0, continent: '남아메리카', totalCount: 12 },
-  { acquiredCount: 0, continent: '아프리카', totalCount: 54 },
-  { acquiredCount: 0, continent: '오세아니아', totalCount: 14 },
+const continentTotals = [
+  { continent: '아시아', totalCount: 48 },
+  { continent: '유럽', totalCount: 44 },
+  { continent: '북아메리카', totalCount: 23 },
+  { continent: '남아메리카', totalCount: 12 },
+  { continent: '아프리카', totalCount: 54 },
+  { continent: '오세아니아', totalCount: 14 },
 ]
+
+const mockCountryByTripId: Record<number, { countryCode: string; countryName: string }> = {
+  1: { countryCode: 'JP', countryName: '일본' },
+  2: { countryCode: 'JP', countryName: '일본' },
+  3: { countryCode: 'KR', countryName: '대한민국' },
+}
+
+const continentByCountryCode: Record<string, string> = {
+  FR: '유럽',
+  JP: '아시아',
+  KR: '아시아',
+  TW: '아시아',
+}
+
+function getMockStats(): WorldMapStatsResponseDto {
+  const acquiredByContinent = new Map<string, number>()
+  for (const country of mockVisited) {
+    const continent = country.countryCode ? continentByCountryCode[country.countryCode] : undefined
+    if (continent) acquiredByContinent.set(continent, (acquiredByContinent.get(continent) ?? 0) + 1)
+  }
+  const totalCount = 195
+  return {
+    acquiredCount: mockVisited.length,
+    byContinent: continentTotals.map((item) => ({ ...item, acquiredCount: acquiredByContinent.get(item.continent) ?? 0 })),
+    percentage: mockVisited.length / totalCount * 100,
+    totalCount,
+  }
+}
 
 export async function getWorldMap(): Promise<WorldMapResponseDto> {
   return requestWithMockFallback(
@@ -87,7 +115,14 @@ export async function acquireCountry(payload: AcquireCountryRequestDto): Promise
       const { data } = await apiClient.post<AcquireCountryResponseDto>(WORLD_MAP_API_PATHS.countries, payload)
       return data
     },
-    () => ({ countryCode: 'JP', isNew: true }),
+    () => {
+      const country = mockCountryByTripId[payload.tripId] ?? { countryCode: 'JP', countryName: '일본' }
+      const alreadyVisited = mockVisited.some((item) => item.countryCode === country.countryCode)
+      if (!alreadyVisited) {
+        mockVisited = [...mockVisited, { cities: [], countryCode: country.countryCode, countryName: country.countryName, visitCount: 1 }]
+      }
+      return { countryCode: country.countryCode, isNew: !alreadyVisited }
+    },
   )
 }
 
@@ -97,7 +132,10 @@ export async function getWorldMapCountry(countryCode: string): Promise<WorldMapC
       const { data } = await apiClient.get<WorldMapCountryResponseDto>(WORLD_MAP_API_PATHS.country(countryCode))
       return data
     },
-    () => ({ countryName: countryCode === 'JP' ? '일본' : countryCode, cities: ['오사카'], trips: [], visitCount: 3 }),
+    () => {
+      const country = mockVisited.find((item) => item.countryCode === countryCode)
+      return { countryName: country?.countryName ?? countryCode, cities: country?.cities ?? [], trips: [], visitCount: country?.visitCount ?? 0 }
+    },
   )
 }
 
@@ -107,6 +145,6 @@ export async function getWorldMapStats(): Promise<WorldMapStatsResponseDto> {
       const { data } = await apiClient.get<WorldMapStatsResponseDto>(WORLD_MAP_API_PATHS.stats)
       return data
     },
-    () => ({ acquiredCount: 5, byContinent: mockContinents, percentage: 2.6, totalCount: 195 }),
+    getMockStats,
   )
 }

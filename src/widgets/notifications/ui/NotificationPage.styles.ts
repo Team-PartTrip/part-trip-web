@@ -157,6 +157,21 @@ export const ErrorMessage = styled.p`
   font-size: 13px;
 `
 
+export const LoadMore = styled.button`
+  align-self: center;
+  min-width: 140px;
+  height: 40px;
+  margin: 12px 0 24px;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 12px;
+  background: ${({ theme }) => theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.brand.primary};
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  &:disabled { cursor: not-allowed; opacity: .55; }
+`
+
 export const Detail = styled.section`
   min-height: 320px;
   border-radius: 20px;

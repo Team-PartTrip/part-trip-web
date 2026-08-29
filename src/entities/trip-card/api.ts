@@ -1,5 +1,6 @@
 import { apiClient } from '@/shared/libs/api-client'
 import { requestWithMockFallback } from '@/shared/libs/api-fallback'
+import { getMockLikeState } from '@/entities/community/mock-state'
 import type { CommentRequestDto, CommentResponseDto } from '@/entities/community/types'
 
 export type ShareTripRequestDto = {
@@ -108,9 +109,11 @@ const mockTravelCards: TravelCardDetailDto[] = [
   { cardId: 3, cityName: '제주', countryName: '대한민국', endDate: '2025-12-24', photoCount: 42, startDate: '2025-12-20', timeline: [{ placeName: '성산일출봉', type: 'PLACE' }] },
 ]
 
+const mockSharedTripComments = new Map<number, CommentResponseDto[]>()
+
 function toSharedTrip(card: TravelCardListItemDto): SharedTripResponseDto {
   const detail = card as TravelCardDetailDto
-  return {
+  const sharedTrip: SharedTripResponseDto = {
     cityName: card.cityName,
     countryName: card.countryName,
     endDate: card.endDate,
@@ -120,6 +123,7 @@ function toSharedTrip(card: TravelCardListItemDto): SharedTripResponseDto {
     title: `${card.cityName || card.countryName || '여행'} 여행`,
     tripId: card.cardId,
   }
+  return card.cardId == null ? sharedTrip : { ...sharedTrip, ...getMockLikeState('TRIP', card.cardId, sharedTrip.liked, sharedTrip.likeCount) }
 }
 
 function getMockTravelCard(cardId?: number) {
@@ -222,7 +226,7 @@ export async function getSharedTripComments(tripId: number): Promise<CommentResp
       const { data } = await apiClient.get<CommentResponseDto[]>(SHARED_TRIP_API_PATHS.comments(tripId))
       return data
     },
-    () => [],
+    () => mockSharedTripComments.get(tripId) ?? [],
   )
 }
 
@@ -235,6 +239,10 @@ export async function createSharedTripComment(
       const { data } = await apiClient.post<CommentResponseDto>(SHARED_TRIP_API_PATHS.comments(tripId), payload)
       return data
     },
-    () => ({ ...payload, commentId: Date.now(), createDate: new Date().toISOString(), userId: 'mock-user' }),
+    () => {
+      const comment = { ...payload, commentId: Date.now(), createDate: new Date().toISOString(), targetId: tripId, userId: 'mock-user' }
+      mockSharedTripComments.set(tripId, [...(mockSharedTripComments.get(tripId) ?? []), comment])
+      return comment
+    },
   )
 }

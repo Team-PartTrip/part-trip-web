@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
 
 import {
@@ -6,6 +6,7 @@ import {
   useMarkNotificationAsReadMutation,
   useNotificationSettingsQuery,
   useNotificationsQuery,
+  useUnreadNotificationCountQuery,
   useUpdateNotificationSettingsMutation,
   type NotificationResponseDto,
   type NotificationType,
@@ -34,13 +35,19 @@ export function useNotificationFlow(mode: NotificationMode) {
   const category = mode === 'list' ? activeTab : 'ALL'
   const notificationsQuery = useNotificationsQuery(category, mode === 'list' || mode === 'detail')
   const settingsQuery = useNotificationSettingsQuery(mode === 'settings')
+  const unreadCountQuery = useUnreadNotificationCountQuery()
   const markReadMutation = useMarkNotificationAsReadMutation()
   const markAllMutation = useMarkAllNotificationsAsReadMutation()
   const updateSettingsMutation = useUpdateNotificationSettingsMutation()
-  const notifications = notificationsQuery.data?.items ?? []
+  const notifications = notificationsQuery.data?.pages.flatMap((page) => page.items ?? []) ?? []
   const settings = settingsQuery.data ?? []
   const detail = notifications.find((item) => String(item.notificationId) === notificationId)
-  const hasUnread = notifications.some((item) => item.read !== true && item.notificationId != null)
+  const hasUnread = (unreadCountQuery.data?.unreadCount ?? notifications.filter((item) => item.read !== true && item.notificationId != null).length) > 0
+
+  useEffect(() => {
+    if (mode !== 'detail' || !notificationId || detail || !notificationsQuery.hasNextPage || notificationsQuery.isFetchingNextPage) return
+    void notificationsQuery.fetchNextPage()
+  }, [detail, mode, notificationId, notificationsQuery])
 
   const handleMarkRead = async (id?: number) => {
     if (id == null) return

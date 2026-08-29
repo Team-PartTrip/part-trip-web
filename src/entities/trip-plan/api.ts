@@ -20,6 +20,8 @@ export type TripPlanRequestDto = {
 export type TripPlanPlaceResponseDto = {
   tripPlaceId?: number
   dayNumber?: number
+  latitude?: number
+  longitude?: number
   placeName?: string
   placeSub?: string
 }
@@ -56,7 +58,10 @@ let mockTrips: TripPlanResponseDto[] = [
     countryName: '일본',
     endDate: '2026-08-27',
     images: [],
-    places: [{ dayNumber: 1, placeName: '도톤보리' }, { dayNumber: 2, placeName: '오사카성' }],
+    places: [
+      { dayNumber: 1, latitude: 34.6687, longitude: 135.5013, placeName: '도톤보리' },
+      { dayNumber: 2, latitude: 34.6873, longitude: 135.5262, placeName: '오사카성' },
+    ],
     startDate: '2026-08-23',
     title: '오사카 4박 5일',
     tripId: 1,

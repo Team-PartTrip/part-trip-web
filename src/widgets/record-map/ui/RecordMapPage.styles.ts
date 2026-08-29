@@ -58,6 +58,18 @@ export const Subtitle = styled.p`
   line-height: 18px;
 `
 
+export const TripSelect = styled.select`
+  min-height: 40px;
+  max-width: 280px;
+  border: 1px solid ${({ theme }) => theme.colors.border.default};
+  border-radius: 12px;
+  padding: 0 12px;
+  background: ${({ theme }) => theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.text.strong};
+  font: inherit;
+  font-size: 12px;
+`
+
 export const RecordTabs = styled.nav`
   display: flex;
   gap: 8px;
@@ -127,6 +139,17 @@ export const MapCanvas = styled.div`
     object-position: center;
   }
   @media (max-width: 640px) { height: 360px; }
+`
+
+export const MapState = styled.p`
+  display: grid;
+  height: 100%;
+  place-items: center;
+  margin: 0;
+  padding: 24px;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 13px;
+  text-align: center;
 `
 
 export const RouteSegment = styled.span<{ $left: number; $top: number; $length: number; $angle: number }>`

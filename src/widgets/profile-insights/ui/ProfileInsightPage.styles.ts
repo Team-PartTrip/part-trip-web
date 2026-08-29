@@ -91,8 +91,38 @@ export const MapCard = styled.section`
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
   > ${SectionTitle} { margin: 0 0 8px; color: ${({ theme }) => theme.colors.brand.primary}; font-size: 14px; line-height: 20px; }
-  img { display: block; width: 100%; height: 470px; box-sizing: border-box; border: 1px solid rgba(216, 221, 221, .55); border-radius: 16px; background: ${({ theme }) => theme.colors.background.default}; object-fit: contain; }
-  @media (max-width: 560px) { min-height: 360px; padding: 16px; img { height: 260px; } }
+  @media (max-width: 560px) { min-height: 360px; padding: 16px; }
+`
+
+export const MapCanvas = styled.div`
+  position: relative;
+  width: 100%;
+  height: 470px;
+  overflow: hidden;
+  border: 1px solid rgba(216, 221, 221, .55);
+  border-radius: 16px;
+  background: ${({ theme }) => theme.colors.background.default};
+  img { display: block; width: 100%; height: 100%; object-fit: contain; filter: grayscale(1); }
+  @media (max-width: 560px) { height: 260px; }
+`
+
+export const MapMarker = styled.span<{ $left: number; $top: number }>`
+  position: absolute;
+  top: ${({ $top }) => `${$top}%`};
+  left: ${({ $left }) => `${$left}%`};
+  display: grid;
+  min-width: 30px;
+  height: 22px;
+  place-items: center;
+  border: 2px solid ${({ theme }) => theme.colors.background.default};
+  border-radius: 999px;
+  padding: 0 5px;
+  background: ${({ theme }) => theme.colors.brand.primary};
+  color: ${({ theme }) => theme.colors.text.inverse};
+  font-size: 9px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgb(15 33 51 / 22%);
+  transform: translate(-50%, -50%);
 `
 
 export const MapLegend = styled.div`
@@ -340,15 +370,20 @@ export const CountrySummaryList = styled.div`
   margin-top: 4px;
 `
 
-export const CountrySummaryRow = styled.div`
+export const CountrySummaryRow = styled.button`
   display: flex;
   min-height: 76px;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  width: 100%;
   border-radius: 12px;
+  border: 0;
   padding: 16px;
   background: ${({ theme }) => theme.colors.background.soft};
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
   strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 16px; }
   span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
   b { margin-left: 8px; font-size: 18px; font-weight: 400; }

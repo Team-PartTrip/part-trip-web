@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from '@tanstack/react-query'
+import { infiniteQueryOptions, queryOptions, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 
 import {
   getNotificationSettings,
@@ -12,14 +12,16 @@ export const notificationsQueryOptions = (
   category: NotificationFilter = 'ALL',
   enabled = true,
 ) =>
-  queryOptions({
+  infiniteQueryOptions({
     queryKey: notificationQueryKeys.list(category),
-    queryFn: () => getNotifications({ category, size: 30 }),
+    queryFn: ({ pageParam }) => getNotifications({ category, cursor: pageParam, size: 30 }),
+    initialPageParam: undefined as number | undefined,
+    getNextPageParam: (lastPage) => lastPage.hasNext ? lastPage.nextCursor : undefined,
     enabled,
   })
 
 export function useNotificationsQuery(category: NotificationFilter = 'ALL', enabled = true) {
-  return useQuery(notificationsQueryOptions(category, enabled))
+  return useInfiniteQuery(notificationsQueryOptions(category, enabled))
 }
 
 export const notificationSettingsQueryOptions = (enabled = true) =>
