@@ -77,6 +77,29 @@ test('보호 API는 access token 없이 요청하지 않는다', async () => {
   }
 })
 
+test('인증 API에는 저장된 access token을 첨부하지 않는다', async () => {
+  const storage = createStorage()
+  const previousStorage = globalThis.localStorage
+  const previousApiAdapter = apiClient.defaults.adapter
+  let authorization: unknown
+
+  apiClient.defaults.adapter = async (config) => {
+    authorization = config.headers.Authorization
+    return { config, data: {}, headers: {}, status: 200, statusText: 'OK' }
+  }
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: storage })
+  saveAuthTokens({ accessToken: 'stale-access', refreshToken: 'refresh-1' })
+
+  try {
+    await apiClient.post('/auth/login', {})
+    assert.equal(authorization, undefined)
+  } finally {
+    clearAuthTokens()
+    Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: previousStorage })
+    apiClient.defaults.adapter = previousApiAdapter
+  }
+})
+
 test('원격 인증 갱신은 HTTPS가 아니면 차단한다', async () => {
   const storage = createStorage()
   const previousWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')

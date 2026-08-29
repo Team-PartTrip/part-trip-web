@@ -35,16 +35,17 @@ function isAuthRequest(url?: string) {
   return url?.includes('/auth/') ?? false
 }
 
-// 저장된 accessToken을 모든 요청 헤더에 자동 첨부
+// 보호 API 요청에만 저장된 accessToken을 자동 첨부
 apiClient.interceptors.request.use((config) => {
   const token = getAccessToken()
+  const isAuth = isAuthRequest(config.url)
 
-  if (!token && !isAuthRequest(config.url)) {
+  if (!token && !isAuth) {
     expireSession()
     return Promise.reject(new Error('로그인이 필요합니다.'))
   }
 
-  if (token) {
+  if (token && !isAuth) {
     config.headers.Authorization = `Bearer ${token}`
   }
 
