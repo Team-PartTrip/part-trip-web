@@ -13,8 +13,24 @@ export { AUTH_EXPIRED_EVENT } from './auth-expiration.ts'
 
 const REQUEST_TIMEOUT_MS = 100_000
 
+function isLocalDevelopmentUrl(url: URL) {
+  return import.meta.env?.DEV && ['localhost', '127.0.0.1', '::1', '[::1]'].includes(url.hostname)
+}
+
+function getSafeApiBaseUrl() {
+  const baseURL = import.meta.env?.VITE_API_BASE_URL?.trim() ?? ''
+  if (typeof window === 'undefined') return baseURL
+
+  const apiUrl = new URL(baseURL || '/', window.location.origin)
+  if (apiUrl.protocol !== 'https:' && !isLocalDevelopmentUrl(apiUrl)) {
+    throw new Error('인증 요청은 HTTPS 연결에서만 사용할 수 있습니다.')
+  }
+
+  return baseURL
+}
+
 export const apiClient = axios.create({
-  baseURL: import.meta.env?.VITE_API_BASE_URL ?? '',
+  baseURL: getSafeApiBaseUrl(),
   timeout: REQUEST_TIMEOUT_MS,
   headers: {
     'Content-Type': 'application/json',
@@ -32,19 +48,27 @@ export function resolveApiAssetUrl(url?: string): string | undefined {
 }
 
 function isAuthRequest(url?: string) {
-  return url?.includes('/auth/') ?? false
+  if (!url) return false
+
+  try {
+    const pathname = new URL(url, 'https://parttrip.invalid').pathname
+    return pathname === '/auth' || pathname.startsWith('/auth/')
+  } catch {
+    return false
+  }
 }
 
-// 저장된 accessToken을 모든 요청 헤더에 자동 첨부
+// 보호 API 요청에만 저장된 accessToken을 자동 첨부
 apiClient.interceptors.request.use((config) => {
   const token = getAccessToken()
+  const isAuth = isAuthRequest(config.url)
 
-  if (!token && !isAuthRequest(config.url)) {
+  if (!token && !isAuth) {
     expireSession()
     return Promise.reject(new Error('로그인이 필요합니다.'))
   }
 
-  if (token) {
+  if (token && !isAuth) {
     config.headers.Authorization = `Bearer ${token}`
   }
 
@@ -56,10 +80,6 @@ type RetryableRequestConfig = InternalAxiosRequestConfig & {
 }
 
 let refreshPromise: Promise<AuthTokens> | null = null
-
-function isLocalDevelopmentUrl(url: URL) {
-  return import.meta.env?.DEV && ['localhost', '127.0.0.1', '::1', '[::1]'].includes(url.hostname)
-}
 
 function getRefreshUrl() {
   const baseURL = apiClient.defaults.baseURL ?? ''
@@ -121,7 +141,7 @@ apiClient.interceptors.response.use(
     const refreshToken = getRefreshToken()
     const isRefreshRequest = originalRequest.url?.includes('/auth/refresh')
 
-    if (originalRequest._retry || !refreshToken || isRefreshRequest) {
+    if (originalRequest._retry || !refreshToken || isRefreshRequest || isAuthRequest(originalRequest.url)) {
       expireSession()
       return Promise.reject(error)
     }

@@ -93,6 +93,7 @@ export function useCommunityDetailActions({
     event.preventDefault()
     if (!post || !comment.trim()) return
 
+    setErrorMessage('')
     try {
       const payload = { content: comment.trim() }
       if (post.type === 'board') {
@@ -183,6 +184,7 @@ export function useCommunityDetailActions({
   const handleCommentUpdate = async (commentId: number) => {
     if (!editingCommentContent.trim()) return
 
+    setErrorMessage('')
     try {
       await updateCommentMutation.mutateAsync({
         commentId,
@@ -198,6 +200,7 @@ export function useCommunityDetailActions({
   const handleCommentDelete = async (commentId: number) => {
     if (!window.confirm('이 댓글을 삭제하시겠습니까?')) return
 
+    setErrorMessage('')
     try {
       await deleteCommentMutation.mutateAsync(commentId)
     } catch {

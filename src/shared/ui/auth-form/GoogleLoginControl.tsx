@@ -19,7 +19,7 @@ export function GoogleLoginControl({ disabled, isSubmitting, label = 'Google로 
     <S.GoogleLoginContainer aria-label={label}>
       <GoogleLogin
         onSuccess={({ credential }) => {
-          if (credential) void onLogin(credential)
+          if (credential) void onLogin(credential).catch(() => onError())
           else onError()
         }}
         onError={onError}

@@ -60,7 +60,7 @@ export function ChangePasswordForm() {
   })
 
   const emailField = verificationForm.register('email', {
-    required: '아이디 또는 이메일을 입력해주세요.',
+    required: '가입한 이메일을 입력해주세요.',
     setValueAs: trimFormValue,
     validate: (value) => emailPattern.test(value) || '가입한 이메일을 입력해주세요.',
   })
@@ -142,13 +142,13 @@ export function ChangePasswordForm() {
         <S.Header>
           <S.Brand>PartTrip</S.Brand>
           <S.Title>비밀번호 찾기</S.Title>
-          <S.Subtitle>가입한 아이디 또는 이메일로 인증번호를 받으세요.</S.Subtitle>
+          <S.Subtitle>가입한 이메일로 인증번호를 받으세요.</S.Subtitle>
         </S.Header>
         <S.Body>
           <S.Form aria-label="비밀번호 찾기 본인 인증" method="post" noValidate onSubmit={verificationForm.handleSubmit(handleVerificationSubmit, handleVerificationInvalid)}>
             <S.Field>
-              <S.Input {...emailField} aria-label="아이디 또는 이메일" type="email" autoComplete="email" placeholder="아이디 또는 이메일을 입력하세요" disabled={isVerificationSubmitting || isSendingCode} required />
-              <S.FieldHint>가입한 아이디 또는 이메일</S.FieldHint>
+              <S.Input {...emailField} aria-label="가입한 이메일" type="email" autoComplete="email" placeholder="가입한 이메일을 입력하세요" disabled={isVerificationSubmitting || isSendingCode} required />
+              <S.FieldHint>가입한 이메일</S.FieldHint>
             </S.Field>
             <S.Field>
               <S.Input {...verificationCodeField} aria-label="인증번호" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="인증번호를 입력하세요" disabled={isVerificationSubmitting} required />

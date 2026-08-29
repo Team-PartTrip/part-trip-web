@@ -11,6 +11,10 @@ import { AppShell } from '@/widgets/app-shell'
 import { useCommunityDetailActions } from '../model/useCommunityDetailActions'
 import * as S from './CommunityDetailPage.styles'
 
+function commentKey(comment: { commentId?: number; content?: string; createDate?: string; userId?: string }) {
+  return comment.commentId ?? `${comment.userId ?? 'anonymous'}-${comment.createDate ?? 'unknown'}-${comment.content ?? ''}`
+}
+
 export function CommunityDetailPage() {
   const navigate = useNavigate()
   const { postId = '' } = useParams({ strict: false })
@@ -106,8 +110,8 @@ export function CommunityDetailPage() {
                 <input value={comment} onChange={(event) => setComment(event.target.value)} placeholder="댓글을 입력하세요." />
                 <button type="submit" disabled={isSubmittingComment || !comment.trim()}>{isSubmittingComment ? '등록 중' : '등록'}</button>
               </S.CommentForm>
-              {comments.length > 0 ? comments.map((item, index) => (
-                <S.Comment key={item.commentId ?? index}>
+              {comments.length > 0 ? comments.map((item) => (
+                <S.Comment key={commentKey(item)}>
                   <div><strong>{item.nickName ?? item.userId ?? '여행자'}</strong><span>{item.createDate}</span></div>
                   {editingCommentId === item.commentId ? (
                     <S.CommentEdit>

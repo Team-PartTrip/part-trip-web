@@ -16,7 +16,7 @@ function createStorage() {
 
 test('401 응답이면 refresh 후 원래 요청을 새 access token으로 재시도한다', async () => {
   const storage = createStorage()
-  const previousStorage = globalThis.localStorage
+  const previousStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
   const previousAxiosAdapter = axios.defaults.adapter
   const previousApiAdapter = apiClient.defaults.adapter
   const requests: string[] = []
@@ -49,7 +49,11 @@ test('401 응답이면 refresh 후 원래 요청을 새 access token으로 재�
     assert.equal(storage.getItem('refreshToken'), 'refresh-2')
   } finally {
     clearAuthTokens()
-    Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: previousStorage })
+    if (previousStorage) {
+      Object.defineProperty(globalThis, 'localStorage', previousStorage)
+    } else {
+      Reflect.deleteProperty(globalThis, 'localStorage')
+    }
     axios.defaults.adapter = previousAxiosAdapter
     apiClient.defaults.adapter = previousApiAdapter
   }
@@ -57,7 +61,7 @@ test('401 응답이면 refresh 후 원래 요청을 새 access token으로 재�
 
 test('보호 API는 access token 없이 요청하지 않는다', async () => {
   const storage = createStorage()
-  const previousStorage = globalThis.localStorage
+  const previousStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
   const previousApiAdapter = apiClient.defaults.adapter
   let requested = false
 
@@ -72,7 +76,125 @@ test('보호 API는 access token 없이 요청하지 않는다', async () => {
     assert.equal(requested, false)
   } finally {
     clearAuthTokens()
-    Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: previousStorage })
+    if (previousStorage) {
+      Object.defineProperty(globalThis, 'localStorage', previousStorage)
+    } else {
+      Reflect.deleteProperty(globalThis, 'localStorage')
+    }
+    apiClient.defaults.adapter = previousApiAdapter
+  }
+})
+
+test('인증 API에는 저장된 access token을 첨부하지 않는다', async () => {
+  const storage = createStorage()
+  const previousStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
+  const previousApiAdapter = apiClient.defaults.adapter
+  const authorizations: Array<[string, unknown]> = []
+
+  apiClient.defaults.adapter = async (config) => {
+    authorizations.push([config.url ?? '', config.headers.Authorization])
+    return { config, data: {}, headers: {}, status: 200, statusText: 'OK' }
+  }
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: storage })
+  saveAuthTokens({ accessToken: 'stale-access', refreshToken: 'refresh-1' })
+
+  try {
+    await apiClient.post('/auth/login', {})
+    await apiClient.get('/auth/login?next=/private')
+    await apiClient.get('/users?redirect=/auth/login')
+    await apiClient.get('/admin/auth/audit')
+    assert.deepEqual(authorizations, [
+      ['/auth/login', undefined],
+      ['/auth/login?next=/private', undefined],
+      ['/users?redirect=/auth/login', 'Bearer stale-access'],
+      ['/admin/auth/audit', 'Bearer stale-access'],
+    ])
+  } finally {
+    clearAuthTokens()
+    if (previousStorage) {
+      Object.defineProperty(globalThis, 'localStorage', previousStorage)
+    } else {
+      Reflect.deleteProperty(globalThis, 'localStorage')
+    }
+    apiClient.defaults.adapter = previousApiAdapter
+  }
+})
+
+test('access token이 없는 인증 API 요청은 세션 만료 없이 허용한다', async () => {
+  const storage = createStorage()
+  const previousStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
+  const previousWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
+  const previousApiAdapter = apiClient.defaults.adapter
+  let requested = false
+  let expiredEvents = 0
+  let authorization: unknown
+
+  Object.defineProperty(globalThis, 'window', {
+    configurable: true,
+    value: {
+      dispatchEvent: () => {
+        expiredEvents += 1
+        return true
+      },
+      localStorage: createStorage(),
+      sessionStorage: storage,
+    },
+  })
+  apiClient.defaults.adapter = async (config) => {
+    requested = true
+    authorization = config.headers.Authorization
+    return { config, data: {}, headers: {}, status: 200, statusText: 'OK' }
+  }
+
+  try {
+    await apiClient.post('/auth/login', {})
+    assert.equal(requested, true)
+    assert.equal(authorization, undefined)
+    assert.equal(expiredEvents, 0)
+  } finally {
+    clearAuthTokens()
+    if (previousStorage) {
+      Object.defineProperty(globalThis, 'localStorage', previousStorage)
+    } else {
+      Reflect.deleteProperty(globalThis, 'localStorage')
+    }
+    apiClient.defaults.adapter = previousApiAdapter
+    if (previousWindow) {
+      Object.defineProperty(globalThis, 'window', previousWindow)
+    } else {
+      Reflect.deleteProperty(globalThis, 'window')
+    }
+  }
+})
+
+test('인증 API의 401 응답은 refresh 후 재시도하지 않는다', async () => {
+  const storage = createStorage()
+  const previousStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
+  const previousAxiosAdapter = axios.defaults.adapter
+  const previousApiAdapter = apiClient.defaults.adapter
+  const requests: string[] = []
+  const adapter: AxiosAdapter = async (config) => {
+    requests.push(config.url ?? '')
+    const response = { config, data: {}, headers: {}, status: 401, statusText: 'Unauthorized' }
+    return Promise.reject(new AxiosError('Unauthorized', AxiosError.ERR_BAD_REQUEST, config, undefined, response))
+  }
+
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: storage })
+  axios.defaults.adapter = adapter
+  apiClient.defaults.adapter = adapter
+  saveAuthTokens({ accessToken: 'stale-access', refreshToken: 'refresh-1' })
+
+  try {
+    await assert.rejects(apiClient.post('/auth/login', {}))
+    assert.deepEqual(requests, ['/auth/login'])
+  } finally {
+    clearAuthTokens()
+    if (previousStorage) {
+      Object.defineProperty(globalThis, 'localStorage', previousStorage)
+    } else {
+      Reflect.deleteProperty(globalThis, 'localStorage')
+    }
+    axios.defaults.adapter = previousAxiosAdapter
     apiClient.defaults.adapter = previousApiAdapter
   }
 })

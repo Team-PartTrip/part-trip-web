@@ -17,7 +17,7 @@ export function RecordCommentEditPage() {
   const [message, setMessage] = useState('')
   const updateMutation = useUpdateTravelCardEntryCommentMutation()
   const editableEntry = record?.timeline?.find((item) => item.entryId != null)
-  const contentValue = content ?? editableEntry?.comment ?? record?.content ?? ''
+  const contentValue = content ?? editableEntry?.comment ?? ''
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()

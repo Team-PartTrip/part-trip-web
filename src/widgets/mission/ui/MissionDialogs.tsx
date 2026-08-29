@@ -13,15 +13,44 @@ type DialogShellProps = {
 
 function DialogShell({ children, labelledBy, onClose }: DialogShellProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
+  const onCloseRef = useRef(onClose)
 
   useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
+
+  useEffect(() => {
+    previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
     closeButtonRef.current?.focus()
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
+      if (event.key === 'Escape') {
+        onCloseRef.current()
+        return
+      }
+      if (event.key !== 'Tab') return
+
+      const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      )
+      if (!focusable?.length) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
     }
     document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      previousFocusRef.current?.focus()
+    }
+  }, [])
 
   return (
     <S.DialogDimmer
@@ -29,7 +58,7 @@ function DialogShell({ children, labelledBy, onClose }: DialogShellProps) {
         if (event.target === event.currentTarget) onClose()
       }}
     >
-      <S.Dialog role="dialog" aria-modal="true" aria-labelledby={labelledBy}>
+      <S.Dialog ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={labelledBy}>
         <S.DialogClose ref={closeButtonRef} type="button" onClick={onClose} aria-label="닫기">×</S.DialogClose>
         {children}
       </S.Dialog>

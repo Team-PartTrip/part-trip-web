@@ -24,6 +24,10 @@ function getCurrentPosition() {
   })
 }
 
+function localDateInputValue(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+
 export function RecordCameraPage() {
   const navigate = useNavigate()
   const { trips, isLoading } = useMyTrips()
@@ -62,11 +66,11 @@ export function RecordCameraPage() {
         longitude: String(longitude),
         travelId: selectedTravelId,
       })
-      const imageId = result.imageId
-      if (!isPositiveSafeInteger(imageId)) {
-        throw new Error('imageId is missing')
+      const resultId = result.imageId ?? result.analysisId
+      if (!isPositiveSafeInteger(resultId)) {
+        throw new Error('analysis result id is missing')
       }
-      navigate({ params: { imageId: String(imageId) }, to: '/record/camera/$imageId' })
+      navigate({ params: { imageId: String(resultId) }, to: '/record/camera/$imageId' })
     } catch {
       setErrorMessage('사진 분석 요청을 처리하지 못했습니다.')
     }
@@ -130,7 +134,7 @@ export function RecordCameraWritePage() {
   const queryErrorMessage = resultQuery.isError ? '분석 결과를 불러오지 못했습니다.' : ''
   const titleValue = title ?? result?.commTitle ?? result?.title ?? ''
   const contentValue = content ?? result?.commContent ?? ''
-  const photoDateValue = photoDate ?? result?.photoDate ?? new Date().toISOString().slice(0, 10)
+  const photoDateValue = photoDate ?? result?.photoDate ?? localDateInputValue()
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()

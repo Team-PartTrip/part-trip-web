@@ -52,6 +52,7 @@ export function RecordMapPage() {
     return position ? [{ ...location, ...position }] : []
   })
   const canRenderMap = trip?.cityName === '오사카' && mappedLocations.length > 0
+  const supportsMap = trip?.cityName === '오사카'
   const locationCount = locations.length
 
   return (
@@ -63,7 +64,7 @@ export function RecordMapPage() {
             {trips.length > 1 ? <S.TripSelect aria-label="지도에 표시할 여행 선택" value={trip?.tripId ?? ''} onChange={(event) => setSelectedTripId(Number(event.target.value))}>{trips.map((item) => <option key={item.tripId} value={item.tripId}>{item.title || `${item.cityName || item.countryName || '여행'} 기록`}</option>)}</S.TripSelect> : null}
           </S.Header>
           <S.RecordTabs aria-label="여행 기록 보기 방식">
-            <button type="button" className="active" aria-current="page">지도</button>
+            {supportsMap ? <button type="button" className="active" aria-current="page">지도</button> : null}
             <button type="button" onClick={() => navigate({ to: paths.record })}>목록</button>
           </S.RecordTabs>
 
