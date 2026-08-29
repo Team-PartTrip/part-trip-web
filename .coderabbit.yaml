@@ -1,0 +1,37 @@
+# CodeRabbit 리뷰 설정
+# https://docs.coderabbit.ai/reference/yaml-template
+#
+# 이 파일은 PR 의 head 브랜치에서 읽힌다. main 에 있어야 적용된다.
+
+language: ko-KR
+
+reviews:
+  # 체험 기간에 한 번 크게 받는 리뷰라 깐깐한 쪽으로 둔다
+  profile: assertive
+
+  path_filters:
+    # 락파일 4,117줄. 사람이 쓰는 파일이 아니라 통째로 뺀다.
+    - "!package-lock.json"
+    - "!**/*.lock"
+
+    # TanStack Router 가 만드는 파일이다. 손으로 고치지 않는다.
+    - "!src/routeTree.gen.ts"
+
+    # 색상·여백 상수만 있어서 리뷰할 게 없다. 파일 수가 많아 빼면
+    # 그만큼 분석량이 실제 로직으로 간다.
+    - "!**/*.styles.ts"
+
+    # 도구 설정. 기본값에서 거의 안 바뀌었고 리뷰할 로직이 없다.
+    - "!.gitignore"
+    - "!.github/ISSUE_TEMPLATE/**"
+
+  auto_review:
+    enabled: true
+    # 전체 코드를 한 번에 보려고 빈 브랜치를 기준점으로 삼는다.
+    # 기본값은 기본 브랜치(main) 로 가는 PR 만 보기 때문에 여기 적어야 한다.
+    #
+    # 주의: CodeRabbit 은 이 설정을 base 브랜치에서 읽는다.
+    # review-baseline 은 빈 브랜치라 설정이 없어서 자동 리뷰가 안 돈다.
+    # 그 PR 에서는 "@coderabbitai review" 댓글로 직접 깨워야 한다.
+    base_branches:
+      - "review-baseline"
