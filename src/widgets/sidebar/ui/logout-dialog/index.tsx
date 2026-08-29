@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { createPortal } from 'react-dom'
 
 import { logout } from '../../model/api'
@@ -10,6 +11,7 @@ interface Props {
 }
 
 const LogoutDialog = ({ onClose, moveToLogin }: Props) => {
+  const queryClient = useQueryClient()
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -37,6 +39,7 @@ const LogoutDialog = ({ onClose, moveToLogin }: Props) => {
     } catch {
       setErrorMessage('로그아웃에 실패했습니다. 다시 시도해주세요.')
     } finally {
+      queryClient.clear()
       setIsSubmitting(false)
     }
   }

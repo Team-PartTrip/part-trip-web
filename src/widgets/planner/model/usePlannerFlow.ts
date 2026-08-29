@@ -366,6 +366,30 @@ export function usePlannerFlow(step: PlannerStep) {
     }
   }
 
+  const handleAddPlaceCandidate = async () => {
+    const plannerId = Number(sessionStorage.getItem(ACTIVE_PLANNER_ID_KEY))
+    const placeId = place?.tourPlaceId
+
+    if (!isPositiveSafeInteger(plannerId)) {
+      setErrorMessage('먼저 여행 계획을 저장해주세요.')
+      return
+    }
+    if (!isPositiveSafeInteger(placeId)) {
+      setErrorMessage('추가할 장소 정보를 확인할 수 없습니다.')
+      return
+    }
+
+    try {
+      setErrorMessage('')
+      await addPlannerPlacesMutation.mutateAsync({ plannerId, payload: { placeIds: [placeId] } })
+      sessionStorage.removeItem(ACTIVE_VOTE_ID_KEY)
+      sessionStorage.setItem(ACTIVE_VOTE_CATEGORY_KEY, voteCategory)
+      navigate({ to: paths.plannerVote })
+    } catch {
+      setErrorMessage('투표 후보를 저장하지 못했습니다.')
+    }
+  }
+
   const handleCastBallot = async (optionId?: number) => {
     if (normalizeVoteStatus(activeVote?.status) !== 'OPEN' || activeVote?.deadlinePassed === true || !isPositiveSafeInteger(activePlannerId) || !isPositiveSafeInteger(activeVote?.voteId) || !isPositiveSafeInteger(optionId)) {
       setErrorMessage('투표할 후보 정보를 확인할 수 없습니다.')
@@ -515,6 +539,7 @@ export function usePlannerFlow(step: PlannerStep) {
     endDate,
     errorMessage,
     handleAcceptPlannerInvitation,
+    handleAddPlaceCandidate,
     handleConfirmPlan,
     handleConfirmVote,
     handleCastBallot,
@@ -530,6 +555,7 @@ export function usePlannerFlow(step: PlannerStep) {
     handleRandomLineup,
     handleRemoveFromLineup,
     handleSelectPlanner,
+    hasActivePlanner: isPositiveSafeInteger(activePlannerId),
     hasError,
     headcount,
     inviteCode,

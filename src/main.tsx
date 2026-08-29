@@ -14,6 +14,7 @@ const queryClient = new QueryClient()
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ''
 
 window.addEventListener(AUTH_EXPIRED_EVENT, () => {
+  queryClient.clear()
   void router.navigate({ replace: true, to: '/login' })
 })
 

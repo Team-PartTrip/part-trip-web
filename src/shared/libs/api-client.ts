@@ -57,6 +57,25 @@ type RetryableRequestConfig = InternalAxiosRequestConfig & {
 
 let refreshPromise: Promise<AuthTokens> | null = null
 
+function isLocalDevelopmentUrl(url: URL) {
+  return import.meta.env?.DEV && ['localhost', '127.0.0.1', '::1', '[::1]'].includes(url.hostname)
+}
+
+function getRefreshUrl() {
+  const baseURL = apiClient.defaults.baseURL ?? ''
+  const refreshPath = `${baseURL.replace(/\/$/, '')}/auth/refresh`
+  if (typeof window === 'undefined') return refreshPath
+
+  const origin = window.location.origin
+  const refreshUrl = new URL(refreshPath, origin)
+
+  if (refreshUrl.protocol !== 'https:' && !isLocalDevelopmentUrl(refreshUrl)) {
+    throw new Error('인증 갱신은 HTTPS 연결에서만 사용할 수 있습니다.')
+  }
+
+  return refreshUrl.href
+}
+
 function expireSession() {
   clearAuthTokens()
   notifyAuthExpired()
@@ -64,10 +83,9 @@ function expireSession() {
 
 async function requestNewTokens(refreshToken: string) {
   if (!refreshPromise) {
-    const baseURL = apiClient.defaults.baseURL ?? ''
     refreshPromise = axios
       .post<AuthTokens>(
-        `${baseURL}/auth/refresh`,
+        getRefreshUrl(),
         { refreshToken },
         { timeout: REQUEST_TIMEOUT_MS },
       )

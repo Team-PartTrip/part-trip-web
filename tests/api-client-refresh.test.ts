@@ -76,3 +76,38 @@ test('보호 API는 access token 없이 요청하지 않는다', async () => {
     apiClient.defaults.adapter = previousApiAdapter
   }
 })
+
+test('원격 인증 갱신은 HTTPS가 아니면 차단한다', async () => {
+  const storage = createStorage()
+  const previousWindow = globalThis.window
+  const previousApiAdapter = apiClient.defaults.adapter
+  const previousBaseURL = apiClient.defaults.baseURL
+  let requested = 0
+
+  Object.defineProperty(globalThis, 'window', {
+    configurable: true,
+    value: {
+      dispatchEvent: () => true,
+      location: { origin: 'https://app.example' },
+      localStorage: createStorage(),
+      sessionStorage: storage,
+    },
+  })
+  apiClient.defaults.baseURL = 'http://api.example/api'
+  apiClient.defaults.adapter = async (config) => {
+    requested += 1
+    const response = { config, data: {}, headers: {}, status: 401, statusText: 'Unauthorized' }
+    return Promise.reject(new AxiosError('Unauthorized', AxiosError.ERR_BAD_REQUEST, config, undefined, response))
+  }
+  saveAuthTokens({ accessToken: 'expired', refreshToken: 'refresh-1' })
+
+  try {
+    await assert.rejects(apiClient.get('/private'), /HTTPS/)
+    assert.equal(requested, 1)
+  } finally {
+    clearAuthTokens()
+    apiClient.defaults.adapter = previousApiAdapter
+    apiClient.defaults.baseURL = previousBaseURL
+    Object.defineProperty(globalThis, 'window', { configurable: true, value: previousWindow })
+  }
+})

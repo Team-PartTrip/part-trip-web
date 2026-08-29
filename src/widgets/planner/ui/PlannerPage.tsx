@@ -245,6 +245,7 @@ function PlannerFlowPage({ step }: Props) {
     confirmVoteMutation,
     deleteVoteOptionMutation,
     errorMessage,
+    handleAddPlaceCandidate,
     handleAcceptPlannerInvitation,
     handleCastBallot,
     handleCloseVote,
@@ -262,6 +263,7 @@ function PlannerFlowPage({ step }: Props) {
     handleRemoveFromLineup,
     handleSelectPlanner,
     hasError,
+    hasActivePlanner,
     inviteCode,
     invitationError,
     invitationLoading,
@@ -397,6 +399,8 @@ function PlannerFlowPage({ step }: Props) {
         placeName: item.placeName,
         voteCount: undefined,
       }));
+
+  const requiresActivePlanner = !["list", "create", "group"].includes(step);
   const handleCalendarDay = (day: number) => {
     const date = `${calendarMonth.getFullYear()}-${String(calendarMonth.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     if (!selectedStartDate || selectedEndDate) {
@@ -411,6 +415,27 @@ function PlannerFlowPage({ step }: Props) {
     }
     setEndDate(date);
   };
+
+  if (requiresActivePlanner && !hasActivePlanner) {
+    return (
+      <AppShell>
+        <S.Page>
+          <S.Header>
+            <div>
+              <S.Title>플래너</S.Title>
+              <S.Subtitle>선택한 여행 계획이 없습니다.</S.Subtitle>
+            </div>
+          </S.Header>
+          <S.State role="alert">먼저 플래너 목록에서 여행 계획을 선택해주세요.</S.State>
+          <S.ActionRow>
+            <PartTripButton type="button" onClick={() => flowNavigate({ to: paths.planner })}>
+              플래너 목록
+            </PartTripButton>
+          </S.ActionRow>
+        </S.Page>
+      </AppShell>
+    );
+  }
 
   const nextVoteCategory = () => {
     const index = categories.indexOf(voteCategory);
@@ -1650,9 +1675,12 @@ function PlannerFlowPage({ step }: Props) {
                       <p>{place.description || "장소 설명이 없습니다."}</p>
                       <PartTripButton
                         type="button"
-                        onClick={() => navigate({ to: paths.plannerVote })}
+                        disabled={addPlannerPlacesMutation.isPending}
+                        onClick={() => void handleAddPlaceCandidate()}
                       >
-                        투표 후보에 추가
+                        {addPlannerPlacesMutation.isPending
+                          ? "후보 저장 중"
+                          : "투표 후보에 추가"}
                       </PartTripButton>
                     </S.StepCard>
                   </>

@@ -1,6 +1,6 @@
-import { apiClient } from '@/shared/libs/api-client'
-import { requestWithMockFallback } from '@/shared/libs/api-fallback'
-import type { CommentRequestDto, CommentResponseDto } from '@/entities/community/types'
+import { apiClient } from '../../shared/libs/api-client.ts'
+import { requestWithMockFallback } from '../../shared/libs/api-fallback.ts'
+import type { CommentRequestDto, CommentResponseDto } from '../community/types.ts'
 
 export type ShareTripRequestDto = {
   tripId?: number
@@ -193,8 +193,21 @@ export async function listSharedTrips(params?: {
   page?: number
   size?: number
 }): Promise<PageResponseDtoSharedTripResponseDto> {
-  const cards = await listTravelCards()
-  return { content: cards.map(toSharedTrip), page: params?.page ?? 0, size: params?.size ?? cards.length, totalElements: cards.length, totalPages: 1, hasNext: false }
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.get<PageResponseDtoSharedTripResponseDto>(SHARED_TRIP_API_PATHS.base, { params })
+      return data
+    },
+    () => {
+      const page = params?.page ?? 0
+      const size = params?.size ?? mockTravelCards.length
+      const start = page * size
+      const content = mockTravelCards.slice(start, start + size).map(toSharedTrip)
+      const totalElements = mockTravelCards.length
+      const totalPages = size > 0 ? Math.ceil(totalElements / size) : 0
+      return { content, hasNext: page + 1 < totalPages, page, size, totalElements, totalPages }
+    },
+  )
 }
 
 export async function shareTrip(payload: ShareTripRequestDto): Promise<SharedTripResponseDto> {
@@ -208,24 +221,13 @@ export async function shareTrip(payload: ShareTripRequestDto): Promise<SharedTri
 }
 
 export async function getSharedTripDetail(tripId: number): Promise<SharedTripResponseDto> {
-  const [detail, cards] = await Promise.all([getTravelCard(tripId), listTravelCards()])
-  const listCard = cards.find((card) => card.cardId === tripId)
-  const listView: SharedTripResponseDto = listCard ? toSharedTrip(listCard) : {}
-  const detailView = toSharedTrip(detail)
-  const hasTimeline = (detail.timeline?.length ?? 0) > 0
-  return {
-    ...listView,
-    ...detailView,
-    cityName: detailView.cityName ?? listView.cityName,
-    countryName: detailView.countryName ?? listView.countryName,
-    coverImageUrl: detailView.coverImageUrl ?? listView.coverImageUrl,
-    endDate: detailView.endDate ?? listView.endDate,
-    images: detailView.images?.length ? detailView.images : listView.images,
-    photoCount: hasTimeline ? detailView.photoCount : listView.photoCount,
-    places: detailView.places?.length ? detailView.places : listView.places,
-    startDate: detailView.startDate ?? listView.startDate,
-    title: detailView.title ?? listView.title,
-  }
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.get<SharedTripResponseDto>(SHARED_TRIP_API_PATHS.detail(tripId))
+      return data
+    },
+    () => toSharedTrip(getMockTravelCard(tripId)),
+  )
 }
 
 export async function importTrip(tripId: number): Promise<SharedTripResponseDto> {
