@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
 
 import {
@@ -12,6 +12,7 @@ import {
   type NotificationType,
 } from '@/entities/notification'
 import { paths } from '@/shared/config'
+import { isPositiveSafeInteger } from '@/shared/utils'
 
 const ACTIVE_PLANNER_ID_KEY = 'parttrip:active-planner-id'
 const ACTIVE_VOTE_ID_KEY = 'parttrip:active-vote-id'
@@ -47,6 +48,12 @@ export function useNotificationFlow(mode: NotificationMode) {
   const detail = notifications.find((item) => String(item.notificationId) === notificationId)
   const hasUnread = (unreadCountQuery.data?.unreadCount ?? notifications.filter((item) => item.isRead !== true && item.notificationId != null).length) > 0
 
+  useEffect(() => {
+    if (detail?.linkType?.trim().toUpperCase() === 'VOTE' && !isPositiveSafeInteger(detail.plannerId)) {
+      sessionStorage.removeItem(ACTIVE_PLANNER_ID_KEY)
+    }
+  }, [detail])
+
   const handleMarkRead = async (id?: number) => {
     if (id == null) return
     try {
@@ -80,8 +87,13 @@ export function useNotificationFlow(mode: NotificationMode) {
       return
     }
 
-    if (linkType === 'VOTE' && linkId != null) {
-      if (detail.plannerId != null) sessionStorage.setItem(ACTIVE_PLANNER_ID_KEY, String(detail.plannerId))
+    if (linkType === 'VOTE') {
+      sessionStorage.removeItem(ACTIVE_PLANNER_ID_KEY)
+      if (!isPositiveSafeInteger(linkId) || !isPositiveSafeInteger(detail.plannerId)) {
+        setActionError('투표 알림의 여행 계획 정보를 확인할 수 없습니다.')
+        return
+      }
+      sessionStorage.setItem(ACTIVE_PLANNER_ID_KEY, String(detail.plannerId))
       sessionStorage.setItem(ACTIVE_VOTE_ID_KEY, String(linkId))
       navigate({ to: paths.plannerVote })
       return

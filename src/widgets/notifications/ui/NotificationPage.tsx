@@ -1,4 +1,5 @@
 import type { NotificationFilter, NotificationType } from '@/entities/notification'
+import { isInCurrentCalendarWeek, isPositiveSafeInteger } from '@/shared/utils'
 import { Button as PartTripButton } from '@/shared/ui/parttrip'
 import { AppShell } from '@/widgets/app-shell'
 
@@ -66,11 +67,11 @@ function detailCopy(notification: { linkType?: string; title?: string; body?: st
   return { body: notification.body || fallback[1], title: notification.title || fallback[0] }
 }
 
-function detailActionLabel(notification: { linkType?: string; linkId?: number }) {
+function detailActionLabel(notification: { linkType?: string; linkId?: number; plannerId?: number }) {
   const linkType = notificationLinkType(notification)
   if (linkType === 'TRIP_CARD' && notification.linkId != null) return '여행카드 보러가기'
   if ((linkType === 'GROUP' || linkType === 'GROUP_INVITATION') && notification.linkId != null) return linkType === 'GROUP_INVITATION' ? '초대 확인하기' : '그룹 보러가기'
-  if (linkType === 'VOTE' && notification.linkId != null) return '투표 보러가기'
+  if (linkType === 'VOTE' && isPositiveSafeInteger(notification.linkId) && isPositiveSafeInteger(notification.plannerId)) return '투표 보러가기'
   if (linkType === 'WORLD_MAP') return '세계지도 보러가기'
   return undefined
 }
@@ -87,24 +88,13 @@ function isToday(value?: string) {
   return Boolean(date && date.getFullYear() === today.getFullYear() && date.getMonth() === today.getMonth() && date.getDate() === today.getDate())
 }
 
-function isThisWeek(value?: string) {
-  const date = parsedDate(value)
-  if (!date) return false
-  const today = new Date()
-  const dayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()
-  const dateStart = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
-  const days = Math.floor((dayStart - dateStart) / 86_400_000)
-  return days >= 0 && days < 7
-}
-
-function sectionLabel(notifications: Array<{ createdAt?: string; isRead?: boolean }>, index: number, todayUnreadCount: number) {
+function sectionLabel(notifications: Array<{ createdAt?: string; isRead?: boolean }>, index: number, todayUnreadCount: number, firstUnreadTodayIndex = notifications.findIndex((item) => isToday(item.createdAt) && item.isRead !== true)) {
   const notification = notifications[index]
   const previous = notifications[index - 1]
   const unreadToday = isToday(notification.createdAt) && notification.isRead !== true
-  const previousUnreadToday = previous && isToday(previous.createdAt) && previous.isRead !== true
-  if (unreadToday && !previousUnreadToday) return `오늘 · 읽지 않음 ${todayUnreadCount}`
-  const thisWeek = isThisWeek(notification.createdAt) && !isToday(notification.createdAt)
-  const previousThisWeek = previous && isThisWeek(previous.createdAt) && !isToday(previous.createdAt)
+  if (unreadToday && index === firstUnreadTodayIndex) return `오늘 · 읽지 않음 ${todayUnreadCount}`
+  const thisWeek = isInCurrentCalendarWeek(notification.createdAt) && !isToday(notification.createdAt)
+  const previousThisWeek = previous && isInCurrentCalendarWeek(previous.createdAt) && !isToday(previous.createdAt)
   return thisWeek && !previousThisWeek ? '이번 주' : undefined
 }
 

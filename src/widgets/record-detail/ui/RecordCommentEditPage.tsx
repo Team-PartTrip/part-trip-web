@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import { useUpdateTravelCardEntryCommentMutation } from '@/entities/trip-card'
 import { useTripQuery } from '@/entities/trip-plan'
@@ -23,6 +23,13 @@ export function RecordCommentEditPage() {
   const contentValue = content ?? editableEntry?.comment ?? ''
   const placeTitle = record?.places?.[0]?.placeName || record?.title || '여행 기록'
   const photoDate = editableEntry?.takenAt || editableEntry?.date || record?.startDate
+
+  useEffect(() => {
+    // The route can change entries without unmounting this editor.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setContent(undefined)
+    setMessage('')
+  }, [recordId, search.entryId])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
