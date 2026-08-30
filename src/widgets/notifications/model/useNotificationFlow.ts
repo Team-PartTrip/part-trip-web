@@ -14,6 +14,7 @@ import {
 import { paths } from '@/shared/config'
 
 const ACTIVE_PLANNER_ID_KEY = 'parttrip:active-planner-id'
+const ACTIVE_VOTE_ID_KEY = 'parttrip:active-vote-id'
 
 export type NotificationMode = 'list' | 'detail' | 'settings'
 
@@ -79,8 +80,9 @@ export function useNotificationFlow(mode: NotificationMode) {
       return
     }
 
-    if (linkType === 'VOTE') {
-      navigate({ to: paths.planner })
+    if (linkType === 'VOTE' && linkId != null) {
+      sessionStorage.setItem(ACTIVE_VOTE_ID_KEY, String(linkId))
+      navigate({ to: paths.plannerVote })
       return
     }
 

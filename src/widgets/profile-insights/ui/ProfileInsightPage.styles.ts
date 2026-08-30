@@ -87,8 +87,8 @@ export const SectionTitle = styled.h2`
 
 export const MapCard = styled.section`
   position: relative;
-  height: 591px;
-  min-height: 591px;
+  height: 543px;
+  min-height: 543px;
   box-sizing: border-box;
   border: 1px solid ${({ theme }) => theme.colors.border.subtle};
   border-radius: 16px;
@@ -109,48 +109,6 @@ export const MapCanvas = styled.div`
   background: ${({ theme }) => theme.colors.background.default};
   img { display: block; width: 100%; height: 100%; object-fit: contain; }
   @media (max-width: 560px) { height: 260px; }
-`
-
-export const MapMarker = styled.span<{ $left: number; $top: number }>`
-  position: absolute;
-  top: ${({ $top }) => `${$top}%`};
-  left: ${({ $left }) => `${$left}%`};
-  display: grid;
-  min-width: 30px;
-  height: 22px;
-  place-items: center;
-  border: 2px solid ${({ theme }) => theme.colors.background.default};
-  border-radius: 999px;
-  padding: 0 5px;
-  background: ${({ theme }) => theme.colors.brand.primary};
-  color: ${({ theme }) => theme.colors.text.inverse};
-  font-size: 9px;
-  font-weight: 700;
-  box-shadow: 0 2px 6px rgb(15 33 51 / 22%);
-  transform: translate(-50%, -50%);
-`
-
-export const MapLegend = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-top: 8px;
-  height: 40px;
-  color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 12px;
-`
-
-export const LegendItem = styled.span`
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-`
-
-export const LegendDot = styled.span<{ $visited?: boolean }>`
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: ${({ $visited, theme }) => ($visited ? theme.colors.brand.primary : '#dce7ef')};
 `
 
 export const CountryStats = styled.aside`

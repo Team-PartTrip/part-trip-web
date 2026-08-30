@@ -234,6 +234,7 @@ function PlannerFlowPage({ step }: Props) {
   const [plannerTab, setPlannerTab] = useState<PlannerTab>("active");
   const [travelStyle, setTravelStyle] = useState("맛집");
   const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [shareError, setShareError] = useState("");
   const {
     addPlannerPlacesMutation,
     activeVote,
@@ -361,8 +362,9 @@ function PlannerFlowPage({ step }: Props) {
       (item) =>
         item.countryName === city.countryName && item.cityName === city.cityName,
     );
+    if (!country) return [];
     return [{
-      countryInfoId: country?.countryInfoId,
+      countryInfoId: country.countryInfoId,
       countryName: city.countryName,
       cityName: city.cityName,
       imageUrl: country?.imageUrl,
@@ -468,6 +470,15 @@ function PlannerFlowPage({ step }: Props) {
     setVoteCategory(categories[(index + 1) % categories.length]);
   };
   const nextCategory = categories[(categories.indexOf(voteCategory) + 1) % categories.length];
+  const handleSharePlan = async () => {
+    try {
+      if (!navigator.clipboard) throw new Error("clipboard is unavailable");
+      await navigator.clipboard.writeText(window.location.href);
+      setShareError("");
+    } catch {
+      setShareError("일정 공유 링크를 복사하지 못했습니다.");
+    }
+  };
 
   const groupManagementPanel =
     step === "group" ? (
@@ -1184,7 +1195,7 @@ function PlannerFlowPage({ step }: Props) {
                           setSelected(places.map((_, index) => index))
                         }
                       >
-                        선택한 후보 보기
+                        전체 후보 담기
                       </button>
                     </S.PlaceListHeader>
                     {places.map((item, index) => {
@@ -1625,11 +1636,12 @@ function PlannerFlowPage({ step }: Props) {
                   <PartTripButton
                     type="button"
                     $variant="secondary"
-                    onClick={() => void navigator.clipboard?.writeText(window.location.href)}
+                    onClick={() => void handleSharePlan()}
                   >
                     일정 공유하기
                   </PartTripButton>
                 </S.FinalActions>
+                {shareError ? <S.Error role="alert">{shareError}</S.Error> : null}
                 <S.FinalHint>
                   일정이 마음에 들지 않나요? 이전 단계에서 수정할 수 있어요
                 </S.FinalHint>

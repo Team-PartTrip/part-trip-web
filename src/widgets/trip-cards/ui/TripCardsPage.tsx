@@ -105,7 +105,7 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
               </S.TravelCard>
             ) : <S.Empty>공유된 여행 카드가 없습니다.</S.Empty>}
             <S.Pagination aria-label="여행 카드 페이지"><span className="active" /><span /><span /></S.Pagination>
-            <PartTripButton type="button" onClick={() => navigate({ to: paths.tripCardCreate })}>여행카드 공유하기</PartTripButton>
+            <PartTripButton type="button" onClick={() => navigate({ to: paths.tripCardCreate })}>사진 · 코멘트 추가</PartTripButton>
           </S.CarouselSection>
         ) : null}
 

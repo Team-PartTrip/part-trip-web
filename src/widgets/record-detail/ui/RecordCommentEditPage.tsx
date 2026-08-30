@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate, useParams } from '@tanstack/react-router'
+import { useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import { useUpdateTravelCardEntryCommentMutation } from '@/entities/trip-card'
 import { useTripQuery } from '@/entities/trip-plan'
 import { figmaRecordMapPhoto } from '@/shared/assets'
@@ -12,11 +12,12 @@ import * as S from './RecordDetailPage.styles'
 export function RecordCommentEditPage() {
   const navigate = useNavigate()
   const { recordId = '' } = useParams({ strict: false })
+  const search = useSearch({ strict: false }) as { entryId?: string }
   const { data: record, isError, isLoading } = useTripQuery(Number(recordId))
   const [content, setContent] = useState<string>()
   const [message, setMessage] = useState('')
   const updateMutation = useUpdateTravelCardEntryCommentMutation()
-  const editableEntry = record?.timeline?.find((item) => item.entryId != null)
+  const editableEntry = record?.timeline?.find((item) => search.entryId != null && String(item.entryId) === search.entryId) ?? record?.timeline?.find((item) => item.entryId != null)
   const contentValue = content ?? editableEntry?.comment ?? ''
   const placeTitle = record?.places?.[0]?.placeName || record?.title || '여행 기록'
   const photoDate = editableEntry?.takenAt || editableEntry?.date || record?.startDate

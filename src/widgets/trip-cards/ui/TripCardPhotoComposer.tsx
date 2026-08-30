@@ -9,6 +9,7 @@ import {
 import * as S from "./TripCardsPage.styles";
 
 type PhotoDraft = { file: File; url: string };
+const MAX_PHOTOS = 4;
 
 type Props = { cards: TripPlanResponseDto[] };
 
@@ -32,16 +33,23 @@ export function TripCardPhotoComposer({ cards }: Props) {
   }, [photos]);
 
   const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const nextPhotos = Array.from(event.target.files ?? [])
+    const remaining = Math.max(0, MAX_PHOTOS - photos.length);
+    const incomingPhotos = Array.from(event.target.files ?? [])
       .filter((file) => file.type.startsWith("image/"))
       .map((file) => ({ file, url: URL.createObjectURL(file) }))
       .sort((a, b) => a.file.lastModified - b.file.lastModified);
-    photos.forEach(({ url }) => URL.revokeObjectURL(url));
-    setPhotos(nextPhotos);
+    const nextPhotos = incomingPhotos.slice(0, remaining);
+    incomingPhotos.slice(remaining).forEach(({ url }) => URL.revokeObjectURL(url));
+    setPhotos((current) => [...current, ...nextPhotos]);
     setSuccessMessage("");
     setErrorMessage(
-      nextPhotos.length === 0 ? "이미지 파일을 하나 이상 선택해주세요." : "",
+      nextPhotos.length === 0
+        ? remaining === 0
+          ? `사진은 최대 ${MAX_PHOTOS}장까지 선택할 수 있습니다.`
+          : "이미지 파일을 하나 이상 선택해주세요."
+        : "",
     );
+    event.target.value = "";
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -90,7 +98,7 @@ export function TripCardPhotoComposer({ cards }: Props) {
                   <S.PhotoCheck aria-hidden="true">✓</S.PhotoCheck>
                 </S.PhotoTile>
               ))}
-              {Array.from({ length: Math.max(0, 4 - photos.length) }, (_, index) => (
+              {Array.from({ length: Math.max(0, MAX_PHOTOS - photos.length) }, (_, index) => (
                 <S.PhotoTile key={`empty-${index}`} type="button" onClick={() => fileInputRef.current?.click()} aria-label="사진 추가">
                 </S.PhotoTile>
               ))}
