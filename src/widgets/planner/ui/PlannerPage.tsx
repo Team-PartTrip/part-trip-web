@@ -953,6 +953,7 @@ function PlannerFlowPage({ step }: Props) {
                       <label htmlFor="planner-city">여행지</label>
                       <PartTripInput
                         id="planner-city"
+                        autoComplete="off"
                         aria-autocomplete="list"
                         value={selectedCityName}
                         onChange={(event) => setCityName(event.target.value)}
