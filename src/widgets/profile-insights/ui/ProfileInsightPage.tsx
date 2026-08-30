@@ -48,8 +48,8 @@ export function ProfileInsightPage({ kind }: { kind: ProfileInsightKind }) {
   const [selectedCity, setSelectedCity] = useState('')
   const [selectedCountry, setSelectedCountry] = useState(() => sessionStorage.getItem(PROFILE_COUNTRY_KEY) ?? '')
   const needsWorldMapState = kind === 'map' || kind === 'claim'
-  const isLoading = isTripsLoading || (needsWorldMapState && worldMapQuery.isLoading) || ((kind === 'map' || kind === 'claim' || kind === 'achievements') && countriesQuery.isLoading) || (kind === 'achievements' && worldMapStatsQuery.isLoading)
-  const hasError = hasTripsError || (needsWorldMapState && worldMapQuery.isError) || ((kind === 'map' || kind === 'claim' || kind === 'achievements') && countriesQuery.isError) || (kind === 'achievements' && worldMapStatsQuery.isError)
+  const isLoading = isTripsLoading || (needsWorldMapState && worldMapQuery.isLoading) || (kind === 'achievements' && countriesQuery.isLoading) || (kind === 'achievements' && worldMapStatsQuery.isLoading)
+  const hasError = hasTripsError || (needsWorldMapState && worldMapQuery.isError) || (kind === 'achievements' && countriesQuery.isError) || (kind === 'achievements' && worldMapStatsQuery.isError)
   const visitedCountries = [...new Set((worldMapQuery.data?.visited?.map((country) => country.countryName).filter((country): country is string => Boolean(country)) ?? trips.map((trip) => trip.countryName).filter((country): country is string => Boolean(country))))]
   const activeCountry = visitedCountries.includes(selectedCountry) ? selectedCountry : visitedCountries[0]
   const countryTrips = trips.filter((trip) => trip.countryName === activeCountry)
