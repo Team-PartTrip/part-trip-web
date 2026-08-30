@@ -9,16 +9,28 @@ const codeCaretBlink = keyframes`
 `
 
 export const AuthPage = styled.main`
-  display: grid;
+  display: flex;
   min-height: 100dvh;
-  place-items: center;
-  padding: 40px 20px;
-  background: ${({ theme }) => theme.colors.background.subtle};
+  align-items: flex-start;
+  justify-content: center;
+  padding: 152px 20px 108px;
+  background: ${({ theme }) => theme.colors.background.default};
+  border: 1px solid #d8dddd;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgb(15 33 51 / 5%);
+
+  @media (max-width: 600px) {
+    padding: 40px 20px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
 `
 
 export const Container = styled.section`
   display: flex;
   width: min(100%, 560px);
+  height: 720px;
   min-height: 720px;
   flex-direction: column;
   align-items: center;
@@ -40,7 +52,7 @@ export const Header = styled.header`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 20px;
 `
 
 export const Brand = styled.span`
@@ -110,6 +122,7 @@ export const Input = styled.input<InputProps>`
   background: var(--pt-bg-soft);
   color: ${({ theme }) => theme.colors.text.strong};
   font-size: 16px;
+  line-height: 22px;
   outline: none;
 
   &:focus {
@@ -205,25 +218,40 @@ export const GoogleLoginContainer = styled.div`
   justify-content: center;
   overflow: hidden;
 
-  > div,
+  > div {
+    width: 100% !important;
+    height: 54px !important;
+  }
+
   > div > div,
   [role='button'] { width: 100% !important; }
+
+  [role='button'] {
+    height: 54px !important;
+    min-height: 54px !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
 `
 
-export const Actions = styled.div`
+export const Actions = styled.div<{ $login?: boolean }>`
   display: flex;
   width: 100%;
   flex-direction: column;
   gap: 14px;
+  margin-top: ${({ $login }) => ($login ? '6px' : '0')};
 `
 
 export const Divider = styled.div`
   display: flex;
   width: 100%;
+  height: 24px;
   align-items: center;
   gap: 16px;
   color: ${({ theme }) => theme.colors.text.muted};
   font-size: 14px;
+  line-height: 20px;
 
   &::before, &::after {
     height: 1px;
@@ -237,7 +265,7 @@ export const HintRow = styled.div`
   display: flex;
   width: 100%;
   justify-content: flex-end;
-  margin-top: -2px;
+  margin-top: 0;
   color: ${({ theme }) => theme.colors.text.muted};
   font-size: 12px;
   line-height: 20px;

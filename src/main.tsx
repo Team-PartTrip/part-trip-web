@@ -26,7 +26,7 @@ declare module '@tanstack/react-router' {
 
 createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
-    <GoogleOAuthProvider clientId={googleClientId}>
+    <GoogleOAuthProvider clientId={googleClientId} locale="ko">
       <ThemeProvider theme={appTheme}>
         <GlobalStyle />
         <RouterProvider router={router} />

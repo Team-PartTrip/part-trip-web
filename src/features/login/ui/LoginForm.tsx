@@ -152,7 +152,7 @@ export function LoginForm() {
             </S.Message>
           ) : null}
 
-          <S.Actions>
+          <S.Actions $login>
             <S.PrimaryButton type="submit" disabled={isSubmitting} $strong>
               {isSubmitting ? '로그인 중' : '로그인'}
             </S.PrimaryButton>
