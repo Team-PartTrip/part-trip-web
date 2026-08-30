@@ -204,6 +204,10 @@ export const GoogleLoginContainer = styled.div`
   align-items: center;
   justify-content: center;
   overflow: hidden;
+
+  > div,
+  > div > div,
+  [role='button'] { width: 100% !important; }
 `
 
 export const Actions = styled.div`
