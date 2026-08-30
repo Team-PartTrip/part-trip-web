@@ -21,6 +21,7 @@ export type TripPlanResponseDto = {
   nickName?: string
   title?: string
   countryInfoId?: number
+  countryCode?: string
   countryName?: string
   cityName?: string
   startDate?: string
@@ -58,6 +59,7 @@ function toTripPlan(
   return {
     cityName: card?.cityName,
     content: timeline.map((item) => item.comment).filter(Boolean).join('\n') || undefined,
+    countryCode: detail?.countryCode ?? card?.countryCode,
     countryName: card?.countryName,
     endDate: detail?.endDate ?? card?.endDate,
     images: images.length

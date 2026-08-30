@@ -54,7 +54,11 @@ export function ProfileInsightPage({ kind }: { kind: ProfileInsightKind }) {
   const activeCountry = visitedCountries.includes(selectedCountry) ? selectedCountry : visitedCountries[0]
   const countryTrips = trips.filter((trip) => trip.countryName === activeCountry)
   const activeTrips = selectedCity ? countryTrips.filter((trip) => trip.cityName === selectedCity) : countryTrips
-  const countryCode = worldMapQuery.data?.visited?.find((country) => country.countryName === activeCountry)?.countryCode ?? '--'
+  const countryCode = [
+    worldMapQuery.data?.visited?.find((country) => country.countryName === activeCountry),
+    countriesQuery.data?.find((country) => country.countryName === activeCountry),
+    trips.find((trip) => trip.countryName === activeCountry),
+  ].find((country) => country?.countryCode)?.countryCode?.trim().toUpperCase() || '--'
   const countryCities = [...new Set(countryTrips.map((trip) => trip.cityName).filter((city): city is string => Boolean(city)))]
   const countryPhotoCount = activeTrips.reduce((total, trip) => total + (trip.images?.length ?? 0), 0)
   const firstVisit = countryTrips.map((trip) => trip.startDate).filter(Boolean).sort()[0]?.replaceAll('-', '.') || '-'

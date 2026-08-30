@@ -51,6 +51,7 @@ export type FestivalResponseDto = {
 
 export type CountryInfoResponseDto = {
   countryInfoId?: number
+  countryCode?: string
   countryName?: string
   cityName?: string
   imageUrl?: string
