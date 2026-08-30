@@ -4,9 +4,13 @@ import { Skeleton } from '@/shared/ui/parttrip'
 export const Page = styled.main<{ $wide?: boolean }>`
   width: 100%;
   min-width: 0;
-  width: ${({ $wide }) => ($wide ? 'calc(100% + 32px)' : '100%')};
-  margin-left: ${({ $wide }) => ($wide ? '-32px' : '0')};
+  box-sizing: border-box;
+  padding: ${({ $wide }) => ($wide ? '0' : '32px')};
   color: ${({ theme }) => theme.colors.text.strong};
+
+  @media (max-width: 767px) {
+    padding: 0;
+  }
 `
 
 export const LoadingHeader = styled(Skeleton)`
@@ -26,20 +30,24 @@ export const LoadingBody = styled(Skeleton)`
   border-radius: 16px;
 `
 
-export const Header = styled.header<{ $final?: boolean; $hasSubtitle?: boolean }>`
+export const Header = styled.header<{ $final?: boolean; $hasSubtitle?: boolean; $wide?: boolean }>`
   display: flex;
-  min-height: ${({ $hasSubtitle }) => ($hasSubtitle ? '70px' : '0')};
+  min-height: ${({ $hasSubtitle, $wide }) => ($hasSubtitle ? ($wide ? '68px' : '70px') : '0')};
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
   padding-inline: 24px;
+  margin-top: ${({ $wide }) => ($wide ? '24px' : '0')};
   margin-bottom: 24px;
 
   ${({ $final }) => $final && `
-    min-height: 32px;
+    position: relative;
+    z-index: 1;
+    height: 0;
+    min-height: 0;
     margin-bottom: 0;
-    padding-bottom: 0;
+    padding: 0;
   `}
 
   > button {
@@ -79,6 +87,8 @@ export const State = styled.p`
 
 export const PlannerTabs = styled.nav`
   display: flex;
+  min-height: 44px;
+  align-items: flex-start;
   gap: 16px;
   margin-bottom: 24px;
 
@@ -91,7 +101,7 @@ export const PlannerTabs = styled.nav`
     background: ${({ theme }) => theme.colors.background.default};
     color: ${({ theme }) => theme.colors.brand.primary};
     cursor: pointer;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
   }
 
@@ -110,7 +120,7 @@ export const PlannerListLayout = styled.div`
 export const PlanListPanel = styled.section`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 
 `
 
@@ -172,7 +182,7 @@ export const PlanStatus = styled.span<{ $state: 'active' | 'planned' | 'complete
   border-radius: 999px;
   padding: 8px;
   background: ${({ theme }) => theme.colors.background.subtle};
-  color: ${({ $state, theme }) => $state === 'completed' ? theme.colors.brand.successStrong : $state === 'active' ? theme.colors.brand.primary : theme.colors.text.muted};
+  color: ${({ $state, theme }) => $state === 'completed' ? theme.colors.brand.successStrong : $state === 'active' ? theme.colors.brand.accent : theme.colors.brand.primary};
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
@@ -236,7 +246,7 @@ export const StepCard = styled.section`
   p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; line-height: 20px; }
 `
 
-export const FlowStepper = styled.nav`
+export const FlowStepper = styled.nav<{ $final?: boolean }>`
   display: flex;
   width: 440px;
   max-width: 100%;
@@ -245,7 +255,10 @@ export const FlowStepper = styled.nav`
   margin-left: auto;
   align-self: center;
   overflow-x: auto;
-  transform: translateX(-4px);
+  position: ${({ $final }) => ($final ? 'absolute' : 'relative')};
+  top: ${({ $final }) => ($final ? '-16px' : 'auto')};
+  right: ${({ $final }) => ($final ? '-8px' : 'auto')};
+  transform: ${({ $final }) => ($final ? 'none' : 'translateX(-4px)')};
 `
 
 export const FlowStep = styled.span<{ $active: boolean; $complete: boolean }>`
@@ -282,7 +295,7 @@ export const FlowStep = styled.span<{ $active: boolean; $complete: boolean }>`
 export const GroupForm = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
 `
 
 export const GroupTypeRow = styled.div`
@@ -301,7 +314,7 @@ export const GroupTypeButton = styled.button<{ $active: boolean }>`
   background: ${({ $active, theme }) => ($active ? '#e2f2ff' : theme.colors.background.default)};
   color: ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.text.strong)};
   cursor: pointer;
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 600;
   text-align: left;
 `
@@ -313,7 +326,8 @@ export const CountRow = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  border-radius: 12px;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 14px;
   padding: 20px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
@@ -327,19 +341,23 @@ export const MemberPanel = styled.section`
   min-height: 270px;
   box-sizing: border-box;
   flex-direction: column;
-  gap: 8px;
+  gap: 14px;
   border-radius: 16px;
   padding: 20px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
+  > h2 { font-size: 18px; line-height: 22px; }
 `
 
 export const GroupActions = styled.div`
   display: flex;
+  min-height: 52px;
   flex-wrap: wrap;
+  align-items: flex-start;
   gap: 12px;
-  margin-top: 4px;
+  margin-top: 0;
 
+  > button { height: 48px; }
   > button:first-child { width: 190px; }
   > button:last-child { width: 140px; }
 `
@@ -369,7 +387,7 @@ export const ActionRow = styled.div`
 export const FullWidthAction = styled.button`
   width: 100%;
   height: 48px;
-  margin-top: 0;
+  margin-top: 24px;
   border: 0;
   border-radius: 12px;
   padding: 14px;
@@ -429,6 +447,7 @@ export const CartBody = styled.div`
 
 export const SettingsLayout = styled.div`
   display: grid;
+  align-items: start;
   gap: 24px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 
@@ -438,6 +457,14 @@ export const SettingsLayout = styled.div`
   > ${StepCard} > div:nth-of-type(4),
   > ${StepCard} > div:nth-of-type(5),
   > ${StepCard} > div:nth-of-type(6) { display: none; }
+
+  > ${StepCard} {
+    border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+    border-radius: 16px;
+    padding: 24px;
+  }
+  > ${StepCard} > h2 { font-size: 18px; line-height: 24px; }
+  > ${StepCard} input { height: 44px; }
 `
 
 export const StepField = styled.div`
@@ -501,7 +528,7 @@ export const Stepper = styled.div`
 export const MemberList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 14px;
 `
 
 export const MemberRow = styled.div`
@@ -509,15 +536,14 @@ export const MemberRow = styled.div`
   min-height: 54px;
   align-items: center;
   gap: 10px;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
   padding: 6px 0;
 `
 
 export const Avatar = styled.span`
   display: inline-flex;
-  width: 32px;
-  height: 32px;
-  flex: 0 0 32px;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
@@ -554,13 +580,13 @@ export const MemberDetails = styled.div`
   flex: 1;
   flex-direction: column;
   gap: 2px;
-  strong { font-size: 14px; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
+  strong { font-size: 15px; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
 `
 
 export const MemberState = styled.span`
   color: ${({ theme }) => theme.colors.brand.primary};
-  font-size: 11px;
+  font-size: 12px;
   white-space: nowrap;
 `
 
@@ -647,19 +673,19 @@ export const PopularGrid = styled.div`
 
 export const PopularButton = styled.button<{ $active: boolean }>`
   display: flex;
-  min-height: 58px;
+  min-height: 56px;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
   gap: 2px;
   border: 1px solid ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.border.default)};
-  border-radius: 12px;
-  padding: 0 12px;
+  border-radius: 14px;
+  padding: 12px 16px;
   background: ${({ $active, theme }) => ($active ? theme.colors.background.muted : theme.colors.background.default)};
   color: ${({ theme }) => theme.colors.text.strong};
   cursor: pointer;
   text-align: left;
-  strong { font-size: 13px; }
+  strong { font-size: 14px; }
   span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
 `
 
@@ -697,7 +723,8 @@ export const PreviewPanel = styled.section`
 
 export const CalendarPanel = styled.section`
   min-height: 402px;
-  border-radius: 20px;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 16px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
@@ -707,46 +734,55 @@ export const CalendarHeader = styled.header`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 16px;
+  margin-top: 12px;
   color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 13px;
+  font-size: 16px;
   span { display: flex; gap: 4px; color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
-  button { width: 24px; height: 24px; border: 0; border-radius: 8px; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.text.strong}; cursor: pointer; }
+  button { width: 18px; height: 20px; border: 0; border-radius: 0; background: transparent; color: ${({ theme }) => theme.colors.text.muted}; cursor: pointer; font-size: 14px; }
 `
 
 export const Weekdays = styled.div`
   display: grid;
-  gap: 4px;
+  gap: 0;
   grid-template-columns: repeat(7, 1fr);
-  margin-top: 14px;
+  height: 20px;
+  margin-top: 12px;
   color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 10px;
+  font-size: 11px;
   text-align: center;
 `
 
 export const CalendarGrid = styled.div`
   display: grid;
-  gap: 4px;
+  gap: 2px;
   grid-template-columns: repeat(7, 1fr);
-  margin-top: 8px;
+  margin-top: 12px;
+
+  > span { min-height: 42px; }
 `
 
 export const CalendarDay = styled.button<{ $selected: boolean; $range: boolean }>`
-  min-height: 30px;
+  min-height: 42px;
   border: 0;
   border-radius: 4px;
   padding: 0;
   background: ${({ $selected, $range, theme }) => ($selected ? theme.colors.brand.primary : $range ? theme.colors.background.info : 'transparent')};
   color: ${({ $selected, theme }) => ($selected ? theme.colors.text.inverse : theme.colors.text.strong)};
   cursor: pointer;
-  font-size: 10px;
+  font-size: 13px;
 `
 
 export const CalendarSummary = styled.p`
-  margin: 14px 0 0;
-  color: ${({ theme }) => theme.colors.brand.primary};
-  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 10px 0 0;
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 14px;
   font-weight: 600;
+  strong { font-size: inherit; }
+  span { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 13px; white-space: nowrap; }
 `
 
 export const PreviewCard = styled.article`
@@ -768,9 +804,10 @@ export const PreviewCard = styled.article`
 
 export const CategoryChips = styled.nav`
   display: flex;
+  min-height: 44px;
   flex-wrap: wrap;
   gap: 14px;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 `
 
 export const CategoryChip = styled.button<{ $active: boolean }>`
@@ -835,6 +872,7 @@ export const PlaceListPanel = styled.section`
   display: flex;
   flex-direction: column;
   gap: 12px;
+  > header { margin-bottom: 12px; }
 `
 
 export const PlaceListHeader = styled.header`
@@ -1120,7 +1158,7 @@ export const ProgressStats = styled.div`
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 `
 
 export const ProgressStat = styled.div`
@@ -1142,10 +1180,17 @@ export const ProgressBody = styled.div`
 `
 
 export const CategoryStatusPanel = styled.section`
-  border-radius: 20px;
-  padding: 24px;
+  height: 470px;
+  box-sizing: border-box;
+  border-radius: 16px;
+  padding: 20px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
+  > h2 { margin-bottom: 14px; font-size: 15px; line-height: 22px; }
+  > div { grid-template-columns: 72px minmax(0, 1fr); min-height: 54px; }
+  > div + div { margin-top: 14px; }
+  > div > span { background: transparent; color: ${({ theme }) => theme.colors.text.strong}; padding: 0; text-align: left; }
+  > div > strong { text-align: right; }
 `
 
 export const StatusLine = styled.div`
@@ -1153,7 +1198,7 @@ export const StatusLine = styled.div`
   align-items: center;
   gap: 8px;
   grid-template-columns: 72px minmax(0, 1fr) auto;
-  min-height: 44px;
+  min-height: 54px;
   border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
   font-size: 12px;
   &:last-child { border-bottom: 0; }
@@ -1208,7 +1253,7 @@ export const ResponseRow = styled.div`
 export const FinalPlaceList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 16px;
 `
 
 export const FinalPlaceRow = styled.div`
@@ -1216,11 +1261,11 @@ export const FinalPlaceRow = styled.div`
   align-items: center;
   gap: 8px;
   grid-template-columns: 72px minmax(0, 1fr) auto;
-  min-height: 56px;
+  min-height: 44px;
   border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
   font-size: 13px;
   &:last-child { border-bottom: 0; }
-  small { width: 64px; border-radius: 8px; padding: 6px 8px; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.brand.strong}; font-size: 11px; text-align: center; }
+  small { display: inline-flex; width: 72px; height: 36px; align-items: center; justify-content: center; border-radius: 12px; padding: 0 8px; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.brand.strong}; font-size: 11px; text-align: center; }
   span { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 13px; font-weight: 600; }
 `
 

@@ -190,14 +190,24 @@ export const CodeSendButton = styled.button`
   font-size: 12px;
 `
 
-export const IdInputRow = styled.div`
+export const InlineVerificationRow = styled.div`
   display: flex;
   width: 100%;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 
-  ${Input} { flex: 1; }
-  ${CodeSendButton} { width: auto; flex: 0 0 auto; white-space: nowrap; }
+  ${Input} { width: 288px; flex: 0 0 288px; }
+  ${CodeSendButton} {
+    width: 100px;
+    height: 44px;
+    min-height: 44px;
+    border: 0;
+    border-radius: 12px;
+    padding: 0;
+    background: ${({ theme }) => theme.colors.brand.primary};
+    box-shadow: 0 4px 10px rgb(26 110 191 / 16%);
+    color: ${({ theme }) => theme.colors.text.inverse};
+  }
 `
 
 export const GoogleButton = styled.button`
@@ -235,12 +245,12 @@ export const GoogleLoginContainer = styled.div`
   }
 `
 
-export const Actions = styled.div<{ $login?: boolean }>`
+export const Actions = styled.div`
   display: flex;
   width: 100%;
   flex-direction: column;
   gap: 14px;
-  margin-top: ${({ $login }) => ($login ? '6px' : '0')};
+  margin-top: 6px;
 `
 
 export const Divider = styled.div`

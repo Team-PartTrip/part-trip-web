@@ -4,12 +4,19 @@ import { Skeleton } from '@/shared/ui/parttrip'
 export const Page = styled.main`
   width: 100%;
   min-width: 0;
+  padding: 32px;
+  box-sizing: border-box;
   color: ${({ theme }) => theme.colors.text.strong};
+
+  @media (max-width: 767px) {
+    padding: 0;
+  }
 `
 
 export const Header = styled.header`
+  min-height: 48px;
   padding-inline: 24px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 `
 
 export const Title = styled.h1`
@@ -21,6 +28,8 @@ export const Title = styled.h1`
 
 export const YearTabs = styled.nav`
   display: flex;
+  min-height: 44px;
+  align-items: flex-start;
   gap: 16px;
   margin-bottom: 24px;
   button {
@@ -85,9 +94,10 @@ export const RecordCopy = styled.span`
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 3px;
-  strong { font-size: 15px; line-height: 20px; }
-  span, small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; line-height: 15px; }
+  gap: 6px;
+  strong { font-size: 17px; line-height: 20px; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; line-height: 16px; }
+  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; line-height: 15px; }
 `
 
 export const RecordStatus = styled.span`

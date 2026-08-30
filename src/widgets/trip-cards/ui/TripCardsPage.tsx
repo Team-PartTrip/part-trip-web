@@ -25,10 +25,8 @@ export function TripCardDeletePage() {
 function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
   const {
     cards,
-    createTab,
     detail,
     handleDelete,
-    handleShare,
     hasQueryError,
     isLoading,
     message,
@@ -36,29 +34,24 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
     navigate,
     paths,
     selected,
-    setCreateTab,
     setSelected,
-    shareMutation,
   } = useTripCardsFlow(mode);
   const allCardIds = cards.flatMap((card) =>
     card.tripId == null ? [] : [card.tripId],
   );
-  const allSelected =
-    allCardIds.length > 0 && selected.length === allCardIds.length;
   const featuredCard = cards[0];
   const detailTimeline = detail?.timeline ?? [];
   const firstPlace = detailTimeline.find((item) => item.type === "PLACE" && item.placeName) ?? detailTimeline.find((item) => item.placeName);
   const firstPhoto = detailTimeline.find((item) => item.type === "PHOTO" && item.imageUrl) ?? detailTimeline.find((item) => item.imageUrl);
   const featuredImage = featuredCard?.coverImageUrl || featuredCard?.images?.[0];
 
-  const toggleAll = () => {
-    setSelected(allSelected ? [] : allCardIds);
-  };
+  const selectAll = () => setSelected(allCardIds);
+  const clearSelection = () => setSelected([]);
 
   return (
     <AppShell>
-      <S.Page>
-        <S.Header>
+      <S.Page $wide={mode === "create" || mode === "delete"}>
+        <S.Header $wide={mode === "create" || mode === "delete"} $create={mode === "create"} $detail={mode === "detail"}>
           {isLoading ? <S.LoadingHeader /> : <div>
             <S.Title>
               {mode === "detail"
@@ -111,7 +104,7 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
                 </S.TravelCardInfo>
               </S.TravelCard>
             ) : <S.Empty>공유된 여행 카드가 없습니다.</S.Empty>}
-            <S.Pagination aria-label="여행 카드 페이지"><span className="active" /></S.Pagination>
+            <S.Pagination aria-label="여행 카드 페이지"><span className="active" /><span /><span /></S.Pagination>
             <PartTripButton type="button" onClick={() => navigate({ to: paths.tripCardCreate })}>여행카드 공유하기</PartTripButton>
           </S.CarouselSection>
         ) : null}
@@ -122,14 +115,13 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
               <>
                 <S.PlaceOverview>
                   <S.DetailHeading><h2>방문 장소</h2></S.DetailHeading>
-                  <S.PlaceOverviewImage>{firstPhoto?.imageUrl ? <img src={resolveApiAssetUrl(firstPhoto.imageUrl) || firstPhoto.imageUrl} alt={firstPlace?.placeName ? `${firstPlace.placeName} 여행 사진` : "여행 사진"} /> : <span>장소 이미지 없음</span>}</S.PlaceOverviewImage>
+                  <S.PlaceOverviewImage>{firstPhoto?.imageUrl ? <img src={resolveApiAssetUrl(firstPhoto.imageUrl) || firstPhoto.imageUrl} alt={firstPlace?.placeName ? `${firstPlace.placeName} 여행 사진` : "여행 사진"} /> : <span>{firstPlace?.placeName || "장소 이미지 없음"}</span>}</S.PlaceOverviewImage>
                   <S.PlaceCopy><strong>{firstPlace?.placeName || "장소 정보 없음"}</strong><span>{firstPlace?.address || "상세 주소 정보 없음"}</span><small>{[firstPlace?.date || detail.startDate, firstPlace?.rating == null ? "" : `★ ${firstPlace.rating}`].filter(Boolean).join(" | ") || "여행 정보 없음"}</small></S.PlaceCopy>
                 </S.PlaceOverview>
-                <S.CapturedInfo>
-                  <S.CapturedPanel><h2>촬영된 이미지</h2><S.CapturedImage>{firstPhoto?.imageUrl ? <img src={resolveApiAssetUrl(firstPhoto.imageUrl) || firstPhoto.imageUrl} alt="여행 사진" /> : <span>촬영된 이미지 없음</span>}</S.CapturedImage><small>{firstPhoto?.takenAt || firstPhoto?.date || detail.startDate || "촬영일 정보 없음"}</small></S.CapturedPanel>
+                  <S.CapturedInfo>
+                  <S.CapturedPanel><h2>촬영된 이미지</h2><S.CapturedImage>{firstPhoto?.imageUrl ? <img src={resolveApiAssetUrl(firstPhoto.imageUrl) || firstPhoto.imageUrl} alt="여행 사진" /> : <span>촬영된 이미지</span>}</S.CapturedImage><small>{firstPhoto?.takenAt || firstPhoto?.date || detail.startDate || "촬영일 정보 없음"}</small></S.CapturedPanel>
                   <S.CapturedPanel><h2>사진에 포함된 위치 정보</h2><strong>{firstPlace?.placeName || "위치 정보 없음"}</strong><small>{[firstPlace?.address, firstPlace?.rating == null ? "" : `★ ${firstPlace.rating}`].filter(Boolean).join(" | ") || "위치 정보 없음"}</small></S.CapturedPanel>
                   <S.AddPhoto><PartTripButton type="button" onClick={() => navigate({ to: paths.tripCardCreate })}>사진 추가하기</PartTripButton><small>갤러리에서 기록하고 싶은 사진 업로드</small></S.AddPhoto>
-                  <S.DetailTimeline><S.DetailHeading><h2>여행 기록 타임라인</h2><span>{detailTimeline.length}개</span></S.DetailHeading>{detailTimeline.map((item, index) => <S.PlaceTimeline key={`${item.date || item.takenAt || "timeline"}-${item.placeName || item.comment || index}`}><strong>{item.type === "PHOTO" ? "사진 기록" : item.placeName || "방문 장소"}</strong><span>{[item.date || item.takenAt, item.address, item.rating == null ? "" : `★ ${item.rating}`, item.latitude == null || item.longitude == null ? "" : `${item.latitude}, ${item.longitude}`].filter(Boolean).join(" · ") || "상세 정보 없음"}</span>{item.comment ? <span>{item.comment}</span> : null}</S.PlaceTimeline>)}{detailTimeline.length === 0 ? <S.Empty>아직 기록된 타임라인이 없습니다.</S.Empty> : null}</S.DetailTimeline>
                 </S.CapturedInfo>
               </>
             ) : (
@@ -138,64 +130,19 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
           </S.DetailLayout>
         ) : null}
 
-        {mode === "create" && !isLoading ? (
-          <>
-            <S.CreateTabs aria-label="여행 카드 작성 방식">
-              <button
-                type="button"
-                aria-pressed={createTab === "share"}
-                onClick={() => setCreateTab("share")}
-              >
-                기존 여행 공유
-              </button>
-              <button
-                type="button"
-                aria-pressed={createTab === "photo"}
-                onClick={() => setCreateTab("photo")}
-              >
-                사진으로 작성
-              </button>
-            </S.CreateTabs>
-            {createTab === "share" ? (
-              <S.SelectList>
-                {mine.map((trip, index) => (
-                  <S.SelectRow key={trip.tripId ?? index}>
-                    <div>
-                      <strong>{trip.title || "여행 기록"}</strong>
-                      <span>
-                        {trip.cityName || trip.countryName || "여행지"}
-                      </span>
-                    </div>
-                    <PartTripButton
-                      type="button"
-                      disabled={shareMutation.isPending}
-                      onClick={() => void handleShare(trip.tripId)}
-                    >
-                      공유하기
-                    </PartTripButton>
-                  </S.SelectRow>
-                ))}
-                {mine.length === 0 ? (
-                  <S.Empty>공유할 내 여행이 없습니다.</S.Empty>
-                ) : null}
-              </S.SelectList>
-            ) : (
-              <TripCardPhotoComposer cards={mine} />
-            )}
-          </>
-        ) : null}
+        {mode === "create" && !isLoading ? <TripCardPhotoComposer cards={mine} /> : null}
 
         {mode === "delete" && !isLoading ? (
-          <S.DeleteLayout>
+          <>
+            <S.Toolbar>
+              <strong>{selected.length}개 선택됨</strong>
+              <div>
+                <button type="button" onClick={selectAll}>전체 선택</button>
+                <button type="button" onClick={clearSelection}>선택 해제</button>
+              </div>
+            </S.Toolbar>
+            <S.DeleteLayout>
             <S.DeleteList>
-              <S.Toolbar>
-                <strong>{selected.length}개 선택됨</strong>
-                <div>
-                  <button type="button" onClick={toggleAll}>
-                    {allSelected ? "선택 해제" : "전체 선택"}
-                  </button>
-                </div>
-              </S.Toolbar>
               <h2>여행 카드 {cards.length}개</h2>
               {cards.map((card, index) => (
                 <S.DeleteRow
@@ -239,8 +186,7 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
                 <strong>! 삭제하면 되돌릴 수 없어요</strong>
                 <span>카드에 담긴 사진과 코멘트가 함께 삭제됩니다.</span>
               </S.Warning>
-              <strong>선택한 카드 {selected.length}개</strong>
-              <span>
+              <S.DeleteSummary><strong>선택한 카드 {selected.length}개</strong><span>
                 {cards
                   .filter(
                     (card) =>
@@ -248,7 +194,7 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
                   )
                   .map((card) => card.title || "여행 카드")
                   .join(" · ") || "선택된 카드가 없습니다."}
-              </span>
+              </span><span>사진과 코멘트가 함께 삭제됩니다.</span></S.DeleteSummary>
               <S.DeleteActions>
                 <S.DeleteButton
                   type="button"
@@ -266,7 +212,8 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
                 </PartTripButton>
               </S.DeleteActions>
             </S.DeletePanel>
-          </S.DeleteLayout>
+            </S.DeleteLayout>
+          </>
         ) : null}
       </S.Page>
     </AppShell>

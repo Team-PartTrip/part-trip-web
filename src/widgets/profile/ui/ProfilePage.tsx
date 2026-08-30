@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useMyTrips } from "@/entities/trip-plan";
 import { useProfileStatsQuery, useUserProfileQuery } from "@/entities/user";
+import { useWorldMapStatsQuery } from "@/entities/world-map";
 import { ProfileForm } from "@/features/fix-profile";
 import { figmaWorldMap } from "@/shared/assets";
 import { paths } from "@/shared/config";
@@ -29,16 +30,15 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
     isLoading: isProfileLoading,
   } = useUserProfileQuery();
   const { data: profileStats, isLoading: isProfileStatsLoading } = useProfileStatsQuery();
-  const isLoading = isTripsLoading || isProfileLoading || isProfileStatsLoading;
+  const { data: worldMapStats, isLoading: isWorldMapStatsLoading } = useWorldMapStatsQuery();
+  const isLoading = isTripsLoading || isProfileLoading || isProfileStatsLoading || isWorldMapStatsLoading;
   const countries = new Set(
     trips.map((trip) => trip.countryName).filter(Boolean),
   ).size;
-  const recordCount = trips.reduce(
-    (total, trip) => total + (trip.images?.length ?? 0),
-    0,
-  );
+  const recordCount = trips.reduce((total, trip) => total + (trip.images?.length ?? 0), 0);
   const displayedRecordCount = profileStats?.recordCount ?? recordCount;
   const name = profile?.name || "닉네임 미설정";
+  const continentSummary = worldMapStats?.byContinent?.filter((item) => (item.acquiredCount ?? 0) > 0).map((item) => `${item.continent || '대륙'} ${item.acquiredCount}`).join(' · ');
 
   return (
     <AppShell>
@@ -64,7 +64,8 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
                   )}
                 </S.Avatar>
                 <h2>{name}</h2>
-                <p>{profile?.travelStyle || '여행 성향 정보 없음'}</p>
+                <p>{profile?.bio || profile?.travelStyle || '여행 성향 정보 없음'}</p>
+                <p>{profile?.id ? `@${profile.id}` : '아이디 정보 없음'}</p>
                 <PartTripButton
                   type="button"
                   $variant="secondary"
@@ -95,7 +96,7 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
               <S.WorldMapSummary>
                 <S.WorldMapCopy>
                   <S.SectionTitle>내 세계지도</S.SectionTitle>
-                  <p>{countries}개국 획득 · 방문 국가별 기록을 확인하세요.</p>
+                  <p>{countries}개국 획득{continentSummary ? ` · ${continentSummary}` : ''}</p>
                   <S.WorldMapMore type="button" onClick={() => navigate({ to: paths.profileMap })}>
                     세계지도 보기
                   </S.WorldMapMore>

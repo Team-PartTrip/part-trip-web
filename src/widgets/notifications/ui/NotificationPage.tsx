@@ -19,6 +19,12 @@ function settingCopy(type?: NotificationType) {
   return ['그룹', '초대가 수락되거나 새 멤버가 들어왔을 때']
 }
 
+function categoryTone(type?: NotificationType) {
+  if (type === 'PHOTO_ORGANIZED') return 'accent'
+  if (type === 'COUNTRY_ACQUIRED') return 'success'
+  return 'primary'
+}
+
 function relativeTime(value?: string) {
   if (!value) return '방금 전'
   const timestamp = Date.parse(value)
@@ -28,6 +34,12 @@ function relativeTime(value?: string) {
   const hours = Math.floor(minutes / 60)
   if (hours < 24) return `${hours}시간 전`
   return `${Math.floor(hours / 24)}일 전`
+}
+
+function timestampLabel(value?: string) {
+  const date = value ? new Date(value) : undefined
+  if (!date || Number.isNaN(date.getTime())) return ''
+  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
 }
 
 export function NotificationPage() { return <NotificationFlow mode="list" /> }
@@ -71,9 +83,9 @@ function NotificationFlow({ mode }: { mode: 'list' | 'detail' | 'settings' }) {
         </S.Header>
         {actionError ? <S.ErrorMessage role="alert">{actionError}</S.ErrorMessage> : null}
 
-        {mode === 'list' ? <><S.NotificationTabs aria-label="알림 종류">{tabs.map((tab) => <button key={tab.value} type="button" className={activeTab === tab.value ? 'active' : ''} aria-pressed={activeTab === tab.value} onClick={() => setActiveTab(tab.value)}>{tab.label}</button>)}</S.NotificationTabs>{notificationsQuery.isLoading ? <S.LoadingList aria-busy="true" aria-label="알림 로딩 중"><S.LoadingRow /><S.LoadingRow /><S.LoadingRow /><S.LoadingRow /><S.LoadingRow /></S.LoadingList> : notificationsQuery.isError ? <S.List><S.Empty><strong>알림을 불러오지 못했습니다.</strong></S.Empty></S.List> : <S.List>{notifications.length ? notifications.map((notification, index) => <div key={notification.notificationId ?? index}>{index === 0 ? <S.SectionLabel>오늘 · 읽지 않음 {notifications.filter((item) => item.isRead !== true).length}</S.SectionLabel> : null}{index === 3 ? <S.SectionLabel>이번 주</S.SectionLabel> : null}<S.NotificationItem type="button" $read={notification.isRead === true} onClick={() => void handleNotificationClick(notification)}><S.StatusDot $read={notification.isRead === true} /><S.NotificationCopy><strong>{notification.title || '새 알림'}</strong><span>{relativeTime(notification.createdAt)}</span></S.NotificationCopy><S.NotificationCategory>{settingCopy(notification.type)[0]}</S.NotificationCategory></S.NotificationItem></div>) : <S.Empty><strong>새로운 알림이 없습니다.</strong><span>새로운 활동이 생기면 이곳에서 확인할 수 있습니다.</span></S.Empty>}{notificationsQuery.hasNextPage ? <S.LoadMore type="button" disabled={notificationsQuery.isFetchingNextPage} onClick={() => void notificationsQuery.fetchNextPage()}>{notificationsQuery.isFetchingNextPage ? '불러오는 중' : '이전 알림 더 보기'}</S.LoadMore> : null}</S.List>}</> : null}
+        {mode === 'list' ? <><S.NotificationTabs aria-label="알림 종류">{tabs.map((tab) => <button key={tab.value} type="button" className={activeTab === tab.value ? 'active' : ''} aria-pressed={activeTab === tab.value} onClick={() => setActiveTab(tab.value)}>{tab.label}</button>)}</S.NotificationTabs>{notificationsQuery.isLoading ? <S.LoadingList aria-busy="true" aria-label="알림 로딩 중"><S.LoadingRow /><S.LoadingRow /><S.LoadingRow /><S.LoadingRow /><S.LoadingRow /></S.LoadingList> : notificationsQuery.isError ? <S.List><S.Empty><strong>알림을 불러오지 못했습니다.</strong></S.Empty></S.List> : <S.List>{notifications.length ? notifications.map((notification, index) => <div key={notification.notificationId ?? index}>{index === 0 ? <S.SectionLabel>오늘 · 읽지 않음 {notifications.filter((item) => item.isRead !== true).length}</S.SectionLabel> : null}{index === 3 ? <S.SectionLabel>이번 주</S.SectionLabel> : null}<S.NotificationItem type="button" $read={notification.isRead === true} onClick={() => void handleNotificationClick(notification)}><S.StatusDot $read={notification.isRead === true} /><S.NotificationCopy $read={notification.isRead === true}><strong>{notification.title || '새 알림'}</strong><span>{relativeTime(notification.createdAt)}</span></S.NotificationCopy><S.NotificationCategory $tone={categoryTone(notification.type)}>{settingCopy(notification.type)[0]}</S.NotificationCategory></S.NotificationItem></div>) : <S.Empty><strong>새로운 알림이 없습니다.</strong><span>새로운 활동이 생기면 이곳에서 확인할 수 있습니다.</span></S.Empty>}{notificationsQuery.hasNextPage ? <S.LoadMore type="button" disabled={notificationsQuery.isFetchingNextPage} onClick={() => void notificationsQuery.fetchNextPage()}>{notificationsQuery.isFetchingNextPage ? '불러오는 중' : '이전 알림 더 보기'}</S.LoadMore> : null}</S.List>}</> : null}
 
-        {mode === 'detail' ? notificationsQuery.isLoading ? <S.LoadingDetail aria-busy="true" aria-label="알림 상세 로딩 중" /> : detail ? <S.Detail><h2>{detail.title || '오사카 여행 투표가 시작되었습니다'}</h2><p>{detail.body || '멤버들이 후보 장소를 등록했습니다. 투표에 참여하고 다음 여행지를 결정하세요.'}</p><S.Feedback><S.StatusDot $read={detail.isRead === true} /><span>{detail.isRead === true ? '읽은 알림입니다.' : '새로운 여행 단계가 시작되었습니다'}</span></S.Feedback><S.ActionRow><PartTripButton type="button" disabled={markReadMutation.isPending} onClick={() => void handleNotificationAction()}>보러가기</PartTripButton><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.notifications })}>알림 목록</PartTripButton></S.ActionRow></S.Detail> : <S.Detail><p>알림을 찾을 수 없습니다.</p></S.Detail> : null}
+        {mode === 'detail' ? notificationsQuery.isLoading ? <S.LoadingDetail aria-busy="true" aria-label="알림 상세 로딩 중" /> : detail ? <S.Detail><S.DetailCategory $tone={categoryTone(detail.type)}>{settingCopy(detail.type)[0]}</S.DetailCategory><h2>{detail.title || '오사카 여행 투표가 시작되었어요'}</h2><p>{detail.body || '멤버들이 후보 장소를 등록했어요. 투표에 참여하고 다음 여행지를 결정하세요.'}</p><S.DetailMeta>{detail.createdAt ? `${timestampLabel(detail.createdAt)} · ${relativeTime(detail.createdAt)}` : '방금 전'}</S.DetailMeta><S.ReadState>✓ 읽음 처리</S.ReadState><S.DetailMeta>이 알림은 열람 시 자동으로 읽음 처리됩니다.</S.DetailMeta><S.DetailMeta>목록에서 [모두 읽음]으로 일괄 처리할 수도 있어요.</S.DetailMeta><S.ActionRow><PartTripButton type="button" disabled={markReadMutation.isPending} onClick={() => void handleNotificationAction()}>투표 보러가기</PartTripButton><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.notifications })}>알림 목록으로</PartTripButton></S.ActionRow></S.Detail> : <S.Detail><p>알림을 찾을 수 없습니다.</p></S.Detail> : null}
 
         {mode === 'settings' ? settingsQuery.isLoading ? <S.LoadingSettings aria-busy="true" aria-label="알림 설정 로딩 중" /> : settingsQuery.isError ? <S.SettingsCard><S.Empty><strong>알림 설정을 불러오지 못했습니다.</strong></S.Empty></S.SettingsCard> : <S.SettingsCard>{settings.length ? settings.map((setting, index) => { const [label, description] = settingCopy(setting.type); return <S.SettingRow key={setting.type ?? index}><div><strong>{label}</strong><span>{description}</span></div><S.Toggle type="button" aria-label={`${label} 알림 ${setting.enabled === true ? '끄기' : '켜기'}`} aria-pressed={setting.enabled === true} $active={setting.enabled === true} disabled={updateSettingsMutation.isPending} onClick={() => void handleSettingToggle(setting.type)} /></S.SettingRow> }) : <S.Empty>설정 가능한 알림이 없습니다.</S.Empty>}</S.SettingsCard> : null}
       </S.Page>

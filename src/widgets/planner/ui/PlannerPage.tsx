@@ -87,6 +87,7 @@ function Header({
   onNewTrip,
   plan,
   showNewTrip,
+  wide,
   step,
   voteCategory,
   vote,
@@ -101,6 +102,7 @@ function Header({
     endDate?: string;
   };
   showNewTrip?: boolean;
+  wide?: boolean;
   step: PlannerStep;
   voteCategory: string;
   vote?: {
@@ -159,7 +161,7 @@ function Header({
             ? 4
             : 0;
   return (
-    <S.Header $final={isFinal} $hasSubtitle={Boolean(subtitle)}>
+    <S.Header $final={isFinal} $hasSubtitle={Boolean(subtitle)} $wide={wide}>
       {isLoading ? (
         <S.LoadingHeader />
       ) : (
@@ -176,7 +178,7 @@ function Header({
             </PartTripButton>
           ) : null}
           {activeStep > 0 ? (
-            <S.FlowStepper aria-label="여행 플래너 진행 단계">
+            <S.FlowStepper $final={isFinal} aria-label="여행 플래너 진행 단계">
               {["그룹", "여행지·기간", "장소·투표", "확정"].map(
                 (label, index) => (
                   <S.FlowStep
@@ -250,7 +252,6 @@ function PlannerFlowPage({ step }: Props) {
     handleAcceptPlannerInvitation,
     handleCastBallot,
     handleCloseVote,
-    handleConfirmPlan,
     handleConfirmVote,
     handleDeleteVoteOption,
     handleDestinationSelect,
@@ -651,6 +652,7 @@ function PlannerFlowPage({ step }: Props) {
           onNewTrip={() => continueTo(paths.plannerCreate)}
           plan={plan}
           showNewTrip={step === "list"}
+          wide={step === "destination" || step === "place"}
           step={step}
           voteCategory={voteCategory}
           vote={activeVote}
@@ -877,10 +879,9 @@ function PlannerFlowPage({ step }: Props) {
                   <S.SectionTitle>함께할 사람</S.SectionTitle>
                   <S.MemberList>
                     <S.MemberRow>
-                      <S.Avatar>{currentUserInitial}</S.Avatar>
+                      <S.Avatar>{currentUserInitial.slice(0, 1)}</S.Avatar>
                       <S.MemberDetails>
                         <strong>{currentUserName}</strong>
-                        <span>나</span>
                       </S.MemberDetails>
                       <S.MemberState>나</S.MemberState>
                     </S.MemberRow>
@@ -890,14 +891,13 @@ function PlannerFlowPage({ step }: Props) {
                       >
                         <S.Avatar>
                           {(member.nickName || member.userId || "멤버")
-                            .slice(0, 2)
+                            .slice(0, 1)
                             .toUpperCase()}
                         </S.Avatar>
                         <S.MemberDetails>
                           <strong>
                             {member.nickName || member.userId || "멤버"}
                           </strong>
-                          <span>멤버</span>
                         </S.MemberDetails>
                         <S.MemberState>
                           {member.role || "초대 대기"}
@@ -1133,9 +1133,16 @@ function PlannerFlowPage({ step }: Props) {
                       })}
                     </S.CalendarGrid>
                     <S.CalendarSummary>
-                      {selectedStartDate && selectedEndDate
-                        ? `${formatDate(selectedStartDate)} – ${formatDate(selectedEndDate)}`
-                        : "날짜를 선택하세요"}
+                      <strong>
+                        {selectedStartDate && selectedEndDate
+                          ? `${formatDate(selectedStartDate)} – ${formatDate(selectedEndDate)}`
+                          : "날짜를 선택하세요"}
+                      </strong>
+                      {selectedStartDate && selectedEndDate ? (
+                        <span>
+                          {tripDuration(selectedStartDate, selectedEndDate)}
+                        </span>
+                      ) : null}
                     </S.CalendarSummary>
                   </S.CalendarPanel>
                 </S.SettingsLayout>
@@ -1177,7 +1184,7 @@ function PlannerFlowPage({ step }: Props) {
                           setSelected(places.map((_, index) => index))
                         }
                       >
-                        후보 {places.length}곳 모두 담기
+                        선택한 후보 보기
                       </button>
                     </S.PlaceListHeader>
                     {places.map((item, index) => {
@@ -1215,30 +1222,19 @@ function PlannerFlowPage({ step }: Props) {
                     {places.length === 0 ? (
                       <S.Empty>연동된 장소 후보가 없습니다.</S.Empty>
                     ) : null}
-                    <S.PanelActions>
-                      <PartTripButton
-                        type="button"
-                        disabled={
-                          isSavingCandidates ||
-                          selectedPlaces.length === 0
-                        }
-                        onClick={() => void handleSaveCandidates()}
-                      >
-                        {isSavingCandidates ? "후보 저장 중" : "투표 시작하기"}
-                      </PartTripButton>
-                      {selectedPlaces.length > 0 ? (
-                        <PartTripButton
-                          type="button"
-                          $variant="secondary"
-                          onClick={() =>
-                            flowNavigate({ to: paths.plannerLineup })
-                          }
-                        >
-                          장바구니 보기
-                        </PartTripButton>
-                      ) : null}
-                    </S.PanelActions>
                   </S.PlaceListPanel>
+                  <S.PanelActions>
+                    <PartTripButton
+                      type="button"
+                      disabled={
+                        isSavingCandidates ||
+                        selectedPlaces.length === 0
+                      }
+                      onClick={() => void handleSaveCandidates()}
+                    >
+                      {isSavingCandidates ? "후보 저장 중" : "투표 시작하기"}
+                    </PartTripButton>
+                  </S.PanelActions>
                 </S.PlaceBody>
               </>
             ) : null}
@@ -1468,15 +1464,6 @@ function PlannerFlowPage({ step }: Props) {
                                     (vote.eligibleMemberCount ?? 0)
                                   : "후보 없음"}
                           </strong>
-                          <small>
-                            {confirmed
-                              ? "확정"
-                              : closed
-                                ? "마감"
-                                : vote
-                                  ? "진행"
-                                  : "미정"}
-                          </small>
                         </S.StatusLine>
                       );
                     })}
@@ -1638,16 +1625,9 @@ function PlannerFlowPage({ step }: Props) {
                   <PartTripButton
                     type="button"
                     $variant="secondary"
-                    onClick={() => void handleConfirmPlan()}
-                    disabled={
-                      isConfirmed ||
-                      !canManagePlanner ||
-                      confirmPlannerMutation.isPending
-                    }
+                    onClick={() => void navigator.clipboard?.writeText(window.location.href)}
                   >
-                    {confirmPlannerMutation.isPending
-                      ? "일정 확정 중"
-                      : "일정 확정하기"}
+                    일정 공유하기
                   </PartTripButton>
                 </S.FinalActions>
                 <S.FinalHint>

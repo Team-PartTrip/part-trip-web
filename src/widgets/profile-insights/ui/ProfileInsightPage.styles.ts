@@ -4,19 +4,23 @@ import { Skeleton } from '@/shared/ui/parttrip'
 export const Page = styled.main<{ $wide?: boolean }>`
   width: 100%;
   min-width: 0;
-  width: ${({ $wide }) => ($wide ? 'calc(100% + 32px)' : '100%')};
-  margin-left: ${({ $wide }) => ($wide ? '-32px' : '0')};
+  box-sizing: border-box;
+  padding: ${({ $wide }) => ($wide ? '0' : '32px')};
   color: ${({ theme }) => theme.colors.text.strong};
 
   @media (max-width: 767px) {
     width: 100%;
-    margin-left: 0;
+    padding: 0;
   }
 `
 
-export const Header = styled.header`
+export const Header = styled.header<{ $wide?: boolean; $hasSubtitle?: boolean }>`
+  min-height: ${({ $hasSubtitle, $wide }) => ($hasSubtitle ? ($wide ? '68px' : '57px') : '48px')};
   padding-inline: 24px;
   margin-bottom: 24px;
+  margin-top: ${({ $wide }) => ($wide ? '24px' : '0')};
+  h1 { line-height: ${({ $hasSubtitle }) => ($hasSubtitle ? '36px' : '38px')}; }
+  p { margin-top: 4px; font-size: 14px; line-height: 17px; }
 `
 
 export const Title = styled.h1`
@@ -83,14 +87,15 @@ export const SectionTitle = styled.h2`
 
 export const MapCard = styled.section`
   position: relative;
-  min-height: 590px;
+  height: 591px;
+  min-height: 591px;
   box-sizing: border-box;
   border: 1px solid ${({ theme }) => theme.colors.border.subtle};
   border-radius: 16px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
-  > ${SectionTitle} { margin: 0 0 8px; color: ${({ theme }) => theme.colors.brand.primary}; font-size: 14px; line-height: 20px; }
+  > ${SectionTitle} { margin: 0 0 8px; color: ${({ theme }) => theme.colors.brand.primary}; font-size: 14px; line-height: 17px; }
   @media (max-width: 560px) { min-height: 360px; padding: 16px; }
 `
 
@@ -102,7 +107,7 @@ export const MapCanvas = styled.div`
   border: 1px solid rgba(216, 221, 221, .55);
   border-radius: 16px;
   background: ${({ theme }) => theme.colors.background.default};
-  img { display: block; width: 100%; height: 100%; object-fit: contain; filter: grayscale(1); }
+  img { display: block; width: 100%; height: 100%; object-fit: contain; }
   @media (max-width: 560px) { height: 260px; }
 `
 
@@ -129,6 +134,7 @@ export const MapLegend = styled.div`
   display: flex;
   align-items: center;
   gap: 20px;
+  margin-top: 8px;
   height: 40px;
   color: ${({ theme }) => theme.colors.text.muted};
   font-size: 12px;
@@ -149,7 +155,9 @@ export const LegendDot = styled.span<{ $visited?: boolean }>`
 
 export const CountryStats = styled.aside`
   display: flex;
-  min-height: 0;
+  width: 360px;
+  height: 378px;
+  box-sizing: border-box;
   align-self: start;
   flex-direction: column;
   align-items: flex-start;
@@ -401,7 +409,7 @@ export const MoreLink = styled.button`
 
 export const ClaimBody = styled.main`
   display: flex;
-  min-height: 640px;
+  min-height: 749px;
   flex-direction: column;
   align-items: center;
   gap: 20px;
@@ -416,30 +424,35 @@ export const ClaimCountry = styled.strong`
   border-radius: 12px;
   background: ${({ theme }) => theme.colors.brand.primary};
   color: ${({ theme }) => theme.colors.text.inverse};
-  font-size: 18px;
+  font-size: 22px;
 `
 
 export const ClaimNew = styled.span`
+  display: inline-flex;
+  width: 76px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
   border-radius: 8px;
-  padding: 5px 12px;
+  padding: 0;
   background: ${({ theme }) => theme.colors.brand.primary};
   color: ${({ theme }) => theme.colors.text.inverse};
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
 `
 
 export const ClaimTitle = styled.h2`
-  margin: 4px 0 0;
+  margin: 0;
   color: ${({ theme }) => theme.colors.text.strong};
   font-size: 30px;
-  line-height: 38px;
+  line-height: 36px;
 `
 
 export const ClaimSubtitle = styled.p`
   margin: 0;
   color: ${({ theme }) => theme.colors.text.muted};
   font-size: 14px;
-  line-height: 20px;
+  line-height: 17px;
 `
 
 export const ClaimInfo = styled.section`
@@ -447,8 +460,9 @@ export const ClaimInfo = styled.section`
   width: min(100%, 620px);
   box-sizing: border-box;
   flex-direction: column;
-  gap: 20px;
-  margin-top: 8px;
+  height: 256px;
+  gap: 16px;
+  margin-top: 0;
   border: 1px solid ${({ theme }) => theme.colors.border.subtle};
   border-radius: 16px;
   padding: 24px;
@@ -461,11 +475,12 @@ export const InfoRow = styled.div`
   display: grid;
   gap: 12px;
   grid-template-columns: 48px minmax(0, 1fr);
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
-  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 13px; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; }
+  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 14px; }
 `
 
 export const ClaimNotice = styled.p`
+  width: 229px;
   height: 44px;
   box-sizing: border-box;
   margin: 0;
@@ -475,6 +490,7 @@ export const ClaimNotice = styled.p`
   background: #fff7f1;
   color: ${({ theme }) => theme.colors.text.muted};
   font-size: 12px;
+  white-space: nowrap;
 `
 
 export const ClaimProgress = styled.section`
@@ -482,6 +498,7 @@ export const ClaimProgress = styled.section`
   width: min(100%, 620px);
   box-sizing: border-box;
   flex-direction: column;
+  height: 96px;
   gap: 16px;
   border: 1px solid #dee5f0;
   border-radius: 18px;
@@ -497,6 +514,7 @@ export const ActionRow = styled.div`
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
+  button { width: 147px; height: 52px; min-height: 52px; font-size: 14px; }
 `
 
 export const ProgressTrack = styled.div`
@@ -507,12 +525,12 @@ export const ProgressTrack = styled.div`
   background: ${({ theme }) => theme.colors.background.muted};
 `
 
-export const ProgressBar = styled.span<{ $progress: number }>`
+export const ProgressBar = styled.span<{ $progress: number; $tone?: 'primary' | 'accent' }>`
   display: block;
   width: ${({ $progress }) => `${Math.max(0, Math.min(100, $progress))}%`};
   height: 100%;
   border-radius: inherit;
-  background: ${({ theme }) => theme.colors.brand.primary};
+  background: ${({ $tone, theme }) => ($tone === 'accent' ? theme.colors.brand.accent : theme.colors.brand.primary)};
 `
 
 export const AchievementSummary = styled.section`
@@ -538,20 +556,20 @@ export const AchievementCount = styled.div<{ $progress: number }>`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background: ${({ $progress, theme }) => `conic-gradient(${theme.colors.brand.primary} ${$progress}%, ${theme.colors.background.muted} 0)`};
+  border-radius: 22px;
+  background: ${({ theme }) => theme.colors.background.subtle};
 
   &::before {
     position: absolute;
     inset: 24px;
-    border-radius: 50%;
+    border-radius: 22px;
     background: ${({ theme }) => theme.colors.background.default};
     content: '';
   }
 
   strong, span { position: relative; z-index: 1; }
-  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 28px; line-height: 34px; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
+  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 36px; line-height: 44px; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
 `
 
 export const AchievementCopy = styled.div`
@@ -559,10 +577,10 @@ export const AchievementCopy = styled.div`
   min-width: 0;
   flex-direction: column;
   gap: 4px;
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
-  strong { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 20px; line-height: 26px; }
-  b { color: ${({ theme }) => theme.colors.brand.success}; font-size: 11px; }
-  em { display: block; width: 300px; height: 42px; box-sizing: border-box; border-radius: 8px; padding: 13px 16px; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.text.strong}; font-size: 10px; font-style: normal; text-align: center; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 14px; }
+  strong { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 24px; line-height: 30px; }
+  b { color: ${({ theme }) => theme.colors.brand.success}; font-size: 14px; }
+  em { display: block; width: 300px; height: 42px; box-sizing: border-box; border-radius: 12px; padding: 10px; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.text.strong}; font-size: 13px; font-style: normal; text-align: center; }
 `
 
 export const ContinentSection = styled.section`
@@ -571,7 +589,7 @@ export const ContinentSection = styled.section`
   gap: 12px;
   margin-top: 24px;
 
-  > ${SectionTitle} { margin-bottom: 0; font-size: 20px; line-height: 24px; }
+  > ${SectionTitle} { margin-bottom: 12px; font-size: 20px; line-height: 24px; }
 `
 
 export const ContinentRow = styled.div`
@@ -581,10 +599,12 @@ export const ContinentRow = styled.div`
   flex-direction: column;
   gap: 6px;
   justify-content: center;
-  border-radius: 12px;
+  border: 1px solid ${({ theme }) => theme.colors.border.soft};
+  border-radius: 14px;
   padding: 14px;
-  background: transparent;
+  background: ${({ theme }) => theme.colors.background.default};
   > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 11px; }
-  > div span { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 10px; }
+  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 14px; }
+  > div span { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 12px; }
+  > ${ProgressTrack} { height: 6px; }
 `

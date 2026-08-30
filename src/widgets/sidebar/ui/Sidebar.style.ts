@@ -71,6 +71,8 @@ export const MenuList = styled.nav`
 
 export const AccountButton = styled.button`
   display: flex;
+  height: 44px;
+  flex: 0 0 44px;
   align-items: center;
   gap: 10px;
   width: 100%;
