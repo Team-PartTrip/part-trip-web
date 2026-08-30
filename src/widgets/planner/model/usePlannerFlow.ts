@@ -212,18 +212,32 @@ export function usePlannerFlow(step: PlannerStep) {
     event.preventDefault()
     const normalizedCityName = selectedCityName.trim().toLocaleLowerCase()
     const normalizedCountryName = selectedCountryName.trim().toLocaleLowerCase()
-    const selectedCountry = countries.find((item) =>
-      (selectedCountryInfoId && String(item.countryInfoId) === selectedCountryInfoId)
-      || item.cityName?.toLocaleLowerCase() === normalizedCityName,
-    ) ?? (normalizedCityName === normalizedCountryName
-      ? countries.find((item) => item.countryName?.toLocaleLowerCase() === normalizedCountryName)
-      : undefined)
-      ?? (countries.length === 1 && selectedCityName.trim() ? countries[0] : undefined)
+    const destinationCandidates = [
+      ...countries,
+      ...popularCities.map(({ cityName, countryName }) => ({ cityName, countryName })),
+    ].filter((candidate, index, all) => all.findIndex((item) =>
+      item.countryName === candidate.countryName && item.cityName === candidate.cityName,
+    ) === index)
+    const matchingDestinations = destinationCandidates.filter((item) => {
+      const itemCityName = item.cityName?.trim().toLocaleLowerCase()
+      const itemCountryName = item.countryName?.trim().toLocaleLowerCase()
+      const matchesCity = itemCityName === normalizedCityName
+      const matchesCountryInput = itemCountryName === normalizedCityName
+      const matchesSelectedCountry = !normalizedCountryName || itemCountryName === normalizedCountryName
+      return matchesSelectedCountry && (matchesCity || matchesCountryInput)
+    })
+    const selectedCountry = selectedCountryInfoId
+      ? countries.find((item) => String(item.countryInfoId) === selectedCountryInfoId)
+      : matchingDestinations.length === 1 ? matchingDestinations[0] : undefined
     const nextCountry = selectedCountry?.countryName || selectedCountryName.trim()
     const nextCity = selectedCountry?.cityName || selectedCityName.trim()
     const nextHeadcount = Number(selectedHeadcount)
     if (!nextCountry || !nextCity || !selectedStartDate || !selectedEndDate || selectedStartDate > selectedEndDate) {
       setErrorMessage('여행지와 올바른 여행 기간을 입력해주세요.')
+      return
+    }
+    if (!selectedCountry) {
+      setErrorMessage('국가와 도시가 일치하는 여행지를 선택해주세요.')
       return
     }
     if (!Number.isSafeInteger(nextHeadcount) || nextHeadcount < 1 || nextHeadcount > 30) {

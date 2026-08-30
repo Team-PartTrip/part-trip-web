@@ -1017,7 +1017,7 @@ function PlannerFlowPage({ step }: Props) {
                           ),
                         )}
                       </S.PopularGrid>
-                      {selectedCityName && destinationResults.length === 0 ? (
+                      {isDestinationSearch && selectedCityName && destinationResults.length === 0 ? (
                         <S.SearchEmpty>
                           검색 결과가 없습니다. 국가명 또는 도시명을 다시
                           입력해주세요.

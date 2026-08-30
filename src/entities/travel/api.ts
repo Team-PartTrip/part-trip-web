@@ -286,7 +286,7 @@ export async function getPopularCities(limit = 50): Promise<PopularCityResponseD
     () => mockCountries
       .filter((country) => country.countryName && country.cityName)
       .map(({ cityName, countryName }, index) => ({ cityName, countryName, planCount: mockCountries.length - index }))
-      .slice(0, 4),
+      .slice(0, limit),
   )
 }
 

@@ -87,7 +87,6 @@ export function usePlannerData(
     popularCities: popularCitiesQuery.data ?? [],
     hasError:
       countriesQuery.isError ||
-      (step === 'destination' && popularCitiesQuery.isError) ||
       placesQuery.isError ||
       plannersQuery.isError ||
       plannerDetailQuery.isError ||
@@ -97,7 +96,6 @@ export function usePlannerData(
       (step === 'vote' && needsVoteDetail && voteDetailQuery.isError),
     isLoading:
       countriesQuery.isLoading ||
-      (step === 'destination' && popularCitiesQuery.isLoading) ||
       placesQuery.isLoading ||
       plannersQuery.isLoading ||
       plannerDetailQuery.isLoading ||
