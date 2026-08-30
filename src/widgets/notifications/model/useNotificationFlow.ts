@@ -17,6 +17,11 @@ import { isPositiveSafeInteger } from '@/shared/utils'
 const ACTIVE_PLANNER_ID_KEY = 'parttrip:active-planner-id'
 const ACTIVE_VOTE_ID_KEY = 'parttrip:active-vote-id'
 
+function clearVoteSession() {
+  sessionStorage.removeItem(ACTIVE_PLANNER_ID_KEY)
+  sessionStorage.removeItem(ACTIVE_VOTE_ID_KEY)
+}
+
 export type NotificationMode = 'list' | 'detail' | 'settings'
 
 export function notificationDate(value?: string) {
@@ -49,8 +54,8 @@ export function useNotificationFlow(mode: NotificationMode) {
   const hasUnread = (unreadCountQuery.data?.unreadCount ?? notifications.filter((item) => item.isRead !== true && item.notificationId != null).length) > 0
 
   useEffect(() => {
-    if (detail?.linkType?.trim().toUpperCase() === 'VOTE' && !isPositiveSafeInteger(detail.plannerId)) {
-      sessionStorage.removeItem(ACTIVE_PLANNER_ID_KEY)
+    if (detail?.linkType?.trim().toUpperCase() === 'VOTE' && (!isPositiveSafeInteger(detail.plannerId) || !isPositiveSafeInteger(detail.linkId))) {
+      clearVoteSession()
     }
   }, [detail])
 
@@ -88,7 +93,7 @@ export function useNotificationFlow(mode: NotificationMode) {
     }
 
     if (linkType === 'VOTE') {
-      sessionStorage.removeItem(ACTIVE_PLANNER_ID_KEY)
+      clearVoteSession()
       if (!isPositiveSafeInteger(linkId) || !isPositiveSafeInteger(detail.plannerId)) {
         setActionError('투표 알림의 여행 계획 정보를 확인할 수 없습니다.')
         return
