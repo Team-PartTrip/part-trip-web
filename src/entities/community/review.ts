@@ -50,13 +50,14 @@ const mockReviewComments = new Map<number, CommentResponseDto[]>()
 function mockPage<T>(content: T[], params?: { page?: number; size?: number }) {
   const page = params?.page ?? 0
   const size = params?.size ?? content.length
+  const totalPages = size > 0 ? Math.ceil(content.length / size) : 0
   return {
     content: content.slice(page * size, page * size + size),
-    hasNext: false,
+    hasNext: page + 1 < totalPages,
     page,
     size,
     totalElements: content.length,
-    totalPages: content.length ? 1 : 0,
+    totalPages,
   }
 }
 
@@ -170,4 +171,25 @@ export async function createReviewComment(
       return comment
     },
   )
+}
+
+export function updateMockReviewComment(
+  commentId: number,
+  payload: CommentRequestDto,
+): CommentResponseDto | undefined {
+  for (const [reviewId, comments] of mockReviewComments) {
+    const index = comments.findIndex((comment) => comment.commentId === commentId)
+    if (index >= 0) {
+      const updated = { ...comments[index], ...payload, commentId, userId: 'mock-user' }
+      mockReviewComments.set(reviewId, comments.map((comment, commentIndex) => commentIndex === index ? updated : comment))
+      return updated
+    }
+  }
+  return undefined
+}
+
+export function deleteMockReviewComment(commentId: number) {
+  for (const [reviewId, comments] of mockReviewComments) {
+    mockReviewComments.set(reviewId, comments.filter((comment) => comment.commentId !== commentId))
+  }
 }

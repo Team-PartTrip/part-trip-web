@@ -13,8 +13,24 @@ export { AUTH_EXPIRED_EVENT } from './auth-expiration.ts'
 
 const REQUEST_TIMEOUT_MS = 100_000
 
+function isLocalDevelopmentUrl(url: URL) {
+  return import.meta.env?.DEV && ['localhost', '127.0.0.1', '::1', '[::1]'].includes(url.hostname)
+}
+
+function getSafeApiBaseUrl() {
+  const baseURL = import.meta.env?.VITE_API_BASE_URL?.trim() ?? ''
+  if (typeof window === 'undefined') return baseURL
+
+  const apiUrl = new URL(baseURL || '/', window.location.origin)
+  if (apiUrl.protocol !== 'https:' && !isLocalDevelopmentUrl(apiUrl)) {
+    throw new Error('인증 요청은 HTTPS 연결에서만 사용할 수 있습니다.')
+  }
+
+  return baseURL
+}
+
 export const apiClient = axios.create({
-  baseURL: import.meta.env?.VITE_API_BASE_URL ?? '',
+  baseURL: getSafeApiBaseUrl(),
   timeout: REQUEST_TIMEOUT_MS,
   headers: {
     'Content-Type': 'application/json',
@@ -64,10 +80,6 @@ type RetryableRequestConfig = InternalAxiosRequestConfig & {
 }
 
 let refreshPromise: Promise<AuthTokens> | null = null
-
-function isLocalDevelopmentUrl(url: URL) {
-  return import.meta.env?.DEV && ['localhost', '127.0.0.1', '::1', '[::1]'].includes(url.hostname)
-}
 
 function getRefreshUrl() {
   const baseURL = apiClient.defaults.baseURL ?? ''

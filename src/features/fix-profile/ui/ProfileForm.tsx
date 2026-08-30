@@ -25,6 +25,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   const navigate = useNavigate()
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const photoSelectionVersionRef = useRef(0)
   const [avatarPreview, setAvatarPreview] = useState(profile.avatarUrl ?? '')
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null)
   const [photoError, setPhotoError] = useState<string | null>(null)
@@ -59,6 +60,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   }, [close])
 
   const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectionVersion = ++photoSelectionVersionRef.current
     const file = event.target.files?.[0]
     if (!file) return
 
@@ -76,9 +78,11 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
     const reader = new FileReader()
     reader.addEventListener('load', () => {
+      if (selectionVersion !== photoSelectionVersionRef.current) return
       if (typeof reader.result === 'string') setAvatarPreview(reader.result)
     })
     reader.addEventListener('error', () => {
+      if (selectionVersion !== photoSelectionVersionRef.current) return
       setPhotoError('사진을 불러오지 못했습니다. 다시 선택해주세요.')
     })
     reader.readAsDataURL(file)
@@ -86,6 +90,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   }
 
   const handleResetPhoto = () => {
+    photoSelectionVersionRef.current += 1
     setAvatarPreview('')
     setSelectedPhoto(null)
     setPhotoError(null)
@@ -172,7 +177,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                 })}
               >
                 <option value="">기존 타입 유지</option>
-                {travelThemes.map((theme) => <option key={theme.themeId} value={theme.themeId}>{theme.themeName || theme.themeCode}</option>)}
+                {travelThemes.filter((theme) => theme.themeId != null).map((theme) => <option key={theme.themeId} value={theme.themeId}>{theme.themeName || theme.themeCode}</option>)}
               </select>
             </S.Field>
           </S.Section>

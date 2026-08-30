@@ -21,13 +21,18 @@ export function TripCardPhotoComposer({ cards }: Props) {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const photosRef = useRef<PhotoDraft[]>([]);
   const createEntryMutation = useCreateTravelCardEntryMutation();
   const selectedCard = cards.find((card) => String(card.tripId) === selectedCardId);
 
   useEffect(
-    () => () => photos.forEach(({ url }) => URL.revokeObjectURL(url)),
-    [photos],
+    () => () => photosRef.current.forEach(({ url }) => URL.revokeObjectURL(url)),
+    [],
   );
+
+  useEffect(() => {
+    photosRef.current = photos;
+  }, [photos]);
 
   const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextPhotos = Array.from(event.target.files ?? [])
@@ -61,6 +66,8 @@ export function TripCardPhotoComposer({ cards }: Props) {
           cardId,
           payload: { comment: comment.trim(), imageFile: photo.file },
         });
+        URL.revokeObjectURL(photo.url);
+        setPhotos((current) => current.filter((item) => item !== photo));
       }
       setSuccessMessage(`${photos.length}장의 사진을 여행 카드에 추가했습니다.`);
       setPhotos([]);

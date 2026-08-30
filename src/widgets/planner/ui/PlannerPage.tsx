@@ -21,13 +21,13 @@ type Props = { step: PlannerStep };
 type PlannerTab = "active" | "planned" | "completed";
 
 function voteStatus(status?: string) {
-  return status?.trim().toLocaleUpperCase() ?? "";
+  return status?.trim().toUpperCase() ?? "";
 }
 
 function dateRange(startDate?: string, endDate?: string) {
   const start = formatDate(startDate);
   const end = formatDate(endDate);
-  return start.slice(0, 7) === end.slice(0, 7)
+  return start.length >= 7 && end.length >= 7 && start.slice(0, 7) === end.slice(0, 7)
     ? `${start} – ${end.slice(5)}`
     : `${start} – ${end}`;
 }
@@ -440,8 +440,6 @@ function PlannerFlowPage({ step }: Props) {
   const nextVoteCategory = () => {
     const index = categories.indexOf(voteCategory);
     setVoteCategory(categories[(index + 1) % categories.length]);
-    setSelected([]);
-    sessionStorage.removeItem("parttrip:active-vote-id");
   };
 
   const groupManagementPanel =
@@ -937,6 +935,7 @@ function PlannerFlowPage({ step }: Props) {
                 <S.SettingsLayout>
                   <S.StepCard
                     as="form"
+                    autoComplete="off"
                     id="planner-destination-form"
                     onSubmit={(event) => void saveDestination(event)}
                   >
@@ -965,10 +964,10 @@ function PlannerFlowPage({ step }: Props) {
                       </S.FieldHint>
                     </S.StepField>
                     <S.StepField>
-                      <label>
+                      <span id="planner-destination-results-label">
                         {isDestinationSearch ? "검색 결과" : "인기 여행지"}
-                      </label>
-                      <S.PopularGrid>
+                      </span>
+                      <S.PopularGrid role="group" aria-labelledby="planner-destination-results-label">
                         {(isDestinationSearch ? countries : countries.slice(0, 4)).map(
                           (country) => (
                             <S.PopularButton
@@ -1001,15 +1000,17 @@ function PlannerFlowPage({ step }: Props) {
                       ) : null}
                     </S.StepField>
                     <S.StepField>
-                      <label>여행 기간</label>
-                      <S.DateRange>
+                      <span id="planner-date-range-label">여행 기간</span>
+                      <S.DateRange role="group" aria-labelledby="planner-date-range-label">
                         <PartTripInput
+                          aria-label="출발일"
                           type="date"
                           value={selectedStartDate}
                           onChange={(event) => setStartDate(event.target.value)}
                         />
                         <span>–</span>
                         <PartTripInput
+                          aria-label="도착일"
                           type="date"
                           value={selectedEndDate}
                           onChange={(event) => setEndDate(event.target.value)}
@@ -1049,8 +1050,8 @@ function PlannerFlowPage({ step }: Props) {
                       </S.Stepper>
                     </S.StepField>
                     <S.StepField>
-                      <label>여행 스타일</label>
-                      <S.ChipRow>
+                      <span id="planner-travel-style-label">여행 스타일</span>
+                      <S.ChipRow role="group" aria-labelledby="planner-travel-style-label">
                         {["휴양", "맛집", "액티비티", "문화"].map((style) => (
                           <S.StyleChip
                             key={style}
@@ -1164,7 +1165,10 @@ function PlannerFlowPage({ step }: Props) {
                       type="button"
                       className={voteCategory === category ? "active" : ""}
                       $active={voteCategory === category}
-                      onClick={() => setVoteCategory(category)}
+                      onClick={() => {
+                        setSelected([]);
+                        setVoteCategory(category);
+                      }}
                     >
                       {category}
                     </S.CategoryChip>
@@ -1180,7 +1184,7 @@ function PlannerFlowPage({ step }: Props) {
                           setSelected(places.map((_, index) => index))
                         }
                       >
-                        후보 {places.length}곳 보기
+                        후보 {places.length}곳 모두 담기
                       </button>
                     </S.PlaceListHeader>
                     {places.map((item, index) => {
@@ -1259,7 +1263,10 @@ function PlannerFlowPage({ step }: Props) {
                       type="button"
                       className={voteCategory === category ? "active" : ""}
                       $active={voteCategory === category}
-                      onClick={() => setVoteCategory(category)}
+                      onClick={() => {
+                        setSelected([]);
+                        setVoteCategory(category);
+                      }}
                     >
                       {category}
                     </S.CategoryChip>

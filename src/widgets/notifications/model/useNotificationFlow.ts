@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
 
 import {
@@ -18,7 +18,9 @@ const ACTIVE_PLANNER_ID_KEY = 'parttrip:active-planner-id'
 export type NotificationMode = 'list' | 'detail' | 'settings'
 
 export function notificationDate(value?: string) {
-  return value ? new Date(value).toLocaleString('ko-KR') : '방금 전'
+  if (!value) return '방금 전'
+  const timestamp = Date.parse(value)
+  return Number.isNaN(timestamp) ? '방금 전' : new Date(timestamp).toLocaleString('ko-KR')
 }
 
 export function notificationTypeLabel(notification: NotificationResponseDto) {
@@ -44,11 +46,6 @@ export function useNotificationFlow(mode: NotificationMode) {
   const detail = notifications.find((item) => String(item.notificationId) === notificationId)
   const hasUnread = (unreadCountQuery.data?.unreadCount ?? notifications.filter((item) => item.isRead !== true && item.notificationId != null).length) > 0
 
-  useEffect(() => {
-    if (mode !== 'detail' || !notificationId || detail || !notificationsQuery.hasNextPage || notificationsQuery.isFetchingNextPage) return
-    void notificationsQuery.fetchNextPage()
-  }, [detail, mode, notificationId, notificationsQuery])
-
   const handleMarkRead = async (id?: number) => {
     if (id == null) return
     try {
@@ -68,7 +65,7 @@ export function useNotificationFlow(mode: NotificationMode) {
   const handleNotificationAction = async () => {
     if (!detail) return
     await handleMarkRead(detail.notificationId)
-    const linkType = detail.linkType?.trim().toLocaleUpperCase()
+    const linkType = detail.linkType?.trim().toUpperCase()
     const linkId = detail.linkId
 
     if (linkType === 'TRIP_CARD' && linkId != null) {

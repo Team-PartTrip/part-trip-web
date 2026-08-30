@@ -21,7 +21,9 @@ function settingCopy(type?: NotificationType) {
 
 function relativeTime(value?: string) {
   if (!value) return '방금 전'
-  const minutes = Math.max(1, Math.floor((Date.now() - Date.parse(value)) / 60000))
+  const timestamp = Date.parse(value)
+  if (Number.isNaN(timestamp)) return '방금 전'
+  const minutes = Math.max(1, Math.floor((Date.now() - timestamp) / 60000))
   if (minutes < 60) return `${minutes}분 전`
   const hours = Math.floor(minutes / 60)
   if (hours < 24) return `${hours}시간 전`

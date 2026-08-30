@@ -3,6 +3,8 @@ export type PlannerGroupSettings = {
   memberCount: number
 }
 
+export const ACTIVE_VOTE_ID_KEY = 'parttrip:active-vote-id'
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }

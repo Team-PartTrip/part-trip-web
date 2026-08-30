@@ -17,7 +17,7 @@ function createStorage() {
 
 test('공유 여행 목록과 상세는 개인 여행 카드 endpoint를 재사용하지 않는다', async () => {
   const storage = createStorage()
-  const previousStorage = globalThis.localStorage
+  const previousStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
   const previousApiAdapter = apiClient.defaults.adapter
   const requests: string[] = []
   const adapter: AxiosAdapter = async (config) => {
@@ -60,7 +60,11 @@ test('공유 여행 목록과 상세는 개인 여행 카드 endpoint를 재사�
     assert.deepEqual(requests, ['/community/shared-trips', '/community/shared-trips/7'])
   } finally {
     clearAuthTokens()
-    Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: previousStorage })
+    if (previousStorage) {
+      Object.defineProperty(globalThis, 'localStorage', previousStorage)
+    } else {
+      Reflect.deleteProperty(globalThis, 'localStorage')
+    }
     apiClient.defaults.adapter = previousApiAdapter
   }
 })

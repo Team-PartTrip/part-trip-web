@@ -35,6 +35,7 @@ export function RecordDeletePage() {
       setSuccessMessage('')
       for (const entryId of selected) {
         await deleteMutation.mutateAsync({ cardId: record.tripId, entryId })
+        setSelected((current) => current.filter((item) => item !== entryId))
       }
       setSelected([])
       setSuccessMessage('선택한 사진을 삭제했습니다.')

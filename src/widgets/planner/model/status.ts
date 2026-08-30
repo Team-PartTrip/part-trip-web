@@ -1,7 +1,7 @@
 export type PlannerStatusKey = 'active' | 'planned' | 'completed'
 
 function normalizeStatus(status?: string) {
-  return status?.trim().toLocaleUpperCase() ?? ''
+  return status?.trim().toUpperCase() ?? ''
 }
 
 export function plannerStatusKey(status?: string): PlannerStatusKey {

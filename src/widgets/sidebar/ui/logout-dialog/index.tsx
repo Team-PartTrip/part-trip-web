@@ -34,14 +34,14 @@ const LogoutDialog = ({ onClose, moveToLogin }: Props) => {
       setIsSubmitting(true)
       setErrorMessage(null)
       await logout()
-      onClose()
-      await moveToLogin()
     } catch {
       setErrorMessage('로그아웃에 실패했습니다. 다시 시도해주세요.')
     } finally {
       queryClient.clear()
       setIsSubmitting(false)
     }
+    onClose()
+    await moveToLogin()
   }
 
   return createPortal(

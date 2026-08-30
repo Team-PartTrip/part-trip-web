@@ -1,6 +1,7 @@
 import { apiClient } from '@/shared/libs/api-client'
 import { requestWithMockFallback } from '@/shared/libs/api-fallback'
 import { getMockLikeState } from './mock-state'
+import { deleteMockReviewComment, updateMockReviewComment } from './review'
 import type { CommentRequestDto, CommentResponseDto } from './types'
 
 export type { CommentRequestDto, CommentResponseDto } from './types'
@@ -48,13 +49,14 @@ const mockBoardComments = new Map<number, CommentResponseDto[]>()
 function mockPage<T>(content: T[], params?: { page?: number; size?: number }) {
   const page = params?.page ?? 0
   const size = params?.size ?? content.length
+  const totalPages = size > 0 ? Math.ceil(content.length / size) : 0
   return {
     content: content.slice(page * size, page * size + size),
-    hasNext: false,
+    hasNext: page + 1 < totalPages,
     page,
     size,
     totalElements: content.length,
-    totalPages: content.length ? 1 : 0,
+    totalPages,
   }
 }
 
@@ -187,6 +189,8 @@ export async function updateComment(
           return updated
         }
       }
+      const updatedReviewComment = updateMockReviewComment(commentId, payload)
+      if (updatedReviewComment) return updatedReviewComment
       throw new Error('댓글을 찾을 수 없습니다.')
     },
   )
@@ -202,6 +206,7 @@ export async function deleteComment(commentId: number): Promise<string> {
       for (const [boardId, comments] of mockBoardComments) {
         mockBoardComments.set(boardId, comments.filter((comment) => comment.commentId !== commentId))
       }
+      deleteMockReviewComment(commentId)
       return '삭제되었습니다.'
     },
   )
