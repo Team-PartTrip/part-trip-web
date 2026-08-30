@@ -81,6 +81,7 @@ export function useNotificationFlow(mode: NotificationMode) {
     }
 
     if (linkType === 'VOTE' && linkId != null) {
+      if (detail.plannerId != null) sessionStorage.setItem(ACTIVE_PLANNER_ID_KEY, String(detail.plannerId))
       sessionStorage.setItem(ACTIVE_VOTE_ID_KEY, String(linkId))
       navigate({ to: paths.plannerVote })
       return

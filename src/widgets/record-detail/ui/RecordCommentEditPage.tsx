@@ -17,7 +17,9 @@ export function RecordCommentEditPage() {
   const [content, setContent] = useState<string>()
   const [message, setMessage] = useState('')
   const updateMutation = useUpdateTravelCardEntryCommentMutation()
-  const editableEntry = record?.timeline?.find((item) => search.entryId != null && String(item.entryId) === search.entryId) ?? record?.timeline?.find((item) => item.entryId != null)
+  const editableEntry = search.entryId != null
+    ? record?.timeline?.find((item) => String(item.entryId) === search.entryId)
+    : record?.timeline?.find((item) => item.entryId != null)
   const contentValue = content ?? editableEntry?.comment ?? ''
   const placeTitle = record?.places?.[0]?.placeName || record?.title || '여행 기록'
   const photoDate = editableEntry?.takenAt || editableEntry?.date || record?.startDate

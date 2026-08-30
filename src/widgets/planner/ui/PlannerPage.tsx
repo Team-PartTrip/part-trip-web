@@ -253,6 +253,7 @@ function PlannerFlowPage({ step }: Props) {
     handleAcceptPlannerInvitation,
     handleCastBallot,
     handleCloseVote,
+    handleConfirmPlan,
     handleConfirmVote,
     handleDeleteVoteOption,
     handleDestinationSelect,
@@ -356,6 +357,12 @@ function PlannerFlowPage({ step }: Props) {
     selectedCityName.trim() !== "" &&
     selectedCityName.trim().toLocaleLowerCase() !==
       (plannerDetail?.cityName ?? "").trim().toLocaleLowerCase();
+  const destinationKeyword = selectedCityName.trim().toLocaleLowerCase();
+  const matchingCountries = countries.filter((country) =>
+    [country.countryName, country.cityName].some((value) =>
+      value?.trim().toLocaleLowerCase().includes(destinationKeyword),
+    ),
+  );
   const popularDestinations = popularCities.flatMap((city) => {
     if (!city.countryName || !city.cityName) return [];
     const country = countries.find(
@@ -372,10 +379,9 @@ function PlannerFlowPage({ step }: Props) {
     }];
   });
   const destinationResults = isDestinationSearch
-    ? [...countries, ...popularDestinations.filter((popular) => {
-        const keyword = selectedCityName.trim().toLocaleLowerCase();
+    ? [...matchingCountries, ...popularDestinations.filter((popular) => {
         return [popular.countryName, popular.cityName].some((value) =>
-          value?.toLocaleLowerCase().includes(keyword),
+          value?.trim().toLocaleLowerCase().includes(destinationKeyword),
         );
       })].filter((destination, index, all) => all.findIndex((item) =>
         item.countryName === destination.countryName && item.cityName === destination.cityName,
@@ -471,6 +477,7 @@ function PlannerFlowPage({ step }: Props) {
   };
   const nextCategory = categories[(categories.indexOf(voteCategory) + 1) % categories.length];
   const handleSharePlan = async () => {
+    if (!isConfirmed && !(await handleConfirmPlan())) return;
     try {
       if (!navigator.clipboard) throw new Error("clipboard is unavailable");
       await navigator.clipboard.writeText(window.location.href);
@@ -1554,7 +1561,9 @@ function PlannerFlowPage({ step }: Props) {
                           !canManagePlanner ||
                           confirmPlannerMutation.isPending
                         }
-                        onClick={() => flowNavigate({ to: paths.plannerFinal })}
+                        onClick={() => void handleConfirmPlan().then((confirmed) => {
+                          if (confirmed) flowNavigate({ to: paths.plannerFinal });
+                        })}
                       >
                         일정 확정하기
                       </PartTripButton>

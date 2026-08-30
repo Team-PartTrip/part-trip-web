@@ -41,7 +41,7 @@ export function ProfileInsightPage({ kind }: { kind: ProfileInsightKind }) {
   const navigate = useNavigate()
   const { hasError: hasTripsError, isLoading: isTripsLoading, trips } = useMyTrips()
   const countriesQuery = useCountriesQuery(kind === 'map' || kind === 'claim')
-  const worldMapQuery = useWorldMapQuery(false)
+  const worldMapQuery = useWorldMapQuery(kind === 'map' || kind === 'claim' || kind === 'countries')
   const worldMapStatsQuery = useWorldMapStatsQuery(false)
   const [selectedCity, setSelectedCity] = useState('')
   const [selectedCountry, setSelectedCountry] = useState(() => sessionStorage.getItem(PROFILE_COUNTRY_KEY) ?? '')

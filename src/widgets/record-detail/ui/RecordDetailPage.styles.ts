@@ -135,6 +135,7 @@ export const RecordDetailCard = styled.section`
   p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 14px; }
   > span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
   button { min-height: 46px; border: 1px solid ${({ theme }) => theme.colors.brand.strong}; border-radius: 12px; padding: 12px 24px; background: ${({ theme }) => theme.colors.background.default}; color: ${({ theme }) => theme.colors.brand.strong}; cursor: pointer; font-size: 15px; font-weight: 600; }
+  button:disabled { cursor: not-allowed; opacity: .56; }
   @media (max-width: 900px) { height: auto; min-height: 260px; }
 `
 
