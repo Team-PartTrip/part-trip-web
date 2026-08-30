@@ -1286,7 +1286,7 @@ function PlannerFlowPage({ step }: Props) {
                           <S.PlaceDetails>
                             <strong>{option.placeName || "장소"}</strong>
                             <span>{option.voteCount ?? 0}표</span>
-                            {(canManagePlanner || option.addedByUserId === profile?.id) &&
+                            {(canManagePlanner || (profile?.id != null && option.addedByUserId === profile.id)) &&
                             voteStatus(activeVote?.status) === "OPEN" ? (
                               <S.DeleteOptionButton
                                 type="button"
