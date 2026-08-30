@@ -40,7 +40,13 @@ export const LoadingRecommendation = styled(Skeleton)`
 export const Page = styled.main`
   width: 100%;
   min-width: 0;
+  padding: 32px;
+  box-sizing: border-box;
   color: ${({ theme }) => theme.colors.text.strong};
+
+  @media (max-width: 767px) {
+    padding: 0;
+  }
 `
 
 export const Error = styled.p`
@@ -120,7 +126,7 @@ export const CalendarIcon = styled.span`
   height: 48px;
   place-items: center;
   border-radius: 12px;
-  background: ${({ theme }) => theme.colors.background.muted};
+  background: ${({ theme }) => theme.colors.background.info};
   img { width: 24px; height: 24px; }
 `
 
@@ -143,7 +149,7 @@ export const Recommendations = styled.section`
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: 16px;
+  margin-top: 24px;
 `
 
 export const SectionTitle = styled.h2`
@@ -155,6 +161,7 @@ export const SectionTitle = styled.h2`
 
 export const RecommendationGrid = styled.div`
   display: grid;
+  min-height: 240px;
   gap: 16px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   @media (max-width: 700px) { grid-template-columns: 1fr; }

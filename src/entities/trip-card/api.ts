@@ -50,6 +50,7 @@ export type SharedTripResponseDto = {
 export type TravelCardListItemDto = {
   cardId?: number
   cityName?: string
+  countryCode?: string
   countryName?: string
   coverImageUrl?: string
   endDate?: string
@@ -73,6 +74,7 @@ export type TravelCardTimelineItemDto = {
 
 export type TravelCardDetailDto = {
   cardId?: number
+  countryCode?: string
   endDate?: string
   startDate?: string
   timeline?: TravelCardTimelineItemDto[]

@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { figmaCardJapan } from "@/shared/assets";
 import { useCreateTravelCardEntryMutation } from "@/entities/trip-card";
 import type { TripPlanResponseDto } from "@/entities/trip-plan";
-import { resolveApiAssetUrl } from "@/shared/libs/api-client";
 import {
   Button as PartTripButton,
   Textarea as PartTripTextarea,
@@ -11,19 +9,19 @@ import {
 import * as S from "./TripCardsPage.styles";
 
 type PhotoDraft = { file: File; url: string };
+const MAX_PHOTOS = 4;
 
 type Props = { cards: TripPlanResponseDto[] };
 
 export function TripCardPhotoComposer({ cards }: Props) {
   const [photos, setPhotos] = useState<PhotoDraft[]>([]);
-  const [selectedCardId, setSelectedCardId] = useState("");
   const [comment, setComment] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const photosRef = useRef<PhotoDraft[]>([]);
   const createEntryMutation = useCreateTravelCardEntryMutation();
-  const selectedCard = cards.find((card) => String(card.tripId) === selectedCardId);
+  const selectedCard = cards[0];
 
   useEffect(
     () => () => photosRef.current.forEach(({ url }) => URL.revokeObjectURL(url)),
@@ -35,21 +33,28 @@ export function TripCardPhotoComposer({ cards }: Props) {
   }, [photos]);
 
   const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const nextPhotos = Array.from(event.target.files ?? [])
+    const remaining = Math.max(0, MAX_PHOTOS - photos.length);
+    const incomingPhotos = Array.from(event.target.files ?? [])
       .filter((file) => file.type.startsWith("image/"))
       .map((file) => ({ file, url: URL.createObjectURL(file) }))
       .sort((a, b) => a.file.lastModified - b.file.lastModified);
-    photos.forEach(({ url }) => URL.revokeObjectURL(url));
-    setPhotos(nextPhotos);
+    const nextPhotos = incomingPhotos.slice(0, remaining);
+    incomingPhotos.slice(remaining).forEach(({ url }) => URL.revokeObjectURL(url));
+    setPhotos((current) => [...current, ...nextPhotos]);
     setSuccessMessage("");
     setErrorMessage(
-      nextPhotos.length === 0 ? "이미지 파일을 하나 이상 선택해주세요." : "",
+      nextPhotos.length === 0
+        ? remaining === 0
+          ? `사진은 최대 ${MAX_PHOTOS}장까지 선택할 수 있습니다.`
+          : "이미지 파일을 하나 이상 선택해주세요."
+        : "",
     );
+    event.target.value = "";
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const cardId = Number(selectedCardId);
+    const cardId = Number(selectedCard?.tripId);
     if (!Number.isSafeInteger(cardId) || cardId <= 0) {
       setErrorMessage("사진을 추가할 여행 카드를 선택해주세요.");
       return;
@@ -61,6 +66,7 @@ export function TripCardPhotoComposer({ cards }: Props) {
     try {
       setErrorMessage("");
       setSuccessMessage("");
+      const photoCount = photos.length;
       for (const photo of photos) {
         await createEntryMutation.mutateAsync({
           cardId,
@@ -69,7 +75,7 @@ export function TripCardPhotoComposer({ cards }: Props) {
         URL.revokeObjectURL(photo.url);
         setPhotos((current) => current.filter((item) => item !== photo));
       }
-      setSuccessMessage(`${photos.length}장의 사진을 여행 카드에 추가했습니다.`);
+      setSuccessMessage(`${photoCount}장의 사진을 여행 카드에 추가했습니다.`);
       setPhotos([]);
       setComment("");
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -82,63 +88,47 @@ export function TripCardPhotoComposer({ cards }: Props) {
     <S.Composer>
       <S.CreateCardLayout>
         <S.CreateFormPanel>
-          <S.FormHeading>기본 정보</S.FormHeading>
+          <S.FormHeading>{selectedCard ? `${selectedCard.title || `${selectedCard.cityName || selectedCard.countryName || "여행"} 여행`} · ${(selectedCard.startDate || "").replaceAll("-", ".")} 시작` : "사진 · 코멘트"}</S.FormHeading>
           <S.Form onSubmit={(event) => void handleSubmit(event)}>
-            <label>
-              여행 카드
-              <select value={selectedCardId} onChange={(event) => setSelectedCardId(event.target.value)} disabled={createEntryMutation.isPending}>
-                <option value="">사진을 추가할 여행 카드를 선택하세요</option>
-                {cards.map((card) => <option key={card.tripId} value={card.tripId}>{card.title || `${card.cityName || card.countryName || "여행"} 기록`}</option>)}
-              </select>
-            </label>
-            <label>
-              사진 선택
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handlePhotoChange}
-              />
-            </label>
-            <S.PreviewGrid>
-              {photos.map((photo) => (
-                <S.PreviewImage
-                  key={`${photo.file.name}-${photo.file.lastModified}`}
-                >
+            <S.FieldLabel htmlFor="trip-card-photos">사진 선택</S.FieldLabel>
+            <S.Gallery>
+              {photos.slice(0, 4).map((photo) => (
+                <S.PhotoTile key={`${photo.file.name}-${photo.file.lastModified}`} type="button" onClick={() => fileInputRef.current?.click()} aria-label={`${photo.file.name} 선택됨`}>
                   <img src={photo.url} alt={photo.file.name} />
-                </S.PreviewImage>
+                  <S.PhotoCheck aria-hidden="true">✓</S.PhotoCheck>
+                </S.PhotoTile>
               ))}
-            </S.PreviewGrid>
-            <label>
-              코멘트
+              {Array.from({ length: Math.max(0, MAX_PHOTOS - photos.length) }, (_, index) => (
+                <S.PhotoTile key={`empty-${index}`} type="button" onClick={() => fileInputRef.current?.click()} aria-label="사진 추가">
+                </S.PhotoTile>
+              ))}
+            </S.Gallery>
+            <S.FileInput
+              ref={fileInputRef}
+              id="trip-card-photos"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handlePhotoChange}
+            />
+            <S.FieldLabel htmlFor="trip-card-comment">코멘트</S.FieldLabel>
+            <S.TextareaField>
               <PartTripTextarea
+                id="trip-card-comment"
                 value={comment}
                 onChange={(event) => setComment(event.target.value)}
                 placeholder="이 사진에 대해 짧게 남겨보세요."
-                maxLength={500}
+                maxLength={100}
               />
-            </label>
-            <small>{comment.length} / 500</small>
+              <S.Counter>{comment.length} / 100</S.Counter>
+            </S.TextareaField>
             {errorMessage ? (
               <S.ErrorMessage role="alert">{errorMessage}</S.ErrorMessage>
             ) : null}
             {successMessage ? <S.SuccessMessage role="status">{successMessage}</S.SuccessMessage> : null}
-            <PartTripButton type="submit" disabled={createEntryMutation.isPending || !selectedCardId || photos.length === 0}>{createEntryMutation.isPending ? "업로드 중" : "여행 카드에 추가"}</PartTripButton>
+            <PartTripButton type="submit" disabled={createEntryMutation.isPending || !selectedCard?.tripId || photos.length === 0}>{createEntryMutation.isPending ? "업로드 중" : "여행 카드에 담기"}</PartTripButton>
           </S.Form>
         </S.CreateFormPanel>
-        <S.CardPreviewPanel>
-          <S.FormHeading>미리보기</S.FormHeading>
-          <S.PreviewCard>
-            <img src={resolveApiAssetUrl(selectedCard?.images?.[0]) || photos[0]?.url || figmaCardJapan} alt="" />
-            <div>
-              <h2>{selectedCard?.title || `${selectedCard?.cityName || selectedCard?.countryName || "여행"} 기록`}</h2>
-              <span>
-                {selectedCard ? `${selectedCard.startDate || "-"} – ${selectedCard.endDate || "-"} · 사진 ${selectedCard.photoCount ?? 0}장` : "여행 카드를 선택하세요"}
-              </span>
-            </div>
-          </S.PreviewCard>
-        </S.CardPreviewPanel>
       </S.CreateCardLayout>
       {cards.length === 0 ? <S.ErrorMessage role="status">추가할 여행 카드가 없습니다. 여행 계획을 확정하면 카드가 생성됩니다.</S.ErrorMessage> : null}
     </S.Composer>

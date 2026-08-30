@@ -18,3 +18,17 @@ export function getDateRangeDays(
 
   return Math.round((end - start) / MILLISECONDS_PER_DAY) + 1
 }
+
+export function isInCurrentCalendarWeek(value?: string, today = new Date()) {
+  if (!value) return false
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return false
+
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  const weekStart = new Date(todayStart)
+  weekStart.setDate(todayStart.getDate() - ((todayStart.getDay() + 6) % 7))
+  const weekEnd = new Date(weekStart)
+  weekEnd.setDate(weekStart.getDate() + 7)
+  const dateStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  return dateStart >= weekStart && dateStart < weekEnd
+}

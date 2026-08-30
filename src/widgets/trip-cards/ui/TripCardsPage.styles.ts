@@ -19,15 +19,24 @@ export const LoadingCard = styled(Skeleton)`
   border-radius: 28px;
 `
 
-export const Page = styled.main`
+export const Page = styled.main<{ $wide?: boolean }>`
   width: 100%;
   min-width: 0;
+  box-sizing: border-box;
+  padding: ${({ $wide }) => ($wide ? '0' : '32px')};
   color: ${({ theme }) => theme.colors.text.strong};
+
+  @media (max-width: 767px) {
+    padding: 0;
+  }
 `;
 
-export const Header = styled.header`
+export const Header = styled.header<{ $wide?: boolean; $create?: boolean; $detail?: boolean }>`
+  min-height: ${({ $detail, $wide, $create }) => ($detail ? '59px' : $create ? '68px' : $wide ? '66px' : '38px')};
   padding-inline: 24px;
+  margin-top: ${({ $wide }) => ($wide ? '24px' : '0')};
   margin-bottom: 24px;
+  > div > p { margin-top: ${({ $detail }) => ($detail ? '4px' : '6px')}; font-size: ${({ $detail }) => ($detail ? '14px' : '15px')}; line-height: ${({ $detail }) => ($detail ? '17px' : '22px')}; }
 `;
 
 export const Title = styled.h1`
@@ -147,7 +156,8 @@ export const CarouselSection = styled.section`
   min-height: 623px;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 18px;
+  > button { width: 147px; height: 52px; min-height: 52px; border-radius: 14px; font-size: 14px; }
 `
 
 export const TravelCard = styled.button`
@@ -208,12 +218,12 @@ export const FavoriteBadge = styled.span`
 export const MetricList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-top: 18px;
+  gap: 16px;
+  margin-top: 15px;
   border-top: 1px solid rgb(255 255 255 / 22%);
-  padding-top: 12px;
-  > span { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-  small { font-size: 11px; }
+  padding-top: 16px;
+  > span { display: flex; height: 28px; align-items: center; justify-content: space-between; gap: 16px; }
+  small { font-size: 12px; }
   strong { font-size: 13px; }
 `
 
@@ -222,11 +232,13 @@ export const Pagination = styled.div`
   gap: 8px;
   height: 12px;
   align-items: center;
+  width: 40px;
   span { width: 8px; height: 8px; border-radius: 50%; background: ${({ theme }) => theme.colors.border.default}; }
   span.active { background: ${({ theme }) => theme.colors.brand.primary}; }
 `
 
 export const PlaceOverview = styled.section`
+  height: 434px;
   min-height: 434px;
   border-radius: 14px;
   padding: 24px;
@@ -239,7 +251,7 @@ export const PlaceOverviewImage = styled.div`
   height: 260px;
   place-items: start;
   margin-top: 16px;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 0;
   background: ${({ theme }) => theme.colors.background.muted};
   color: ${({ theme }) => theme.colors.brand.primary};
@@ -251,11 +263,11 @@ export const PlaceOverviewImage = styled.div`
 export const PlaceCopy = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   margin-top: 16px;
-  strong { font-size: 16px; line-height: 24px; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
-  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 10px; }
+  strong { font-size: 20px; line-height: 24px; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 14px; line-height: 17px; }
+  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; line-height: 15px; }
 `
 
 export const CapturedInfo = styled.div`
@@ -270,14 +282,14 @@ export const CapturedPanel = styled.section`
   min-height: 141px;
   flex-direction: column;
   align-items: flex-start;
-  gap: 10px;
+  gap: 16px;
   border-radius: 14px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
   h2 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 15px; line-height: 22px; }
-  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 16px; }
-  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 10px; }
+  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 20px; line-height: 24px; }
+  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; line-height: 15px; }
 `
 
 export const CapturedImage = styled.div`
@@ -298,7 +310,8 @@ export const AddPhoto = styled.div`
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
-  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 10px; }
+  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; line-height: 15px; }
+  > button { width: 119px; height: 52px; min-height: 52px; font-size: 14px; }
 `
 
 export const DetailTrip = styled.section`
@@ -327,6 +340,7 @@ export const DetailHeading = styled.header`
   h2 {
     margin: 0;
     font-size: 15px;
+    line-height: 22px;
   }
   span {
     color: ${({ theme }) => theme.colors.text.muted};
@@ -444,126 +458,123 @@ export const SelectRow = styled.div`
 `;
 
 export const Composer = styled.section`
-  display: grid;
-  gap: 16px;
-  border-radius: 20px;
+  display: block;
+  width: 100%;
+  height: 560px;
+  box-sizing: border-box;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 16px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
-  form {
-    display: grid;
-    gap: 14px;
-  }
-  label {
-    display: grid;
-    gap: 6px;
-    color: ${({ theme }) => theme.colors.text.strong};
-    font-size: 13px;
-    font-weight: 600;
-  }
-  input[type="file"] {
-    font-weight: 400;
-  }
 `;
 
 export const CreateCardLayout = styled.div`
-  display: grid;
-  gap: 24px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  @media (max-width: 860px) {
-    grid-template-columns: 1fr;
-  }
+  display: block;
+  height: 100%;
 `;
 
 export const CreateFormPanel = styled.section`
-  min-height: 560px;
-  border-radius: 20px;
-  padding: 24px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-`;
-
-export const CardPreviewPanel = styled.section`
-  min-height: 560px;
-  border-radius: 20px;
-  padding: 24px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
+  height: 100%;
 `;
 
 export const FormHeading = styled.h2`
-  margin: 0 0 16px;
+  margin: 0 0 12px;
   color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 15px;
+  font-size: 18px;
+  line-height: 24px;
 `;
 
-export const PreviewCard = styled.article`
-  width: 360px;
-  max-width: 100%;
-  overflow: hidden;
-  border-radius: 20px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-  img {
-    display: block;
-    width: 100%;
-    height: 170px;
-    object-fit: cover;
-  }
-  > div {
-    display: flex;
-    min-height: 100px;
-    flex-direction: column;
-    gap: 6px;
-    padding: 16px;
-  }
-  h2 {
-    margin: 0;
-    color: ${({ theme }) => theme.colors.text.strong};
-    font-size: 16px;
-  }
-  span {
-    color: ${({ theme }) => theme.colors.text.muted};
-    font-size: 12px;
-  }
+export const Form = styled.form`
+  display: flex;
+  height: calc(100% - 36px);
+  flex-direction: column;
+  align-items: flex-start;
+  > button { width: 139px; height: 46px; min-height: 46px; margin-top: 12px; border-radius: 14px; font-size: 14px; }
 `;
 
-export const Form = styled.form``;
-export const PreviewGrid = styled.div`
-  display: grid;
+export const FieldLabel = styled.label`
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+`;
+
+export const Gallery = styled.div`
+  display: flex;
   gap: 10px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  @media (max-width: 560px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  width: 100%;
+  height: 90px;
+  margin-top: 6px;
 `;
 
-export const PreviewImage = styled.div`
+export const PhotoTile = styled.button`
+  position: relative;
+  display: grid;
+  width: 120px;
+  height: 90px;
+  flex: 0 0 120px;
+  place-items: center;
   overflow: hidden;
+  border: 0;
   border-radius: 12px;
+  padding: 0;
   background: ${({ theme }) => theme.colors.background.muted};
-  img {
-    display: block;
-    width: 100%;
-    aspect-ratio: 1;
-    object-fit: cover;
-  }
-  small {
-    display: block;
-    padding: 6px;
-    color: ${({ theme }) => theme.colors.text.muted};
-    font-size: 10px;
-  }
+  color: ${({ theme }) => theme.colors.text.muted};
+  cursor: pointer;
+  font-size: 12px;
+  img { display: block; width: 100%; height: 100%; object-fit: cover; }
+`;
+
+export const PhotoCheck = styled.span`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border-radius: 50%;
+  background: ${({ theme }) => theme.colors.brand.primary};
+  color: ${({ theme }) => theme.colors.text.inverse};
+  font-size: 12px;
+`;
+
+export const FileInput = styled.input`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+`;
+
+export const TextareaField = styled.div`
+  position: relative;
+  width: 100%;
+  height: 96px;
+  margin-top: 6px;
+  textarea { width: 100%; height: 96px; min-height: 96px; resize: none; border-radius: 12px; padding: 14px 16px 32px; font-size: 14px; }
+`;
+
+export const Counter = styled.span`
+  position: absolute;
+  bottom: 14px;
+  left: 16px;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 11px;
+  line-height: 13px;
 `;
 
 export const ErrorMessage = styled.p`
-  margin: 0;
+  margin: 12px 0 0;
   color: ${({ theme }) => theme.colors.status.error};
   font-size: 13px;
 `;
 
 export const SuccessMessage = styled.p`
-  margin: 0;
+  margin: 12px 0 0;
   color: ${({ theme }) => theme.colors.status.success};
   font-size: 13px;
 `;
@@ -571,63 +582,78 @@ export const SuccessMessage = styled.p`
 export const DeleteLayout = styled.div`
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: 720px minmax(0, 456px);
   @media (max-width: 860px) {
     grid-template-columns: 1fr;
   }
 `;
 
 export const DeleteList = styled.section`
-  min-height: 370px;
+  width: 720px;
+  height: 370px;
+  box-sizing: border-box;
   border-radius: 20px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
   h2 {
-    margin: 24px 0 8px;
+    margin: 0 0 12px;
     font-size: 15px;
+    line-height: 22px;
   }
+  @media (max-width: 860px) { width: 100%; height: auto; min-height: 370px; }
 `;
 
 export const Toolbar = styled.header`
   display: flex;
+  width: 100%;
+  height: 31px;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin-bottom: 24px;
   strong {
-    font-size: 12px;
+    font-size: 15px;
+    line-height: 18px;
   }
-  button {
-    border: 0;
-    background: transparent;
-    color: ${({ theme }) => theme.colors.brand.primary};
-    cursor: pointer;
-    font-size: 11px;
-  }
+  > div { display: flex; gap: 12px; }
+  button { width: 76px; height: 31px; border: 0; border-radius: 10px; padding: 0; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.brand.primary}; cursor: pointer; font-size: 12px; font-weight: 600; }
+  button + button { border: 1px solid ${({ theme }) => theme.colors.border.default}; background: ${({ theme }) => theme.colors.background.default}; }
 `;
 
 export const DeleteRow = styled.label<{ $selected: boolean }>`
-  display: flex;
-  min-height: 64px;
+  display: grid;
+  width: 672px;
+  height: 88px;
+  box-sizing: border-box;
+  grid-template-columns: 24px 64px minmax(0, 1fr);
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   border: 1px solid
     ${({ $selected, theme }) => ($selected ? theme.colors.brand.primary : theme.colors.border.subtle)};
   border-radius: 12px;
-  margin-top: 8px;
-  padding: 8px;
+  margin-top: 12px;
+  padding: 12px 14px;
   background: ${({ $selected, theme }) => ($selected ? theme.colors.background.muted : theme.colors.background.default)};
   cursor: pointer;
   input {
-    width: 18px;
-    height: 18px;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
+    border-radius: 7px;
+    background: ${({ theme }) => theme.colors.background.default};
+    cursor: pointer;
+    &:checked { border-color: ${({ theme }) => theme.colors.brand.primary}; background: ${({ theme }) => theme.colors.brand.primary}; }
+    &:checked::after { display: grid; height: 100%; place-items: center; color: ${({ theme }) => theme.colors.text.inverse}; content: '✓'; font-size: 14px; }
   }
   > span {
     display: grid;
-    width: 44px;
-    height: 44px;
+    width: 64px;
+    height: 64px;
     place-items: center;
-    border-radius: 8px;
+    border-radius: 12px;
     background: ${({ theme }) => theme.colors.background.muted};
     color: ${({ theme }) => theme.colors.text.muted};
     font-size: 10px;
@@ -637,6 +663,7 @@ export const DeleteRow = styled.label<{ $selected: boolean }>`
     min-width: 0;
     flex-direction: column;
     gap: 4px;
+    align-self: center;
   }
   strong {
     font-size: 13px;
@@ -645,11 +672,14 @@ export const DeleteRow = styled.label<{ $selected: boolean }>`
     color: ${({ theme }) => theme.colors.text.muted};
     font-size: 11px;
   }
+  @media (max-width: 860px) { width: 100%; }
 `;
 
 export const DeletePanel = styled.section`
   display: flex;
-  min-height: 370px;
+  width: 456px;
+  height: 370px;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
@@ -661,19 +691,14 @@ export const DeletePanel = styled.section`
     margin: 0;
     font-size: 15px;
   }
-  > strong {
-    font-size: 12px;
-  }
-  > span {
-    color: ${({ theme }) => theme.colors.text.muted};
-    font-size: 11px;
-    line-height: 16px;
-  }
+  @media (max-width: 860px) { width: 100%; height: auto; min-height: 370px; }
 `;
 
 export const Warning = styled.div`
   display: flex;
   width: 100%;
+  height: 71px;
+  box-sizing: border-box;
   flex-direction: column;
   gap: 4px;
   border-radius: 12px;
@@ -689,17 +714,26 @@ export const Warning = styled.div`
   }
 `;
 
+export const DeleteSummary = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  strong { font-size: 12px; line-height: 17px; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; line-height: 15px; }
+`;
+
 export const DeleteActions = styled.div`
   display: flex;
   width: 100%;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   margin-top: auto;
+  > button { height: 43px; min-height: 43px; border-radius: 12px; }
 `;
 
 export const DeleteButton = styled.button`
   width: 100%;
-  min-height: 46px;
+  min-height: 43px;
   border: 0;
   border-radius: 10px;
   background: ${({ theme }) => theme.colors.status.error};

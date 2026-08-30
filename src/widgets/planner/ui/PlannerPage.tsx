@@ -87,6 +87,7 @@ function Header({
   onNewTrip,
   plan,
   showNewTrip,
+  wide,
   step,
   voteCategory,
   vote,
@@ -101,6 +102,7 @@ function Header({
     endDate?: string;
   };
   showNewTrip?: boolean;
+  wide?: boolean;
   step: PlannerStep;
   voteCategory: string;
   vote?: {
@@ -159,7 +161,7 @@ function Header({
             ? 4
             : 0;
   return (
-    <S.Header $final={isFinal}>
+    <S.Header $final={isFinal} $hasSubtitle={Boolean(subtitle)} $wide={wide}>
       {isLoading ? (
         <S.LoadingHeader />
       ) : (
@@ -176,7 +178,7 @@ function Header({
             </PartTripButton>
           ) : null}
           {activeStep > 0 ? (
-            <S.FlowStepper aria-label="여행 플래너 진행 단계">
+            <S.FlowStepper $final={isFinal} aria-label="여행 플래너 진행 단계">
               {["그룹", "여행지·기간", "장소·투표", "확정"].map(
                 (label, index) => (
                   <S.FlowStep
@@ -232,6 +234,7 @@ function PlannerFlowPage({ step }: Props) {
   const [plannerTab, setPlannerTab] = useState<PlannerTab>("active");
   const [travelStyle, setTravelStyle] = useState("맛집");
   const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [shareError, setShareError] = useState("");
   const {
     addPlannerPlacesMutation,
     activeVote,
@@ -240,6 +243,7 @@ function PlannerFlowPage({ step }: Props) {
     closeVoteMutation,
     confirmedPlaces,
     countries,
+    popularCities,
     continueTo,
     confirmPlannerMutation,
     confirmVoteMutation,
@@ -353,6 +357,36 @@ function PlannerFlowPage({ step }: Props) {
     selectedCityName.trim() !== "" &&
     selectedCityName.trim().toLocaleLowerCase() !==
       (plannerDetail?.cityName ?? "").trim().toLocaleLowerCase();
+  const destinationKeyword = selectedCityName.trim().toLocaleLowerCase();
+  const matchingCountries = countries.filter((country) =>
+    [country.countryName, country.cityName].some((value) =>
+      value?.trim().toLocaleLowerCase().includes(destinationKeyword),
+    ),
+  );
+  const popularDestinations = popularCities.flatMap((city) => {
+    if (!city.countryName || !city.cityName) return [];
+    const country = countries.find(
+      (item) =>
+        item.countryName === city.countryName && item.cityName === city.cityName,
+    );
+    if (!country) return [];
+    return [{
+      countryInfoId: country.countryInfoId,
+      countryName: city.countryName,
+      cityName: city.cityName,
+      imageUrl: country?.imageUrl,
+      summary: country?.summary,
+    }];
+  });
+  const destinationResults = isDestinationSearch
+    ? [...matchingCountries, ...popularDestinations.filter((popular) => {
+        return [popular.countryName, popular.cityName].some((value) =>
+          value?.trim().toLocaleLowerCase().includes(destinationKeyword),
+        );
+      })].filter((destination, index, all) => all.findIndex((item) =>
+        item.countryName === destination.countryName && item.cityName === destination.cityName,
+      ) === index)
+    : popularDestinations;
   const currentUserName = profile?.name || "사용자";
   const currentUserInitial = currentUserName.slice(0, 2).toUpperCase() || "MS";
   const otherMembers = members.filter((member) =>
@@ -440,6 +474,17 @@ function PlannerFlowPage({ step }: Props) {
   const nextVoteCategory = () => {
     const index = categories.indexOf(voteCategory);
     setVoteCategory(categories[(index + 1) % categories.length]);
+  };
+  const nextCategory = categories[(categories.indexOf(voteCategory) + 1) % categories.length];
+  const handleSharePlan = async () => {
+    if (!isConfirmed && !(await handleConfirmPlan())) return;
+    try {
+      if (!navigator.clipboard) throw new Error("clipboard is unavailable");
+      await navigator.clipboard.writeText(window.location.href);
+      setShareError("");
+    } catch {
+      setShareError("일정 공유 링크를 복사하지 못했습니다.");
+    }
   };
 
   const groupManagementPanel =
@@ -618,37 +663,6 @@ function PlannerFlowPage({ step }: Props) {
       </S.InvitePanel>
     ) : null;
 
-  const voteOptionManagementPanel =
-    step === "vote" && activeVote ? (
-      <S.InvitePanel>
-        <S.SectionTitle>후보 관리</S.SectionTitle>
-        {voteOptions.map((option, index) => (
-          <S.InvitationRow key={option.optionId ?? index}>
-            <strong>{option.placeName || "장소"}</strong>
-            <span>{option.voteCount ?? 0}표</span>
-            {(canManagePlanner || option.addedByUserId === profile?.id) &&
-            voteStatus(activeVote.status) === "OPEN" ? (
-              <S.DeleteOptionButton
-                type="button"
-                disabled={
-                  deleteVoteOptionMutation.isPending || option.optionId == null
-                }
-                onClick={() => {
-                  if (window.confirm("이 후보를 삭제할까요?"))
-                    void handleDeleteVoteOption(option.optionId);
-                }}
-              >
-                후보 삭제
-              </S.DeleteOptionButton>
-            ) : null}
-          </S.InvitationRow>
-        ))}
-        {!voteOptions.length ? (
-          <S.Notice>삭제할 후보가 없습니다.</S.Notice>
-        ) : null}
-      </S.InvitePanel>
-    ) : null;
-
   return (
     <AppShell>
       <S.Page $wide={step === "destination" || step === "place"}>
@@ -656,6 +670,7 @@ function PlannerFlowPage({ step }: Props) {
           onNewTrip={() => continueTo(paths.plannerCreate)}
           plan={plan}
           showNewTrip={step === "list"}
+          wide={step === "destination" || step === "place"}
           step={step}
           voteCategory={voteCategory}
           vote={activeVote}
@@ -774,8 +789,6 @@ function PlannerFlowPage({ step }: Props) {
               </S.StepCard>
             ) : null}
 
-            {voteOptionManagementPanel}
-
             {step === "group" ? (
               <S.GroupForm as="form" onSubmit={(event) => void saveGroupSettings(event)}>
                 <S.GroupTypeRow>
@@ -884,10 +897,9 @@ function PlannerFlowPage({ step }: Props) {
                   <S.SectionTitle>함께할 사람</S.SectionTitle>
                   <S.MemberList>
                     <S.MemberRow>
-                      <S.Avatar>{currentUserInitial}</S.Avatar>
+                      <S.Avatar>{currentUserInitial.slice(0, 1)}</S.Avatar>
                       <S.MemberDetails>
                         <strong>{currentUserName}</strong>
-                        <span>나</span>
                       </S.MemberDetails>
                       <S.MemberState>나</S.MemberState>
                     </S.MemberRow>
@@ -897,14 +909,13 @@ function PlannerFlowPage({ step }: Props) {
                       >
                         <S.Avatar>
                           {(member.nickName || member.userId || "멤버")
-                            .slice(0, 2)
+                            .slice(0, 1)
                             .toUpperCase()}
                         </S.Avatar>
                         <S.MemberDetails>
                           <strong>
                             {member.nickName || member.userId || "멤버"}
                           </strong>
-                          <span>멤버</span>
                         </S.MemberDetails>
                         <S.MemberState>
                           {member.role || "초대 대기"}
@@ -935,6 +946,7 @@ function PlannerFlowPage({ step }: Props) {
                 <S.SettingsLayout>
                   <S.StepCard
                     as="form"
+                    autoComplete="off"
                     id="planner-destination-form"
                     onSubmit={(event) => void saveDestination(event)}
                   >
@@ -967,7 +979,7 @@ function PlannerFlowPage({ step }: Props) {
                         {isDestinationSearch ? "검색 결과" : "인기 여행지"}
                       </span>
                       <S.PopularGrid role="group" aria-labelledby="planner-destination-results-label">
-                        {(isDestinationSearch ? countries : countries.slice(0, 4)).map(
+                        {destinationResults.map(
                           (country) => (
                             <S.PopularButton
                               type="button"
@@ -991,7 +1003,7 @@ function PlannerFlowPage({ step }: Props) {
                           ),
                         )}
                       </S.PopularGrid>
-                      {selectedCityName && countries.length === 0 ? (
+                      {isDestinationSearch && selectedCityName && destinationResults.length === 0 ? (
                         <S.SearchEmpty>
                           검색 결과가 없습니다. 국가명 또는 도시명을 다시
                           입력해주세요.
@@ -1139,9 +1151,16 @@ function PlannerFlowPage({ step }: Props) {
                       })}
                     </S.CalendarGrid>
                     <S.CalendarSummary>
-                      {selectedStartDate && selectedEndDate
-                        ? `${formatDate(selectedStartDate)} – ${formatDate(selectedEndDate)}`
-                        : "날짜를 선택하세요"}
+                      <strong>
+                        {selectedStartDate && selectedEndDate
+                          ? `${formatDate(selectedStartDate)} – ${formatDate(selectedEndDate)}`
+                          : "날짜를 선택하세요"}
+                      </strong>
+                      {selectedStartDate && selectedEndDate ? (
+                        <span>
+                          {tripDuration(selectedStartDate, selectedEndDate)}
+                        </span>
+                      ) : null}
                     </S.CalendarSummary>
                   </S.CalendarPanel>
                 </S.SettingsLayout>
@@ -1183,7 +1202,7 @@ function PlannerFlowPage({ step }: Props) {
                           setSelected(places.map((_, index) => index))
                         }
                       >
-                        후보 {places.length}곳 모두 담기
+                        전체 후보 담기
                       </button>
                     </S.PlaceListHeader>
                     {places.map((item, index) => {
@@ -1221,30 +1240,19 @@ function PlannerFlowPage({ step }: Props) {
                     {places.length === 0 ? (
                       <S.Empty>연동된 장소 후보가 없습니다.</S.Empty>
                     ) : null}
-                    <S.PanelActions>
-                      <PartTripButton
-                        type="button"
-                        disabled={
-                          isSavingCandidates ||
-                          selectedPlaces.length === 0
-                        }
-                        onClick={() => void handleSaveCandidates()}
-                      >
-                        {isSavingCandidates ? "후보 저장 중" : "투표 시작하기"}
-                      </PartTripButton>
-                      {selectedPlaces.length > 0 ? (
-                        <PartTripButton
-                          type="button"
-                          $variant="secondary"
-                          onClick={() =>
-                            flowNavigate({ to: paths.plannerLineup })
-                          }
-                        >
-                          장바구니 보기
-                        </PartTripButton>
-                      ) : null}
-                    </S.PanelActions>
                   </S.PlaceListPanel>
+                  <S.PanelActions>
+                    <PartTripButton
+                      type="button"
+                      disabled={
+                        isSavingCandidates ||
+                        selectedPlaces.length === 0
+                      }
+                      onClick={() => void handleSaveCandidates()}
+                    >
+                      {isSavingCandidates ? "후보 저장 중" : "투표 시작하기"}
+                    </PartTripButton>
+                  </S.PanelActions>
                 </S.PlaceBody>
               </>
             ) : null}
@@ -1295,10 +1303,25 @@ function PlannerFlowPage({ step }: Props) {
                         >
                           <S.PlaceDetails>
                             <strong>{option.placeName || "장소"}</strong>
-                            <span>{option.address || "상세 정보"}</span>
+                            <span>{option.voteCount ?? 0}표</span>
+                            {(canManagePlanner || (profile?.id != null && option.addedByUserId === profile.id)) &&
+                            voteStatus(activeVote?.status) === "OPEN" ? (
+                              <S.DeleteOptionButton
+                                type="button"
+                                disabled={
+                                  deleteVoteOptionMutation.isPending ||
+                                  option.optionId == null
+                                }
+                                onClick={() => {
+                                  if (window.confirm("이 후보를 삭제할까요?"))
+                                    void handleDeleteVoteOption(option.optionId);
+                                }}
+                              >
+                                후보 삭제
+                              </S.DeleteOptionButton>
+                            ) : null}
                           </S.PlaceDetails>
                           <S.VoteMeta $selected={isSelected}>
-                            <span>{option.voteCount ?? 0}표</span>
                             <button
                               type="button"
                               aria-pressed={isSelected}
@@ -1311,7 +1334,7 @@ function PlannerFlowPage({ step }: Props) {
                                 void handleCastBallot(option.optionId)
                               }
                             >
-                              {isSelected ? "투표함" : "투표"}
+                              {isSelected ? "투표 완료" : "투표"}
                             </button>
                           </S.VoteMeta>
                         </S.CandidateRow>
@@ -1320,21 +1343,12 @@ function PlannerFlowPage({ step }: Props) {
                     {!activeVote || voteOptions.length === 0 ? (
                       <S.Empty>아직 등록된 후보가 없습니다.</S.Empty>
                     ) : null}
-                    <S.PanelActions>
-                      <PartTripButton type="button" onClick={nextVoteCategory}>
-                        다음 카테고리
-                      </PartTripButton>
-                      <PartTripButton
-                        type="button"
-                        $variant="secondary"
-                        onClick={() =>
-                          flowNavigate({ to: paths.plannerProgress })
-                        }
-                      >
-                        진행 현황
-                      </PartTripButton>
-                    </S.PanelActions>
                   </S.CandidatePanel>
+                  <S.PanelActions>
+                    <PartTripButton type="button" onClick={nextVoteCategory}>
+                      다음: {nextCategory}
+                    </PartTripButton>
+                  </S.PanelActions>
                 </S.VoteBody>
               </>
             ) : null}
@@ -1388,7 +1402,7 @@ function PlannerFlowPage({ step }: Props) {
                             aria-label={`${item.placeName || "장소"} 후보 제거`}
                             onClick={() => handleRemoveFromLineup(index)}
                           >
-                            {lineupChoice === index ? "✓" : "×"}
+                            {lineupChoice === index ? "✓" : "✕"}
                           </button>
                         </S.SelectedPlaceRow>
                       ))}
@@ -1399,10 +1413,7 @@ function PlannerFlowPage({ step }: Props) {
                   </S.SelectedPanel>
                   <S.NextPanel>
                     <S.SectionTitle>선택을 확정할까요?</S.SectionTitle>
-                    <p>담은 장소 중 지금 고른 장소로 일정을 확정해요.</p>
-                    <S.Notice>
-                      선택한 후보를 저장하고 다음 투표 단계로 이동합니다.
-                    </S.Notice>
+                    <p>담은 장소 중 지금 고른 장소로 일정을 확정해요</p>
                     <S.ActionRow>
                       <PartTripButton
                         type="button"
@@ -1411,16 +1422,7 @@ function PlannerFlowPage({ step }: Props) {
                         }
                         onClick={() => void handleSaveCandidates()}
                       >
-                        투표 진행
-                      </PartTripButton>
-                      <PartTripButton
-                        type="button"
-                        $variant="secondary"
-                        onClick={() =>
-                          flowNavigate({ to: paths.plannerExplore })
-                        }
-                      >
-                        장소 더 찾기
+                        선택 확정하기
                       </PartTripButton>
                     </S.ActionRow>
                   </S.NextPanel>
@@ -1480,15 +1482,6 @@ function PlannerFlowPage({ step }: Props) {
                                     (vote.eligibleMemberCount ?? 0)
                                   : "후보 없음"}
                           </strong>
-                          <small>
-                            {confirmed
-                              ? "확정"
-                              : closed
-                                ? "마감"
-                                : vote
-                                  ? "진행"
-                                  : "미정"}
-                          </small>
                         </S.StatusLine>
                       );
                     })}
@@ -1568,7 +1561,9 @@ function PlannerFlowPage({ step }: Props) {
                           !canManagePlanner ||
                           confirmPlannerMutation.isPending
                         }
-                        onClick={() => flowNavigate({ to: paths.plannerFinal })}
+                        onClick={() => void handleConfirmPlan().then((confirmed) => {
+                          if (confirmed) flowNavigate({ to: paths.plannerFinal });
+                        })}
                       >
                         일정 확정하기
                       </PartTripButton>
@@ -1650,18 +1645,12 @@ function PlannerFlowPage({ step }: Props) {
                   <PartTripButton
                     type="button"
                     $variant="secondary"
-                    onClick={() => void handleConfirmPlan()}
-                    disabled={
-                      isConfirmed ||
-                      !canManagePlanner ||
-                      confirmPlannerMutation.isPending
-                    }
+                    onClick={() => void handleSharePlan()}
                   >
-                    {confirmPlannerMutation.isPending
-                      ? "일정 확정 중"
-                      : "일정 확정하기"}
+                    일정 공유하기
                   </PartTripButton>
                 </S.FinalActions>
+                {shareError ? <S.Error role="alert">{shareError}</S.Error> : null}
                 <S.FinalHint>
                   일정이 마음에 들지 않나요? 이전 단계에서 수정할 수 있어요
                 </S.FinalHint>

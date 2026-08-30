@@ -2,15 +2,21 @@ import styled from 'styled-components'
 import { Skeleton } from '@/shared/ui/parttrip'
 
 export const Page = styled.main`
+  width: 100%;
   min-width: 0;
-  width: calc(100% + 32px);
-  margin-left: -32px;
+  box-sizing: border-box;
+  padding: 0 0 60px;
   color: ${({ theme }) => theme.colors.text.strong};
+
+  @media (max-width: 767px) {
+    padding-bottom: 48px;
+  }
 `
 
 export const Header = styled.header`
+  min-height: 68px;
   padding: 0 24px;
-  margin-bottom: 24px;
+  margin: 24px 0;
 `
 
 export const Title = styled.h1`
@@ -198,8 +204,8 @@ export const WorldMapCopy = styled.div`
   p {
     margin: 0;
     color: ${({ theme }) => theme.colors.text.muted};
-    font-size: 15px;
-    line-height: 22px;
+    font-size: 14px;
+    line-height: 20px;
   }
 `
 

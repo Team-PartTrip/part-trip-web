@@ -3,18 +3,22 @@ import styled from 'styled-components'
 export const Page = styled.main`
   width: 100%;
   min-width: 0;
+  box-sizing: border-box;
+  padding-bottom: 60px;
   color: ${({ theme }) => theme.colors.text.strong};
 `
 
 export const Header = styled.header`
-  margin-bottom: 24px;
+  min-height: 66px;
+  margin: 24px 0;
+  padding-inline: 24px;
 `
 
 export const Title = styled.h1`
   margin: 0;
   color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 32px;
-  line-height: 40px;
+  font-size: 30px;
+  line-height: 38px;
 `
 
 export const Subtitle = styled.p`
@@ -39,50 +43,62 @@ export const State = styled.p`
 export const DeleteLayout = styled.div`
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: 720px minmax(0, 456px);
   @media (max-width: 860px) { grid-template-columns: 1fr; }
 `
 
 export const DeleteList = styled.section`
-  min-height: 374px;
+  width: 720px;
+  height: 374px;
+  box-sizing: border-box;
   border-radius: 20px;
-  padding: 24px 16px;
+  padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
-  h2 { margin: 24px 0 8px; font-size: 15px; }
+  h2 { margin: 0 0 12px; font-size: 15px; line-height: 22px; }
+  @media (max-width: 860px) { width: 100%; height: auto; min-height: 374px; }
 `
 
 export const Toolbar = styled.header`
   display: flex;
+  width: 100%;
+  height: 31px;
   align-items: center;
   justify-content: space-between;
-  strong { font-size: 12px; }
-  button { border: 0; background: transparent; color: ${({ theme }) => theme.colors.brand.primary}; cursor: pointer; font-size: 11px; }
+  margin-bottom: 24px;
+  strong { font-size: 15px; line-height: 18px; }
+  > div { display: flex; gap: 12px; }
+  button { width: 76px; height: 31px; border: 0; border-radius: 10px; padding: 0; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.brand.primary}; cursor: pointer; font-size: 12px; font-weight: 600; }
+  button + button { border: 1px solid ${({ theme }) => theme.colors.border.default}; background: ${({ theme }) => theme.colors.background.default}; }
 `
 
 export const PhotoGrid = styled.div`
   display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  @media (max-width: 560px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  gap: 12px;
+  grid-template-columns: repeat(4, 159px);
+  @media (max-width: 760px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 `
 
 export const PhotoButton = styled.button<{ $selected: boolean }>`
   position: relative;
   overflow: hidden;
-  height: 94px;
+  width: 159px;
+  height: 140px;
   border: 2px solid ${({ $selected, theme }) => ($selected ? theme.colors.brand.primary : 'transparent')};
   border-radius: 10px;
   padding: 0;
   background: ${({ theme }) => theme.colors.background.muted};
   cursor: pointer;
   img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  span { position: absolute; top: 6px; right: 6px; display: grid; width: 18px; height: 18px; place-items: center; border-radius: 5px; background: ${({ $selected, theme }) => ($selected ? theme.colors.brand.primary : theme.colors.background.default)}; color: ${({ theme }) => theme.colors.text.inverse}; font-size: 11px; }
+  span { position: absolute; top: 8px; right: 8px; display: grid; width: 24px; height: 24px; place-items: center; border-radius: 7px; background: ${({ $selected, theme }) => ($selected ? theme.colors.brand.primary : theme.colors.background.default)}; color: ${({ $selected, theme }) => ($selected ? theme.colors.text.inverse : theme.colors.text.muted)}; font-size: 14px; }
+  @media (max-width: 760px) { width: 100%; }
 `
 
 export const DeletePanel = styled.section`
   display: flex;
-  min-height: 374px;
+  width: 456px;
+  height: 374px;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
@@ -91,13 +107,14 @@ export const DeletePanel = styled.section`
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
   h2 { margin: 0; font-size: 15px; }
-  > strong { font-size: 12px; }
-  > span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; line-height: 16px; }
+  @media (max-width: 860px) { width: 100%; height: auto; min-height: 374px; }
 `
 
 export const Warning = styled.div`
   display: flex;
   width: 100%;
+  height: 71px;
+  box-sizing: border-box;
   flex-direction: column;
   gap: 4px;
   border-radius: 12px;
@@ -107,18 +124,26 @@ export const Warning = styled.div`
   span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 10px; }
 `
 
+export const DeleteSummary = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  strong { font-size: 12px; line-height: 17px; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; line-height: 15px; }
+`
+
 export const DeleteActions = styled.div`
   display: flex;
   width: 100%;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   margin-top: auto;
-  button { min-height: 36px; border: 1px solid ${({ theme }) => theme.colors.border.default}; border-radius: 10px; background: ${({ theme }) => theme.colors.background.default}; color: ${({ theme }) => theme.colors.text.strong}; cursor: pointer; font-size: 12px; font-weight: 600; }
+  button { height: 43px; min-height: 43px; border: 1px solid ${({ theme }) => theme.colors.border.default}; border-radius: 12px; background: ${({ theme }) => theme.colors.background.default}; color: ${({ theme }) => theme.colors.text.strong}; cursor: pointer; font-size: 12px; font-weight: 600; }
 `
 
 export const DeleteButton = styled.button`
   width: 100%;
-  min-height: 46px !important;
+  min-height: 43px !important;
   border: 0 !important;
   background: ${({ theme }) => theme.colors.status.error} !important;
   color: ${({ theme }) => theme.colors.text.inverse} !important;

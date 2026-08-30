@@ -94,6 +94,7 @@ export function usePlannerFlow(step: PlannerStep) {
     plan,
     plannerDetail,
     planners,
+    popularCities,
     setPlan,
     votes,
     voteDetail,
@@ -209,16 +210,34 @@ export function usePlannerFlow(step: PlannerStep) {
 
   const saveDestination = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const selectedCountry = countries.find((item) =>
-      String(item.countryInfoId) === selectedCountryInfoId
-      || item.cityName?.toLocaleLowerCase() === selectedCityName.trim().toLocaleLowerCase()
-      || item.countryName?.toLocaleLowerCase() === selectedCityName.trim().toLocaleLowerCase(),
-    ) ?? (countries.length === 1 && selectedCityName.trim() ? countries[0] : undefined)
+    const normalizedCityName = selectedCityName.trim().toLocaleLowerCase()
+    const normalizedCountryName = selectedCountryName.trim().toLocaleLowerCase()
+    const destinationCandidates = [
+      ...countries,
+      ...popularCities.map(({ cityName, countryName }) => ({ cityName, countryName })),
+    ].filter((candidate, index, all) => all.findIndex((item) =>
+      item.countryName === candidate.countryName && item.cityName === candidate.cityName,
+    ) === index)
+    const matchingDestinations = destinationCandidates.filter((item) => {
+      const itemCityName = item.cityName?.trim().toLocaleLowerCase()
+      const itemCountryName = item.countryName?.trim().toLocaleLowerCase()
+      const matchesCity = itemCityName === normalizedCityName
+      const matchesCountryInput = itemCountryName === normalizedCityName
+      const matchesSelectedCountry = !normalizedCountryName || itemCountryName === normalizedCountryName
+      return matchesSelectedCountry && (matchesCity || matchesCountryInput)
+    })
+    const selectedCountry = selectedCountryInfoId
+      ? countries.find((item) => String(item.countryInfoId) === selectedCountryInfoId)
+      : matchingDestinations.length === 1 ? matchingDestinations[0] : undefined
     const nextCountry = selectedCountry?.countryName || selectedCountryName.trim()
     const nextCity = selectedCountry?.cityName || selectedCityName.trim()
     const nextHeadcount = Number(selectedHeadcount)
     if (!nextCountry || !nextCity || !selectedStartDate || !selectedEndDate || selectedStartDate > selectedEndDate) {
       setErrorMessage('여행지와 올바른 여행 기간을 입력해주세요.')
+      return
+    }
+    if (!selectedCountry) {
+      setErrorMessage('국가와 도시가 일치하는 여행지를 선택해주세요.')
       return
     }
     if (!Number.isSafeInteger(nextHeadcount) || nextHeadcount < 1 || nextHeadcount > 30) {
@@ -532,19 +551,21 @@ export function usePlannerFlow(step: PlannerStep) {
   const handleConfirmPlan = async () => {
     if (!canManagePlanner) {
       setErrorMessage('먼저 여행 계획을 저장해주세요.')
-      return
+      return false
     }
     try {
       setErrorMessage('')
       if (!isPositiveSafeInteger(activePlannerId) || votes.length === 0) {
         setErrorMessage('확정할 투표 결과를 확인할 수 없습니다.')
-        return
+        return false
       }
       await confirmPlannerMutation.mutateAsync(activePlannerId)
       writeSessionValue(plannerConfirmationKey, 'true')
       setConfirmedPlannerId(activePlannerId)
+      return true
     } catch {
       setErrorMessage('최종 계획을 확정하지 못했습니다.')
+      return false
     }
   }
 
@@ -614,6 +635,7 @@ export function usePlannerFlow(step: PlannerStep) {
     plannerInviteLink,
     plannerTitle,
     planners,
+    popularCities,
     saveDestination,
     saveGroupSettings,
     selected,

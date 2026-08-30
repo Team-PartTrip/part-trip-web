@@ -11,6 +11,7 @@ import {
 } from '@/entities/planner'
 import {
   useCountriesQuery,
+  usePopularCitiesQuery,
   useTourPlacesQuery,
 } from '@/entities/travel'
 import { isPositiveSafeInteger } from '@/shared/utils'
@@ -52,6 +53,7 @@ export function usePlannerData(
   const needsConfirmedPlaces = step === 'final'
   const [overriddenPlan, setOverriddenPlan] = useState<PlannerPlan>()
   const countriesQuery = useCountriesQuery(countryKeyword, step === 'destination')
+  const popularCitiesQuery = usePopularCitiesQuery(50, step === 'destination')
   const plannersQuery = useMyPlannersQuery(step === 'list')
   const plannerDetailQuery = usePlannerDetailQuery(
     activePlannerId,
@@ -82,6 +84,7 @@ export function usePlannerData(
 
   return {
     countries: countriesQuery.data ?? [],
+    popularCities: popularCitiesQuery.data ?? [],
     hasError:
       countriesQuery.isError ||
       placesQuery.isError ||

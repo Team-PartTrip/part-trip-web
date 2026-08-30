@@ -143,7 +143,7 @@ export function LoginForm() {
           />
 
           <S.HintRow>
-            <S.InlineLink to={paths.changePassword}>비밀번호 찾기</S.InlineLink>
+            <S.InlineLink to={paths.changePassword}>비밀번호를 잊으셨나요?</S.InlineLink>
           </S.HintRow>
 
           {message ? (

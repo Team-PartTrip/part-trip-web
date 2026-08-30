@@ -15,7 +15,8 @@ export const LoadingHeader = styled(Skeleton)`
 export const LoadingBody = styled.div`
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 432px;
+  margin: 0 24px;
+  grid-template-columns: minmax(0, 696px) 432px;
 `
 
 export const LoadingPhoto = styled(Skeleton)`
@@ -35,25 +36,26 @@ export const Page = styled.main`
 `
 
 export const Content = styled.section`
-  width: min(100%, 1200px);
+  width: 100%;
   min-width: 0;
-  margin: 0 auto;
   padding: 0 0 60px;
   @media (max-width: 47.9375rem) { padding: 0 0 48px; }
 `
 
-export const TopBar = styled.header`
+export const TopBar = styled.header<{ $comment?: boolean }>`
   display: flex;
+  min-height: ${({ $comment }) => ($comment ? '48px' : '68px')};
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 22px;
+  margin: ${({ $comment }) => ($comment ? '32px 32px 24px' : '24px 0 24px')};
+  padding-inline: 24px;
   gap: 16px;
   h1 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 30px; line-height: 38px; }
   p { margin: 6px 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 15px; line-height: 22px; }
   > div:first-child { display: flex; flex-direction: column; gap: 6px; }
   > div:last-child:not(:first-child) { display: flex; flex-wrap: wrap; gap: 8px; }
-  button { border: 0; border-radius: 10px; padding: 10px 14px; background: transparent; color: var(--pt-brand-primary); cursor: pointer; font: inherit; font-weight: 700; }
-  button:last-child { background: var(--pt-brand-primary); color: var(--pt-text-inverse); }
+  button { width: 112px; height: 48px; border: 1px solid var(--pt-brand-primary); border-radius: 14px; padding: 0 14px; background: var(--pt-bg-default); color: var(--pt-brand-primary); cursor: pointer; font: inherit; font-size: 14px; font-weight: 600; }
+  button:disabled { cursor: not-allowed; opacity: .56; }
 `
 
 export const ErrorMessage = styled.p`
@@ -75,17 +77,45 @@ export const DetailBody = styled.section`
   display: grid;
   height: 560px;
   gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 432px;
+  margin: 0 24px;
+  grid-template-columns: minmax(0, 696px) 432px;
   @media (max-width: 900px) { height: auto; grid-template-columns: 1fr; }
 `
 
 export const RecordPhoto = styled.div`
+  position: relative;
   min-width: 0;
   overflow: hidden;
   border-radius: 28px;
   background: var(--pt-bg-muted);
   img { display: block; width: 100%; height: 560px; object-fit: cover; }
   @media (max-width: 900px) { img { height: 360px; } }
+`
+
+export const PhotoControls = styled.div`
+  position: absolute;
+  right: auto;
+  bottom: 18px;
+  left: 24px;
+  display: flex;
+  width: 180px;
+  height: 40px;
+  overflow: hidden;
+  align-items: stretch;
+  border-radius: 999px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: ${({ theme }) => theme.shadows.subtle};
+`
+
+export const PhotoButton = styled.button`
+  flex: 1;
+  border: 0;
+  padding: 0 10px;
+  background: transparent;
+  color: ${({ theme }) => theme.colors.brand.strong};
+  cursor: pointer;
+  font-size: 12px;
+  &:disabled { color: ${({ theme }) => theme.colors.text.muted}; cursor: not-allowed; opacity: .5; }
 `
 
 export const RecordDetailCard = styled.section`
@@ -105,6 +135,7 @@ export const RecordDetailCard = styled.section`
   p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 14px; }
   > span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
   button { min-height: 46px; border: 1px solid ${({ theme }) => theme.colors.brand.strong}; border-radius: 12px; padding: 12px 24px; background: ${({ theme }) => theme.colors.background.default}; color: ${({ theme }) => theme.colors.brand.strong}; cursor: pointer; font-size: 15px; font-weight: 600; }
+  button:disabled { cursor: not-allowed; opacity: .56; }
   @media (max-width: 900px) { height: auto; min-height: 260px; }
 `
 
@@ -123,43 +154,62 @@ export const RecordDescription = styled.p`
   line-height: 22px;
 `
 
+export const CommentHeading = styled.span`
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 15px;
+  line-height: 22px;
+`
+
+export const RecordAction = styled.button`
+  width: 107px;
+  height: 46px;
+  flex: 0 0 46px;
+`
+
 export const CommentEditLayout = styled.div`
   display: grid;
+  margin: 0 32px;
   gap: 24px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 430px minmax(0, 682px);
   @media (max-width: 860px) { grid-template-columns: 1fr; }
 `
 
 export const CommentPhoto = styled.section`
   display: flex;
-  min-height: 380px;
+  width: 430px;
+  height: 526px;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
-  border-radius: 20px;
-  padding: 16px;
+  gap: 14px;
+  border: 1px solid #dceaf7;
+  border-radius: 16px;
+  padding: 20px;
   background: var(--pt-bg-default);
-  box-shadow: 0 2px 12px rgb(16 42 66 / 8%);
-  img { display: block; width: 100%; height: 250px; border-radius: 12px; object-fit: cover; }
-  span { color: var(--pt-text-muted); font-size: 12px; }
-  button { min-height: 36px; border: 1px solid var(--pt-brand-primary); border-radius: 10px; padding: 0 14px; background: var(--pt-bg-default); color: var(--pt-brand-primary); cursor: not-allowed; font-size: 12px; font-weight: 600; opacity: .7; }
+  img { display: block; width: 382px; height: 420px; border-radius: 16px; object-fit: cover; }
+  h2 { margin: 0; color: var(--pt-text-strong); font-size: 18px; line-height: 22px; }
+  span { color: var(--pt-text-muted); font-size: 13px; line-height: 16px; }
+  @media (max-width: 860px) { width: 100%; height: auto; img { width: 100%; height: min(420px, 70vw); } }
 `
 
 export const CommentForm = styled.form`
   display: flex;
-  min-height: 380px;
+  width: 682px;
+  height: 400px;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
-  border-radius: 20px;
+  gap: 14px;
+  border-radius: 16px;
   padding: 24px;
   background: var(--pt-bg-default);
   box-shadow: 0 2px 12px rgb(16 42 66 / 8%);
-  h2 { margin: 0; color: var(--pt-text-strong); font-size: 15px; }
-  p { margin: 0; color: var(--pt-text-muted); font-size: 12px; }
-  textarea { width: 100%; min-height: 108px; resize: vertical; border: 1px solid var(--pt-border-default); border-radius: 12px; padding: 14px; color: var(--pt-text-strong); font: inherit; }
-  button { min-height: 46px; border: 0; border-radius: 10px; padding: 0 16px; background: var(--pt-brand-primary); color: var(--pt-text-inverse); cursor: pointer; font-weight: 600; }
+  h2 { margin: 0; color: var(--pt-text-strong); font-size: 18px; line-height: 22px; }
+  p { order: 3; margin: 0; color: var(--pt-text-muted); font-size: 12px; line-height: 15px; }
+  textarea { width: 100%; height: 220px; min-height: 220px; resize: none; border: 1px solid var(--pt-border-default); border-radius: 16px; padding: 14px 16px; color: var(--pt-text-strong); font: inherit; }
+  button { order: 4; width: 180px; height: 48px; border: 0; border-radius: 14px; padding: 0 16px; background: var(--pt-brand-primary); color: var(--pt-text-inverse); cursor: pointer; font-size: 14px; font-weight: 600; }
   small { color: var(--pt-status-error); font-size: 12px; }
+  @media (max-width: 860px) { width: 100%; height: auto; min-height: 400px; }
 `
 
 export const EditHistory = styled.section`

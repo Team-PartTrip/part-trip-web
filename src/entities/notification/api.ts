@@ -23,6 +23,7 @@ export type NotificationResponseDto = {
   body?: string
   linkType?: string
   linkId?: number
+  plannerId?: number
   isRead?: boolean
   read?: boolean
   createdAt?: string

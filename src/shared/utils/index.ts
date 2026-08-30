@@ -7,7 +7,7 @@ export {
   sanitizePassword,
 } from './authValidation'
 export { getErrorMessage } from './errorMessage'
-export { formatDate, getDateRangeDays } from './date'
+export { formatDate, getDateRangeDays, isInCurrentCalendarWeek } from './date'
 export {
   createSanitizedChangeHandler,
   getFirstErrorMessage,
