@@ -240,6 +240,7 @@ function PlannerFlowPage({ step }: Props) {
     closeVoteMutation,
     confirmedPlaces,
     countries,
+    popularCities,
     continueTo,
     confirmPlannerMutation,
     confirmVoteMutation,
@@ -353,6 +354,30 @@ function PlannerFlowPage({ step }: Props) {
     selectedCityName.trim() !== "" &&
     selectedCityName.trim().toLocaleLowerCase() !==
       (plannerDetail?.cityName ?? "").trim().toLocaleLowerCase();
+  const popularDestinations = popularCities.flatMap((city) => {
+    if (!city.countryName || !city.cityName) return [];
+    const country = countries.find(
+      (item) =>
+        item.countryName === city.countryName && item.cityName === city.cityName,
+    );
+    return [{
+      countryInfoId: country?.countryInfoId,
+      countryName: city.countryName,
+      cityName: city.cityName,
+      imageUrl: country?.imageUrl,
+      summary: country?.summary,
+    }];
+  });
+  const destinationResults = isDestinationSearch
+    ? [...countries, ...popularDestinations.filter((popular) => {
+        const keyword = selectedCityName.trim().toLocaleLowerCase();
+        return [popular.countryName, popular.cityName].some((value) =>
+          value?.toLocaleLowerCase().includes(keyword),
+        );
+      })].filter((destination, index, all) => all.findIndex((item) =>
+        item.countryName === destination.countryName && item.cityName === destination.cityName,
+      ) === index)
+    : popularDestinations;
   const currentUserName = profile?.name || "사용자";
   const currentUserInitial = currentUserName.slice(0, 2).toUpperCase() || "MS";
   const otherMembers = members.filter((member) =>
@@ -968,7 +993,7 @@ function PlannerFlowPage({ step }: Props) {
                         {isDestinationSearch ? "검색 결과" : "인기 여행지"}
                       </span>
                       <S.PopularGrid role="group" aria-labelledby="planner-destination-results-label">
-                        {(isDestinationSearch ? countries : countries.slice(0, 4)).map(
+                        {destinationResults.map(
                           (country) => (
                             <S.PopularButton
                               type="button"
@@ -992,7 +1017,7 @@ function PlannerFlowPage({ step }: Props) {
                           ),
                         )}
                       </S.PopularGrid>
-                      {selectedCityName && countries.length === 0 ? (
+                      {selectedCityName && destinationResults.length === 0 ? (
                         <S.SearchEmpty>
                           검색 결과가 없습니다. 국가명 또는 도시명을 다시
                           입력해주세요.

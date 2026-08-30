@@ -94,6 +94,7 @@ export function usePlannerFlow(step: PlannerStep) {
     plan,
     plannerDetail,
     planners,
+    popularCities,
     setPlan,
     votes,
     voteDetail,
@@ -209,11 +210,15 @@ export function usePlannerFlow(step: PlannerStep) {
 
   const saveDestination = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    const normalizedCityName = selectedCityName.trim().toLocaleLowerCase()
+    const normalizedCountryName = selectedCountryName.trim().toLocaleLowerCase()
     const selectedCountry = countries.find((item) =>
-      String(item.countryInfoId) === selectedCountryInfoId
-      || item.cityName?.toLocaleLowerCase() === selectedCityName.trim().toLocaleLowerCase()
-      || item.countryName?.toLocaleLowerCase() === selectedCityName.trim().toLocaleLowerCase(),
-    ) ?? (countries.length === 1 && selectedCityName.trim() ? countries[0] : undefined)
+      (selectedCountryInfoId && String(item.countryInfoId) === selectedCountryInfoId)
+      || item.cityName?.toLocaleLowerCase() === normalizedCityName,
+    ) ?? (normalizedCityName === normalizedCountryName
+      ? countries.find((item) => item.countryName?.toLocaleLowerCase() === normalizedCountryName)
+      : undefined)
+      ?? (countries.length === 1 && selectedCityName.trim() ? countries[0] : undefined)
     const nextCountry = selectedCountry?.countryName || selectedCountryName.trim()
     const nextCity = selectedCountry?.cityName || selectedCityName.trim()
     const nextHeadcount = Number(selectedHeadcount)
@@ -614,6 +619,7 @@ export function usePlannerFlow(step: PlannerStep) {
     plannerInviteLink,
     plannerTitle,
     planners,
+    popularCities,
     saveDestination,
     saveGroupSettings,
     selected,

@@ -59,6 +59,12 @@ export type CountryInfoResponseDto = {
 
 export type PopularPlaceResponseDto = CountryInfoResponseDto
 
+export type PopularCityResponseDto = {
+  cityName?: string
+  countryName?: string
+  planCount?: number
+}
+
 export type RecentSearchResponseDto = {
   recentSearchId?: number
   countryName?: string
@@ -89,6 +95,7 @@ const MAIN_API_PATHS = {
   countryInfo: '/main/country-info',
   countries: '/main/countries',
   popular: '/main/search/popular',
+  popularCities: '/main/popular-cities',
   recent: '/main/search/recent',
 } as const
 
@@ -267,6 +274,19 @@ export async function getPopularPlaces(): Promise<PopularPlaceResponseDto[]> {
       return data
     },
     () => mockCountries.slice(0, 4),
+  )
+}
+
+export async function getPopularCities(limit = 50): Promise<PopularCityResponseDto[]> {
+  return requestWithMockFallback(
+    async () => {
+      const { data } = await apiClient.get<PopularCityResponseDto[]>(MAIN_API_PATHS.popularCities, { params: { limit } })
+      return data
+    },
+    () => mockCountries
+      .filter((country) => country.countryName && country.cityName)
+      .map(({ cityName, countryName }, index) => ({ cityName, countryName, planCount: mockCountries.length - index }))
+      .slice(0, 4),
   )
 }
 

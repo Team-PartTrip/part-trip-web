@@ -4,6 +4,7 @@ import {
   getCountryInfo,
   getDday,
   getFestivals,
+  getPopularCities,
   getTourPlace,
   type CountryInfoResponseDto,
   type DdayResponseDto,
@@ -46,6 +47,17 @@ export function useCountriesQuery(keywordOrEnabled: string | boolean = '', enabl
   const keyword = typeof keywordOrEnabled === 'string' ? keywordOrEnabled : ''
   const isEnabled = typeof keywordOrEnabled === 'boolean' ? keywordOrEnabled : enabled
   return useQuery(countriesQueryOptions(keyword, isEnabled))
+}
+
+export const popularCitiesQueryOptions = (limit = 50, enabled = true) =>
+  queryOptions({
+    queryKey: travelQueryKeys.popularCities(limit),
+    queryFn: () => getPopularCities(limit),
+    enabled,
+  })
+
+export function usePopularCitiesQuery(limit = 50, enabled = true) {
+  return useQuery(popularCitiesQueryOptions(limit, enabled))
 }
 
 export function useDdayQuery(enabled = true) {
