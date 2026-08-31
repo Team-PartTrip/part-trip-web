@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 import { useUnreadNotificationCountQuery } from '@/entities/notification'
-import { useUserProfileQuery } from '@/entities/user'
+import { partTripLogoUrl } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import { MENUS } from '@/widgets/sidebar'
 import { Sidebar } from '@/widgets/sidebar'
@@ -13,16 +13,15 @@ type AppShellProps = {
 
 export function AppShell({ children }: AppShellProps) {
   const { data: notificationCount } = useUnreadNotificationCountQuery()
-  const { data: profile, isLoading: isProfileLoading } = useUserProfileQuery()
 
   return (
     <S.Root>
-      <Sidebar accountName={profile?.name ? `${profile.name}님의 PartTrip` : undefined} isLoading={isProfileLoading} menus={MENUS} />
+      <Sidebar menus={MENUS} />
       <S.Content>
         <S.Topbar>
+          <S.MobileLogoLink to={paths.main} aria-label="PartTrip 홈"><img src={partTripLogoUrl} alt="" /></S.MobileLogoLink>
           <S.TopbarSpacer />
           <S.NotificationLink to={paths.notifications}>알림{typeof notificationCount?.unreadCount === 'number' ? ` ${notificationCount.unreadCount}` : ''}</S.NotificationLink>
-          <S.ProfileLink to={paths.profile} aria-label="마이페이지">{isProfileLoading ? <S.ProfileSkeleton /> : profile?.name?.slice(0, 1) || '찬'}</S.ProfileLink>
         </S.Topbar>
         <S.Main>{children}</S.Main>
       </S.Content>

@@ -1,6 +1,5 @@
 export type PlannerStep =
   | 'list'
-  | 'create'
   | 'group'
   | 'destination'
   | 'explore'

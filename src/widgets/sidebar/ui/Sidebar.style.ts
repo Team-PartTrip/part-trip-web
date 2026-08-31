@@ -1,5 +1,4 @@
 import styled from 'styled-components'
-import { Skeleton } from '@/shared/ui/parttrip'
 
 export const SidebarWrapper = styled.aside`
   position: sticky;
@@ -44,11 +43,13 @@ export const LogoSection = styled.div`
   margin-bottom: 26px;
 
   a {
-    color: ${({ theme }) => theme.colors.brand.strong};
-    font-size: 28px;
-    font-weight: 700;
-    line-height: 32px;
     text-decoration: none;
+
+    img {
+      display: block;
+      width: 136px;
+      height: auto;
+    }
   }
 
   @media (max-width: 767px) {
@@ -67,67 +68,4 @@ export const MenuList = styled.nav`
     justify-content: space-around;
     gap: 4px;
   }
-`
-
-export const AccountButton = styled.button`
-  display: flex;
-  height: 44px;
-  flex: 0 0 44px;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  margin-top: auto;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: var(--pt-text-strong);
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 20px;
-  text-align: left;
-
-  @media (max-width: 767px) {
-    display: none;
-  }
-`
-
-export const Avatar = styled.span`
-  display: inline-flex;
-  width: 32px;
-  height: 32px;
-  flex: 0 0 32px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: ${({ theme }) => theme.colors.background.muted};
-  color: ${({ theme }) => theme.colors.brand.strong};
-  font-size: 11px;
-  font-weight: 600;
-`
-
-export const AccountIcon = styled.span`
-  display: inline-flex;
-  width: 25px;
-  height: 25px;
-  flex: 0 0 25px;
-  align-items: center;
-  justify-content: center;
-
-  img {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-`
-
-export const AccountSkeleton = styled(Skeleton)`
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-`
-
-export const AccountNameSkeleton = styled(Skeleton)`
-  width: 128px;
-  height: 20px;
 `

@@ -80,14 +80,21 @@ export const CalendarGrid = styled.div`
   grid-template-columns: repeat(7, 1fr);
 `
 
-export const Cell = styled.div<{ $empty: boolean; $inTrip: boolean }>`
+export const Cell = styled.button<{ $empty: boolean; $inTrip: boolean; $selected: boolean }>`
   position: relative;
+  width: 100%;
   min-height: 64px;
+  border: 0;
   border-radius: 8px;
   padding: 8px;
   background: ${({ $empty, $inTrip, theme }) => $empty ? 'transparent' : $inTrip ? theme.colors.background.muted : theme.colors.background.default};
   color: ${({ theme }) => theme.colors.text.strong};
+  cursor: ${({ $empty }) => ($empty ? 'default' : 'pointer')};
+  font: inherit;
   font-size: 11px;
+  text-align: left;
+  box-shadow: ${({ $selected, theme }) => ($selected ? `inset 0 0 0 2px ${theme.colors.brand.primary}` : 'none')};
+  &:disabled { cursor: default; }
   strong { font-weight: 500; }
   &:nth-child(7n + 1) strong { color: ${({ theme }) => theme.colors.status.error}; }
   @media (max-width: 560px) { min-height: 50px; padding: 6px; }
@@ -118,12 +125,25 @@ export const Note = styled.p`
 
 export const FestivalList = styled.section`
   min-height: 650px;
+  max-height: 650px;
+  box-sizing: border-box;
+  overflow-y: auto;
   border-radius: 28px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
   h2 { margin: 0 0 16px; color: ${({ theme }) => theme.colors.text.strong}; font-size: 15px; }
   > button { margin-top: 24px; border: 0; background: transparent; color: ${({ theme }) => theme.colors.brand.primary}; cursor: pointer; font-size: 12px; font-weight: 600; }
+`
+
+export const FilterButton = styled.button`
+  margin: -8px 0 16px;
+  border: 0;
+  background: transparent;
+  color: ${({ theme }) => theme.colors.brand.primary};
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
 `
 
 export const FestivalRow = styled.article`

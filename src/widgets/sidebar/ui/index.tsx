@@ -1,18 +1,12 @@
-import { useState, type ReactNode } from 'react'
-import { Link, useLocation, useNavigate } from '@tanstack/react-router'
-import { getAccessToken } from '@/entities/session/api'
-import { figmaProfileIcon } from '@/shared/assets'
+import { Link, useLocation } from '@tanstack/react-router'
+import { partTripLogoUrl } from '@/shared/assets'
 import { paths } from '@/shared/config'
 
 import type { SidebarMenuType } from '../types/sidebar-item/sidebar-item'
-import LogoutDialog from './logout-dialog'
 import SidebarItem from './sidebar-item/SidebarItem'
 import * as S from './Sidebar.style'
 
 interface Props {
-  accountName?: string
-  isLoading?: boolean
-  logo?: ReactNode
   menus: SidebarMenuType[]
 }
 
@@ -28,11 +22,8 @@ function activeHref(pathname: string, menus: SidebarMenuType[]) {
   return menus.find((item) => pathname === item.href)?.href ?? paths.main
 }
 
-export default function Sidebar({ accountName = '내 PartTrip', isLoading = false, menus }: Props) {
-  const navigate = useNavigate()
+export default function Sidebar({ menus }: Props) {
   const { pathname } = useLocation()
-  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false)
-  const isLoggedIn = Boolean(getAccessToken())
 
   const selectedHref = activeHref(pathname, menus)
 
@@ -40,7 +31,7 @@ export default function Sidebar({ accountName = '내 PartTrip', isLoading = fals
     <S.SidebarWrapper>
       <S.Aside>
         <S.LogoSection>
-          <Link to={paths.main} aria-label="PartTrip 홈">PartTrip</Link>
+          <Link to={paths.main} aria-label="PartTrip 홈"><img src={partTripLogoUrl} alt="" /></Link>
         </S.LogoSection>
 
         <S.MenuList aria-label="메인 메뉴">
@@ -55,25 +46,7 @@ export default function Sidebar({ accountName = '내 PartTrip', isLoading = fals
           ))}
         </S.MenuList>
 
-        <S.AccountButton
-          type="button"
-          onClick={() => {
-            if (isLoggedIn) setIsLogoutDialogOpen(true)
-            else navigate({ to: paths.login })
-          }}
-          aria-label={isLoggedIn ? '로그아웃 메뉴' : '로그인'}
-        >
-          {isLoading ? <S.AccountSkeleton aria-hidden="true" /> : <S.AccountIcon aria-hidden="true"><img src={figmaProfileIcon} alt="" /></S.AccountIcon>}
-          {isLoading ? <S.AccountNameSkeleton aria-hidden="true" /> : <span>{isLoggedIn ? accountName : '로그인'}</span>}
-        </S.AccountButton>
       </S.Aside>
-
-      {isLogoutDialogOpen ? (
-        <LogoutDialog
-          onClose={() => setIsLogoutDialogOpen(false)}
-          moveToLogin={() => navigate({ to: paths.login, replace: true })}
-        />
-      ) : null}
     </S.SidebarWrapper>
   )
 }

@@ -1,5 +1,4 @@
 export {
-  PlannerCreatePage,
   PlannerDestinationPage,
   PlannerExplorePage,
   PlannerFinalPage,

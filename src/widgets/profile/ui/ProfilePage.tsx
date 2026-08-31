@@ -66,13 +66,18 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
                 <h2>{name}</h2>
                 <p>{profile?.bio || profile?.travelStyle || '여행 성향 정보 없음'}</p>
                 <p>{profile?.id ? `@${profile.id}` : '아이디 정보 없음'}</p>
-                <PartTripButton
-                  type="button"
-                  $variant="secondary"
-                  onClick={() => navigate({ to: paths.profileEdit })}
-                >
-                  프로필 수정
-                </PartTripButton>
+                <S.ProfileActions>
+                  <PartTripButton
+                    type="button"
+                    $variant="secondary"
+                    onClick={() => navigate({ to: paths.profileEdit })}
+                  >
+                    프로필 수정
+                  </PartTripButton>
+                  <S.LogoutButton type="button" onClick={() => setIsLogoutDialogOpen(true)}>
+                    로그아웃
+                  </S.LogoutButton>
+                </S.ProfileActions>
               </S.ProfileCard>
               <S.StatsCard>
                 <S.SectionTitle>여행 통계</S.SectionTitle>
@@ -103,24 +108,6 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
                 </S.WorldMapCopy>
                 <img src={figmaWorldMap} alt="방문 국가 세계 지도" />
               </S.WorldMapSummary>
-              <S.SettingsCard>
-                <S.SectionTitle>설정</S.SectionTitle>
-                <S.SettingsButton
-                  type="button"
-                  onClick={() => navigate({ to: paths.profileEdit })}
-                >
-                  여행 타입 수정 <span>›</span>
-                </S.SettingsButton>
-                <S.SettingsButton
-                  type="button"
-                  onClick={() => navigate({ to: paths.changePassword })}
-                >
-                  계정 · 보안 <span>›</span>
-                </S.SettingsButton>
-                <S.SettingsButton type="button" $danger onClick={() => setIsLogoutDialogOpen(true)}>
-                  로그아웃
-                </S.SettingsButton>
-              </S.SettingsCard>
             </S.LowerBody>
           </>
         ) : null}

@@ -12,6 +12,7 @@ import {
   verifyCode,
   type SignUpRequestDto,
 } from '@/entities/session/api'
+import { partTripLogoUrl } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import {
   authValidationRules,
@@ -199,7 +200,7 @@ export function SignUpForm() {
     return (
       <S.Container>
         <S.Header>
-          <S.Brand>PartTrip</S.Brand>
+          <S.Brand><img src={partTripLogoUrl} alt="PartTrip" /></S.Brand>
           <S.Title>이메일 인증</S.Title>
           <S.Subtitle>이메일로 받은 인증번호를 입력하세요.</S.Subtitle>
         </S.Header>
@@ -233,7 +234,7 @@ export function SignUpForm() {
   return (
     <S.Container>
       <S.Header>
-        <S.Brand>PartTrip</S.Brand>
+        <S.Brand><img src={partTripLogoUrl} alt="PartTrip" /></S.Brand>
         <S.Title>회원가입</S.Title>
       </S.Header>
       <S.Body>

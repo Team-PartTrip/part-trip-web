@@ -6,28 +6,28 @@ import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './RecordPage.styles'
 
-type YearFilter = 'all' | '2026' | '2025'
-
 export function RecordPage() {
   const navigate = useNavigate()
   const { hasError, isLoading, trips } = useMyTrips()
-  const [year, setYear] = useState<YearFilter>('all')
+  const [year, setYear] = useState('all')
   const today = new Date().toISOString().slice(0, 10)
   const records = trips.map((trip) => ({
     id: trip.tripId,
     title: trip.title || `${trip.cityName || trip.countryName || '여행'} 여행`,
     date: `${formatDate(trip.startDate)} – ${formatDate(trip.endDate)}`,
+    year: trip.startDate?.slice(0, 4) || trip.createDate?.slice(0, 4) || '',
     photoCount: trip.photoCount ?? trip.images?.length ?? 0,
     active: Boolean(trip.startDate && trip.endDate && trip.startDate <= today && today <= trip.endDate),
   }))
-  const filteredRecords = records.filter((record) => year === 'all' || record.date.startsWith(year))
+  const years = [...new Set(records.map((record) => record.year).filter(Boolean))].sort((a, b) => b.localeCompare(a))
+  const filteredRecords = records.filter((record) => year === 'all' || record.year === year)
 
   return (
     <AppShell>
       <S.Page>
         <S.Header><S.Title>기록</S.Title></S.Header>
         <S.YearTabs aria-label="기록 연도 필터">
-          {(['all', '2026', '2025'] as const).map((value) => (
+          {['all', ...years].map((value) => (
             <button key={value} type="button" className={year === value ? 'active' : ''} aria-pressed={year === value} onClick={() => setYear(value)}>
               {value === 'all' ? '전체' : value}
             </button>

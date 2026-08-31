@@ -251,10 +251,11 @@ export const FlowStepper = styled.nav<{ $final?: boolean }>`
   width: 440px;
   max-width: 100%;
   align-items: center;
-  gap: 32px;
+  justify-content: space-between;
+  gap: 0;
   margin-left: auto;
   align-self: center;
-  overflow-x: auto;
+  overflow-x: hidden;
   position: ${({ $final }) => ($final ? 'absolute' : 'relative')};
   top: ${({ $final }) => ($final ? '-16px' : 'auto')};
   right: ${({ $final }) => ($final ? '-8px' : 'auto')};

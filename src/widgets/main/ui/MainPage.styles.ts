@@ -75,12 +75,6 @@ export const Hero = styled.section`
   color: ${({ theme }) => theme.colors.text.inverse};
 `
 
-export const Eyebrow = styled.span`
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 22px;
-`
-
 export const HeroLabel = styled.span`
   font-size: 13px;
   line-height: 18px;

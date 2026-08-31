@@ -6,6 +6,7 @@ import {
 } from 'react-hook-form'
 import { useNavigate } from '@tanstack/react-router'
 import { googleLogin, login, saveAuthTokens } from '@/entities/session/api'
+import { partTripLogoUrl } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import {
   authValidationRules,
@@ -97,7 +98,7 @@ export function LoginForm() {
   return (
     <S.Container>
       <S.Header>
-        <S.Brand>PartTrip</S.Brand>
+        <S.Brand><img src={partTripLogoUrl} alt="PartTrip" /></S.Brand>
         <S.Title>로그인</S.Title>
         <S.Subtitle>아이디와 비밀번호로 로그인하세요.</S.Subtitle>
       </S.Header>

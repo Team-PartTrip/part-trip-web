@@ -40,7 +40,7 @@ export function usePlannerData(
     step === 'final' ||
     step === 'place'
   const hasActivePlanner = isPositiveSafeInteger(activePlannerId)
-  const needsPlannerDetail = hasActivePlanner && step !== 'list' && step !== 'create'
+  const needsPlannerDetail = hasActivePlanner && step !== 'list'
   const needsMembers = step === 'group' || step === 'progress' || step === 'final'
   const requiresMembers = step === 'group' || step === 'progress'
   const needsInvitations = step === 'group'
