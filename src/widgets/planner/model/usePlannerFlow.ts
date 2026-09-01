@@ -668,6 +668,7 @@ export function usePlannerFlow(step: PlannerStep) {
     saveGroupSettings,
     selected,
     selectedCountryInfoId,
+    selectedCountryName,
     selectedCityName,
     selectedEndDate,
     selectedHeadcount,

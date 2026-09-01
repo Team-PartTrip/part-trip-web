@@ -11,7 +11,6 @@ const travelTimeZoneByCountryCode: Record<string, string> = {
   JP: 'Asia/Tokyo',
   KR: 'Asia/Seoul',
   MY: 'Asia/Kuala_Lumpur',
-  NZ: 'Pacific/Auckland',
   PH: 'Asia/Manila',
   SG: 'Asia/Singapore',
   TH: 'Asia/Bangkok',
@@ -25,6 +24,9 @@ const travelTimeZoneByCityName: Record<string, string> = {
   'New York': 'America/New_York',
   'San Francisco': 'America/Los_Angeles',
   '시드니': 'Australia/Sydney',
+  'Auckland': 'Pacific/Auckland',
+  'Christchurch': 'Pacific/Auckland',
+  'Wellington': 'Pacific/Auckland',
   '뉴욕': 'America/New_York',
   '로스앤젤레스': 'America/Los_Angeles',
   '샌프란시스코': 'America/Los_Angeles',
@@ -34,6 +36,9 @@ const travelTimeZoneByCityName: Record<string, string> = {
   '자카르타': 'Asia/Jakarta',
   '멜버른': 'Australia/Melbourne',
   '퍼스': 'Australia/Perth',
+  '오클랜드': 'Pacific/Auckland',
+  '웰링턴': 'Pacific/Auckland',
+  '크라이스트처치': 'Pacific/Auckland',
 }
 
 const travelTimeZoneByCountryName: Record<string, string> = {

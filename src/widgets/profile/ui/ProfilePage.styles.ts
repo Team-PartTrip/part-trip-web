@@ -54,7 +54,7 @@ export const LoadingRow = styled.div`
 export const LoadingLower = styled.div`
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 384px;
+  grid-template-columns: 1fr;
 `
 
 export const LoadingCard = styled(Skeleton)`
@@ -68,11 +68,6 @@ export const LoadingStats = styled(Skeleton)`
 `
 
 export const LoadingMap = styled(Skeleton)`
-  height: 260px;
-  border-radius: 16px;
-`
-
-export const LoadingSettings = styled(Skeleton)`
   height: 260px;
   border-radius: 16px;
 `
@@ -126,6 +121,12 @@ export const LogoutButton = styled.button`
   cursor: pointer;
   font-size: 15px;
   font-weight: 600;
+`
+
+export const ErrorActions = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
 `
 
 export const Avatar = styled.div`

@@ -19,7 +19,7 @@ export function AppShell({ children }: AppShellProps) {
       <Sidebar menus={MENUS} />
       <S.Content>
         <S.Topbar>
-          <S.MobileLogoLink to={paths.main} aria-label="PartTrip 홈"><img src={partTripLogoUrl} alt="" /></S.MobileLogoLink>
+          <S.MobileLogoLink to={paths.main} aria-label="PartTrip 홈"><img width={362} height={86} src={partTripLogoUrl} alt="" /></S.MobileLogoLink>
           <S.TopbarSpacer />
           <S.NotificationLink to={paths.notifications}>알림{typeof notificationCount?.unreadCount === 'number' ? ` ${notificationCount.unreadCount}` : ''}</S.NotificationLink>
         </S.Topbar>

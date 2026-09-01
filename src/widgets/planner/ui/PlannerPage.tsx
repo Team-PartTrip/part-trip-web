@@ -291,6 +291,7 @@ function PlannerFlowPage({ step }: Props) {
     saveDestination,
     saveGroupSettings,
     selected,
+    selectedCountryName,
     selectedCityName,
     selectedCountryInfoId,
     selectedEndDate,
@@ -963,8 +964,9 @@ function PlannerFlowPage({ step }: Props) {
                                 `${country.countryName}-${country.cityName}`
                               }
                               $active={
-                                String(country.countryInfoId) ===
-                                selectedCountryInfoId
+                                String(country.countryInfoId) === selectedCountryInfoId ||
+                                (country.countryName === selectedCountryName &&
+                                  country.cityName === selectedCityName)
                               }
                               onClick={() => handleDestinationSelect(country)}
                             >

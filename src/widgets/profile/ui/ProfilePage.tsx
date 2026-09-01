@@ -50,9 +50,16 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
           </S.Subtitle>
         </S.Header>
         {hasProfileError || hasTripsError ? (
-          <S.State role="alert">정보를 불러오지 못했습니다.</S.State>
+          <>
+            <S.State role="alert">정보를 불러오지 못했습니다.</S.State>
+            <S.ErrorActions>
+              <S.LogoutButton type="button" onClick={() => setIsLogoutDialogOpen(true)}>
+                로그아웃
+              </S.LogoutButton>
+            </S.ErrorActions>
+          </>
         ) : null}
-        {isLoading ? <S.LoadingLayout aria-busy="true" aria-label="프로필 정보 로딩 중"><S.LoadingRow><S.LoadingCard /><S.LoadingStats /></S.LoadingRow><S.LoadingLower><S.LoadingMap /><S.LoadingSettings /></S.LoadingLower></S.LoadingLayout> : !hasProfileError && !hasTripsError ? (
+        {isLoading ? <S.LoadingLayout aria-busy="true" aria-label="프로필 정보 로딩 중"><S.LoadingRow><S.LoadingCard /><S.LoadingStats /></S.LoadingRow><S.LoadingLower><S.LoadingMap /></S.LoadingLower></S.LoadingLayout> : !hasProfileError && !hasTripsError ? (
           <>
             <S.ProfileBody>
               <S.ProfileCard>
