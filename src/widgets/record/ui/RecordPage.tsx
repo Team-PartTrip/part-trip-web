@@ -10,7 +10,8 @@ export function RecordPage() {
   const navigate = useNavigate()
   const { hasError, isLoading, trips } = useMyTrips()
   const [year, setYear] = useState('all')
-  const today = new Date().toISOString().slice(0, 10)
+  const now = new Date()
+  const today = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-')
   const records = trips.map((trip) => ({
     id: trip.tripId,
     title: trip.title || `${trip.cityName || trip.countryName || '여행'} 여행`,

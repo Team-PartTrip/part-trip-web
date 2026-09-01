@@ -20,4 +20,6 @@ test('현재 달력 주는 월요일부터 일요일까지 계산한다', () => 
 
 test('촬영 시각을 여행 국가 시간대로 표시한다', () => {
   assert.equal(formatTravelDateTime('2026-08-31T15:00:00', 'JP'), '2026. 9. 1. 오전 12:00')
+  assert.equal(formatTravelDateTime('2026-08-31T15:00:00', 'US', undefined, 'Los Angeles'), '2026. 8. 31. 오전 8:00')
+  assert.equal(formatTravelDateTime('2026-08-31T15:00:00', 'XX'), '2026. 8. 31. 오후 3:00')
 })

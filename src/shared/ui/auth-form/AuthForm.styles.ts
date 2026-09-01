@@ -60,6 +60,7 @@ export const Brand = styled.span`
     display: block;
     width: 180px;
     height: auto;
+    aspect-ratio: 362 / 86;
   }
 `
 

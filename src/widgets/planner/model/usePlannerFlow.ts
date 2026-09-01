@@ -70,6 +70,7 @@ export function usePlannerFlow(step: PlannerStep) {
   const activePlannerId = storedActivePlannerId
   const activeVoteId = storedActiveVoteId
   const [countryInfoId, setCountryInfoId] = useState('')
+  const [selectedDestination, setSelectedDestination] = useState<CountryInfoResponseDto>()
   const [startDate, setStartDate] = useState<string>()
   const [endDate, setEndDate] = useState<string>()
   const [countryName, setCountryName] = useState<string>()
@@ -166,12 +167,14 @@ export function usePlannerFlow(step: PlannerStep) {
   const canManagePlanner = isPositiveSafeInteger(activePlannerId) && isPlannerLeader(plannerDetail?.role)
   const isRemindAvailable = canManagePlanner && openVotes.length > 0
   const handleDestinationSelect = (country: CountryInfoResponseDto) => {
+    setSelectedDestination(country)
     setCountryInfoId(String(country.countryInfoId ?? ''))
     setCountryName(country.countryName ?? '')
     setCityName(country.cityName ?? country.countryName ?? '')
   }
 
   const handleCityNameChange = (value: string) => {
+    setSelectedDestination(undefined)
     setCountryInfoId('')
     setCountryName('')
     setCityName(value)
@@ -212,8 +215,8 @@ export function usePlannerFlow(step: PlannerStep) {
       return matchesSelectedCountry && (matchesCity || matchesCountryInput)
     })
     const selectedCountry = selectedCountryInfoId
-      ? countries.find((item) => String(item.countryInfoId) === selectedCountryInfoId)
-      : matchingDestinations.length === 1 ? matchingDestinations[0] : undefined
+      ? countries.find((item) => String(item.countryInfoId) === selectedCountryInfoId) ?? selectedDestination
+      : selectedDestination ?? (matchingDestinations.length === 1 ? matchingDestinations[0] : undefined)
     const nextCountry = selectedCountry?.countryName || selectedCountryName.trim()
     const nextCity = selectedCountry?.cityName || selectedCityName.trim()
     const nextHeadcount = Number(selectedHeadcount)
@@ -579,6 +582,7 @@ export function usePlannerFlow(step: PlannerStep) {
     removeSessionValue(PLANNER_SELECTED_KEY)
     setStoredActivePlannerId(0)
     setStoredActiveVoteId(0)
+    setSelectedDestination(undefined)
     setCountryInfoId('')
     setCountryName(undefined)
     setCityName(undefined)
