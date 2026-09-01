@@ -9,8 +9,8 @@ export type SignUpRequestDto = {
   userId: string
   userPwd: string
   userMail: string
-  signUpDivision?: string
-  myCountry?: string
+  signUpDivision: string
+  myCountry: string
 }
 
 export type RefreshRequestDto = {
@@ -20,7 +20,12 @@ export type RefreshRequestDto = {
 export type TokenResponseDto = {
   accessToken: string
   refreshToken: string
-  surveyCompleted?: boolean
+  surveyCompleted: boolean
+}
+
+export type RefreshTokenResponseDto = {
+  accessToken: string
+  refreshToken: string
 }
 
 export type EmailVerifyRequestDto = {
@@ -33,13 +38,8 @@ export type EmailSendRequestDto = {
 }
 
 export type PasswordResetRequestDto = {
-  email: string
+  resetToken: string
   newPassword: string
-  confirmPassword: string
-}
-
-export type LogoutRequestDto = {
-  refreshToken: string
 }
 
 export type LoginRequestDto = {
@@ -52,7 +52,13 @@ export type GoogleLoginRequestDto = {
   code?: string
 }
 
-export type CheckUserIdResponseDto = Record<string, boolean>
+export type PasswordResetCodeResponseDto = {
+  resetToken: string
+}
+
+export type CheckUserIdResponseDto = {
+  available: boolean
+}
 
 export type UserEntity = {
   userId: string
@@ -118,8 +124,8 @@ export async function sendPasswordResetCode(payload: EmailSendRequestDto): Promi
   return post<string>(AUTH_API_PATHS.password.sendCode, payload)
 }
 
-export async function verifyPasswordResetCode(payload: EmailVerifyRequestDto): Promise<string> {
-  return post<string>(AUTH_API_PATHS.password.verifyCode, payload)
+export async function verifyPasswordResetCode(payload: EmailVerifyRequestDto): Promise<PasswordResetCodeResponseDto> {
+  return post<PasswordResetCodeResponseDto>(AUTH_API_PATHS.password.verifyCode, payload)
 }
 
 export async function signUp(payload: SignUpRequestDto): Promise<string> {
@@ -130,12 +136,13 @@ export async function resetPassword(payload: PasswordResetRequestDto): Promise<s
   return post<string>(AUTH_API_PATHS.password.reset, payload)
 }
 
-export async function logout(payload?: LogoutRequestDto): Promise<string> {
-  return post<string>(AUTH_API_PATHS.session.logout, payload ?? { refreshToken: '' })
+export async function logout(): Promise<string> {
+  const { data } = await apiClient.post<string>(AUTH_API_PATHS.session.logout)
+  return data
 }
 
-export async function refresh(payload: RefreshRequestDto): Promise<TokenResponseDto> {
-  return post<TokenResponseDto>(AUTH_API_PATHS.session.refresh, payload)
+export async function refresh(payload: RefreshRequestDto): Promise<RefreshTokenResponseDto> {
+  return post<RefreshTokenResponseDto>(AUTH_API_PATHS.session.refresh, payload)
 }
 
 export async function checkUserId(userId: string): Promise<CheckUserIdResponseDto> {

@@ -1,7 +1,6 @@
 import { infiniteQueryOptions, queryOptions, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 
 import {
-  getNotificationSettings,
   getNotifications,
   getUnreadNotificationCount,
   type NotificationFilter,
@@ -22,17 +21,6 @@ export const notificationsQueryOptions = (
 
 export function useNotificationsQuery(category: NotificationFilter = 'ALL', enabled = true) {
   return useInfiniteQuery(notificationsQueryOptions(category, enabled))
-}
-
-export const notificationSettingsQueryOptions = (enabled = true) =>
-  queryOptions({
-    queryKey: notificationQueryKeys.settings(),
-    queryFn: getNotificationSettings,
-    enabled,
-  })
-
-export function useNotificationSettingsQuery(enabled = true) {
-  return useQuery(notificationSettingsQueryOptions(enabled))
 }
 
 export const unreadNotificationCountQueryOptions = () =>

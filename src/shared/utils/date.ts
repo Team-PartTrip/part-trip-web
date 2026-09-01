@@ -1,4 +1,68 @@
 const MILLISECONDS_PER_DAY = 86_400_000
+type DateValue = string | null | undefined
+
+export type DateOnlyRange = {
+  startDate: string
+  endDate: string
+}
+
+type CalendarMonth = {
+  year: number
+  month: number
+}
+
+// ponytail: cap festival fan-out at 14 months; add a range/pagination API if longer trips need support.
+export const MAX_FESTIVAL_QUERY_MONTHS = 14
+
+function parseDateOnly(value: DateValue) {
+  const match = value?.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (!match) return undefined
+
+  const year = Number(match[1])
+  const month = Number(match[2])
+  const day = Number(match[3])
+  const date = new Date(Date.UTC(year, month - 1, day))
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day ? date : undefined
+}
+
+function formatDateOnly(date: Date) {
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`
+}
+
+export function getDateRangeWithPadding(startDate: DateValue, endDate: DateValue, paddingDays = 7): DateOnlyRange | undefined {
+  const start = parseDateOnly(startDate)
+  const end = parseDateOnly(endDate)
+  if (!start || !end || end < start || !Number.isInteger(paddingDays) || paddingDays < 0) return undefined
+
+  start.setUTCDate(start.getUTCDate() - paddingDays)
+  end.setUTCDate(end.getUTCDate() + paddingDays)
+  return { startDate: formatDateOnly(start), endDate: formatDateOnly(end) }
+}
+
+export function getCalendarMonthsInRange(startDate: DateValue, endDate: DateValue): CalendarMonth[] {
+  const start = parseDateOnly(startDate)
+  const end = parseDateOnly(endDate)
+  if (!start || !end || end < start) return []
+
+  const monthCount = (end.getUTCFullYear() - start.getUTCFullYear()) * 12 + end.getUTCMonth() - start.getUTCMonth() + 1
+  if (monthCount > MAX_FESTIVAL_QUERY_MONTHS) return []
+
+  const current = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1))
+  const lastMonth = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), 1))
+  const months: CalendarMonth[] = []
+  while (current <= lastMonth) {
+    months.push({ year: current.getUTCFullYear(), month: current.getUTCMonth() + 1 })
+    current.setUTCMonth(current.getUTCMonth() + 1)
+  }
+  return months
+}
+
+export function isDateInRange(value: DateValue, startDate: DateValue, endDate: DateValue) {
+  const date = parseDateOnly(value)
+  const start = parseDateOnly(startDate)
+  const end = parseDateOnly(endDate)
+  return Boolean(date && start && end && date >= start && date <= end)
+}
 
 const travelTimeZoneByCountryCode: Record<string, string> = {
   CN: 'Asia/Shanghai',
@@ -61,11 +125,11 @@ function travelTimeZone(countryCode?: string, countryName?: string, cityName?: s
     ?? travelTimeZoneByCountryName[countryName?.trim() ?? '']
 }
 
-export function formatDate(value?: string) {
+export function formatDate(value: DateValue) {
   return value?.replaceAll('-', '.') ?? '-'
 }
 
-export function formatTravelDateTime(value?: string, countryCode?: string, countryName?: string, cityName?: string) {
+export function formatTravelDateTime(value: DateValue, countryCode?: string, countryName?: string, cityName?: string) {
   if (!value) return '-'
   const normalized = value.trim()
   const date = new Date(/(?:Z|[+-]\d{2}:?\d{2})$/i.test(normalized) ? normalized : `${normalized}Z`)
@@ -80,8 +144,8 @@ export function formatTravelDateTime(value?: string, countryCode?: string, count
 }
 
 export function getDateRangeDays(
-  startDate?: string,
-  endDate?: string,
+  startDate: DateValue,
+  endDate: DateValue,
 ): number | undefined {
   if (!startDate || !endDate) return undefined
 
@@ -94,7 +158,7 @@ export function getDateRangeDays(
   return Math.round((end - start) / MILLISECONDS_PER_DAY) + 1
 }
 
-export function isInCurrentCalendarWeek(value?: string, today = new Date()) {
+export function isInCurrentCalendarWeek(value: DateValue, today = new Date()) {
   if (!value) return false
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return false

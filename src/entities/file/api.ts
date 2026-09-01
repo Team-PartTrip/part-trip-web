@@ -1,18 +1,8 @@
-import { apiClient, resolveApiAssetUrl } from '@/shared/libs/api-client'
-import { requestWithMockFallback } from '@/shared/libs/api-fallback'
+import { createUnsupportedApiError } from '@/shared/libs/unsupported-api-error'
 
 export { resolveApiAssetUrl } from '@/shared/libs/api-client'
 
-const FILE_API_PATHS = {
-  image: '/community/images',
-} as const
-
 export async function uploadImage(file: File): Promise<Record<string, string>> {
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.postForm<Record<string, string>>(FILE_API_PATHS.image, { file })
-      return Object.fromEntries(Object.entries(data).map(([key, url]) => [key, resolveApiAssetUrl(url) ?? url]))
-    },
-    () => ({ imageUrl: typeof URL.createObjectURL === 'function' ? URL.createObjectURL(file) : '' }),
-  )
+  void file
+  throw createUnsupportedApiError('커뮤니티 이미지')
 }

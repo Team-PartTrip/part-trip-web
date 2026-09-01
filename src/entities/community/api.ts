@@ -1,6 +1,4 @@
-import { apiClient } from '@/shared/libs/api-client'
-import { requestWithMockFallback } from '@/shared/libs/api-fallback'
-import { toggleMockLike } from './mock-state'
+import { createUnsupportedApiError } from '@/shared/libs/unsupported-api-error'
 
 export * from './board'
 export * from './review'
@@ -16,11 +14,6 @@ export type LikeResponseDto = {
 }
 
 export async function toggleLike(payload: LikeRequestDto): Promise<LikeResponseDto> {
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.post<LikeResponseDto>('/community/likes', payload)
-      return data
-    },
-    () => toggleMockLike(payload.targetType, payload.targetId),
-  )
+  void payload
+  throw createUnsupportedApiError('커뮤니티')
 }

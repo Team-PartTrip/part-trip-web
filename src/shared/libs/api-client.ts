@@ -40,8 +40,8 @@ export const apiClient = axios.create({
   },
 })
 
-export function resolveApiAssetUrl(url?: string): string | undefined {
-  if (!url || !url.startsWith('/')) return url
+export function resolveApiAssetUrl(url?: string | null): string | undefined {
+  if (!url || !url.startsWith('/')) return url ?? undefined
   if (typeof window === 'undefined') return url
   const apiBaseUrl = new URL(apiClient.defaults.baseURL ?? '/', window.location.origin)
   return new URL(url, apiBaseUrl.origin).href
@@ -110,8 +110,7 @@ async function requestNewTokens(refreshToken: string) {
         { timeout: REQUEST_TIMEOUT_MS },
       )
       .then(({ data }) => {
-        saveAuthTokens(data)
-        return data
+        return saveAuthTokens(data)
       })
       .finally(() => {
         refreshPromise = null

@@ -115,6 +115,7 @@ export const DestinationButton = styled.button<{ $active: boolean }>`
   text-align: left;
   strong { font-size: 13px; }
   span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
+  &:disabled { cursor: default; }
 `
 
 export const DateRange = styled.div`

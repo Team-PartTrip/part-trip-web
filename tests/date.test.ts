@@ -1,13 +1,30 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { formatDate, formatTravelDateTime, getDateRangeDays, isInCurrentCalendarWeek } from '../src/shared/utils/date.ts'
+import { formatDate, formatTravelDateTime, getCalendarMonthsInRange, getDateRangeDays, getDateRangeWithPadding, isDateInRange, isInCurrentCalendarWeek, MAX_FESTIVAL_QUERY_MONTHS } from '../src/shared/utils/date.ts'
 
 test('날짜 포맷과 양끝 포함 기간을 공통 규칙으로 계산한다', () => {
   assert.equal(formatDate('2026-07-01'), '2026.07.01')
   assert.equal(getDateRangeDays('2026-07-01', '2026-07-03'), 3)
   assert.equal(getDateRangeDays('잘못된 날짜', '2026-07-03'), undefined)
   assert.equal(getDateRangeDays('2026-07-03', '2026-07-01'), undefined)
+})
+
+test('축제 조회 범위는 여행 기간 앞뒤 7일을 포함하고 월 경계를 넘는다', () => {
+  const range = getDateRangeWithPadding('2026-08-30', '2026-09-02')
+
+  assert.deepEqual(range, { startDate: '2026-08-23', endDate: '2026-09-09' })
+  assert.deepEqual(getCalendarMonthsInRange(range?.startDate, range?.endDate), [
+    { year: 2026, month: 8 },
+    { year: 2026, month: 9 },
+  ])
+  assert.equal(isDateInRange('2026-08-23', range?.startDate, range?.endDate), true)
+  assert.equal(isDateInRange('2026-09-10', range?.startDate, range?.endDate), false)
+})
+
+test('축제 월별 조회 fan-out은 상한을 넘지 않는다', () => {
+  assert.equal(getCalendarMonthsInRange('2026-01-01', '2027-02-01').length, MAX_FESTIVAL_QUERY_MONTHS)
+  assert.deepEqual(getCalendarMonthsInRange('2026-01-01', '2027-03-01'), [])
 })
 
 test('현재 달력 주는 월요일부터 일요일까지 계산한다', () => {

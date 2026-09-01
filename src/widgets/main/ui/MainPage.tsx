@@ -8,14 +8,14 @@ import { AppShell } from '@/widgets/app-shell'
 import { formatDday, hasTravelPlan } from '../model/dday'
 import * as S from './MainPage.styles'
 
-function dateRangeLabel(startDate?: string, endDate?: string) {
+function dateRangeLabel(startDate?: string | null, endDate?: string | null) {
   const start = formatDate(startDate)
   const end = formatDate(endDate)
   if (start.length >= 7 && end.startsWith(start.slice(0, 7))) return `${start} – ${end.slice(5)}`
   return `${start} – ${end}`
 }
 
-function durationLabel(startDate?: string, endDate?: string) {
+function durationLabel(startDate?: string | null, endDate?: string | null) {
   const days = getDateRangeDays(startDate, endDate)
   return days == null ? '여행 기간 미설정' : `${Math.max(0, days - 1)}박 ${days}일`
 }
@@ -45,7 +45,7 @@ export function MainPage() {
             <S.CalendarIcon><img src={figmaPlannerIcon} alt="" /></S.CalendarIcon>
             <S.CalendarCopy>
               <strong>축제 · 이벤트 캘린더</strong>
-              <span>{data.country?.countryName || plan?.countryName || '여행지'}의 이번 달 일정</span>
+              <span>{data.country?.countryName || plan?.countryName || '여행지'}의 여행 기간 전후 일정</span>
             </S.CalendarCopy>
             <S.CalendarArrow aria-hidden="true">›</S.CalendarArrow>
           </S.CalendarCard>

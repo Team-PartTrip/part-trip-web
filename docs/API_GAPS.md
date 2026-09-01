@@ -1,21 +1,20 @@
-# API 계약 보류 항목
+# API 계약 보류·미구현 항목
 
-2026-08-27 기준 로컬 Swagger(`http://127.0.0.1:8080/v3/api-docs`)에서 확인되지 않은 endpoint다. 계약이 추가되기 전까지 mock 성공 응답을 만들지 않고, 현재 UI의 명시적인 fallback·비활성 상태를 유지한다.
+2026-09-01 기준 최신 CSV 명세서를 계약의 source of truth로 사용한다. CSV의 구현완료 API만 실제 Entity API에서 호출하고, 보류·미구현·CSV 미수록 기능은 성공 mock을 만들지 않는다.
 
-| 영역 | 현재 프론트 호출 | 현재 동작 |
-| --- | --- | --- |
-| 메인 부가 정보 | `/main/today-phrase`, `/main/weather`, `/main/exchange-rate`, `/main/population-info`, `/main/food-info` | 해당 카드에 빈 상태를 표시 |
-| 메인 검색 | `/main/search/popular`, `/main/search/recent`, `/main/search/travel-change` | 여행지 선택 화면에서 데이터가 없으면 빈 상태를 표시 |
-| 커뮤니티 | `/community/**` | API 오류를 화면에 표시하고 가짜 게시글을 만들지 않음 |
-| 여행 기록 | `/trips/**` | API 오류를 화면에 표시하고 가짜 기록을 만들지 않음 |
-| 여행 카드 | `/community/shared-trips/**` | 공유 카드 삭제만 브라우저에서 숨김 처리하고 서버 성공으로 표시하지 않음 |
-| 미션 | `/mission/**` | API 오류를 화면에 표시하고 가짜 완료 응답을 만들지 않음 |
+## CSV에 있지만 아직 사용할 수 없는 API
 
-알림(`/notifications/**`)과 플래너(`/planners/**`)의 목록·상세·멤버·투표·확정 endpoint는 현재 Swagger 계약을 기준으로 Entity API에 연결되어 있다.
+- `GET /api/trips/history`: 보류. 기록 화면은 구현완료인 `/api/travel-cards` 목록·상세를 사용한다.
+- `POST /api/travel-cards/{cardId}/report`: 보류. 리포트 화면은 생성 버튼 없이 준비 중 상태를 표시한다.
+- `/api/world-map/**`: 미구현. 관련 API 함수는 명시적 미지원 오류를 반환하며 mock 데이터를 만들지 않는다.
 
-계약이 추가되거나 경로가 변경되면 다음 순서로 동기화한다.
+## 최신 CSV에 없는 기존 기능
 
-1. Swagger에 method, path, request, response, 인증 조건이 있는지 확인한다.
-2. 관련 Entity의 `api.ts`, `types`, `query-keys`, `queries`, `mutations`를 함께 갱신한다.
-3. loading, error, empty, success 상태와 Query cache invalidation을 연결한다.
-4. 실제 API 환경에서 주요 사용자 흐름을 확인한다.
+커뮤니티·공유 여행·미션·촬영 분석·메인 여행지 저장/최근 검색·프로필 테마·알림 설정 API는 최신 명세서에 없어 명시적 미지원 상태로 유지한다. 해당 기능에서 2xx 성공이나 가짜 데이터를 표시하지 않는다.
+
+계약이 추가되거나 경로가 변경되면 다음을 함께 갱신한다.
+
+1. method, path, query/path parameter, request body, response DTO, 인증 조건을 CSV와 대조한다.
+2. 관련 Entity의 `api.ts`, `queries`, `mutations`, query key를 갱신한다.
+3. 영향을 받는 UI의 loading, error, empty, success 상태와 cache invalidation을 연결한다.
+4. 인증된 실제 API 환경에서 주요 흐름을 확인한다.

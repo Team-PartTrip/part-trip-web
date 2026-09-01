@@ -237,3 +237,37 @@ test('원격 인증 갱신은 HTTPS가 아니면 차단한다', async () => {
     }
   }
 })
+
+test('refresh 실패 시 저장된 토큰을 제거하고 원래 요청을 재시도하지 않는다', async () => {
+  const storage = createStorage()
+  const previousStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
+  const previousAxiosAdapter = axios.defaults.adapter
+  const previousApiAdapter = apiClient.defaults.adapter
+  const requests: string[] = []
+  const adapter: AxiosAdapter = async (config) => {
+    requests.push(config.url ?? '')
+    const response = { config, data: {}, headers: {}, status: 401, statusText: 'Unauthorized' }
+    return Promise.reject(new AxiosError('Unauthorized', AxiosError.ERR_BAD_REQUEST, config, undefined, response))
+  }
+
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: storage })
+  axios.defaults.adapter = adapter
+  apiClient.defaults.adapter = adapter
+  saveAuthTokens({ accessToken: 'expired', refreshToken: 'refresh-1' })
+
+  try {
+    await assert.rejects(apiClient.get('/private'))
+    assert.deepEqual(requests, ['/private', '/auth/refresh'])
+    assert.equal(storage.getItem('accessToken'), null)
+    assert.equal(storage.getItem('refreshToken'), null)
+  } finally {
+    clearAuthTokens()
+    if (previousStorage) {
+      Object.defineProperty(globalThis, 'localStorage', previousStorage)
+    } else {
+      Reflect.deleteProperty(globalThis, 'localStorage')
+    }
+    axios.defaults.adapter = previousAxiosAdapter
+    apiClient.defaults.adapter = previousApiAdapter
+  }
+})

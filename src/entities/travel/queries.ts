@@ -8,18 +8,11 @@ import {
   getTourPlace,
   type CountryInfoResponseDto,
   type DdayResponseDto,
-  type Destination,
   type FestivalResponseDto,
   type TourPlaceResponseDto,
 } from './api'
 import { travelQueryKeys } from './query-keys'
-
-const currencyByCountry: Record<string, string> = {
-  베트남: 'VND',
-  싱가포르: 'SGD',
-  일본: 'JPY',
-  태국: 'THB',
-}
+import { getCalendarMonthsInRange, getDateRangeWithPadding, isDateInRange } from '@/shared/utils'
 
 export const countriesQueryOptions = (keyword = '', enabled = true) =>
   queryOptions({
@@ -49,14 +42,14 @@ export function useCountriesQuery(keywordOrEnabled: string | boolean = '', enabl
   return useQuery(countriesQueryOptions(keyword, isEnabled))
 }
 
-export const popularCitiesQueryOptions = (limit = 50, enabled = true) =>
+export const popularCitiesQueryOptions = (limit = 8, enabled = true) =>
   queryOptions({
     queryKey: travelQueryKeys.popularCities(limit),
     queryFn: () => getPopularCities(limit),
     enabled,
   })
 
-export function usePopularCitiesQuery(limit = 50, enabled = true) {
+export function usePopularCitiesQuery(limit = 8, enabled = true) {
   return useQuery(popularCitiesQueryOptions(limit, enabled))
 }
 
@@ -66,6 +59,24 @@ export function useDdayQuery(enabled = true) {
 
 export function useFestivalsQuery(countryName?: string, year?: number, month?: number) {
   return useQuery(festivalsQueryOptions(countryName ?? '', year, month))
+}
+
+export function useTripFestivalsQuery(countryName?: string | null, startDate?: string | null, endDate?: string | null) {
+  const dateRange = getDateRangeWithPadding(startDate, endDate)
+  const months = getCalendarMonthsInRange(dateRange?.startDate, dateRange?.endDate)
+  const isRangeTooLong = Boolean(dateRange && months.length === 0)
+  const queries = useQueries({
+    queries: isRangeTooLong ? [] : months.map(({ year, month }) => festivalsQueryOptions(countryName ?? '', year, month)),
+  })
+  const festivals = queries.flatMap((query) => query.data ?? [])
+
+  return {
+    data: festivals.filter((festival) => isDateInRange(festival?.startDate, dateRange?.startDate, dateRange?.endDate)),
+    dateRange,
+    isError: isRangeTooLong || queries.some((query) => query.isError),
+    isRangeTooLong,
+    isLoading: queries.some((query) => query.isLoading),
+  }
 }
 
 export const tourPlacesQueryOptions = (
@@ -87,42 +98,6 @@ export function useTourPlacesQuery(
   enabled = true,
 ) {
   return useQuery(tourPlacesQueryOptions(countryName ?? '', cityName, category, enabled))
-}
-
-export type DestinationQueryData = {
-  destinations: readonly Destination[]
-  recentDestinations: readonly Destination[]
-  travelPlanId?: number
-}
-
-export async function getDestinationData(): Promise<DestinationQueryData> {
-  const [countries, currentPlan] = await Promise.all([
-    getCountries(),
-    getDday(),
-  ])
-  const destinations = countries.map((country, index) => ({
-    country: country.countryName ?? '여행지',
-    countryInfoId: country.countryInfoId,
-    currency: currencyByCountry[country.countryName ?? ''] ?? '',
-    id: String(country.countryInfoId ?? index),
-    imageUrl: country.imageUrl,
-    name: country.cityName || country.countryName || '여행지',
-  }))
-  return {
-    destinations,
-    recentDestinations: [],
-    travelPlanId: currentPlan?.travelPlanId,
-  }
-}
-
-export const destinationQueryOptions = () =>
-  queryOptions({
-    queryKey: travelQueryKeys.destinationSelector(),
-    queryFn: getDestinationData,
-  })
-
-export function useDestinationDataQuery() {
-  return useQuery(destinationQueryOptions())
 }
 
 export type MainTravelQueryData = {

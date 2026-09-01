@@ -62,7 +62,7 @@ export function RecordDetailPage() {
             </S.RecordPhoto>
             <S.RecordDetailCard>
               <h1>{placeTitle}</h1>
-              <p>{[selectedEntry?.takenAt ? formatTravelDateTime(selectedEntry.takenAt, record.countryCode, record.countryName, record.cityName) : selectedEntry?.date ? formatDate(selectedEntry.date) : formatDate(record.startDate), selectedEntry?.address || record.cityName || record.countryName].filter(Boolean).join(' · ')}</p>
+              <p>{[selectedEntry?.takenAt ? formatTravelDateTime(selectedEntry.takenAt, undefined, record.countryName, record.cityName) : selectedEntry?.date ? formatDate(selectedEntry.date) : formatDate(record.startDate), selectedEntry?.address || record.cityName || record.countryName].filter(Boolean).join(' · ')}</p>
               <S.Badge>AI 해설</S.Badge>
               <S.CommentHeading>사진 코멘트</S.CommentHeading>
               <S.RecordDescription>{selectedEntry?.comment || '이 사진에 대한 메모를 남겨보세요'}</S.RecordDescription>

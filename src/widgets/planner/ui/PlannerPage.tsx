@@ -229,7 +229,7 @@ function PlannerFlowPage({ step }: Props) {
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [shareError, setShareError] = useState("");
   const {
-    addPlannerPlacesMutation,
+    addVoteOptionMutation,
     activeVote,
     castBallotMutation,
     canManagePlanner,
@@ -239,6 +239,7 @@ function PlannerFlowPage({ step }: Props) {
     countries,
     popularCities,
     confirmPlannerMutation,
+    createVoteMutation,
     confirmVoteMutation,
     deleteVoteOptionMutation,
     errorMessage,
@@ -412,7 +413,8 @@ function PlannerFlowPage({ step }: Props) {
     ? 1
     : 0;
   const isSavingCandidates =
-    addPlannerPlacesMutation.isPending ||
+    addVoteOptionMutation.isPending ||
+    createVoteMutation.isPending ||
     selectRandomPlannerPlaceMutation.isPending;
   const isManagingMembers =
     acceptPlannerInvitationMutation.isPending ||
@@ -421,9 +423,9 @@ function PlannerFlowPage({ step }: Props) {
     removePlannerMemberMutation.isPending;
   const finalPlaces = confirmedPlaces.length
     ? confirmedPlaces
-    : selectedPlaces.map(({ item }) => ({
-        category: item.category,
-        categoryLabel: item.category,
+      : selectedPlaces.map(({ item }) => ({
+        category: voteCategory,
+        categoryLabel: voteCategory,
         placeName: item.placeName,
         voteCount: undefined,
       }));
@@ -1191,10 +1193,7 @@ function PlannerFlowPage({ step }: Props) {
                           </S.PlaceThumb>
                           <S.PlaceDetails>
                             <strong>{item.placeName || "장소"}</strong>
-                            <span>
-                              ★ {item.rating ?? "-"} ·{" "}
-                              {item.address || "상세 정보"}
-                            </span>
+                            <span>{voteCategory} · 장소 정보</span>
                           </S.PlaceDetails>
                           <S.PlaceAction
                             type="button"
@@ -1384,7 +1383,7 @@ function PlannerFlowPage({ step }: Props) {
                         <S.SelectedPlaceRow key={`${item.placeName}-${index}`}>
                           <S.PlaceDetails>
                             <strong>{item.placeName || "장소"}</strong>
-                            <span>{item.category || "장소"}</span>
+                            <span>{voteCategory}</span>
                           </S.PlaceDetails>
                           <button
                             type="button"
@@ -1663,10 +1662,10 @@ function PlannerFlowPage({ step }: Props) {
                       <p>{place.description || "장소 설명이 없습니다."}</p>
                       <PartTripButton
                         type="button"
-                        disabled={addPlannerPlacesMutation.isPending}
+                        disabled={addVoteOptionMutation.isPending || createVoteMutation.isPending}
                         onClick={() => void handleAddPlaceCandidate()}
                       >
-                        {addPlannerPlacesMutation.isPending
+                        {addVoteOptionMutation.isPending || createVoteMutation.isPending
                           ? "후보 저장 중"
                           : "투표 후보에 추가"}
                       </PartTripButton>

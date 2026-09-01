@@ -1,9 +1,9 @@
 export type DdayPlan = {
-  cityName?: string
-  dday?: string
-  countryName?: string
-  endDate?: string
-  startDate?: string
+  cityName?: string | null
+  dday?: string | null
+  countryName?: string | null
+  endDate?: string | null
+  startDate?: string | null
 }
 
 export function hasTravelPlan(plan?: DdayPlan) {
@@ -11,7 +11,7 @@ export function hasTravelPlan(plan?: DdayPlan) {
   return Boolean(plan.countryName || plan.cityName || plan.startDate || plan.endDate)
 }
 
-export function formatDday(value?: string) {
+export function formatDday(value?: string | null) {
   const normalized = value?.trim()
   if (!normalized) return '-'
   if (/^d\s*-\s*day$/i.test(normalized) || normalized === 'D-Day') return 'D-Day'

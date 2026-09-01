@@ -1,15 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
 
 import {
   useMarkAllNotificationsAsReadMutation,
   useMarkNotificationAsReadMutation,
-  useNotificationSettingsQuery,
   useNotificationsQuery,
   useUnreadNotificationCountQuery,
-  useUpdateNotificationSettingsMutation,
   type NotificationResponseDto,
-  type NotificationType,
 } from '@/entities/notification'
 import { paths } from '@/shared/config'
 import { isPositiveSafeInteger } from '@/shared/utils'
@@ -17,12 +14,17 @@ import { isPositiveSafeInteger } from '@/shared/utils'
 const ACTIVE_PLANNER_ID_KEY = 'parttrip:active-planner-id'
 const ACTIVE_VOTE_ID_KEY = 'parttrip:active-vote-id'
 
-function clearVoteSession() {
-  sessionStorage.removeItem(ACTIVE_PLANNER_ID_KEY)
-  sessionStorage.removeItem(ACTIVE_VOTE_ID_KEY)
+function readSessionId(key: string) {
+  if (typeof window === 'undefined') return 0
+  try {
+    const value = Number(window.sessionStorage.getItem(key))
+    return isPositiveSafeInteger(value) ? value : 0
+  } catch {
+    return 0
+  }
 }
 
-export type NotificationMode = 'list' | 'detail' | 'settings'
+export type NotificationMode = 'list' | 'detail'
 
 export function notificationDate(value?: string) {
   if (!value) return '방금 전'
@@ -43,21 +45,15 @@ export function useNotificationFlow(mode: NotificationMode) {
   const [actionError, setActionError] = useState('')
   const category = mode === 'list' ? activeTab : 'ALL'
   const notificationsQuery = useNotificationsQuery(category, mode === 'list' || mode === 'detail')
-  const settingsQuery = useNotificationSettingsQuery(mode === 'settings')
   const unreadCountQuery = useUnreadNotificationCountQuery()
   const markReadMutation = useMarkNotificationAsReadMutation()
   const markAllMutation = useMarkAllNotificationsAsReadMutation()
-  const updateSettingsMutation = useUpdateNotificationSettingsMutation()
   const notifications = notificationsQuery.data?.pages.flatMap((page) => page.items ?? []) ?? []
-  const settings = settingsQuery.data ?? []
   const detail = notifications.find((item) => String(item.notificationId) === notificationId)
+  const canNavigateToVote = detail?.linkType?.trim().toUpperCase() === 'VOTE'
+    && isPositiveSafeInteger(detail.linkId)
+    && isPositiveSafeInteger(readSessionId(ACTIVE_PLANNER_ID_KEY))
   const hasUnread = (unreadCountQuery.data?.unreadCount ?? notifications.filter((item) => item.isRead !== true && item.notificationId != null).length) > 0
-
-  useEffect(() => {
-    if (detail?.linkType?.trim().toUpperCase() === 'VOTE' && (!isPositiveSafeInteger(detail.plannerId) || !isPositiveSafeInteger(detail.linkId))) {
-      clearVoteSession()
-    }
-  }, [detail])
 
   const handleMarkRead = async (id?: number) => {
     if (id == null) return
@@ -92,14 +88,19 @@ export function useNotificationFlow(mode: NotificationMode) {
       return
     }
 
-    if (linkType === 'VOTE') {
-      clearVoteSession()
-      if (!isPositiveSafeInteger(linkId) || !isPositiveSafeInteger(detail.plannerId)) {
+    // The latest notification DTO exposes one linkId; use it as voteId only with the active planner context.
+    if (linkType === 'VOTE' && isPositiveSafeInteger(linkId)) {
+      const activePlannerId = readSessionId(ACTIVE_PLANNER_ID_KEY)
+      if (!isPositiveSafeInteger(activePlannerId)) {
         setActionError('투표 알림의 여행 계획 정보를 확인할 수 없습니다.')
         return
       }
-      sessionStorage.setItem(ACTIVE_PLANNER_ID_KEY, String(detail.plannerId))
-      sessionStorage.setItem(ACTIVE_VOTE_ID_KEY, String(linkId))
+      try {
+        window.sessionStorage.setItem(ACTIVE_VOTE_ID_KEY, String(linkId))
+      } catch {
+        setActionError('투표 알림을 열 수 없습니다.')
+        return
+      }
       navigate({ to: paths.plannerVote })
       return
     }
@@ -118,30 +119,15 @@ export function useNotificationFlow(mode: NotificationMode) {
     }
   }
 
-  const handleSettingToggle = async (type?: NotificationType) => {
-    if (type == null) return
-    try {
-      setActionError('')
-      await updateSettingsMutation.mutateAsync({
-        settings: settings.flatMap((setting) => setting.type == null ? [] : [{
-          enabled: setting.type === type ? setting.enabled !== true : setting.enabled === true,
-          type: setting.type,
-        }]),
-      })
-    } catch {
-      setActionError('알림 설정을 저장하지 못했습니다.')
-    }
-  }
-
   return {
     actionError,
     activeTab,
+    canNavigateToVote,
     detail,
     handleMarkAll,
     handleMarkRead,
     handleNotificationClick,
     handleNotificationAction,
-    handleSettingToggle,
     hasUnread,
     markAllMutation,
     markReadMutation,
@@ -150,8 +136,5 @@ export function useNotificationFlow(mode: NotificationMode) {
     notificationsQuery,
     paths,
     setActiveTab,
-    settings,
-    settingsQuery,
-    updateSettingsMutation,
   }
 }

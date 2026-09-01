@@ -1,5 +1,5 @@
 import { apiClient } from '../../shared/libs/api-client.ts'
-import { requestWithMockFallback } from '../../shared/libs/api-fallback.ts'
+import { createUnsupportedApiError } from '../../shared/libs/unsupported-api-error.ts'
 import type { CommentRequestDto, CommentResponseDto } from '../community/types.ts'
 
 export type ShareTripRequestDto = {
@@ -50,7 +50,6 @@ export type SharedTripResponseDto = {
 export type TravelCardListItemDto = {
   cardId?: number
   cityName?: string
-  countryCode?: string
   countryName?: string
   coverImageUrl?: string
   endDate?: string
@@ -69,19 +68,18 @@ export type TravelCardTimelineItemDto = {
   placeName?: string
   rating?: number
   takenAt?: string
-  type?: 'PLACE' | 'PHOTO' | 'NO_INFO_PHOTO'
+  type?: 'PLACE' | 'PHOTO'
 }
 
 export type TravelCardDetailDto = {
   cardId?: number
-  countryCode?: string
   endDate?: string
   startDate?: string
   timeline?: TravelCardTimelineItemDto[]
 }
 
 export type TravelCardEntryRequestDto = {
-  comment: string
+  comment?: string
   imageFile: File
 }
 
@@ -101,63 +99,12 @@ export type TravelCardDeleteRequestDto = {
   cardIds: number[]
 }
 
-const SHARED_TRIP_API_PATHS = {
-  base: '/community/shared-trips',
-  detail: (tripId: number) => `/community/shared-trips/${tripId}`,
-  import: (tripId: number) => `/community/shared-trips/${tripId}/import`,
-  comments: (tripId: number) => `/community/shared-trips/${tripId}/comments`,
-} as const
-
 const TRAVEL_CARD_API_PATHS = {
   base: '/travel-cards',
   detail: (cardId: number) => `/travel-cards/${cardId}`,
   entries: (cardId: number) => `/travel-cards/${cardId}/entries`,
   entry: (cardId: number, entryId: number) => `/travel-cards/${cardId}/entries/${entryId}`,
 } as const
-
-type MockTravelCard = TravelCardListItemDto & TravelCardDetailDto
-
-const mockTravelCards: MockTravelCard[] = [
-  { cardId: 1, cityName: '오사카', countryName: '일본', endDate: '2026-08-27', photoCount: 24, startDate: '2026-08-23', timeline: [{ placeName: '도톤보리', type: 'PLACE' }, { placeName: '오사카성', type: 'PLACE' }] },
-  { cardId: 2, cityName: '도쿄', countryName: '일본', endDate: '2026-05-12', photoCount: 16, startDate: '2026-05-10', timeline: [{ placeName: '시부야', type: 'PLACE' }] },
-  { cardId: 3, cityName: '제주', countryName: '대한민국', endDate: '2025-12-24', photoCount: 42, startDate: '2025-12-20', timeline: [{ placeName: '성산일출봉', type: 'PLACE' }] },
-]
-
-const mockSharedTripComments = new Map<number, CommentResponseDto[]>()
-
-export function toSharedTrip(card: TravelCardListItemDto | TravelCardDetailDto): SharedTripResponseDto {
-  const listCard = 'cityName' in card ? card : undefined
-  const timeline = 'timeline' in card ? card.timeline ?? [] : []
-  const timelineImages = timeline.flatMap((item) => item.imageUrl ? [item.imageUrl] : [])
-  const images = timelineImages.length ? timelineImages : listCard?.coverImageUrl ? [listCard.coverImageUrl] : []
-  const destination = listCard?.cityName || listCard?.countryName
-  const sharedTrip: SharedTripResponseDto = {
-    cityName: listCard?.cityName,
-    countryName: listCard?.countryName,
-    coverImageUrl: listCard?.coverImageUrl,
-    endDate: card.endDate,
-    images,
-    photoCount: listCard?.photoCount ?? timeline.filter((item) => item.type === 'PHOTO').length,
-    places: timeline.filter((item) => item.type === 'PLACE').map((item, index) => ({
-      address: item.address,
-      dayNumber: index + 1,
-      placeName: item.placeName,
-      placeSub: item.address,
-      rating: item.rating,
-    })),
-    startDate: card.startDate,
-    timeline,
-    title: destination ? `${destination} 여행` : undefined,
-    tripId: card.cardId,
-  }
-  return sharedTrip
-}
-
-function getMockTravelCard(cardId?: number): MockTravelCard {
-  const card = mockTravelCards.find((item) => item.cardId === cardId)
-  if (!card) throw new Error('여행 카드를 찾을 수 없습니다.')
-  return card
-}
 
 export async function listTravelCards(): Promise<TravelCardListItemDto[]> {
   const { data } = await apiClient.get<TravelCardListItemDto[]>(TRAVEL_CARD_API_PATHS.base)
@@ -195,76 +142,35 @@ export async function listSharedTrips(params?: {
   page?: number
   size?: number
 }): Promise<PageResponseDtoSharedTripResponseDto> {
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.get<PageResponseDtoSharedTripResponseDto>(SHARED_TRIP_API_PATHS.base, { params })
-      return data
-    },
-    () => {
-      const page = params?.page ?? 0
-      const size = params?.size ?? mockTravelCards.length
-      const start = page * size
-      const content = mockTravelCards.slice(start, start + size).map(toSharedTrip)
-      const totalElements = mockTravelCards.length
-      const totalPages = size > 0 ? Math.ceil(totalElements / size) : 0
-      return { content, hasNext: page + 1 < totalPages, page, size, totalElements, totalPages }
-    },
-  )
+  void params
+  throw createUnsupportedApiError('공유 여행')
 }
 
 export async function shareTrip(payload: ShareTripRequestDto): Promise<SharedTripResponseDto> {
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.post<SharedTripResponseDto>(SHARED_TRIP_API_PATHS.base, payload)
-      return data
-    },
-    () => toSharedTrip(getMockTravelCard(payload.tripId)),
-  )
+  void payload
+  throw createUnsupportedApiError('공유 여행')
 }
 
 export async function getSharedTripDetail(tripId: number): Promise<SharedTripResponseDto> {
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.get<SharedTripResponseDto>(SHARED_TRIP_API_PATHS.detail(tripId))
-      return data
-    },
-    () => toSharedTrip(getMockTravelCard(tripId)),
-  )
+  void tripId
+  throw createUnsupportedApiError('공유 여행')
 }
 
 export async function importTrip(tripId: number): Promise<SharedTripResponseDto> {
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.post<SharedTripResponseDto>(SHARED_TRIP_API_PATHS.import(tripId))
-      return data
-    },
-    () => toSharedTrip(getMockTravelCard(tripId)),
-  )
+  void tripId
+  throw createUnsupportedApiError('공유 여행')
 }
 
 export async function getSharedTripComments(tripId: number): Promise<CommentResponseDto[]> {
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.get<CommentResponseDto[]>(SHARED_TRIP_API_PATHS.comments(tripId))
-      return data
-    },
-    () => mockSharedTripComments.get(tripId) ?? [],
-  )
+  void tripId
+  throw createUnsupportedApiError('공유 여행')
 }
 
 export async function createSharedTripComment(
   tripId: number,
   payload: CommentRequestDto
 ): Promise<CommentResponseDto> {
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.post<CommentResponseDto>(SHARED_TRIP_API_PATHS.comments(tripId), payload)
-      return data
-    },
-    () => {
-      const comment = { ...payload, commentId: Date.now(), createDate: new Date().toISOString(), targetId: tripId, userId: 'mock-user' }
-      mockSharedTripComments.set(tripId, [...(mockSharedTripComments.get(tripId) ?? []), comment])
-      return comment
-    },
-  )
+  void tripId
+  void payload
+  throw createUnsupportedApiError('공유 여행')
 }

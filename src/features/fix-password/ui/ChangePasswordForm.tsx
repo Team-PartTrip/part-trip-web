@@ -28,7 +28,7 @@ import { AuthForm as S } from '@/shared/ui'
 type ChangePasswordStep = 'verification' | 'password'
 
 type ResetPasswordContext = {
-  email: string
+  resetToken: string
 }
 
 type FormMessage = {
@@ -98,8 +98,9 @@ export function ChangePasswordForm() {
 
   const handleVerificationSubmit: SubmitHandler<VerificationFormValues> = async ({ email, verificationCode }) => {
     try {
-      await verifyPasswordResetCode({ email, code: verificationCode })
-      setResetContext({ email })
+      const { resetToken } = await verifyPasswordResetCode({ email, code: verificationCode })
+      if (!resetToken.trim()) throw new Error('비밀번호 재설정 토큰을 받지 못했습니다.')
+      setResetContext({ resetToken })
       setMessage(null)
       setStep('password')
     } catch (error) {
@@ -123,7 +124,7 @@ export function ChangePasswordForm() {
     }
 
     try {
-      await resetPassword({ ...resetContext, confirmPassword: newPasswordConfirm, newPassword })
+      await resetPassword({ ...resetContext, newPassword })
       navigate({ to: paths.login, replace: true })
     } catch (error) {
       setMessage({ text: getErrorMessage(error), tone: 'error' })
