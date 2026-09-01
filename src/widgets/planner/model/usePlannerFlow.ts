@@ -239,7 +239,7 @@ export function usePlannerFlow(step: PlannerStep) {
     }
     const minimumMemberCount = isSolo ? 1 : 2
     if (!Number.isSafeInteger(nextMemberCount) || nextMemberCount < minimumMemberCount || nextMemberCount > 30) {
-      setErrorMessage('여행 인원은 1명에서 30명 사이로 입력해주세요.')
+      setErrorMessage(isSolo ? '혼자 여행은 1명에서 30명 사이로 입력해주세요.' : '함께 여행은 2명에서 30명 사이로 입력해주세요.')
       return
     }
     try {

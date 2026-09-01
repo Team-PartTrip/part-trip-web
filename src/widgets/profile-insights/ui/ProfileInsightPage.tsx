@@ -16,11 +16,29 @@ const copy: Record<ProfileInsightKind, { title: string; subtitle: string }> = {
 
 const PROFILE_COUNTRY_KEY = 'parttrip:profile-selected-country'
 
+function readSelectedCountry() {
+  if (typeof window === 'undefined') return ''
+  try {
+    return window.sessionStorage.getItem(PROFILE_COUNTRY_KEY) ?? ''
+  } catch {
+    return ''
+  }
+}
+
+function saveSelectedCountry(country: string) {
+  if (typeof window === 'undefined') return
+  try {
+    window.sessionStorage.setItem(PROFILE_COUNTRY_KEY, country)
+  } catch {
+    // Storage access can be blocked by browser privacy settings.
+  }
+}
+
 export function ProfileInsightPage({ kind }: { kind: ProfileInsightKind }) {
   const navigate = useNavigate()
   const { hasError, isLoading, trips } = useMyTrips(kind === 'countries')
   const [selectedCity, setSelectedCity] = useState('')
-  const [selectedCountry, setSelectedCountry] = useState(() => typeof window === 'undefined' ? '' : sessionStorage.getItem(PROFILE_COUNTRY_KEY) ?? '')
+  const [selectedCountry, setSelectedCountry] = useState(readSelectedCountry)
   const visitedCountries = [...new Set(trips.map((trip) => trip.countryName).filter((country): country is string => Boolean(country)))]
   const activeCountry = visitedCountries.includes(selectedCountry) ? selectedCountry : visitedCountries[0]
   const countryTrips = trips.filter((trip) => trip.countryName === activeCountry)
@@ -33,7 +51,7 @@ export function ProfileInsightPage({ kind }: { kind: ProfileInsightKind }) {
   const pageSubtitle = kind === 'countries' ? `첫 방문 ${firstVisit}` : subtitle
   const selectCountry = (country: string) => {
     setSelectedCountry(country)
-    sessionStorage.setItem(PROFILE_COUNTRY_KEY, country)
+    saveSelectedCountry(country)
     setSelectedCity('')
   }
 
