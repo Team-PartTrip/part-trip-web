@@ -286,6 +286,11 @@ export function usePlannerFlow(step: PlannerStep) {
         if (!isPositiveSafeInteger(planner.plannerId)) throw new Error('plannerId is missing')
         writeSessionValue(ACTIVE_PLANNER_ID_KEY, String(planner.plannerId))
         setStoredActivePlannerId(planner.plannerId)
+        removeSessionValue(ACTIVE_VOTE_ID_KEY)
+        removeSessionValue(PLANNER_SELECTED_KEY)
+        setStoredActiveVoteId(0)
+        setSelected([])
+        setSelectedOptionId(undefined)
         if (planner.inviteCode) {
           writeSessionValue(PLANNER_INVITE_CODE_KEY, planner.inviteCode)
           setPlannerInviteCode(planner.inviteCode)
@@ -309,6 +314,11 @@ export function usePlannerFlow(step: PlannerStep) {
       if (!isPositiveSafeInteger(plannerId)) throw new Error('plannerId is missing')
       writeSessionValue(ACTIVE_PLANNER_ID_KEY, String(plannerId))
       setStoredActivePlannerId(plannerId)
+      removeSessionValue(ACTIVE_VOTE_ID_KEY)
+      removeSessionValue(PLANNER_SELECTED_KEY)
+      setStoredActiveVoteId(0)
+      setSelected([])
+      setSelectedOptionId(undefined)
       setConfirmedPlannerId(readSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`) === 'true' ? plannerId : 0)
       navigate({ to: paths.plannerProgress })
     } catch {
@@ -327,6 +337,11 @@ export function usePlannerFlow(step: PlannerStep) {
       if (isPositiveSafeInteger(invitation.plannerId)) {
         writeSessionValue(ACTIVE_PLANNER_ID_KEY, String(invitation.plannerId))
         setStoredActivePlannerId(invitation.plannerId)
+        removeSessionValue(ACTIVE_VOTE_ID_KEY)
+        removeSessionValue(PLANNER_SELECTED_KEY)
+        setStoredActiveVoteId(0)
+        setSelected([])
+        setSelectedOptionId(undefined)
         setConfirmedPlannerId(readSessionValue(`${PLANNER_CONFIRMED_KEY}:${invitation.plannerId}`) === 'true' ? invitation.plannerId : 0)
         navigate({ to: paths.plannerProgress })
       }

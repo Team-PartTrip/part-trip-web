@@ -16,7 +16,7 @@ export function RecordDetailPage() {
   const recordImages = record?.images?.filter((image): image is string => Boolean(image)) ?? []
   const [photoIndex, setPhotoIndex] = useState(0)
   const currentPhotoIndex = recordImages.length ? Math.min(photoIndex, recordImages.length - 1) : 0
-  const selectedEntry = record?.timeline?.find((item) => item.imageUrl === recordImages[currentPhotoIndex]) ?? record?.timeline?.find((item) => item.imageUrl)
+  const selectedEntry = record?.timeline?.find((item) => item.imageUrl === recordImages[currentPhotoIndex])
   const hasRecordPhotos = recordImages.length > 0 && record?.photoCount !== 0
 
   useEffect(() => {

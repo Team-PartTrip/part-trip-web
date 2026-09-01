@@ -39,7 +39,6 @@ const travelTimeZoneByCityName: Record<string, string> = {
 const travelTimeZoneByCountryName: Record<string, string> = {
   대만: 'Asia/Taipei',
   독일: 'Europe/Berlin',
-  미국: 'America/New_York',
   베트남: 'Asia/Ho_Chi_Minh',
   싱가포르: 'Asia/Singapore',
   영국: 'Europe/London',
