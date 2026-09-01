@@ -237,7 +237,8 @@ export function usePlannerFlow(step: PlannerStep) {
       setErrorMessage('국가와 도시가 일치하는 여행지를 선택해주세요.')
       return
     }
-    if (!Number.isSafeInteger(nextMemberCount) || nextMemberCount < 1 || nextMemberCount > 30) {
+    const minimumMemberCount = isSolo ? 1 : 2
+    if (!Number.isSafeInteger(nextMemberCount) || nextMemberCount < minimumMemberCount || nextMemberCount > 30) {
       setErrorMessage('여행 인원은 1명에서 30명 사이로 입력해주세요.')
       return
     }
@@ -415,11 +416,14 @@ export function usePlannerFlow(step: PlannerStep) {
       return
     }
 
+    let voteId = 0
+    const addedOptionIds: number[] = []
     try {
       setErrorMessage('')
-      const voteId = await getOrCreateVoteId(plannerId)
+      voteId = await getOrCreateVoteId(plannerId)
       for (const placeName of placeNames) {
-        await addVoteOptionMutation.mutateAsync({ plannerId, voteId, payload: { placeName } })
+        const option = await addVoteOptionMutation.mutateAsync({ plannerId, voteId, payload: { placeName } })
+        if (isPositiveSafeInteger(option.optionId)) addedOptionIds.push(option.optionId)
       }
       removeSessionValue(ACTIVE_VOTE_ID_KEY)
       setStoredActiveVoteId(0)
@@ -428,7 +432,14 @@ export function usePlannerFlow(step: PlannerStep) {
       setSelected([])
       navigate({ to: paths.plannerVote })
     } catch {
-      setErrorMessage('후보를 저장하지 못했습니다.')
+      let rollbackFailed = false
+      if (isPositiveSafeInteger(voteId)) {
+        const rollbackResults = await Promise.allSettled(addedOptionIds.map((optionId) =>
+          deleteVoteOptionMutation.mutateAsync({ optionId, plannerId, voteId }),
+        ))
+        rollbackFailed = rollbackResults.some((result) => result.status === 'rejected')
+      }
+      setErrorMessage(rollbackFailed ? '후보 저장에 실패해 일부 후보가 남아 있을 수 있습니다.' : '후보를 저장하지 못했습니다.')
     }
   }
 
