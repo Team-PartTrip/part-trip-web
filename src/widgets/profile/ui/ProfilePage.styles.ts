@@ -54,7 +54,7 @@ export const LoadingRow = styled.div`
 export const LoadingLower = styled.div`
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 384px;
+  grid-template-columns: 1fr;
 `
 
 export const LoadingCard = styled(Skeleton)`
@@ -68,11 +68,6 @@ export const LoadingStats = styled(Skeleton)`
 `
 
 export const LoadingMap = styled(Skeleton)`
-  height: 260px;
-  border-radius: 16px;
-`
-
-export const LoadingSettings = styled(Skeleton)`
   height: 260px;
   border-radius: 16px;
 `
@@ -106,6 +101,32 @@ export const ProfileCard = styled.article`
   box-shadow: ${({ theme }) => theme.shadows.subtle};
   h2 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 24px; line-height: 32px; }
   p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 14px; line-height: 20px; }
+`
+
+export const ProfileActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  button { min-height: 46px; }
+`
+
+export const LogoutButton = styled.button`
+  min-height: 46px;
+  border: 1px solid ${({ theme }) => theme.colors.status.error};
+  border-radius: 14px;
+  padding: 12px 24px;
+  background: transparent;
+  color: ${({ theme }) => theme.colors.status.error};
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+`
+
+export const ErrorActions = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
 `
 
 export const Avatar = styled.div`
@@ -163,7 +184,7 @@ export const Stats = styled.div`
 export const LowerBody = styled.section`
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 384px;
+  grid-template-columns: 1fr;
   margin-top: 24px;
   @media (max-width: 860px) { grid-template-columns: 1fr; }
 `
@@ -220,38 +241,4 @@ export const WorldMapMore = styled.button`
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
-`
-
-export const SettingsCard = styled.section`
-  min-height: 260px;
-  box-sizing: border-box;
-  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  border-radius: 16px;
-  padding: 20px 24px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-
-  > ${SectionTitle} {
-    margin-bottom: 0;
-    font-size: 15px;
-    line-height: 20px;
-  }
-`
-
-export const SettingsButton = styled.button<{ $danger?: boolean }>`
-  display: flex;
-  width: 100%;
-  min-height: 49px;
-  align-items: center;
-  justify-content: space-between;
-  border: 0;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  padding: 0;
-  background: transparent;
-  color: ${({ $danger, theme }) => ($danger ? theme.colors.status.error : theme.colors.text.strong)};
-  cursor: pointer;
-  font-size: 12px;
-  text-align: left;
-  &:last-child { border-bottom: 0; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 18px; }
 `

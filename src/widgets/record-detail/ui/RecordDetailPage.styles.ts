@@ -88,7 +88,7 @@ export const RecordPhoto = styled.div`
   overflow: hidden;
   border-radius: 28px;
   background: var(--pt-bg-muted);
-  img { display: block; width: 100%; height: 560px; object-fit: cover; }
+  img { display: block; width: 100%; height: 560px; aspect-ratio: 696 / 560; object-fit: cover; }
   @media (max-width: 900px) { img { height: 360px; } }
 `
 

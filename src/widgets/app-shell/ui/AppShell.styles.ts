@@ -1,6 +1,5 @@
 import { Link } from '@tanstack/react-router'
 import styled from 'styled-components'
-import { Skeleton } from '@/shared/ui/parttrip'
 
 export const Root = styled.div`
   display: flex;
@@ -44,6 +43,21 @@ export const TopbarSpacer = styled.div`
   flex: 1;
 `
 
+export const MobileLogoLink = styled(Link)`
+  display: none;
+
+  img {
+    display: block;
+    width: 112px;
+    height: auto;
+  }
+
+  @media (max-width: 767px) {
+    display: inline-flex;
+    align-items: center;
+  }
+`
+
 export const NotificationLink = styled(Link)`
   display: inline-flex;
   width: 70px;
@@ -58,27 +72,6 @@ export const NotificationLink = styled(Link)`
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
-`
-
-export const ProfileLink = styled(Link)`
-  display: inline-flex;
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: ${({ theme }) => theme.colors.background.muted};
-  color: ${({ theme }) => theme.colors.brand.strong};
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-`
-
-export const ProfileSkeleton = styled(Skeleton)`
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
 `
 
 export const Main = styled.main`

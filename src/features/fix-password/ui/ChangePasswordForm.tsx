@@ -10,6 +10,7 @@ import {
   sendPasswordResetCode,
   verifyPasswordResetCode,
 } from '@/entities/session/api'
+import { partTripLogoUrl } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import {
   authValidationRules,
@@ -140,7 +141,7 @@ export function ChangePasswordForm() {
     return (
       <S.Container>
         <S.Header>
-          <S.Brand>PartTrip</S.Brand>
+          <S.Brand><img src={partTripLogoUrl} alt="PartTrip" /></S.Brand>
           <S.Title>비밀번호 찾기</S.Title>
         </S.Header>
         <S.Body>
@@ -168,7 +169,7 @@ export function ChangePasswordForm() {
   return (
     <S.Container>
       <S.Header>
-        <S.Brand>PartTrip</S.Brand>
+        <S.Brand><img src={partTripLogoUrl} alt="PartTrip" /></S.Brand>
         <S.Title>비밀번호 찾기</S.Title>
         <S.Subtitle>이메일 인증이 완료되었습니다. 새 비밀번호를 입력하세요.</S.Subtitle>
       </S.Header>

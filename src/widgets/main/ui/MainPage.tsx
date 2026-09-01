@@ -35,7 +35,6 @@ export function MainPage() {
         {isError ? <S.Error role="alert">여행 정보를 불러오지 못했습니다.</S.Error> : null}
         {isLoading ? <S.LoadingLayout aria-busy="true" aria-label="여행 정보 로딩 중"><S.LoadingHero /><S.LoadingCalendar /><S.LoadingRecommendations><S.LoadingHeading /><div><S.LoadingRecommendation /><S.LoadingRecommendation /><S.LoadingRecommendation /></div></S.LoadingRecommendations></S.LoadingLayout> : isError ? null : !hasPlan ? <S.State>등록된 여행 정보가 없습니다.</S.State> : <>
           <S.Hero>
-            <S.Eyebrow>PartTrip</S.Eyebrow>
             <S.HeroLabel>다가오는 여행</S.HeroLabel>
             <S.Dday>{formatDday(plan?.dday)}</S.Dday>
             <S.Destination>{destination} · {durationLabel(plan?.startDate, plan?.endDate)}</S.Destination>

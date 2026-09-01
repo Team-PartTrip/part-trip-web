@@ -56,10 +56,12 @@ export const Header = styled.header`
 `
 
 export const Brand = styled.span`
-  color: ${({ theme }) => theme.colors.brand.strong};
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 32px;
+  img {
+    display: block;
+    width: 180px;
+    height: auto;
+    aspect-ratio: 362 / 86;
+  }
 `
 
 export const Title = styled.h1`

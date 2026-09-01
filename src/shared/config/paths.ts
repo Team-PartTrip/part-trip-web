@@ -5,7 +5,6 @@ export const paths = {
   login: '/login',
   main: '/main',
   planner: '/planner',
-  plannerCreate: '/planner/new',
   plannerGroup: '/planner/group',
   plannerDestination: '/planner/destination',
   plannerExplore: '/planner/explore',

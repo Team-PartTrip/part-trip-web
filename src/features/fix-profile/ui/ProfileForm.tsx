@@ -182,16 +182,6 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             </S.Field>
           </S.Section>
 
-          <S.Section>
-            <S.SectionHeading>
-              <strong>비밀번호 재설정</strong>
-              <span>본인 확인을 위해 이메일 인증 후 변경합니다.</span>
-            </S.SectionHeading>
-            <S.ResetPhotoButton type="button" onClick={() => navigate({ to: paths.changePassword })}>
-              이메일 인증 후 비밀번호 변경
-            </S.ResetPhotoButton>
-          </S.Section>
-
           {errorMessage ? <S.ErrorMessage role="alert">{errorMessage}</S.ErrorMessage> : null}
         </S.EditorColumn>
 

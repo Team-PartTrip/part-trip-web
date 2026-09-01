@@ -67,9 +67,10 @@ export function usePlannerFlow(step: PlannerStep) {
   const [savedGroupSettings, setSavedGroupSettings] = useState(() => parsePlannerGroupSettings(readSessionValue(PLANNER_GROUP_SETTINGS_KEY)))
   const [storedActivePlannerId, setStoredActivePlannerId] = useState(() => readSessionId(ACTIVE_PLANNER_ID_KEY))
   const [storedActiveVoteId, setStoredActiveVoteId] = useState(() => readSessionId(ACTIVE_VOTE_ID_KEY))
-  const activePlannerId = step === 'create' ? 0 : storedActivePlannerId
-  const activeVoteId = step === 'create' ? 0 : storedActiveVoteId
+  const activePlannerId = storedActivePlannerId
+  const activeVoteId = storedActiveVoteId
   const [countryInfoId, setCountryInfoId] = useState('')
+  const [selectedDestination, setSelectedDestination] = useState<CountryInfoResponseDto>()
   const [startDate, setStartDate] = useState<string>()
   const [endDate, setEndDate] = useState<string>()
   const [countryName, setCountryName] = useState<string>()
@@ -99,9 +100,7 @@ export function usePlannerFlow(step: PlannerStep) {
     votes,
     voteDetail,
   } = usePlannerData(step, voteCategory, activePlannerId, activeVoteId, searchKeyword)
-  const [selected, setSelected] = useState<number[]>(() =>
-    step === 'create' ? [] : parsePlannerSelectedIndexes(readSessionValue(PLANNER_SELECTED_KEY)),
-  )
+  const [selected, setSelected] = useState<number[]>(() => parsePlannerSelectedIndexes(readSessionValue(PLANNER_SELECTED_KEY)))
   const [headcount, setHeadcount] = useState(String(savedGroupSettings.memberCount))
   const [plannerTitle, setPlannerTitle] = useState('나의 여행 계획')
   const [memberCount, setMemberCount] = useState(() => String(savedGroupSettings.memberCount))
@@ -109,15 +108,13 @@ export function usePlannerFlow(step: PlannerStep) {
   const [inviteCode, setInviteCode] = useState(() =>
     typeof window === 'undefined' ? '' : new URLSearchParams(window.location.search).get('inviteCode') ?? '',
   )
-  const [plannerInviteCode, setPlannerInviteCode] = useState(() =>
-    step === 'create' ? '' : readSessionValue(PLANNER_INVITE_CODE_KEY) ?? '',
-  )
+  const [plannerInviteCode, setPlannerInviteCode] = useState(() => readSessionValue(PLANNER_INVITE_CODE_KEY) ?? '')
   const [selectedOptionId, setSelectedOptionId] = useState<number>()
   const [lineupChoice, setLineupChoice] = useState<number | null>(null)
   const [lineupMode, setLineupMode] = useState<'direct' | 'random'>('direct')
   const plannerConfirmationKey = `${PLANNER_CONFIRMED_KEY}:${activePlannerId}`
-  const [confirmedPlannerId, setConfirmedPlannerId] = useState(() => step !== 'create' && readSessionValue(plannerConfirmationKey) === 'true' ? activePlannerId : 0)
-  const hasConfirmedLocally = step !== 'create' && confirmedPlannerId === activePlannerId
+  const [confirmedPlannerId, setConfirmedPlannerId] = useState(() => readSessionValue(plannerConfirmationKey) === 'true' ? activePlannerId : 0)
+  const hasConfirmedLocally = confirmedPlannerId === activePlannerId
   const [errorMessage, setErrorMessage] = useState('')
   const [remindFeedback, setRemindFeedback] = useState('')
   const createPlannerMutation = useCreatePlannerMutation()
@@ -145,15 +142,6 @@ export function usePlannerFlow(step: PlannerStep) {
     writeSessionValue(ACTIVE_VOTE_CATEGORY_KEY, voteCategory)
   }, [voteCategory])
 
-  useEffect(() => {
-    if (step !== 'create') return
-    removeSessionValue(ACTIVE_PLANNER_ID_KEY)
-    removeSessionValue(ACTIVE_VOTE_ID_KEY)
-    removeSessionValue(ACTIVE_VOTE_CATEGORY_KEY)
-    removeSessionValue(PLANNER_INVITE_CODE_KEY)
-    removeSessionValue(PLANNER_SELECTED_KEY)
-  }, [step])
-
   const continueTo = (next: string) => navigate({ to: next })
   const selectedCountryInfoId = countryInfoId
   const selectedCountryName = countryName ?? plannerDetail?.countryName ?? ''
@@ -174,19 +162,19 @@ export function usePlannerFlow(step: PlannerStep) {
   const plannerInviteLink = visiblePlannerInviteCode && typeof window !== 'undefined'
     ? `${window.location.origin}/planner/group?inviteCode=${encodeURIComponent(visiblePlannerInviteCode)}`
     : ''
-  const openVotes = votes.filter((vote) => normalizeVoteStatus(vote.status) === 'OPEN' && isPositiveSafeInteger(vote.voteId))
-  const closeableVote = normalizeVoteStatus(activeVote?.status) === 'OPEN' && isPositiveSafeInteger(activeVote?.voteId)
-    ? activeVote
-    : openVotes[0]
+  const openVotes = votes.filter((vote) => normalizeVoteStatus(vote.status) === 'OPEN')
+  const canCloseVotes = openVotes.length > 0 && openVotes.every((vote) => isPositiveSafeInteger(vote.voteId) && vote.options.some((option) => option.selectedByMe))
   const canManagePlanner = isPositiveSafeInteger(activePlannerId) && isPlannerLeader(plannerDetail?.role)
   const isRemindAvailable = canManagePlanner && openVotes.length > 0
   const handleDestinationSelect = (country: CountryInfoResponseDto) => {
+    setSelectedDestination(country)
     setCountryInfoId(String(country.countryInfoId ?? ''))
     setCountryName(country.countryName ?? '')
     setCityName(country.cityName ?? country.countryName ?? '')
   }
 
   const handleCityNameChange = (value: string) => {
+    setSelectedDestination(undefined)
     setCountryInfoId('')
     setCountryName('')
     setCityName(value)
@@ -227,8 +215,8 @@ export function usePlannerFlow(step: PlannerStep) {
       return matchesSelectedCountry && (matchesCity || matchesCountryInput)
     })
     const selectedCountry = selectedCountryInfoId
-      ? countries.find((item) => String(item.countryInfoId) === selectedCountryInfoId)
-      : matchingDestinations.length === 1 ? matchingDestinations[0] : undefined
+      ? countries.find((item) => String(item.countryInfoId) === selectedCountryInfoId) ?? selectedDestination
+      : selectedDestination ?? (matchingDestinations.length === 1 ? matchingDestinations[0] : undefined)
     const nextCountry = selectedCountry?.countryName || selectedCountryName.trim()
     const nextCity = selectedCountry?.cityName || selectedCityName.trim()
     const nextHeadcount = Number(selectedHeadcount)
@@ -298,6 +286,11 @@ export function usePlannerFlow(step: PlannerStep) {
         if (!isPositiveSafeInteger(planner.plannerId)) throw new Error('plannerId is missing')
         writeSessionValue(ACTIVE_PLANNER_ID_KEY, String(planner.plannerId))
         setStoredActivePlannerId(planner.plannerId)
+        removeSessionValue(ACTIVE_VOTE_ID_KEY)
+        removeSessionValue(PLANNER_SELECTED_KEY)
+        setStoredActiveVoteId(0)
+        setSelected([])
+        setSelectedOptionId(undefined)
         if (planner.inviteCode) {
           writeSessionValue(PLANNER_INVITE_CODE_KEY, planner.inviteCode)
           setPlannerInviteCode(planner.inviteCode)
@@ -321,6 +314,11 @@ export function usePlannerFlow(step: PlannerStep) {
       if (!isPositiveSafeInteger(plannerId)) throw new Error('plannerId is missing')
       writeSessionValue(ACTIVE_PLANNER_ID_KEY, String(plannerId))
       setStoredActivePlannerId(plannerId)
+      removeSessionValue(ACTIVE_VOTE_ID_KEY)
+      removeSessionValue(PLANNER_SELECTED_KEY)
+      setStoredActiveVoteId(0)
+      setSelected([])
+      setSelectedOptionId(undefined)
       setConfirmedPlannerId(readSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`) === 'true' ? plannerId : 0)
       navigate({ to: paths.plannerProgress })
     } catch {
@@ -339,6 +337,11 @@ export function usePlannerFlow(step: PlannerStep) {
       if (isPositiveSafeInteger(invitation.plannerId)) {
         writeSessionValue(ACTIVE_PLANNER_ID_KEY, String(invitation.plannerId))
         setStoredActivePlannerId(invitation.plannerId)
+        removeSessionValue(ACTIVE_VOTE_ID_KEY)
+        removeSessionValue(PLANNER_SELECTED_KEY)
+        setStoredActiveVoteId(0)
+        setSelected([])
+        setSelectedOptionId(undefined)
         setConfirmedPlannerId(readSessionValue(`${PLANNER_CONFIRMED_KEY}:${invitation.plannerId}`) === 'true' ? invitation.plannerId : 0)
         navigate({ to: paths.plannerProgress })
       }
@@ -486,13 +489,15 @@ export function usePlannerFlow(step: PlannerStep) {
   }
 
   const handleCloseVote = async () => {
-    if (!canManagePlanner || !isPositiveSafeInteger(closeableVote?.voteId)) {
-      setErrorMessage('마감할 투표 정보를 확인할 수 없습니다.')
+    if (!canManagePlanner || !canCloseVotes) {
+      setErrorMessage('모든 카테고리 투표를 완료한 뒤 마감할 수 있습니다.')
       return
     }
     try {
       setErrorMessage('')
-      await closeVoteMutation.mutateAsync({ plannerId: activePlannerId, voteId: closeableVote.voteId })
+      for (const vote of openVotes) {
+        if (vote.voteId != null) await closeVoteMutation.mutateAsync({ plannerId: activePlannerId, voteId: vote.voteId })
+      }
     } catch {
       setErrorMessage('투표를 마감하지 못했습니다.')
     }
@@ -584,6 +589,27 @@ export function usePlannerFlow(step: PlannerStep) {
     navigate({ to: paths.plannerProgress })
   }
 
+  const handleStartNewPlanner = () => {
+    removeSessionValue(ACTIVE_PLANNER_ID_KEY)
+    removeSessionValue(ACTIVE_VOTE_ID_KEY)
+    removeSessionValue(ACTIVE_VOTE_CATEGORY_KEY)
+    removeSessionValue(PLANNER_INVITE_CODE_KEY)
+    removeSessionValue(PLANNER_SELECTED_KEY)
+    setStoredActivePlannerId(0)
+    setStoredActiveVoteId(0)
+    setSelectedDestination(undefined)
+    setCountryInfoId('')
+    setCountryName(undefined)
+    setCityName(undefined)
+    setStartDate(undefined)
+    setEndDate(undefined)
+    setSelected([])
+    setSelectedOptionId(undefined)
+    setPlannerInviteCode('')
+    setConfirmedPlannerId(0)
+    navigate({ to: paths.plannerGroup })
+  }
+
   return {
     activeVote,
     countries,
@@ -610,6 +636,7 @@ export function usePlannerFlow(step: PlannerStep) {
     handleRandomLineup,
     handleRemoveFromLineup,
     handleSelectPlanner,
+    handleStartNewPlanner,
     hasActivePlanner: isPositiveSafeInteger(activePlannerId),
     hasError,
     headcount,
@@ -618,6 +645,7 @@ export function usePlannerFlow(step: PlannerStep) {
     invitationLoading,
     invitations,
     isConfirmed,
+    canCloseVotes,
     isLoading,
     isSaving,
     isSolo,
@@ -640,6 +668,7 @@ export function usePlannerFlow(step: PlannerStep) {
     saveGroupSettings,
     selected,
     selectedCountryInfoId,
+    selectedCountryName,
     selectedCityName,
     selectedEndDate,
     selectedHeadcount,
