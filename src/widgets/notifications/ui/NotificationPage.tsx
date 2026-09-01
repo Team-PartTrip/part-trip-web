@@ -67,10 +67,11 @@ function detailCopy(notification: { linkType?: string; title?: string; body?: st
   return { body: notification.body || fallback[1], title: notification.title || fallback[0] }
 }
 
-function detailActionLabel(notification: { linkType?: string; linkId?: number }) {
+function detailActionLabel(notification: { linkType?: string; linkId?: number }, canNavigateToVote: boolean) {
   const linkType = notificationLinkType(notification)
   if (linkType === 'TRIP_CARD' && notification.linkId != null) return '여행카드 보러가기'
   if ((linkType === 'GROUP' || linkType === 'GROUP_INVITATION') && notification.linkId != null) return linkType === 'GROUP_INVITATION' ? '초대 확인하기' : '그룹 보러가기'
+  if (linkType === 'VOTE' && canNavigateToVote) return '투표 보러가기'
   if (linkType === 'WORLD_MAP') return '세계지도 보러가기'
   return undefined
 }
@@ -107,6 +108,7 @@ function NotificationFlow({ mode }: { mode: 'list' | 'detail' }) {
   const {
     actionError,
     activeTab,
+    canNavigateToVote,
     detail,
     handleMarkAll,
     handleNotificationClick,
@@ -125,7 +127,7 @@ function NotificationFlow({ mode }: { mode: 'list' | 'detail' }) {
       ? ['알림 상세', '']
       : ['알림', '']
   const todayUnreadCount = notifications.filter((item) => isToday(item.createdAt) && item.isRead !== true).length
-  const actionLabel = detail ? detailActionLabel(detail) : undefined
+  const actionLabel = detail ? detailActionLabel(detail, canNavigateToVote) : undefined
   const content = detail ? detailCopy(detail) : undefined
 
   return (

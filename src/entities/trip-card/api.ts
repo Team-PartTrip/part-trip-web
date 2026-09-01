@@ -1,4 +1,5 @@
 import { apiClient } from '../../shared/libs/api-client.ts'
+import { createUnsupportedApiError } from '../../shared/libs/unsupported-api-error.ts'
 import type { CommentRequestDto, CommentResponseDto } from '../community/types.ts'
 
 export type ShareTripRequestDto = {
@@ -137,34 +138,32 @@ export async function updateTravelCardEntryComment(
   await apiClient.patch(TRAVEL_CARD_API_PATHS.entry(cardId, entryId), payload)
 }
 
-const SHARED_TRIP_API_UNAVAILABLE = '최신 API 명세서에 공유 여행 API가 없습니다.'
-
 export async function listSharedTrips(params?: {
   page?: number
   size?: number
 }): Promise<PageResponseDtoSharedTripResponseDto> {
   void params
-  throw new Error(SHARED_TRIP_API_UNAVAILABLE)
+  throw createUnsupportedApiError('공유 여행')
 }
 
 export async function shareTrip(payload: ShareTripRequestDto): Promise<SharedTripResponseDto> {
   void payload
-  throw new Error(SHARED_TRIP_API_UNAVAILABLE)
+  throw createUnsupportedApiError('공유 여행')
 }
 
 export async function getSharedTripDetail(tripId: number): Promise<SharedTripResponseDto> {
   void tripId
-  throw new Error(SHARED_TRIP_API_UNAVAILABLE)
+  throw createUnsupportedApiError('공유 여행')
 }
 
 export async function importTrip(tripId: number): Promise<SharedTripResponseDto> {
   void tripId
-  throw new Error(SHARED_TRIP_API_UNAVAILABLE)
+  throw createUnsupportedApiError('공유 여행')
 }
 
 export async function getSharedTripComments(tripId: number): Promise<CommentResponseDto[]> {
   void tripId
-  throw new Error(SHARED_TRIP_API_UNAVAILABLE)
+  throw createUnsupportedApiError('공유 여행')
 }
 
 export async function createSharedTripComment(
@@ -173,5 +172,5 @@ export async function createSharedTripComment(
 ): Promise<CommentResponseDto> {
   void tripId
   void payload
-  throw new Error(SHARED_TRIP_API_UNAVAILABLE)
+  throw createUnsupportedApiError('공유 여행')
 }

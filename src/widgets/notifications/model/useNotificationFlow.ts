@@ -9,8 +9,20 @@ import {
   type NotificationResponseDto,
 } from '@/entities/notification'
 import { paths } from '@/shared/config'
+import { isPositiveSafeInteger } from '@/shared/utils'
 
 const ACTIVE_PLANNER_ID_KEY = 'parttrip:active-planner-id'
+const ACTIVE_VOTE_ID_KEY = 'parttrip:active-vote-id'
+
+function readSessionId(key: string) {
+  if (typeof window === 'undefined') return 0
+  try {
+    const value = Number(window.sessionStorage.getItem(key))
+    return isPositiveSafeInteger(value) ? value : 0
+  } catch {
+    return 0
+  }
+}
 
 export type NotificationMode = 'list' | 'detail'
 
@@ -38,6 +50,9 @@ export function useNotificationFlow(mode: NotificationMode) {
   const markAllMutation = useMarkAllNotificationsAsReadMutation()
   const notifications = notificationsQuery.data?.pages.flatMap((page) => page.items ?? []) ?? []
   const detail = notifications.find((item) => String(item.notificationId) === notificationId)
+  const canNavigateToVote = detail?.linkType?.trim().toUpperCase() === 'VOTE'
+    && isPositiveSafeInteger(detail.linkId)
+    && isPositiveSafeInteger(readSessionId(ACTIVE_PLANNER_ID_KEY))
   const hasUnread = (unreadCountQuery.data?.unreadCount ?? notifications.filter((item) => item.isRead !== true && item.notificationId != null).length) > 0
 
   const handleMarkRead = async (id?: number) => {
@@ -73,6 +88,23 @@ export function useNotificationFlow(mode: NotificationMode) {
       return
     }
 
+    // The latest notification DTO exposes one linkId; use it as voteId only with the active planner context.
+    if (linkType === 'VOTE' && isPositiveSafeInteger(linkId)) {
+      const activePlannerId = readSessionId(ACTIVE_PLANNER_ID_KEY)
+      if (!isPositiveSafeInteger(activePlannerId)) {
+        setActionError('투표 알림의 여행 계획 정보를 확인할 수 없습니다.')
+        return
+      }
+      try {
+        window.sessionStorage.setItem(ACTIVE_VOTE_ID_KEY, String(linkId))
+      } catch {
+        setActionError('투표 알림을 열 수 없습니다.')
+        return
+      }
+      navigate({ to: paths.plannerVote })
+      return
+    }
+
     if (linkType === 'WORLD_MAP') {
       navigate({ to: paths.profileMap })
     }
@@ -90,6 +122,7 @@ export function useNotificationFlow(mode: NotificationMode) {
   return {
     actionError,
     activeTab,
+    canNavigateToVote,
     detail,
     handleMarkAll,
     handleMarkRead,

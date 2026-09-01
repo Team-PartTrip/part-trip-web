@@ -64,15 +64,17 @@ export function useFestivalsQuery(countryName?: string, year?: number, month?: n
 export function useTripFestivalsQuery(countryName?: string | null, startDate?: string | null, endDate?: string | null) {
   const dateRange = getDateRangeWithPadding(startDate, endDate)
   const months = getCalendarMonthsInRange(dateRange?.startDate, dateRange?.endDate)
+  const isRangeTooLong = Boolean(dateRange && months.length === 0)
   const queries = useQueries({
-    queries: months.map(({ year, month }) => festivalsQueryOptions(countryName ?? '', year, month)),
+    queries: isRangeTooLong ? [] : months.map(({ year, month }) => festivalsQueryOptions(countryName ?? '', year, month)),
   })
   const festivals = queries.flatMap((query) => query.data ?? [])
 
   return {
     data: festivals.filter((festival) => isDateInRange(festival?.startDate, dateRange?.startDate, dateRange?.endDate)),
     dateRange,
-    isError: queries.some((query) => query.isError),
+    isError: isRangeTooLong || queries.some((query) => query.isError),
+    isRangeTooLong,
     isLoading: queries.some((query) => query.isLoading),
   }
 }

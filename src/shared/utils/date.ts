@@ -11,6 +11,9 @@ type CalendarMonth = {
   month: number
 }
 
+// ponytail: cap festival fan-out at 14 months; add a range/pagination API if longer trips need support.
+export const MAX_FESTIVAL_QUERY_MONTHS = 14
+
 function parseDateOnly(value: DateValue) {
   const match = value?.match(/^(\d{4})-(\d{2})-(\d{2})$/)
   if (!match) return undefined
@@ -40,6 +43,9 @@ export function getCalendarMonthsInRange(startDate: DateValue, endDate: DateValu
   const start = parseDateOnly(startDate)
   const end = parseDateOnly(endDate)
   if (!start || !end || end < start) return []
+
+  const monthCount = (end.getUTCFullYear() - start.getUTCFullYear()) * 12 + end.getUTCMonth() - start.getUTCMonth() + 1
+  if (monthCount > MAX_FESTIVAL_QUERY_MONTHS) return []
 
   const current = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1))
   const lastMonth = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), 1))

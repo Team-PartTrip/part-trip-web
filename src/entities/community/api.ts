@@ -1,3 +1,5 @@
+import { createUnsupportedApiError } from '@/shared/libs/unsupported-api-error'
+
 export * from './board'
 export * from './review'
 
@@ -13,5 +15,5 @@ export type LikeResponseDto = {
 
 export async function toggleLike(payload: LikeRequestDto): Promise<LikeResponseDto> {
   void payload
-  throw new Error('최신 API 명세서에 커뮤니티 API가 없습니다.')
+  throw createUnsupportedApiError('커뮤니티')
 }

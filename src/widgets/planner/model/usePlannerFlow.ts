@@ -228,6 +228,7 @@ export function usePlannerFlow(step: PlannerStep) {
     const nextCountry = selectedCountry?.countryName || selectedCountryName.trim()
     const nextCity = selectedCountry?.cityName || selectedCityName.trim()
     const nextHeadcount = Number(selectedHeadcount)
+    const nextMemberCount = isSolo ? 1 : nextHeadcount
     if (!nextCountry || !nextCity || !selectedStartDate || !selectedEndDate || selectedStartDate > selectedEndDate) {
       setErrorMessage('여행지와 올바른 여행 기간을 입력해주세요.')
       return
@@ -236,7 +237,7 @@ export function usePlannerFlow(step: PlannerStep) {
       setErrorMessage('국가와 도시가 일치하는 여행지를 선택해주세요.')
       return
     }
-    if (!Number.isSafeInteger(nextHeadcount) || nextHeadcount < 1 || nextHeadcount > 30) {
+    if (!Number.isSafeInteger(nextMemberCount) || nextMemberCount < 1 || nextMemberCount > 30) {
       setErrorMessage('여행 인원은 1명에서 30명 사이로 입력해주세요.')
       return
     }
@@ -252,7 +253,7 @@ export function usePlannerFlow(step: PlannerStep) {
           countryName: nextCountry,
           endDate: selectedEndDate,
           isSolo,
-          memberCount: nextHeadcount,
+          memberCount: nextMemberCount,
           startDate: selectedStartDate,
         },
       })
@@ -260,7 +261,7 @@ export function usePlannerFlow(step: PlannerStep) {
         cityName: savedPlan.cityName ?? nextCity,
         countryName: savedPlan.countryName ?? nextCountry,
         endDate: savedPlan.endDate ?? selectedEndDate,
-        headcount: plan?.headcount ?? nextHeadcount,
+        headcount: nextMemberCount,
         startDate: savedPlan.startDate ?? selectedStartDate,
       })
       removeSessionValue(ACTIVE_VOTE_ID_KEY)

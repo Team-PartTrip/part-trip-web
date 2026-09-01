@@ -1,3 +1,5 @@
+import { createUnsupportedApiError } from '@/shared/libs/unsupported-api-error'
+
 export type WorldMapVisitedCountryDto = {
   cities?: string[]
   countryCode?: string
@@ -46,22 +48,20 @@ export type WorldMapStatsResponseDto = {
   totalCount?: number
 }
 
-const WORLD_MAP_UNAVAILABLE = '세계지도 API가 아직 구현되지 않았습니다.'
-
 export async function getWorldMap(): Promise<WorldMapResponseDto> {
-  throw new Error(WORLD_MAP_UNAVAILABLE)
+  throw createUnsupportedApiError('세계지도')
 }
 
 export async function acquireCountry(_payload: AcquireCountryRequestDto): Promise<AcquireCountryResponseDto> {
   void _payload
-  throw new Error(WORLD_MAP_UNAVAILABLE)
+  throw createUnsupportedApiError('세계지도')
 }
 
 export async function getWorldMapCountry(_countryCode: string): Promise<WorldMapCountryResponseDto> {
   void _countryCode
-  throw new Error(WORLD_MAP_UNAVAILABLE)
+  throw createUnsupportedApiError('세계지도')
 }
 
 export async function getWorldMapStats(): Promise<WorldMapStatsResponseDto> {
-  throw new Error(WORLD_MAP_UNAVAILABLE)
+  throw createUnsupportedApiError('세계지도')
 }
