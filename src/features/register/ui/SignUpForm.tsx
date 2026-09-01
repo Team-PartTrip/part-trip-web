@@ -7,10 +7,8 @@ import {
 import { useNavigate } from '@tanstack/react-router'
 import {
   checkUserId,
-  sendVerificationCode,
   signUp,
   verifyCode,
-  type SignUpRequestDto,
 } from '@/entities/session/api'
 import { partTripLogoUrl } from '@/shared/assets'
 import { paths } from '@/shared/config'
@@ -163,7 +161,15 @@ export function SignUpForm() {
 
     try {
       setIsSendingCode(true)
-      await sendVerificationCode({ email })
+      const { id, password, phoneNumber, myCountry } = credentialsForm.getValues()
+      await signUp({
+        myCountry,
+        phoneNumber,
+        signUpDivision: 'USER',
+        userId: id,
+        userMail: email,
+        userPwd: password,
+      })
       setMessage({ text: '인증번호를 발송했습니다.', tone: 'success' })
     } catch (error) {
       setMessage({ text: getErrorMessage(error), tone: 'error' })
@@ -175,16 +181,6 @@ export function SignUpForm() {
   const handleVerificationSubmit: SubmitHandler<VerificationFormValues> = async ({ email, verificationCode }) => {
     try {
       await verifyCode({ code: verificationCode, email })
-      const { id, password, phoneNumber, myCountry } = credentialsForm.getValues()
-      const payload: SignUpRequestDto = {
-        myCountry,
-        phoneNumber,
-        signUpDivision: 'USER',
-        userId: id,
-        userMail: email,
-        userPwd: password,
-      }
-      await signUp(payload)
       navigate({ to: paths.login, replace: true })
     } catch (error) {
       setMessage({ text: getErrorMessage(error), tone: 'error' })

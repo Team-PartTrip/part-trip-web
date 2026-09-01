@@ -196,7 +196,7 @@ export const WorldMapSummary = styled.section`
   box-sizing: border-box;
   border: 1px solid #dceaf7;
   border-radius: 16px;
-  padding: 12px;
+  padding: 24px;
   background: ${({ theme }) => theme.colors.background.muted};
 
   img {
@@ -204,7 +204,7 @@ export const WorldMapSummary = styled.section`
     position: absolute;
     top: 57px;
     right: 16px;
-    width: 360px;
+    width: min(360px, calc(100% - 48px));
     height: 180px;
     object-fit: contain;
   }

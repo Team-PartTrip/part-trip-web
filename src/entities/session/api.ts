@@ -20,12 +20,6 @@ export type RefreshRequestDto = {
 export type TokenResponseDto = {
   accessToken: string
   refreshToken: string
-  surveyCompleted: boolean
-}
-
-export type RefreshTokenResponseDto = {
-  accessToken: string
-  refreshToken: string
 }
 
 export type EmailVerifyRequestDto = {
@@ -45,6 +39,10 @@ export type PasswordResetRequestDto = {
 export type LoginRequestDto = {
   userId: string
   userPwd: string
+}
+
+export type LogoutRequestDto = {
+  refreshToken: string
 }
 
 export type GoogleLoginRequestDto = {
@@ -136,13 +134,13 @@ export async function resetPassword(payload: PasswordResetRequestDto): Promise<s
   return post<string>(AUTH_API_PATHS.password.reset, payload)
 }
 
-export async function logout(): Promise<string> {
-  const { data } = await apiClient.post<string>(AUTH_API_PATHS.session.logout)
+export async function logout(payload: LogoutRequestDto): Promise<string> {
+  const { data } = await apiClient.post<string>(AUTH_API_PATHS.session.logout, payload)
   return data
 }
 
-export async function refresh(payload: RefreshRequestDto): Promise<RefreshTokenResponseDto> {
-  return post<RefreshTokenResponseDto>(AUTH_API_PATHS.session.refresh, payload)
+export async function refresh(payload: RefreshRequestDto): Promise<TokenResponseDto> {
+  return post<TokenResponseDto>(AUTH_API_PATHS.session.refresh, payload)
 }
 
 export async function checkUserId(userId: string): Promise<CheckUserIdResponseDto> {

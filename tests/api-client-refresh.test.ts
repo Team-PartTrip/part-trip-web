@@ -271,3 +271,28 @@ test('refresh 실패 시 저장된 토큰을 제거하고 원래 요청을 재�
     apiClient.defaults.adapter = previousApiAdapter
   }
 })
+
+test('로그아웃은 서버가 요구하는 refresh token을 본문으로 보낸다', async () => {
+  const previousStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
+  const previousApiAdapter = apiClient.defaults.adapter
+  let requestBody: unknown
+
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: createStorage() })
+
+  apiClient.defaults.adapter = async (config) => {
+    requestBody = typeof config.data === 'string' ? JSON.parse(config.data) : config.data
+    return { config, data: '로그아웃 완료', headers: {}, status: 200, statusText: 'OK' }
+  }
+
+  try {
+    await apiClient.post('/auth/logout', { refreshToken: 'refresh-1' })
+    assert.deepEqual(requestBody, { refreshToken: 'refresh-1' })
+  } finally {
+    apiClient.defaults.adapter = previousApiAdapter
+    if (previousStorage) {
+      Object.defineProperty(globalThis, 'localStorage', previousStorage)
+    } else {
+      Reflect.deleteProperty(globalThis, 'localStorage')
+    }
+  }
+})

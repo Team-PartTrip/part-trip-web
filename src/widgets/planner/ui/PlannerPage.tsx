@@ -229,7 +229,7 @@ function PlannerFlowPage({ step }: Props) {
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [shareError, setShareError] = useState("");
   const {
-    addVoteOptionMutation,
+    addPlannerPlacesMutation,
     activeVote,
     castBallotMutation,
     canManagePlanner,
@@ -239,8 +239,8 @@ function PlannerFlowPage({ step }: Props) {
     countries,
     popularCities,
     confirmPlannerMutation,
-    createVoteMutation,
     confirmVoteMutation,
+    deletePlannerMutation,
     deleteVoteOptionMutation,
     errorMessage,
     handleAddPlaceCandidate,
@@ -249,6 +249,7 @@ function PlannerFlowPage({ step }: Props) {
     handleCloseVote,
     handleConfirmPlan,
     handleConfirmVote,
+    handleDeletePlanner,
     handleDeleteVoteOption,
     handleDestinationSelect,
     handleJoinPlanner,
@@ -413,8 +414,7 @@ function PlannerFlowPage({ step }: Props) {
     ? 1
     : 0;
   const isSavingCandidates =
-    addVoteOptionMutation.isPending ||
-    createVoteMutation.isPending ||
+    addPlannerPlacesMutation.isPending ||
     selectRandomPlannerPlaceMutation.isPending;
   const isManagingMembers =
     acceptPlannerInvitationMutation.isPending ||
@@ -720,45 +720,61 @@ function PlannerFlowPage({ step }: Props) {
                 </S.PlannerTabs>
                 <S.PlannerListLayout>
                   <S.PlanListPanel>
-                    {availablePlanners.map((planner, index) => (
-                      <S.PlanRow
-                        key={planner.plannerId ?? index}
-                        type="button"
-                        $state={plannerStatusKey(planner.status)}
-                        onClick={() =>
-                          void handleSelectPlanner(planner.plannerId)
-                        }
-                      >
-                        <S.PlanContent>
-                          <S.PlanDetails>
-                            <strong>
-                              {planner.title ||
-                                `${planner.cityName || planner.countryName || "여행"} 여행`}
-                            </strong>
-                            <span>
-                              {dateRange(planner.startDate, planner.endDate)}
-                            </span>
-                            <S.PlanStatusRow>
-                              <S.PlanStatus
-                                $state={plannerStatusKey(planner.status)}
-                              >
-                                {plannerStatusLabel(planner.status)}
-                              </S.PlanStatus>
-                              <S.PlanParticipation>
-                                {planner.joinedMemberCount ?? 0}/
-                                {planner.memberCount ?? 0}명 참여
-                              </S.PlanParticipation>
-                            </S.PlanStatusRow>
-                          </S.PlanDetails>
-                          <S.PlanAside>
-                            <PlannerMemberAvatars
-                              plannerId={planner.plannerId}
-                            />
-                            <S.RowArrow aria-hidden="true">›</S.RowArrow>
-                          </S.PlanAside>
-                        </S.PlanContent>
-                      </S.PlanRow>
-                    ))}
+                    {availablePlanners.map((planner, index) => {
+                      const title = planner.title || `${planner.cityName || planner.countryName || "여행"} 여행`;
+                      const isOwner = planner.role?.trim().toUpperCase() === "OWNER";
+                      return (
+                        <S.PlanItem key={planner.plannerId ?? index}>
+                          <S.PlanRow
+                            type="button"
+                            $state={plannerStatusKey(planner.status)}
+                            onClick={() =>
+                              void handleSelectPlanner(planner.plannerId)
+                            }
+                          >
+                            <S.PlanContent>
+                              <S.PlanDetails>
+                                <strong>{title}</strong>
+                                <span>
+                                  {dateRange(planner.startDate, planner.endDate)}
+                                </span>
+                                <S.PlanStatusRow>
+                                  <S.PlanStatus
+                                    $state={plannerStatusKey(planner.status)}
+                                  >
+                                    {plannerStatusLabel(planner.status)}
+                                  </S.PlanStatus>
+                                  <S.PlanParticipation>
+                                    {planner.joinedMemberCount ?? 0}/
+                                    {planner.memberCount ?? 0}명 참여
+                                  </S.PlanParticipation>
+                                </S.PlanStatusRow>
+                              </S.PlanDetails>
+                              <S.PlanAside>
+                                <PlannerMemberAvatars
+                                  plannerId={planner.plannerId}
+                                />
+                                <S.RowArrow aria-hidden="true">›</S.RowArrow>
+                              </S.PlanAside>
+                            </S.PlanContent>
+                          </S.PlanRow>
+                          {isOwner ? (
+                            <S.DeletePlannerButton
+                              type="button"
+                              aria-label={`${title} 삭제`}
+                              disabled={deletePlannerMutation.isPending}
+                              onClick={() => {
+                                if (window.confirm("이 플래너를 삭제할까요?")) {
+                                  void handleDeletePlanner(planner.plannerId);
+                                }
+                              }}
+                            >
+                              {deletePlannerMutation.isPending ? "삭제 중" : "삭제"}
+                            </S.DeletePlannerButton>
+                          ) : null}
+                        </S.PlanItem>
+                      );
+                    })}
                     {!isLoading && availablePlanners.length === 0 ? (
                       <S.Empty>등록된 여행 계획이 없습니다.</S.Empty>
                     ) : null}
@@ -1193,7 +1209,9 @@ function PlannerFlowPage({ step }: Props) {
                           </S.PlaceThumb>
                           <S.PlaceDetails>
                             <strong>{item.placeName || "장소"}</strong>
-                            <span>{voteCategory} · 장소 정보</span>
+                            <span>
+                              {item.category || voteCategory} · {item.address || "장소 정보"}
+                            </span>
                           </S.PlaceDetails>
                           <S.PlaceAction
                             type="button"
@@ -1360,12 +1378,12 @@ function PlannerFlowPage({ step }: Props) {
                   >
                     직접 선택
                   </S.SegmentButton>
-                  <S.SegmentButton
-                    type="button"
-                    disabled={
-                      selectedPlaces.length === 0 ||
-                      selectRandomPlannerPlaceMutation.isPending
-                    }
+                    <S.SegmentButton
+                      type="button"
+                      disabled={
+                        selectedPlaces.length === 0 ||
+                        isSavingCandidates
+                      }
                     data-active={lineupMode === "random"}
                     $active={lineupMode === "random"}
                     onClick={() => void handleRandomLineup()}
@@ -1662,10 +1680,10 @@ function PlannerFlowPage({ step }: Props) {
                       <p>{place.description || "장소 설명이 없습니다."}</p>
                       <PartTripButton
                         type="button"
-                        disabled={addVoteOptionMutation.isPending || createVoteMutation.isPending}
+                        disabled={addPlannerPlacesMutation.isPending}
                         onClick={() => void handleAddPlaceCandidate()}
                       >
-                        {addVoteOptionMutation.isPending || createVoteMutation.isPending
+                        {addPlannerPlacesMutation.isPending
                           ? "후보 저장 중"
                           : "투표 후보에 추가"}
                       </PartTripButton>

@@ -15,7 +15,7 @@ export type PlannerCreateResponseDto = {
   endDate?: string
   countryName?: string
   cityName?: string
-  inviteCode?: string
+  inviteLink?: string
 }
 
 export type PlannerListResponseDto = {
