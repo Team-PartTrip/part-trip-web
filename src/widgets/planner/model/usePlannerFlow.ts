@@ -162,8 +162,8 @@ export function usePlannerFlow(step: PlannerStep) {
   const plannerInviteLink = visiblePlannerInviteCode && typeof window !== 'undefined'
     ? `${window.location.origin}/planner/group?inviteCode=${encodeURIComponent(visiblePlannerInviteCode)}`
     : ''
-  const openVotes = votes.filter((vote) => normalizeVoteStatus(vote.status) === 'OPEN' && isPositiveSafeInteger(vote.voteId))
-  const canCloseVotes = openVotes.length > 0 && openVotes.every((vote) => vote.options.some((option) => option.selectedByMe))
+  const openVotes = votes.filter((vote) => normalizeVoteStatus(vote.status) === 'OPEN')
+  const canCloseVotes = openVotes.length > 0 && openVotes.every((vote) => isPositiveSafeInteger(vote.voteId) && vote.options.some((option) => option.selectedByMe))
   const canManagePlanner = isPositiveSafeInteger(activePlannerId) && isPlannerLeader(plannerDetail?.role)
   const isRemindAvailable = canManagePlanner && openVotes.length > 0
   const handleDestinationSelect = (country: CountryInfoResponseDto) => {
