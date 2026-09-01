@@ -43,7 +43,7 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
   const detailTimeline = detail?.timeline ?? [];
   const firstPlace = detailTimeline.find((item) => item.type === "PLACE" && item.placeName) ?? detailTimeline.find((item) => item.placeName);
   const firstPhoto = detailTimeline.find((item) => item.type === "PHOTO" && item.imageUrl) ?? detailTimeline.find((item) => item.imageUrl);
-  const featuredImage = featuredCard?.coverImageUrl || featuredCard?.images?.[0];
+  const featuredImage = featuredCard?.images?.[0];
 
   const selectAll = () => setSelected(allCardIds);
   const clearSelection = () => setSelected([]);
@@ -103,7 +103,7 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
                   </S.MetricList>
                 </S.TravelCardInfo>
               </S.TravelCard>
-            ) : <S.Empty>공유된 여행 카드가 없습니다.</S.Empty>}
+            ) : <S.Empty>여행 카드가 없습니다.</S.Empty>}
             <S.Pagination aria-label="여행 카드 페이지"><span className="active" /><span /><span /></S.Pagination>
             <PartTripButton type="button" onClick={() => navigate({ to: paths.tripCardCreate })}>사진 · 코멘트 추가</PartTripButton>
           </S.CarouselSection>

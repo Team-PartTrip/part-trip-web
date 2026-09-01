@@ -35,6 +35,14 @@ test('로그아웃 시 두 토큰을 모두 제거한다', () => {
   assert.equal(storage.getItem(REFRESH_TOKEN_KEY), null)
 })
 
+test('빈 인증 토큰은 저장하지 않는다', () => {
+  const storage = createStorage()
+
+  assert.throws(() => saveAuthTokens({ accessToken: ' ', refreshToken: 'refresh' }, storage), /인증 토큰/)
+  assert.equal(storage.getItem(ACCESS_TOKEN_KEY), null)
+  assert.equal(storage.getItem(REFRESH_TOKEN_KEY), null)
+})
+
 test('브라우저 기본 저장소는 sessionStorage를 사용하고 legacy 토큰을 제거한다', () => {
   const sessionStorage = createStorage()
   const legacyStorage = createStorage()

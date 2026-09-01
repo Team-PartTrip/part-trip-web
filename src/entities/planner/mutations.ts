@@ -4,11 +4,14 @@ import {
   castBallot,
   acceptPlannerInvitation,
   addPlannerPlaces,
+  addVoteOption,
   cancelPlannerInvitation,
   closeVote,
   confirmPlanner,
   confirmVote,
   createPlanner,
+  createVote,
+  deletePlanner,
   deleteVoteOption,
   joinPlanner,
   remindPlannerMembers,
@@ -17,11 +20,13 @@ import {
   selectRandomPlannerPlace,
   updatePlanner,
   type CreatePlannerRequestDto,
+  type CreateVoteRequestDto,
   type JoinPlannerRequestDto,
   type PlannerCartRequestDto,
   type SavePlannerTravelPlanRequestDto,
   type VoteBallotRequestDto,
   type VoteConfirmRequestDto,
+  type VoteOptionCreateRequestDto,
 } from './api'
 import { plannerQueryKeys } from './query-keys'
 
@@ -108,6 +113,32 @@ export function useDeleteVoteOptionMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ plannerId, voteId, optionId }: { plannerId: number; voteId: number; optionId: number }) => deleteVoteOption(plannerId, voteId, optionId),
+    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
+  })
+}
+
+export function useAddVoteOptionMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ plannerId, voteId, payload }: { plannerId: number; voteId: number; payload: VoteOptionCreateRequestDto }) =>
+      addVoteOption(plannerId, voteId, payload),
+    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
+  })
+}
+
+export function useCreateVoteMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ plannerId, payload }: { plannerId: number; payload: CreateVoteRequestDto }) =>
+      createVote(plannerId, payload),
+    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
+  })
+}
+
+export function useDeletePlannerMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (plannerId: number) => deletePlanner(plannerId),
     onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
   })
 }

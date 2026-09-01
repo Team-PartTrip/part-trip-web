@@ -1,33 +1,20 @@
 import { apiClient } from '../../shared/libs/api-client.ts'
-import { requestWithMockFallback } from '../../shared/libs/api-fallback.ts'
 
 export type ProfileUpdateRequestDto = {
   imgUrl?: string
   nickName: string
-  themeId?: number
 }
 
 export type ProfileResponseDto = {
-  imgUrl?: string
-  nickName?: string
-  themeDescription?: string
-  themeId?: number
-  themeName?: string
-  userId?: string
-}
-
-export type TravelThemeResponseDto = {
-  description?: string
-  imageUrl?: string
-  themeCode?: string
-  themeId?: number
-  themeName?: string
+  imgUrl?: string | null
+  nickName: string
+  userId: string
 }
 
 export type ProfileStatsResponseDto = {
-  countryCount?: number
-  recordCount?: number
-  tripCount?: number
+  countryCount: number
+  recordCount: number
+  tripCount: number
 }
 
 const PROFILE_API_PATHS = {
@@ -35,7 +22,6 @@ const PROFILE_API_PATHS = {
   image: '/profile/image',
   mine: '/profile/myInfo',
   stats: '/profile/stats',
-  themes: '/profile/themes',
 } as const
 
 export async function getProfile(): Promise<ProfileResponseDto> {
@@ -53,17 +39,7 @@ export async function uploadProfileImage(file: File): Promise<string> {
   return data
 }
 
-export async function getTravelThemes(): Promise<TravelThemeResponseDto[]> {
-  const { data } = await apiClient.get<TravelThemeResponseDto[]>(PROFILE_API_PATHS.themes)
+export async function getProfileStats(): Promise<ProfileStatsResponseDto> {
+  const { data } = await apiClient.get<ProfileStatsResponseDto>(PROFILE_API_PATHS.stats)
   return data
-}
-
-export async function getProfileStats(): Promise<ProfileStatsResponseDto | undefined> {
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.get<ProfileStatsResponseDto>(PROFILE_API_PATHS.stats)
-      return data
-    },
-    () => undefined,
-  )
 }

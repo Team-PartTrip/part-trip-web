@@ -53,7 +53,7 @@ export function usePlannerData(
   const needsConfirmedPlaces = step === 'final'
   const [overriddenPlan, setOverriddenPlan] = useState<PlannerPlan>()
   const countriesQuery = useCountriesQuery(countryKeyword, step === 'destination')
-  const popularCitiesQuery = usePopularCitiesQuery(50, step === 'destination')
+  const popularCitiesQuery = usePopularCitiesQuery(8, step === 'destination')
   const plannersQuery = useMyPlannersQuery(step === 'list')
   const plannerDetailQuery = usePlannerDetailQuery(
     activePlannerId,

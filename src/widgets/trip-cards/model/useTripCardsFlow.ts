@@ -1,48 +1,33 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
 
-import { useDeleteTravelCardsMutation, useSharedTripQuery, useSharedTripsQuery } from '@/entities/trip-card'
-import { useMyTrips } from '@/entities/trip-plan'
+import { useDeleteTravelCardsMutation } from '@/entities/trip-card'
+import { useMyTrips, useTripQuery } from '@/entities/trip-plan'
 import { paths } from '@/shared/config'
 
-import { addHiddenTripIds, parseHiddenTripIds } from './storage'
-
-const HIDDEN_TRIP_CARDS_KEY = 'parttrip:hidden-trip-cards'
-
 export type TripCardsMode = 'list' | 'detail' | 'create' | 'delete'
-function readHiddenTripIds() {
-  if (typeof window === 'undefined') return []
-  return parseHiddenTripIds(window.localStorage.getItem(HIDDEN_TRIP_CARDS_KEY))
-}
 
 export function useTripCardsFlow(mode: TripCardsMode) {
   const navigate = useNavigate()
   const { tripId } = useParams({ strict: false })
   const [selected, setSelected] = useState<number[]>([])
-  const [hiddenTripIds, setHiddenTripIds] = useState(readHiddenTripIds)
   const [message, setMessage] = useState('')
-  const sharedTripsQuery = useSharedTripsQuery(mode !== 'detail' && mode !== 'create')
-  const sharedTripQuery = useSharedTripQuery(Number(tripId))
-  const myTripsQuery = useMyTrips(mode === 'create')
+  const tripQuery = useTripQuery(Number(tripId))
+  const myTripsQuery = useMyTrips(mode !== 'detail')
   const deleteMutation = useDeleteTravelCardsMutation()
-  const cards = [...(sharedTripsQuery.data?.content ?? [])]
-    .filter((card) => card.tripId == null || !hiddenTripIds.includes(card.tripId))
-    .sort((a, b) => (b.startDate ?? b.createDate ?? '').localeCompare(a.startDate ?? a.createDate ?? ''))
+  const cards = myTripsQuery.trips
   const mine = myTripsQuery.trips
-  const detail = sharedTripQuery.data
-  const isLoading = mode === 'detail' ? sharedTripQuery.isLoading : mode === 'create' ? myTripsQuery.isLoading : sharedTripsQuery.isLoading
-  const hasQueryError = mode === 'detail' ? sharedTripQuery.isError : mode === 'create' ? myTripsQuery.hasError : sharedTripsQuery.isError
+  const detail = tripQuery.data
+  const isLoading = mode === 'detail' ? tripQuery.isLoading : myTripsQuery.isLoading
+  const hasQueryError = mode === 'detail' ? tripQuery.isError : myTripsQuery.hasError
 
   const handleDelete = async () => {
-    const nextIds = addHiddenTripIds(hiddenTripIds, selected)
-    if (nextIds.length === hiddenTripIds.length) {
+    if (selected.length === 0) {
       setMessage('삭제할 여행 카드를 선택해주세요.')
       return
     }
     try {
       await deleteMutation.mutateAsync({ cardIds: selected })
-      window.localStorage.setItem(HIDDEN_TRIP_CARDS_KEY, JSON.stringify(nextIds))
-      setHiddenTripIds(nextIds)
       setSelected([])
       setMessage('선택한 카드가 삭제되었습니다.')
     } catch {
@@ -64,6 +49,5 @@ export function useTripCardsFlow(mode: TripCardsMode) {
     paths,
     selected,
     setSelected,
-    sharedTripQuery,
   }
 }

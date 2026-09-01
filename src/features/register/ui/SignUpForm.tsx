@@ -36,6 +36,7 @@ type CredentialsFormValues = {
   password: string
   passwordConfirm: string
   phoneNumber: string
+  myCountry: string
 }
 
 type VerificationFormValues = {
@@ -65,6 +66,7 @@ export function SignUpForm() {
       password: '',
       passwordConfirm: '',
       phoneNumber: '',
+      myCountry: '',
     },
   })
   const verificationForm = useForm<VerificationFormValues>({
@@ -138,8 +140,7 @@ export function SignUpForm() {
     try {
       setIsCheckingId(true)
       const result = await checkUserId(userId)
-      const [responseKey, responseValue] = Object.entries(result)[0] ?? []
-      const available = responseKey?.toLowerCase().includes('duplicate') ? responseValue !== true : responseValue === true
+      const available = result.available === true
       setCheckedId(userId)
       setIsUserIdAvailable(available)
       setMessage({ text: available ? '사용할 수 있는 아이디입니다.' : '이미 사용 중인 아이디입니다.', tone: available ? 'success' : 'error' })
@@ -174,8 +175,9 @@ export function SignUpForm() {
   const handleVerificationSubmit: SubmitHandler<VerificationFormValues> = async ({ email, verificationCode }) => {
     try {
       await verifyCode({ code: verificationCode, email })
-      const { id, password, phoneNumber } = credentialsForm.getValues()
+      const { id, password, phoneNumber, myCountry } = credentialsForm.getValues()
       const payload: SignUpRequestDto = {
+        myCountry,
         phoneNumber,
         signUpDivision: 'USER',
         userId: id,
@@ -254,6 +256,10 @@ export function SignUpForm() {
           <S.Field>
             <S.Input {...phoneNumberField} aria-label="전화번호" type="tel" inputMode="tel" autoComplete="tel" placeholder="대한민국  +82  전화번호 입력" maxLength={20} disabled={isCredentialsBusy} required />
             <S.FieldHint>인증번호를 받을 수 있는 번호를 입력하세요</S.FieldHint>
+          </S.Field>
+          <S.Field>
+            <S.Input {...credentialsForm.register('myCountry', { required: '거주 국가를 입력해주세요.', setValueAs: trimFormValue })} aria-label="거주 국가" type="text" autoComplete="country-name" placeholder="거주 국가 입력" disabled={isCredentialsBusy} required />
+            <S.FieldHint>거주 국가를 입력하세요</S.FieldHint>
           </S.Field>
           {message ? <S.Message $tone={message.tone} aria-live="polite">{message.text}</S.Message> : null}
           <S.Actions>

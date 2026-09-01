@@ -3,12 +3,13 @@ import { useNavigate, useParams } from '@tanstack/react-router'
 
 import {
   useAcceptPlannerInvitationMutation,
-  useAddPlannerPlacesMutation,
+  useAddVoteOptionMutation,
   useCastBallotMutation,
   useCloseVoteMutation,
   useConfirmVoteMutation,
   useConfirmPlannerMutation,
   useCreatePlannerMutation,
+  useCreateVoteMutation,
   useDeleteVoteOptionMutation,
   useCancelPlannerInvitationMutation,
   useJoinPlannerMutation,
@@ -124,7 +125,8 @@ export function usePlannerFlow(step: PlannerStep) {
   const rejectPlannerInvitationMutation = useRejectPlannerInvitationMutation()
   const cancelPlannerInvitationMutation = useCancelPlannerInvitationMutation()
   const removePlannerMemberMutation = useRemovePlannerMemberMutation()
-  const addPlannerPlacesMutation = useAddPlannerPlacesMutation()
+  const addVoteOptionMutation = useAddVoteOptionMutation()
+  const createVoteMutation = useCreateVoteMutation()
   const remindPlannerMembersMutation = useRemindPlannerMembersMutation()
   const selectRandomPlannerPlaceMutation = useSelectRandomPlannerPlaceMutation()
   const confirmPlannerMutation = useConfirmPlannerMutation()
@@ -132,7 +134,7 @@ export function usePlannerFlow(step: PlannerStep) {
   const closeVoteMutation = useCloseVoteMutation()
   const confirmVoteMutation = useConfirmVoteMutation()
   const deleteVoteOptionMutation = useDeleteVoteOptionMutation()
-  const isSaving = createPlannerMutation.isPending || updatePlannerMutation.isPending
+  const isSaving = createPlannerMutation.isPending || updatePlannerMutation.isPending || createVoteMutation.isPending || addVoteOptionMutation.isPending
 
   useEffect(() => {
     writeSessionValue(PLANNER_SELECTED_KEY, JSON.stringify(selected))
@@ -151,21 +153,27 @@ export function usePlannerFlow(step: PlannerStep) {
   const selectedHeadcount = headcount.trim() || String(plannerDetail?.memberCount ?? savedGroupSettings.memberCount)
   const selectedPlaces = places.flatMap((item, index) => selected.includes(index) ? [{ index, item }] : [])
   const placeParam = Number(placeId)
-  const place = places.find((item) => item.tourPlaceId === placeParam)
+  const place = Number.isSafeInteger(placeParam) && placeParam >= 0 ? places[placeParam] : undefined
   const categoryVote = votes.find((vote) => vote.category === voteCategory || vote.categoryLabel === voteCategory)
   const activeVote = (voteDetail?.category === voteCategory || voteDetail?.categoryLabel === voteCategory ? voteDetail : undefined) ??
     categoryVote ??
     (voteDetail?.voteId === activeVoteId ? voteDetail : undefined) ??
     votes.find((vote) => vote.voteId === activeVoteId)
-  const visiblePlannerInviteCode = plannerDetail?.inviteCode || plannerInviteCode
+  const visiblePlannerInviteLink = plannerDetail?.inviteLink || (plannerInviteCode && typeof window !== 'undefined'
+    ? `${window.location.origin}/planner/group?inviteCode=${encodeURIComponent(plannerInviteCode)}`
+    : '')
   const isConfirmed = hasConfirmedLocally || normalizeVoteStatus(plannerDetail?.status) === 'CONFIRMED'
-  const plannerInviteLink = visiblePlannerInviteCode && typeof window !== 'undefined'
-    ? `${window.location.origin}/planner/group?inviteCode=${encodeURIComponent(visiblePlannerInviteCode)}`
-    : ''
   const openVotes = votes.filter((vote) => normalizeVoteStatus(vote.status) === 'OPEN')
   const canCloseVotes = openVotes.length > 0 && openVotes.every((vote) => isPositiveSafeInteger(vote.voteId) && vote.options.some((option) => option.selectedByMe))
   const canManagePlanner = isPositiveSafeInteger(activePlannerId) && isPlannerLeader(plannerDetail?.role)
   const isRemindAvailable = canManagePlanner && openVotes.length > 0
+  const getOrCreateVoteId = async (plannerId: number) => {
+    const existingVote = votes.find((vote) => vote.category === voteCategory || vote.categoryLabel === voteCategory)
+    if (isPositiveSafeInteger(existingVote?.voteId)) return existingVote.voteId
+    const createdVote = await createVoteMutation.mutateAsync({ plannerId, payload: { category: voteCategory } })
+    if (!isPositiveSafeInteger(createdVote.voteId)) throw new Error('voteId is missing')
+    return createdVote.voteId
+  }
   const handleDestinationSelect = (country: CountryInfoResponseDto) => {
     setSelectedDestination(country)
     setCountryInfoId(String(country.countryInfoId ?? ''))
@@ -243,6 +251,8 @@ export function usePlannerFlow(step: PlannerStep) {
           cityName: nextCity,
           countryName: nextCountry,
           endDate: selectedEndDate,
+          isSolo,
+          memberCount: nextHeadcount,
           startDate: selectedStartDate,
         },
       })
@@ -391,22 +401,25 @@ export function usePlannerFlow(step: PlannerStep) {
 
   const handleSaveCandidates = async () => {
     const plannerId = activePlannerId
-    const placeIds = [...new Set(selectedPlaces
-      .map(({ item }) => item.tourPlaceId)
-      .filter((placeId): placeId is number => isPositiveSafeInteger(placeId)))]
+    const placeNames = [...new Set(selectedPlaces
+      .map(({ item }) => item.placeName?.trim())
+      .filter((placeName): placeName is string => Boolean(placeName)))]
 
     if (!isPositiveSafeInteger(plannerId)) {
       setErrorMessage('먼저 여행 계획을 저장해주세요.')
       return
     }
-    if (placeIds.length === 0) {
+    if (placeNames.length === 0) {
       setErrorMessage('검색 결과를 선택해주세요.')
       return
     }
 
     try {
       setErrorMessage('')
-      await addPlannerPlacesMutation.mutateAsync({ plannerId, payload: { placeIds } })
+      const voteId = await getOrCreateVoteId(plannerId)
+      for (const placeName of placeNames) {
+        await addVoteOptionMutation.mutateAsync({ plannerId, voteId, payload: { placeName } })
+      }
       removeSessionValue(ACTIVE_VOTE_ID_KEY)
       setStoredActiveVoteId(0)
 
@@ -420,20 +433,21 @@ export function usePlannerFlow(step: PlannerStep) {
 
   const handleAddPlaceCandidate = async () => {
     const plannerId = activePlannerId
-    const placeId = place?.tourPlaceId
+    const placeName = place?.placeName?.trim()
 
     if (!isPositiveSafeInteger(plannerId)) {
       setErrorMessage('먼저 여행 계획을 저장해주세요.')
       return
     }
-    if (!isPositiveSafeInteger(placeId)) {
+    if (!placeName) {
       setErrorMessage('추가할 장소 정보를 확인할 수 없습니다.')
       return
     }
 
     try {
       setErrorMessage('')
-      await addPlannerPlacesMutation.mutateAsync({ plannerId, payload: { placeIds: [placeId] } })
+      const voteId = await getOrCreateVoteId(plannerId)
+      await addVoteOptionMutation.mutateAsync({ plannerId, voteId, payload: { placeName } })
       removeSessionValue(ACTIVE_VOTE_ID_KEY)
       setStoredActiveVoteId(0)
       writeSessionValue(ACTIVE_VOTE_CATEGORY_KEY, voteCategory)
@@ -530,27 +544,7 @@ export function usePlannerFlow(step: PlannerStep) {
       setErrorMessage('먼저 장바구니에 장소를 담아주세요.')
       return
     }
-    const plannerId = activePlannerId
-    const placeIds = selectedPlaces
-      .map(({ item }) => item.tourPlaceId)
-      .filter((placeId): placeId is number => isPositiveSafeInteger(placeId))
-    if (!isPositiveSafeInteger(plannerId) || placeIds.length === 0) {
-      setErrorMessage('랜덤으로 선택할 장소 정보를 확인할 수 없습니다.')
-      return
-    }
-
-    try {
-      setErrorMessage('')
-      await addPlannerPlacesMutation.mutateAsync({ plannerId, payload: { placeIds } })
-      const randomPlace = await selectRandomPlannerPlaceMutation.mutateAsync(plannerId)
-      const choiceIndex = places.findIndex((item) => item.tourPlaceId === randomPlace.placeId)
-      if (choiceIndex < 0) throw new Error('random place is not in the current category')
-      setLineupMode('random')
-      setLineupChoice(choiceIndex)
-      setSelected([choiceIndex])
-    } catch {
-      setErrorMessage('랜덤 장소를 선택하지 못했습니다.')
-    }
+    setErrorMessage('최신 장소 조회 응답에는 랜덤 선택에 필요한 장소 ID가 없어 사용할 수 없습니다.')
   }
 
   const handleConfirmPlan = async () => {
@@ -659,8 +653,8 @@ export function usePlannerFlow(step: PlannerStep) {
     plan,
     plannerCategories,
     plannerDetail,
-    plannerInviteCode: visiblePlannerInviteCode,
-    plannerInviteLink,
+    plannerInviteCode,
+    plannerInviteLink: visiblePlannerInviteLink,
     plannerTitle,
     planners,
     popularCities,
@@ -695,7 +689,7 @@ export function usePlannerFlow(step: PlannerStep) {
     confirmPlannerMutation,
     confirmVoteMutation,
     deleteVoteOptionMutation,
-    addPlannerPlacesMutation,
+    addVoteOptionMutation,
     castBallotMutation,
     closeVoteMutation,
     joinPlannerMutation,
@@ -705,6 +699,7 @@ export function usePlannerFlow(step: PlannerStep) {
     removePlannerMemberMutation,
     remindPlannerMembersMutation,
     selectRandomPlannerPlaceMutation,
+    createVoteMutation,
     remindFeedback,
     members,
     memberCount,

@@ -70,7 +70,10 @@ export function TripCardPhotoComposer({ cards }: Props) {
       for (const photo of photos) {
         await createEntryMutation.mutateAsync({
           cardId,
-          payload: { comment: comment.trim(), imageFile: photo.file },
+          payload: {
+            ...(comment.trim() ? { comment: comment.trim() } : {}),
+            imageFile: photo.file,
+          },
         });
         URL.revokeObjectURL(photo.url);
         setPhotos((current) => current.filter((item) => item !== photo));

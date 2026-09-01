@@ -1,7 +1,3 @@
-import { apiClient } from '@/shared/libs/api-client'
-import { requestWithMockFallback } from '@/shared/libs/api-fallback'
-import { toggleMockLike } from './mock-state'
-
 export * from './board'
 export * from './review'
 
@@ -16,11 +12,6 @@ export type LikeResponseDto = {
 }
 
 export async function toggleLike(payload: LikeRequestDto): Promise<LikeResponseDto> {
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.post<LikeResponseDto>('/community/likes', payload)
-      return data
-    },
-    () => toggleMockLike(payload.targetType, payload.targetId),
-  )
+  void payload
+  throw new Error('최신 API 명세서에 커뮤니티 API가 없습니다.')
 }

@@ -3,39 +3,21 @@ import { apiClient } from '@/shared/libs/api-client'
 import { requestWithMockFallback } from '@/shared/libs/api-fallback'
 import { isMissingTravelPlanResponse } from './main-error'
 
-export type TravelPlanRequestDto = {
-  countryName?: string
-  cityName?: string
-  headcount?: number
-  startDate?: string
-  endDate?: string
-}
-
 export type DdayResponseDto = {
-  travelPlanId?: number
-  countryName?: string
-  cityName?: string
-  headcount?: number
-  startDate?: string
-  endDate?: string
-  dday?: string
-}
-
-export type TravelChangeRequestDto = {
-  travelPlanId: number
-  countryInfoId: number
+  countryName?: string | null
+  cityName?: string | null
+  headcount?: number | null
+  startDate?: string | null
+  endDate?: string | null
+  dday?: string | null
 }
 
 export type TourPlaceResponseDto = {
-  address?: string
-  category?: string
   placeName?: string
   description?: string
   imageUrl?: string
   latitude?: number
   longitude?: number
-  rating?: number
-  tourPlaceId?: number
 }
 
 export type FestivalResponseDto = {
@@ -51,14 +33,11 @@ export type FestivalResponseDto = {
 
 export type CountryInfoResponseDto = {
   countryInfoId?: number
-  countryCode?: string
   countryName?: string
   cityName?: string
   imageUrl?: string
   summary?: string
 }
-
-export type PopularPlaceResponseDto = CountryInfoResponseDto
 
 export type PopularCityResponseDto = {
   cityName?: string
@@ -66,38 +45,13 @@ export type PopularCityResponseDto = {
   planCount?: number
 }
 
-export type RecentSearchResponseDto = {
-  recentSearchId?: number
-  countryName?: string
-  cityName?: string
-  imageUrl?: string
-}
-
-export type RecentSearchRequestDto = {
-  countryInfoId: number
-}
-
-export type Destination = {
-  country: string
-  countryInfoId?: number
-  currency: string
-  id: string
-  imageUrl?: string
-  name: string
-  recentSearchId?: number
-}
-
 const MAIN_API_PATHS = {
-  travelPlan: '/main/travel-plan',
-  travelChange: '/main/search/travel-change',
   dday: '/main/dday',
   tourPlace: '/main/tour-place',
   festivals: '/main/festivals',
   countryInfo: '/main/country-info',
   countries: '/main/countries',
-  popular: '/main/search/popular',
   popularCities: '/main/popular-cities',
-  recent: '/main/search/recent',
 } as const
 
 const mockCountries: CountryInfoResponseDto[] = [
@@ -115,15 +69,15 @@ const mockCountrySearchAliases: Record<number, string[]> = {
 }
 
 const mockTourPlaces: TourPlaceResponseDto[] = [
-  { tourPlaceId: 1, placeName: '이치란 라멘', category: '맛집', address: '도톤보리', rating: 4.6, description: '오사카에서 즐기는 대표 라멘' },
-  { tourPlaceId: 2, placeName: '쿠시카츠 다루마', category: '맛집', address: '신세카이', rating: 4.4, description: '바삭한 쿠시카츠 전문점' },
-  { tourPlaceId: 3, placeName: '하리주 그릴', category: '맛집', address: '난바', rating: 4.7, description: '오래된 오사카식 그릴' },
-  { tourPlaceId: 4, placeName: '미즈노 오코노미야키', category: '맛집', address: '도톤보리', rating: 4.5, description: '현지식 오코노미야키' },
-  { tourPlaceId: 5, placeName: '오사카성', category: '명소', address: '주오구', rating: 4.7, description: '오사카를 대표하는 역사 명소' },
-  { tourPlaceId: 6, placeName: '호텔 닛코 오사카', category: '숙소', address: '신사이바시', rating: 4.3, description: '도심 이동이 편한 숙소' },
-  { tourPlaceId: 7, placeName: '리로 커피 로스터스', category: '카페', address: '난바', rating: 4.5, description: '여행 중 쉬어가기 좋은 카페' },
-  { tourPlaceId: 8, placeName: '유니버설 스튜디오 재팬', category: '액티비티', address: '고노하나구', rating: 4.8, description: '하루 종일 즐기는 테마파크' },
-  { tourPlaceId: 9, placeName: '난바 파크스', category: '쇼핑', address: '난바', rating: 4.4, description: '쇼핑과 식사를 함께 즐기는 공간' },
+  { placeName: '이치란 라멘', description: '오사카에서 즐기는 대표 라멘' },
+  { placeName: '쿠시카츠 다루마', description: '바삭한 쿠시카츠 전문점' },
+  { placeName: '하리주 그릴', description: '오래된 오사카식 그릴' },
+  { placeName: '미즈노 오코노미야키', description: '현지식 오코노미야키' },
+  { placeName: '오사카성', description: '오사카를 대표하는 역사 명소' },
+  { placeName: '호텔 닛코 오사카', description: '도심 이동이 편한 숙소' },
+  { placeName: '리로 커피 로스터스', description: '여행 중 쉬어가기 좋은 카페' },
+  { placeName: '유니버설 스튜디오 재팬', description: '하루 종일 즐기는 테마파크' },
+  { placeName: '난바 파크스', description: '쇼핑과 식사를 함께 즐기는 공간' },
 ]
 
 const mockFestivals: FestivalResponseDto[] = [
@@ -132,14 +86,13 @@ const mockFestivals: FestivalResponseDto[] = [
   { festivalId: 3, title: '구로몬 야시장', category: '마켓', startDate: '2026-08-27', startTime: '17:00', location: '구로몬 시장' },
 ]
 
-let mockDday: DdayResponseDto = {
+const mockDday: DdayResponseDto = {
   cityName: '오사카',
   countryName: '일본',
   dday: 'D-3',
   endDate: '2026-08-27',
   headcount: 4,
   startDate: '2026-08-23',
-  travelPlanId: 1,
 }
 
 function getMockDday(startDate?: string, endDate?: string) {
@@ -155,43 +108,20 @@ function getMockDday(startDate?: string, endDate?: string) {
   return today <= end ? '여행 중' : '여행 종료'
 }
 
-export async function saveTravelPlan(payload: TravelPlanRequestDto): Promise<DdayResponseDto> {
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.post<DdayResponseDto>(MAIN_API_PATHS.travelPlan, payload)
-      return data
-    },
-    () => {
-      mockDday = { ...mockDday, ...payload, dday: getMockDday(payload.startDate, payload.endDate) }
-      return mockDday
-    },
-  )
-}
-
-export async function changeTravelCountry(payload: TravelChangeRequestDto): Promise<void> {
-  await requestWithMockFallback(
-    async () => { await apiClient.patch(MAIN_API_PATHS.travelChange, payload) },
-    () => {
-      const country = mockCountries.find((item) => item.countryInfoId === payload.countryInfoId)
-      if (country) {
-        mockDday = { ...mockDday, cityName: country.cityName, countryName: country.countryName }
-      }
-    },
-  )
-}
-
-export async function getDday(): Promise<DdayResponseDto | undefined> {
+export async function getDday(): Promise<DdayResponseDto> {
   return requestWithMockFallback(
     async () => {
       try {
         const { data } = await apiClient.get<DdayResponseDto>(MAIN_API_PATHS.dday)
         return data
       } catch (error) {
-        if (isAxiosError(error) && isMissingTravelPlanResponse(error.response?.status, error.response?.data)) return undefined
+        if (isAxiosError(error) && isMissingTravelPlanResponse(error.response?.status, error.response?.data)) {
+          return { cityName: null, countryName: null, dday: '쉬는 중', endDate: null, headcount: null, startDate: null }
+        }
         throw error
       }
     },
-    () => ({ ...mockDday, dday: getMockDday(mockDday.startDate, mockDday.endDate) }),
+    () => ({ ...mockDday, dday: getMockDday(mockDday.startDate ?? undefined, mockDday.endDate ?? undefined) }),
   )
 }
 
@@ -207,11 +137,7 @@ export async function getTourPlace(
       })
       return data
     },
-    () => mockTourPlaces.filter((place) =>
-      (!countryName || countryName === '일본')
-      && (!cityName || cityName === '오사카')
-      && (!category || place.category === category),
-    ),
+    () => mockTourPlaces,
   )
 }
 
@@ -268,49 +194,16 @@ export async function getCountries(keyword?: string): Promise<CountryInfoRespons
   )
 }
 
-export async function getPopularPlaces(): Promise<PopularPlaceResponseDto[]> {
+export async function getPopularCities(limit = 8): Promise<PopularCityResponseDto[]> {
+  const normalizedLimit = Math.min(50, Math.max(1, Math.trunc(limit)))
   return requestWithMockFallback(
     async () => {
-      const { data } = await apiClient.get<PopularPlaceResponseDto[]>(MAIN_API_PATHS.popular)
-      return data
-    },
-    () => mockCountries.slice(0, 4),
-  )
-}
-
-export async function getPopularCities(limit = 50): Promise<PopularCityResponseDto[]> {
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.get<PopularCityResponseDto[]>(MAIN_API_PATHS.popularCities, { params: { limit } })
+      const { data } = await apiClient.get<PopularCityResponseDto[]>(MAIN_API_PATHS.popularCities, { params: { limit: normalizedLimit } })
       return data
     },
     () => mockCountries
       .filter((country) => country.countryName && country.cityName)
       .map(({ cityName, countryName }, index) => ({ cityName, countryName, planCount: mockCountries.length - index }))
-      .slice(0, limit),
-  )
-}
-
-export async function getRecentSearches(): Promise<RecentSearchResponseDto[]> {
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.get<RecentSearchResponseDto[]>(MAIN_API_PATHS.recent)
-      return data
-    },
-    () => mockCountries.slice(0, 2).map(({ cityName, countryName, imageUrl }, index) => ({ cityName, countryName, imageUrl, recentSearchId: index + 1 })),
-  )
-}
-
-export async function saveRecentSearch(payload: RecentSearchRequestDto): Promise<void> {
-  await requestWithMockFallback(
-    async () => { await apiClient.post(MAIN_API_PATHS.recent, payload) },
-    () => undefined,
-  )
-}
-
-export async function deleteRecentSearch(recentSearchId: number): Promise<void> {
-  await requestWithMockFallback(
-    async () => { await apiClient.delete(`${MAIN_API_PATHS.recent}/${recentSearchId}`) },
-    () => undefined,
+      .slice(0, normalizedLimit),
   )
 }

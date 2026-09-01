@@ -24,10 +24,15 @@ function getStorage(storage?: TokenStorage) {
 }
 
 export function saveAuthTokens(tokens: AuthTokens, storage?: TokenStorage) {
+  const accessToken = typeof tokens?.accessToken === 'string' ? tokens.accessToken.trim() : ''
+  const refreshToken = typeof tokens?.refreshToken === 'string' ? tokens.refreshToken.trim() : ''
+  if (!accessToken || !refreshToken) throw new Error('인증 토큰 응답이 올바르지 않습니다.')
+
   const target = getStorage(storage)
-  target.setItem(ACCESS_TOKEN_KEY, tokens.accessToken)
-  target.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken)
+  target.setItem(ACCESS_TOKEN_KEY, accessToken)
+  target.setItem(REFRESH_TOKEN_KEY, refreshToken)
   if (!storage) clearLegacyTokens()
+  return { accessToken, refreshToken }
 }
 
 export function getAccessToken(storage?: TokenStorage) {

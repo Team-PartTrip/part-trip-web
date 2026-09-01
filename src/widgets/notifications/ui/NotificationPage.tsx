@@ -1,5 +1,5 @@
 import type { NotificationFilter, NotificationType } from '@/entities/notification'
-import { isInCurrentCalendarWeek, isPositiveSafeInteger } from '@/shared/utils'
+import { isInCurrentCalendarWeek } from '@/shared/utils'
 import { Button as PartTripButton } from '@/shared/ui/parttrip'
 import { AppShell } from '@/widgets/app-shell'
 
@@ -67,11 +67,10 @@ function detailCopy(notification: { linkType?: string; title?: string; body?: st
   return { body: notification.body || fallback[1], title: notification.title || fallback[0] }
 }
 
-function detailActionLabel(notification: { linkType?: string; linkId?: number; plannerId?: number }) {
+function detailActionLabel(notification: { linkType?: string; linkId?: number }) {
   const linkType = notificationLinkType(notification)
   if (linkType === 'TRIP_CARD' && notification.linkId != null) return '여행카드 보러가기'
   if ((linkType === 'GROUP' || linkType === 'GROUP_INVITATION') && notification.linkId != null) return linkType === 'GROUP_INVITATION' ? '초대 확인하기' : '그룹 보러가기'
-  if (linkType === 'VOTE' && isPositiveSafeInteger(notification.linkId) && isPositiveSafeInteger(notification.plannerId)) return '투표 보러가기'
   if (linkType === 'WORLD_MAP') return '세계지도 보러가기'
   return undefined
 }
@@ -100,9 +99,11 @@ function sectionLabel(notifications: Array<{ createdAt?: string; isRead?: boolea
 
 export function NotificationPage() { return <NotificationFlow mode="list" /> }
 export function NotificationDetailPage() { return <NotificationFlow mode="detail" /> }
-export function NotificationSettingsPage() { return <NotificationFlow mode="settings" /> }
+export function NotificationSettingsPage() {
+  return <AppShell><S.Page><S.Header><div><S.Title>알림 설정</S.Title><S.Subtitle>알림 설정 API는 아직 제공되지 않습니다.</S.Subtitle></div></S.Header><S.SettingsCard><S.Empty>최신 API 명세서에 알림 설정 endpoint가 없습니다.</S.Empty></S.SettingsCard></S.Page></AppShell>
+}
 
-function NotificationFlow({ mode }: { mode: 'list' | 'detail' | 'settings' }) {
+function NotificationFlow({ mode }: { mode: 'list' | 'detail' }) {
   const {
     actionError,
     activeTab,
@@ -110,7 +111,6 @@ function NotificationFlow({ mode }: { mode: 'list' | 'detail' | 'settings' }) {
     handleMarkAll,
     handleNotificationClick,
     handleNotificationAction,
-    handleSettingToggle,
     hasUnread,
     markAllMutation,
     markReadMutation,
@@ -119,14 +119,9 @@ function NotificationFlow({ mode }: { mode: 'list' | 'detail' | 'settings' }) {
     notificationsQuery,
     paths,
     setActiveTab,
-    settings,
-    settingsQuery,
-    updateSettingsMutation,
   } = useNotificationFlow(mode)
 
-  const header = mode === 'settings'
-    ? ['알림 설정', '받고 싶은 알림만 켜두세요.']
-    : mode === 'detail'
+  const header = mode === 'detail'
       ? ['알림 상세', '']
       : ['알림', '']
   const todayUnreadCount = notifications.filter((item) => isToday(item.createdAt) && item.isRead !== true).length
@@ -146,7 +141,6 @@ function NotificationFlow({ mode }: { mode: 'list' | 'detail' | 'settings' }) {
 
         {mode === 'detail' ? notificationsQuery.isLoading ? <S.LoadingDetail aria-busy="true" aria-label="알림 상세 로딩 중" /> : detail && content ? <S.Detail><S.DetailCategory $tone={categoryTone(detail.type)}>{settingCopy(detail.type)[0]}</S.DetailCategory><h2>{content.title}</h2><p>{content.body}</p><S.DetailMeta>{detailTimestamp(detail.createdAt)}</S.DetailMeta>{detail.isRead === true || markReadMutation.isSuccess ? <S.ReadState>✓ 읽음 처리</S.ReadState> : null}<S.DetailMeta>이 알림은 열람 시 자동으로 읽음 처리됩니다.</S.DetailMeta><S.DetailMeta>목록에서 [모두 읽음]으로 일괄 처리할 수도 있어요.</S.DetailMeta>{actionLabel ? <S.ActionRow><PartTripButton type="button" disabled={markReadMutation.isPending} onClick={() => void handleNotificationAction()}>{actionLabel}</PartTripButton><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.notifications })}>알림 목록으로</PartTripButton></S.ActionRow> : null}</S.Detail> : <S.Detail><p>알림을 찾을 수 없습니다.</p></S.Detail> : null}
 
-        {mode === 'settings' ? settingsQuery.isLoading ? <S.LoadingSettings aria-busy="true" aria-label="알림 설정 로딩 중" /> : settingsQuery.isError ? <S.SettingsCard><S.Empty><strong>알림 설정을 불러오지 못했습니다.</strong></S.Empty></S.SettingsCard> : <S.SettingsCard>{settings.length ? settings.map((setting, index) => { const [label, description] = settingCopy(setting.type); return <S.SettingRow key={setting.type ?? index}><div><strong>{label}</strong><span>{description}</span></div><S.Toggle type="button" aria-label={`${label} 알림 ${setting.enabled === true ? '끄기' : '켜기'}`} aria-pressed={setting.enabled === true} $active={setting.enabled === true} disabled={updateSettingsMutation.isPending} onClick={() => void handleSettingToggle(setting.type)} /></S.SettingRow> }) : <S.Empty>설정 가능한 알림이 없습니다.</S.Empty>}</S.SettingsCard> : null}
       </S.Page>
     </AppShell>
   )
