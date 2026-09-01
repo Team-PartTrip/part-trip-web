@@ -59,7 +59,7 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
             </S.ErrorActions>
           </>
         ) : null}
-        {isLoading ? <S.LoadingLayout aria-busy="true" aria-label="프로필 정보 로딩 중"><S.LoadingRow><S.LoadingCard /><S.LoadingStats /></S.LoadingRow><S.LoadingLower><S.LoadingMap /></S.LoadingLower></S.LoadingLayout> : !hasProfileError && !hasTripsError ? (
+        {!hasProfileError && !hasTripsError && isLoading ? <S.LoadingLayout aria-busy="true" aria-label="프로필 정보 로딩 중"><S.LoadingRow><S.LoadingCard /><S.LoadingStats /></S.LoadingRow><S.LoadingLower><S.LoadingMap /></S.LoadingLower></S.LoadingLayout> : !hasProfileError && !hasTripsError ? (
           <>
             <S.ProfileBody>
               <S.ProfileCard>

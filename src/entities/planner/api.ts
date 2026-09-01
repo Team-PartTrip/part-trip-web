@@ -151,7 +151,7 @@ export type VoteOptionStatusResponseDto = {
   rating?: number
   addedByUserId?: string
   voteCount?: number
-  selectedByMe?: boolean
+  selectedByMe: boolean
   confirmed?: boolean
 }
 
@@ -166,7 +166,7 @@ export type VoteStatusResponseDto = {
   eligibleMemberCount?: number
   votedMemberCount?: number
   confirmedOptionId?: number
-  options?: VoteOptionStatusResponseDto[]
+  options: VoteOptionStatusResponseDto[]
 }
 
 export type VoteBallotRequestDto = {
@@ -334,12 +334,22 @@ export async function createVote(plannerId: number, payload: CreateVoteRequestDt
 
 export async function getVotes(plannerId: number): Promise<VoteStatusResponseDto[]> {
   const { data } = await apiClient.get<VoteStatusResponseDto[]>(PLANNER_API_PATHS.votes(plannerId))
-  return data
+  return data.map(normalizeVoteStatusResponse)
 }
 
 export async function getVote(plannerId: number, voteId: number): Promise<VoteStatusResponseDto> {
   const { data } = await apiClient.get<VoteStatusResponseDto>(PLANNER_API_PATHS.vote(plannerId, voteId))
-  return data
+  return normalizeVoteStatusResponse(data)
+}
+
+function normalizeVoteStatusResponse(vote: VoteStatusResponseDto): VoteStatusResponseDto {
+  return {
+    ...vote,
+    options: (vote.options ?? []).map((option) => ({
+      ...option,
+      selectedByMe: option.selectedByMe === true,
+    })),
+  }
 }
 
 export async function castBallot(
