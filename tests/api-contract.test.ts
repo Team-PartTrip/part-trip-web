@@ -15,6 +15,11 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
   const travel = read('/src/entities/travel/api.ts')
   const tripCard = read('/src/entities/trip-card/api.ts')
 
+  assert.match(planner, /export type PlannerCreateResponseDto = \{[\s\S]*?inviteLink\?: string\n\}/)
+  assert.match(planner, /export type PlannerDetailResponseDto = \{[\s\S]*?inviteLink\?: string\n\}/)
+  assert.match(plannerFlow, /const visiblePlannerInviteLink = plannerDetail\?\.inviteLink \|\| plannerInviteLink/)
+  assert.doesNotMatch(plannerFlow, /plannerInviteCode/)
+  assert.doesNotMatch(plannerFlow, /window\.location\.origin\/planner\/group/)
   assert.match(planner, /update: \(plannerId: number\) => `\/planners\/\$\{plannerId\}\/travel-plan`/)
   assert.match(planner, /apiClient\.put<PlannerTravelPlanResponseDto>/)
   assert.match(planner, /export async function deletePlanner\(plannerId: number\)/)
