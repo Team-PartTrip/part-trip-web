@@ -20,6 +20,7 @@ import {
   getFirstErrorMessage,
   getIdValidationError,
   getPasswordValidationError,
+  getSafeRedirect,
   sanitizeId,
   sanitizePassword,
   trimFormValue,
@@ -49,8 +50,13 @@ type FormMessage = {
 
 const phoneNumberPattern = /^\+?[0-9-]{9,20}$/
 
-export function SignUpForm() {
+type SignUpFormProps = {
+  redirect?: string
+}
+
+export function SignUpForm({ redirect }: SignUpFormProps) {
   const navigate = useNavigate()
+  const safeRedirect = getSafeRedirect(redirect)
   const [step, setStep] = useState<SignUpStep>('credentials')
   const [message, setMessage] = useState<FormMessage | null>(null)
   const [isSendingCode, setIsSendingCode] = useState(false)
@@ -181,7 +187,11 @@ export function SignUpForm() {
   const handleVerificationSubmit: SubmitHandler<VerificationFormValues> = async ({ email, verificationCode }) => {
     try {
       await verifyCode({ code: verificationCode, email })
-      navigate({ to: paths.login, replace: true })
+      navigate({
+        search: safeRedirect ? { redirect: safeRedirect } : undefined,
+        to: paths.login,
+        replace: true,
+      })
     } catch (error) {
       setMessage({ text: getErrorMessage(error), tone: 'error' })
     }

@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { createLink, Link } from '@tanstack/react-router'
 import styled, { css, keyframes } from 'styled-components'
 
 type InputProps = { $compact?: boolean }
@@ -163,7 +163,7 @@ export const PrimaryButton = styled.button<{ $strong?: boolean }>`
   &:hover:not(:disabled) { background: ${({ theme }) => theme.colors.brand.primaryHover}; }
 `
 
-export const SecondaryButton = styled(Link)<{ $filled?: boolean }>`
+const SecondaryButtonBase = styled.a<{ $filled?: boolean }>`
   ${buttonStyles}
   border: 1px solid ${({ theme }) => theme.colors.border.subtle};
   border-radius: 14px;
@@ -172,6 +172,8 @@ export const SecondaryButton = styled(Link)<{ $filled?: boolean }>`
 
   &:hover { background: ${({ theme }) => theme.colors.background.muted}; }
 `
+
+export const SecondaryButton = createLink(SecondaryButtonBase)
 
 export const OutlineButton = styled.button`
   ${buttonStyles}

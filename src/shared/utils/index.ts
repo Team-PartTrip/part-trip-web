@@ -15,3 +15,7 @@ export {
   verificationCodeRules,
 } from './form'
 export { isPositiveSafeInteger } from './number'
+export {
+  getSafeRedirect,
+  validateAuthSearch,
+} from './redirect'

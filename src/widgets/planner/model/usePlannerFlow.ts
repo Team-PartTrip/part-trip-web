@@ -34,7 +34,6 @@ const ACTIVE_PLANNER_ID_KEY = 'parttrip:active-planner-id'
 const PLANNER_SELECTED_KEY = 'parttrip:planner-selected'
 const PLANNER_CONFIRMED_KEY = 'parttrip:planner-confirmed'
 const ACTIVE_VOTE_CATEGORY_KEY = 'parttrip:active-vote-category'
-const PLANNER_INVITE_CODE_KEY = 'parttrip:planner-invite-code'
 
 function readSessionValue(key: string) {
   return typeof window === 'undefined' ? null : window.sessionStorage.getItem(key)
@@ -109,7 +108,6 @@ export function usePlannerFlow(step: PlannerStep) {
   const [inviteCode, setInviteCode] = useState(() =>
     typeof window === 'undefined' ? '' : new URLSearchParams(window.location.search).get('inviteCode') ?? '',
   )
-  const [plannerInviteCode, setPlannerInviteCode] = useState(() => readSessionValue(PLANNER_INVITE_CODE_KEY) ?? '')
   const [selectedOptionId, setSelectedOptionId] = useState<number>()
   const [lineupChoice, setLineupChoice] = useState<number | null>(null)
   const [lineupMode, setLineupMode] = useState<'direct' | 'random'>('direct')
@@ -159,11 +157,7 @@ export function usePlannerFlow(step: PlannerStep) {
     categoryVote ??
     (voteDetail?.voteId === activeVoteId ? voteDetail : undefined) ??
     votes.find((vote) => vote.voteId === activeVoteId)
-  const visiblePlannerInviteLink = plannerDetail?.inviteLink || (plannerInviteCode && typeof window !== 'undefined'
-    ? plannerInviteCode.startsWith('http')
-      ? plannerInviteCode
-      : `${window.location.origin}/planner/group?inviteCode=${encodeURIComponent(plannerInviteCode)}`
-    : '')
+  const visiblePlannerInviteLink = plannerDetail?.inviteLink ?? ''
   const isConfirmed = hasConfirmedLocally || normalizeVoteStatus(plannerDetail?.status) === 'CONFIRMED'
   const openVotes = votes.filter((vote) => normalizeVoteStatus(vote.status) === 'OPEN')
   const canCloseVotes = openVotes.length > 0 && openVotes.every((vote) => isPositiveSafeInteger(vote.voteId) && vote.options.some((option) => option.selectedByMe))
@@ -298,10 +292,6 @@ export function usePlannerFlow(step: PlannerStep) {
         setStoredActiveVoteId(0)
         setSelected([])
         setSelectedOptionId(undefined)
-        if (planner.inviteLink) {
-          writeSessionValue(PLANNER_INVITE_CODE_KEY, planner.inviteLink)
-          setPlannerInviteCode(planner.inviteLink)
-        }
       }
       navigate({ to: paths.plannerDestination })
     } catch {
@@ -511,12 +501,10 @@ export function usePlannerFlow(step: PlannerStep) {
         removeSessionValue(ACTIVE_PLANNER_ID_KEY)
         removeSessionValue(ACTIVE_VOTE_ID_KEY)
         removeSessionValue(PLANNER_SELECTED_KEY)
-        removeSessionValue(PLANNER_INVITE_CODE_KEY)
         removeSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`)
         setStoredActivePlannerId(0)
         setStoredActiveVoteId(0)
         setSelected([])
-        setPlannerInviteCode('')
         setConfirmedPlannerId(0)
       }
     } catch (error) {
@@ -629,7 +617,6 @@ export function usePlannerFlow(step: PlannerStep) {
     removeSessionValue(ACTIVE_PLANNER_ID_KEY)
     removeSessionValue(ACTIVE_VOTE_ID_KEY)
     removeSessionValue(ACTIVE_VOTE_CATEGORY_KEY)
-    removeSessionValue(PLANNER_INVITE_CODE_KEY)
     removeSessionValue(PLANNER_SELECTED_KEY)
     setStoredActivePlannerId(0)
     setStoredActiveVoteId(0)
@@ -641,7 +628,6 @@ export function usePlannerFlow(step: PlannerStep) {
     setEndDate(undefined)
     setSelected([])
     setSelectedOptionId(undefined)
-    setPlannerInviteCode('')
     setConfirmedPlannerId(0)
     navigate({ to: paths.plannerGroup })
   }
@@ -696,7 +682,6 @@ export function usePlannerFlow(step: PlannerStep) {
     plan,
     plannerCategories,
     plannerDetail,
-    plannerInviteCode,
     plannerInviteLink: visiblePlannerInviteLink,
     plannerTitle,
     planners,

@@ -1,4 +1,4 @@
-import { createUnsupportedApiError } from '@/shared/libs/unsupported-api-error'
+import { apiClient } from '@/shared/libs/api-client'
 
 export type WorldMapVisitedCountryDto = {
   cities?: string[]
@@ -25,7 +25,7 @@ export type WorldMapTripSummaryDto = {
   cityName?: string
   endDate?: string
   startDate?: string
-  tripId?: number
+  tripCardId?: number
 }
 
 export type WorldMapCountryResponseDto = {
@@ -48,20 +48,29 @@ export type WorldMapStatsResponseDto = {
   totalCount?: number
 }
 
+const WORLD_MAP_API_PATHS = {
+  base: '/world-map',
+  country: (countryCode: string) => `/world-map/countries/${countryCode}`,
+  countries: '/world-map/countries',
+  stats: '/world-map/stats',
+} as const
+
 export async function getWorldMap(): Promise<WorldMapResponseDto> {
-  throw createUnsupportedApiError('세계지도')
+  const { data } = await apiClient.get<WorldMapResponseDto>(WORLD_MAP_API_PATHS.base)
+  return data
 }
 
-export async function acquireCountry(_payload: AcquireCountryRequestDto): Promise<AcquireCountryResponseDto> {
-  void _payload
-  throw createUnsupportedApiError('세계지도')
+export async function acquireCountry(payload: AcquireCountryRequestDto): Promise<AcquireCountryResponseDto> {
+  const { data } = await apiClient.post<AcquireCountryResponseDto>(WORLD_MAP_API_PATHS.countries, payload)
+  return data
 }
 
-export async function getWorldMapCountry(_countryCode: string): Promise<WorldMapCountryResponseDto> {
-  void _countryCode
-  throw createUnsupportedApiError('세계지도')
+export async function getWorldMapCountry(countryCode: string): Promise<WorldMapCountryResponseDto> {
+  const { data } = await apiClient.get<WorldMapCountryResponseDto>(WORLD_MAP_API_PATHS.country(countryCode))
+  return data
 }
 
 export async function getWorldMapStats(): Promise<WorldMapStatsResponseDto> {
-  throw createUnsupportedApiError('세계지도')
+  const { data } = await apiClient.get<WorldMapStatsResponseDto>(WORLD_MAP_API_PATHS.stats)
+  return data
 }

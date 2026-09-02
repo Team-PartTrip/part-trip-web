@@ -1,51 +1,4 @@
 import { apiClient } from '../../shared/libs/api-client.ts'
-import { createUnsupportedApiError } from '../../shared/libs/unsupported-api-error.ts'
-import type { CommentRequestDto, CommentResponseDto } from '../community/types.ts'
-
-export type ShareTripRequestDto = {
-  tripId?: number
-}
-
-export type PageResponseDtoSharedTripResponseDto = {
-  content?: SharedTripResponseDto[]
-  page?: number
-  size?: number
-  totalElements?: number
-  totalPages?: number
-  hasNext?: boolean
-}
-
-export type SharedTripPlaceResponseDto = {
-  address?: string
-  tripPlaceId?: number
-  dayNumber?: number
-  placeName?: string
-  placeSub?: string
-  rating?: number
-}
-
-export type SharedTripResponseDto = {
-  tripId?: number
-  userId?: string
-  nickName?: string
-  title?: string
-  countryInfoId?: number
-  countryName?: string
-  cityName?: string
-  startDate?: string
-  endDate?: string
-  content?: string
-  images?: string[]
-  likeCount?: number
-  liked?: boolean
-  commentCount?: number
-  coverImageUrl?: string
-  isPublic?: boolean
-  createDate?: string
-  photoCount?: number
-  places?: SharedTripPlaceResponseDto[]
-  timeline?: TravelCardTimelineItemDto[]
-}
 
 export type TravelCardListItemDto = {
   cardId?: number
@@ -136,41 +89,4 @@ export async function updateTravelCardEntryComment(
   payload: TravelCardEntryCommentRequestDto,
 ): Promise<void> {
   await apiClient.patch(TRAVEL_CARD_API_PATHS.entry(cardId, entryId), payload)
-}
-
-export async function listSharedTrips(params?: {
-  page?: number
-  size?: number
-}): Promise<PageResponseDtoSharedTripResponseDto> {
-  void params
-  throw createUnsupportedApiError('공유 여행')
-}
-
-export async function shareTrip(payload: ShareTripRequestDto): Promise<SharedTripResponseDto> {
-  void payload
-  throw createUnsupportedApiError('공유 여행')
-}
-
-export async function getSharedTripDetail(tripId: number): Promise<SharedTripResponseDto> {
-  void tripId
-  throw createUnsupportedApiError('공유 여행')
-}
-
-export async function importTrip(tripId: number): Promise<SharedTripResponseDto> {
-  void tripId
-  throw createUnsupportedApiError('공유 여행')
-}
-
-export async function getSharedTripComments(tripId: number): Promise<CommentResponseDto[]> {
-  void tripId
-  throw createUnsupportedApiError('공유 여행')
-}
-
-export async function createSharedTripComment(
-  tripId: number,
-  payload: CommentRequestDto
-): Promise<CommentResponseDto> {
-  void tripId
-  void payload
-  throw createUnsupportedApiError('공유 여행')
 }
