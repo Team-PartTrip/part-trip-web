@@ -1,5 +1,5 @@
+import { resolveApiAssetUrl } from "@/shared/libs/api-client";
 import { Button as PartTripButton } from "@/shared/ui/parttrip";
-import { resolveApiAssetUrl } from "@/entities/file/api";
 import { AppShell } from "@/widgets/app-shell";
 
 import {
