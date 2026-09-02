@@ -567,10 +567,10 @@ export function usePlannerFlow(step: PlannerStep) {
       return
     }
     const plannerId = activePlannerId
-    const placeIds = selectedPlaces
+    const placeIds = [...new Set(selectedPlaces
       .map(({ item }) => item.tourPlaceId)
-      .filter((placeId): placeId is number => isPositiveSafeInteger(placeId))
-    if (!isPositiveSafeInteger(plannerId) || placeIds.length === 0) {
+      .filter((placeId): placeId is number => isPositiveSafeInteger(placeId)))]
+    if (!isPositiveSafeInteger(plannerId) || placeIds.length !== selectedPlaces.length) {
       setErrorMessage('랜덤으로 선택할 장소 정보를 확인할 수 없습니다.')
       return
     }

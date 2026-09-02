@@ -23,6 +23,8 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
   assert.match(planner, /options: \(plannerId: number, voteId: number\) => `\/planners\/\$\{plannerId\}\/votes\/\$\{voteId\}\/options`/)
   assert.match(plannerFlow, /useAddPlannerPlacesMutation/)
   assert.match(plannerFlow, /addPlannerPlacesMutation\.mutateAsync\(\{ plannerId, payload: \{ placeIds \} \}\)/)
+  assert.match(plannerFlow, /const placeIds = \[\.\.\.new Set\(selectedPlaces/)
+  assert.match(plannerFlow, /placeIds\.length !== selectedPlaces\.length/)
   assert.match(plannerFlow, /useDeletePlannerMutation/)
   assert.match(plannerFlow, /const minimumMemberCount = isSolo \? 1 : 2/)
   assert.match(plannerPage, /삭제할까요\?/)

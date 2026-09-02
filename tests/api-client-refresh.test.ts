@@ -276,8 +276,8 @@ test('refresh 실패 시 저장된 토큰을 제거하고 원래 요청을 재�
 test('로그아웃은 서버가 요구하는 refresh token을 본문으로 보낸다', async () => {
   const previousStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
   const jiti = createJiti(process.cwd(), { alias: { '@': `${process.cwd()}/src` } })
-  const { logout: productionLogout } = await jiti.import('../src/widgets/sidebar/model/api.ts')
-  const { apiClient: productionApiClient } = await jiti.import('../src/shared/libs/api-client.ts')
+  const { logout: productionLogout } = await jiti.import('./src/widgets/sidebar/model/api.ts')
+  const { apiClient: productionApiClient } = await jiti.import('./src/shared/libs/api-client.ts')
   const previousApiAdapter = productionApiClient.defaults.adapter
   let requestBody: unknown
 
