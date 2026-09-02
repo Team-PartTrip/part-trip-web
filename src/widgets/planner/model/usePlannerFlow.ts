@@ -410,6 +410,10 @@ export function usePlannerFlow(step: PlannerStep) {
       setErrorMessage('검색 결과를 선택해주세요.')
       return
     }
+    if (placeIds.length !== selectedPlaces.length) {
+      setErrorMessage('실제 API 장소 정보가 없어 후보를 저장할 수 없습니다.')
+      return
+    }
 
     try {
       setErrorMessage('')
