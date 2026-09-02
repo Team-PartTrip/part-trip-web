@@ -15,9 +15,25 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
   const travel = read('/src/entities/travel/api.ts')
   const tripCard = read('/src/entities/trip-card/api.ts')
 
-  assert.match(planner, /export type PlannerCreateResponseDto = \{[\s\S]*?inviteLink\?: string\n\}/)
-  assert.match(planner, /export type PlannerDetailResponseDto = \{[\s\S]*?inviteLink\?: string\n\}/)
-  assert.match(plannerFlow, /const visiblePlannerInviteLink = plannerDetail\?\.inviteLink \|\| plannerInviteLink/)
+  const plannerCreateResponse = planner.slice(
+    planner.indexOf('export type PlannerCreateResponseDto'),
+    planner.indexOf('export type PlannerListResponseDto'),
+  )
+  const plannerDetailResponse = planner.slice(
+    planner.indexOf('export type PlannerDetailResponseDto'),
+    planner.indexOf('export type PlannerMemberResponseDto'),
+  )
+  const joinPlannerRequest = planner.slice(
+    planner.indexOf('export type JoinPlannerRequestDto'),
+    planner.indexOf('export type PlannerJoinResponseDto'),
+  )
+  assert.match(plannerCreateResponse, /inviteLink\?: string/)
+  assert.doesNotMatch(plannerCreateResponse, /inviteCode/)
+  assert.match(plannerDetailResponse, /inviteLink\?: string/)
+  assert.doesNotMatch(plannerDetailResponse, /inviteCode/)
+  assert.match(joinPlannerRequest, /inviteCode: string/)
+  assert.match(plannerFlow, /const visiblePlannerInviteLink = plannerDetail\?\.inviteLink \?\? ''/)
+  assert.doesNotMatch(plannerFlow, /PLANNER_INVITE_LINK_KEY|plannerInviteLink = useState/)
   assert.doesNotMatch(plannerFlow, /plannerInviteCode/)
   assert.doesNotMatch(plannerFlow, /window\.location\.origin\/planner\/group/)
   assert.match(planner, /update: \(plannerId: number\) => `\/planners\/\$\{plannerId\}\/travel-plan`/)
