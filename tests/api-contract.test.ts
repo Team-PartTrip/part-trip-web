@@ -33,7 +33,10 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
   assert.doesNotMatch(plannerDetailResponse, /inviteCode/)
   assert.match(joinPlannerRequest, /inviteCode: string/)
   assert.match(plannerFlow, /const visiblePlannerInviteLink = plannerDetail\?\.inviteLink \?\? ''/)
-  assert.doesNotMatch(plannerFlow, /PLANNER_INVITE_LINK_KEY|plannerInviteLink = useState/)
+  assert.doesNotMatch(
+    plannerFlow,
+    /PLANNER_INVITE_(?:LINK|CODE)_KEY|plannerInviteCode|const\s*\[\s*plannerInviteLink\s*,|window\.location\.origin/,
+  )
   assert.doesNotMatch(plannerFlow, /plannerInviteCode/)
   assert.doesNotMatch(plannerFlow, /window\.location\.origin\/planner\/group/)
   assert.match(planner, /update: \(plannerId: number\) => `\/planners\/\$\{plannerId\}\/travel-plan`/)
