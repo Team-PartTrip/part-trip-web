@@ -39,9 +39,9 @@ type LoginFormProps = {
 export function LoginForm({ redirect }: LoginFormProps) {
   const navigate = useNavigate()
   const safeRedirect = getSafeRedirect(redirect)
-  const signUpPath = safeRedirect
-    ? `${paths.signUp}?redirect=${encodeURIComponent(safeRedirect)}`
-    : paths.signUp
+  const navigateAfterAuth = () => {
+    void navigate({ href: safeRedirect ?? paths.main, replace: true })
+  }
   const [message, setMessage] = useState<FormMessage | null>(null)
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
 
@@ -73,7 +73,7 @@ export function LoginForm({ redirect }: LoginFormProps) {
         userPwd,
       })
       saveAuthTokens(tokens)
-      navigate({ to: safeRedirect ?? paths.main, replace: true })
+      navigateAfterAuth()
     } catch (error) {
       setMessage({
         text: getErrorMessage(error),
@@ -94,7 +94,7 @@ export function LoginForm({ redirect }: LoginFormProps) {
       setIsGoogleSubmitting(true)
       const tokens = await googleLogin({ idToken })
       saveAuthTokens(tokens)
-      navigate({ to: safeRedirect ?? paths.main, replace: true })
+      navigateAfterAuth()
     } catch (error) {
       setMessage({ text: getErrorMessage(error), tone: 'error' })
     } finally {
@@ -173,7 +173,10 @@ export function LoginForm({ redirect }: LoginFormProps) {
               onError={() => setMessage({ text: 'Google 로그인에 실패했습니다.', tone: 'error' })}
               onLogin={handleGoogleLogin}
             />
-            <S.SecondaryButton to={signUpPath}>
+            <S.SecondaryButton
+              search={safeRedirect ? { redirect: safeRedirect } : undefined}
+              to={paths.signUp}
+            >
               회원가입
             </S.SecondaryButton>
           </S.Actions>
