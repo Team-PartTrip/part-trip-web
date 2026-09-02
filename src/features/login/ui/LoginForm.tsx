@@ -15,6 +15,7 @@ import {
   getFirstErrorMessage,
   getIdValidationError,
   getPasswordValidationError,
+  getSafeRedirect,
   sanitizeId,
   sanitizePassword,
   trimFormValue,
@@ -31,8 +32,16 @@ type LoginFormValues = {
   userPwd: string
 }
 
-export function LoginForm() {
+type LoginFormProps = {
+  redirect?: string
+}
+
+export function LoginForm({ redirect }: LoginFormProps) {
   const navigate = useNavigate()
+  const safeRedirect = getSafeRedirect(redirect)
+  const signUpPath = safeRedirect
+    ? `${paths.signUp}?redirect=${encodeURIComponent(safeRedirect)}`
+    : paths.signUp
   const [message, setMessage] = useState<FormMessage | null>(null)
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
 
@@ -64,7 +73,7 @@ export function LoginForm() {
         userPwd,
       })
       saveAuthTokens(tokens)
-      navigate({ to: paths.main, replace: true })
+      navigate({ to: safeRedirect ?? paths.main, replace: true })
     } catch (error) {
       setMessage({
         text: getErrorMessage(error),
@@ -85,7 +94,7 @@ export function LoginForm() {
       setIsGoogleSubmitting(true)
       const tokens = await googleLogin({ idToken })
       saveAuthTokens(tokens)
-      navigate({ to: paths.main, replace: true })
+      navigate({ to: safeRedirect ?? paths.main, replace: true })
     } catch (error) {
       setMessage({ text: getErrorMessage(error), tone: 'error' })
     } finally {
@@ -164,7 +173,7 @@ export function LoginForm() {
               onError={() => setMessage({ text: 'Google 로그인에 실패했습니다.', tone: 'error' })}
               onLogin={handleGoogleLogin}
             />
-            <S.SecondaryButton to={paths.signUp}>
+            <S.SecondaryButton to={signUpPath}>
               회원가입
             </S.SecondaryButton>
           </S.Actions>
