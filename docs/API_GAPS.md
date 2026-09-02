@@ -6,7 +6,6 @@
 
 - `GET /api/trips/history`: 보류. 기록 화면은 구현완료인 `/api/travel-cards` 목록·상세를 사용한다.
 - `POST /api/travel-cards/{cardId}/report`: 보류. 리포트 화면은 생성 버튼 없이 준비 중 상태를 표시한다.
-- `/api/world-map/**`: 미구현. 관련 API 함수는 명시적 미지원 오류를 반환하며 mock 데이터를 만들지 않는다.
 
 ## 최신 CSV에 없는 기존 기능
 
