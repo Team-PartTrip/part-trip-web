@@ -21,11 +21,26 @@ test('삭제된 기능의 라우트와 공유 여행 API가 남지 않는다', (
     '/src/widgets/mission',
     '/src/widgets/record-camera',
   ]
+  const retiredFiles = [
+    '/src/shared/assets/community-avatar-cat.png',
+    '/src/shared/assets/community-avatar-dog.png',
+    '/src/shared/assets/community-destination-danang.jpg',
+    '/src/shared/assets/community-destination-swiss.jpg',
+    '/src/shared/assets/community-destination-tokyo.jpg',
+    '/src/shared/assets/community-italy.jpg',
+    '/src/shared/assets/community-swiss.jpg',
+    '/src/shared/assets/community-vietnam.jpg',
+    '/src/shared/assets/mission-character.png',
+  ]
 
   assert.deepEqual(retiredDirectories.filter((path) => existsSync(`${projectRoot}${path}`)), [])
+  assert.deepEqual(retiredFiles.filter((path) => existsSync(`${projectRoot}${path}`)), [])
   assert.doesNotMatch(read('/src/routeTree.gen.ts'), /community|mission|record\/camera/)
   assert.doesNotMatch(read('/src/shared/config/paths.ts'), /(?:community|communityWrite|mission|recordCamera):/)
+  assert.doesNotMatch(read('/src/widgets/sidebar/constants/sidebar-item.ts'), /community|mission|recordCamera|record\/camera/)
+  assert.doesNotMatch(read('/src/entities/user/api.ts'), /themes|TravelTheme|travelTheme/)
   assert.doesNotMatch(read('/src/entities/trip-card/api.ts'), /SharedTrip|listSharedTrips|shareTrip|importTrip|getSharedTrip/)
   assert.doesNotMatch(read('/src/entities/trip-card/mutations.ts'), /ShareTrip|ImportTrip|SharedTrip|communityQueryKeys/)
+  assert.doesNotMatch(read('/src/entities/trip-card/index.ts'), /SharedTrip|listSharedTrips|shareTrip|importTrip|getSharedTrip/)
   assert.doesNotMatch(read('/src/widgets/trip-cards/ui/TripCardsPage.tsx'), /entities\/file/)
 })
