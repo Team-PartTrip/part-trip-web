@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import axios, { AxiosError, type AxiosAdapter } from 'axios'
+import { createJiti } from 'jiti'
 
 import { apiClient } from '../src/shared/libs/api-client.ts'
 import { clearAuthTokens, saveAuthTokens } from '../src/shared/libs/token-storage.ts'
@@ -269,5 +270,36 @@ test('refresh 실패 시 저장된 토큰을 제거하고 원래 요청을 재�
     }
     axios.defaults.adapter = previousAxiosAdapter
     apiClient.defaults.adapter = previousApiAdapter
+  }
+})
+
+test('로그아웃은 서버가 요구하는 refresh token을 본문으로 보낸다', async () => {
+  const previousStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
+  const jiti = createJiti(process.cwd(), { alias: { '@': `${process.cwd()}/src` } })
+  const { logout: productionLogout } = await jiti.import('./src/widgets/sidebar/model/api.ts')
+  const { apiClient: productionApiClient } = await jiti.import('./src/shared/libs/api-client.ts')
+  const previousApiAdapter = productionApiClient.defaults.adapter
+  let requestBody: unknown
+
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: createStorage() })
+
+  saveAuthTokens({ accessToken: 'access-1', refreshToken: 'refresh-1' })
+  productionApiClient.defaults.adapter = async (config) => {
+    requestBody = typeof config.data === 'string' ? JSON.parse(config.data) : config.data
+    return { config, data: '로그아웃 완료', headers: {}, status: 200, statusText: 'OK' }
+  }
+
+  try {
+    await productionLogout()
+    assert.deepEqual(requestBody, { refreshToken: 'refresh-1' })
+    assert.equal(localStorage.getItem('accessToken'), null)
+    assert.equal(localStorage.getItem('refreshToken'), null)
+  } finally {
+    productionApiClient.defaults.adapter = previousApiAdapter
+    if (previousStorage) {
+      Object.defineProperty(globalThis, 'localStorage', previousStorage)
+    } else {
+      Reflect.deleteProperty(globalThis, 'localStorage')
+    }
   }
 })

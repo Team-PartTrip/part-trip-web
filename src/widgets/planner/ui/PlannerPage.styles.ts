@@ -152,6 +152,17 @@ export const PlanRow = styled.button<{ $state: 'active' | 'planned' | 'completed
   }
 `
 
+export const PlanItem = styled.div`
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+
+  ${PlanRow} {
+    flex: 1;
+  }
+`
+
 export const PlanContent = styled.span`
   display: flex;
   width: 100%;
@@ -216,6 +227,24 @@ export const RowArrow = styled.span`
   font-size: 20px;
   font-weight: 600;
   line-height: 24px;
+`
+
+export const DeletePlannerButton = styled.button`
+  min-width: 64px;
+  height: 44px;
+  border: 1px solid ${({ theme }) => theme.colors.status.error};
+  border-radius: 12px;
+  padding: 0 12px;
+  background: transparent;
+  color: ${({ theme }) => theme.colors.status.error};
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
 `
 
 export const SelectedPlanPanel = styled.section`
