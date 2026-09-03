@@ -48,12 +48,16 @@ export function useNotificationFlow(mode: NotificationMode) {
   const unreadCountQuery = useUnreadNotificationCountQuery()
   const markReadMutation = useMarkNotificationAsReadMutation()
   const markAllMutation = useMarkAllNotificationsAsReadMutation()
-  const notifications = notificationsQuery.data?.pages.flatMap((page) => page.items ?? []) ?? []
+  const fetchedNotifications = notificationsQuery.data?.pages.flatMap((page) => page.items ?? []) ?? []
+  const notifications = unreadCountQuery.data?.unreadCount === 0
+    ? fetchedNotifications.map((notification) => ({ ...notification, read: true }))
+    : fetchedNotifications
   const detail = notifications.find((item) => String(item.notificationId) === notificationId)
   const canNavigateToVote = detail?.linkType?.trim().toUpperCase() === 'VOTE'
     && isPositiveSafeInteger(detail.linkId)
     && isPositiveSafeInteger(readSessionId(ACTIVE_PLANNER_ID_KEY))
-  const hasUnread = (unreadCountQuery.data?.unreadCount ?? notifications.filter((item) => item.isRead !== true && item.notificationId != null).length) > 0
+  const hasUnread = (unreadCountQuery.data?.unreadCount ?? 0) > 0
+    || notifications.some((item) => item.read !== true && item.notificationId != null)
 
   const handleMarkRead = async (id?: number) => {
     if (id == null) return
@@ -67,7 +71,7 @@ export function useNotificationFlow(mode: NotificationMode) {
 
   const handleNotificationClick = async (notification: NotificationResponseDto) => {
     if (notification.notificationId == null) return
-    if (notification.isRead !== true) await handleMarkRead(notification.notificationId)
+    if (notification.read !== true) await handleMarkRead(notification.notificationId)
     navigate({ params: { notificationId: String(notification.notificationId) }, to: '/notifications/$notificationId' })
   }
 
@@ -134,6 +138,7 @@ export function useNotificationFlow(mode: NotificationMode) {
     navigate,
     notifications,
     notificationsQuery,
+    unreadCount: unreadCountQuery.data?.unreadCount,
     paths,
     setActiveTab,
   }

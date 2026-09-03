@@ -122,23 +122,22 @@ export const NotificationItem = styled.button<{ $read: boolean }>`
   min-height: 72px;
   align-items: center;
   gap: 12px;
-  grid-template-columns: 8px minmax(0, 1fr) auto;
-  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  border: 1px solid ${({ $read, theme }) => ($read ? theme.colors.border.subtle : theme.colors.border.interactive)};
   border-radius: 14px;
   padding: 16px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-  color: ${({ theme }) => theme.colors.text.strong};
+  background: ${({ $read, theme }) => ($read ? theme.colors.background.soft : theme.colors.background.default)};
+  box-shadow: ${({ $read, theme }) => ($read ? 'none' : theme.shadows.subtle)};
+  color: ${({ $read, theme }) => ($read ? theme.colors.text.muted : theme.colors.text.strong)};
   cursor: pointer;
   text-align: left;
-  opacity: ${({ $read }) => ($read ? .62 : 1)};
 `
 
 export const StatusDot = styled.span<{ $read?: boolean }>`
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: ${({ $read, theme }) => ($read ? theme.colors.border.subtle : theme.colors.brand.primary)};
+  background: ${({ $read, theme }) => ($read ? theme.colors.border.default : theme.colors.brand.primary)};
 `
 
 export const NotificationCopy = styled.span<{ $read?: boolean }>`
@@ -147,7 +146,7 @@ export const NotificationCopy = styled.span<{ $read?: boolean }>`
   flex-direction: column;
   gap: 4px;
   strong { overflow: hidden; font-size: 14px; font-weight: ${({ $read }) => ($read ? 400 : 600)}; text-overflow: ellipsis; white-space: nowrap; }
-  span { overflow: hidden; color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+  span { overflow: hidden; color: ${({ $read, theme }) => ($read ? theme.colors.text.placeholder : theme.colors.brand.primary)}; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 `
 
 export const NotificationCategory = styled.span<{ $tone: 'primary' | 'accent' | 'success' }>`
