@@ -44,8 +44,8 @@ export function usePlannerData(
   const needsMembers = step === 'group' || step === 'progress' || step === 'final'
   const requiresMembers = step === 'group' || step === 'progress'
   const needsInvitations = step === 'group'
-  const needsVotes = step === 'explore' || step === 'vote' || step === 'lineup' || step === 'progress' || step === 'final'
-  const requiresVotes = step === 'vote' || step === 'progress'
+  const needsVotes = step === 'explore' || step === 'vote' || step === 'lineup' || step === 'progress' || step === 'final' || step === 'place'
+  const requiresVotes = step === 'vote' || step === 'progress' || step === 'place'
   const needsVoteDetail = step === 'vote' &&
     isPositiveSafeInteger(activePlannerId) &&
     isPositiveSafeInteger(activeVoteId)
@@ -115,5 +115,7 @@ export function usePlannerData(
     setPlan: setOverriddenPlan,
     voteDetail: voteDetailQuery.data,
     votes: votesQuery.data ?? [],
+    votesError: needsVotes && votesQuery.isError,
+    votesLoading: needsVotes && votesQuery.isLoading,
   }
 }

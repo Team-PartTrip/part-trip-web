@@ -108,6 +108,8 @@ export function usePlannerFlow(step: PlannerStep) {
     setPlan,
     votes,
     voteDetail,
+    votesError,
+    votesLoading,
   } = usePlannerData(step, voteCategory, activePlannerId, activeVoteId, searchKeyword)
   const [selectedPlacesByCategory, setSelectedPlacesByCategory] = useState<Record<string, TourPlaceResponseDto[]>>(() =>
     parsePlannerSelectedPlacesByCategory(readSessionValue(PLANNER_SELECTED_KEY)),
@@ -191,6 +193,7 @@ export function usePlannerFlow(step: PlannerStep) {
   const openVotes = votes.filter((vote) => normalizeVoteStatus(vote.status) === 'OPEN')
   const canCloseVotes = openVotes.length > 0 && openVotes.every((vote) => isPositiveSafeInteger(vote.voteId) && vote.options.some((option) => option.selectedByMe))
   const canManagePlanner = isPositiveSafeInteger(activePlannerId) && isPlannerLeader(plannerDetail?.role)
+  const canManageCandidates = !votesLoading && !votesError && votes.every((vote) => normalizeVoteStatus(vote.status) === 'OPEN')
   const isRemindAvailable = canManagePlanner && openVotes.length > 0
   const handleDestinationSelect = (country: CountryInfoResponseDto) => {
     setSelectedDestination(country)
@@ -423,6 +426,10 @@ export function usePlannerFlow(step: PlannerStep) {
 
   const handleSaveCandidates = async () => {
     const plannerId = activePlannerId
+    if (!canManageCandidates) {
+      setErrorMessage(votesLoading ? '투표 상태를 확인하는 중입니다.' : '투표가 시작되거나 마감된 뒤에는 후보를 변경할 수 없습니다.')
+      return
+    }
     const placeIds = [...new Set(allSelectedPlaces
       .map((item) => item.tourPlaceId)
       .filter((placeId): placeId is number => isPositiveSafeInteger(placeId)))]
@@ -457,6 +464,11 @@ export function usePlannerFlow(step: PlannerStep) {
   const handleAddPlaceCandidate = async () => {
     const plannerId = activePlannerId
     const placeId = place?.tourPlaceId
+
+    if (!canManageCandidates) {
+      setErrorMessage(votesLoading ? '투표 상태를 확인하는 중입니다.' : '투표가 시작되거나 마감된 뒤에는 후보를 변경할 수 없습니다.')
+      return
+    }
 
     if (!isPositiveSafeInteger(plannerId)) {
       setErrorMessage('먼저 여행 계획을 저장해주세요.')
@@ -671,6 +683,7 @@ export function usePlannerFlow(step: PlannerStep) {
   return {
     activeVote,
     countries,
+    canManageCandidates,
     canManagePlanner,
     confirmedPlaces,
     countryInfoId,

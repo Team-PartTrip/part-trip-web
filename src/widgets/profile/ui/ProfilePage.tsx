@@ -30,8 +30,13 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
     isLoading: isProfileLoading,
   } = useUserProfileQuery();
   const { data: profileStats, isLoading: isProfileStatsLoading } = useProfileStatsQuery();
-  const { data: worldMap } = useWorldMapQuery();
-  const isLoading = isTripsLoading || isProfileLoading || isProfileStatsLoading;
+  const {
+    data: worldMap,
+    isError: hasWorldMapError,
+    isLoading: isWorldMapLoading,
+  } = useWorldMapQuery();
+  const isLoading = isTripsLoading || isProfileLoading || isProfileStatsLoading || isWorldMapLoading;
+  const hasPageError = hasProfileError || hasTripsError || hasWorldMapError;
   const tripCountryCount = new Set(
     trips.map((trip) => trip.countryName).filter(Boolean),
   ).size;
@@ -52,7 +57,7 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
             내 여행과 기록을 한눈에 확인하세요.
           </S.Subtitle>
         </S.Header>
-        {hasProfileError || hasTripsError ? (
+        {hasPageError ? (
           <>
             <S.State role="alert">정보를 불러오지 못했습니다.</S.State>
             <S.ErrorActions>
@@ -62,7 +67,7 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
             </S.ErrorActions>
           </>
         ) : null}
-        {!hasProfileError && !hasTripsError && isLoading ? <S.LoadingLayout aria-busy="true" aria-label="프로필 정보 로딩 중"><S.LoadingRow><S.LoadingCard /><S.LoadingStats /></S.LoadingRow><S.LoadingLower><S.LoadingMap /></S.LoadingLower></S.LoadingLayout> : !hasProfileError && !hasTripsError ? (
+        {!hasPageError && isLoading ? <S.LoadingLayout aria-busy="true" aria-label="프로필 정보 로딩 중"><S.LoadingRow><S.LoadingCard /><S.LoadingStats /></S.LoadingRow><S.LoadingLower><S.LoadingMap /></S.LoadingLower></S.LoadingLayout> : !hasPageError ? (
           <>
             <S.ProfileBody>
               <S.ProfileCard>

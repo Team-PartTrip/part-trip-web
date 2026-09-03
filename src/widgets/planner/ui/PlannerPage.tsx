@@ -237,6 +237,7 @@ function PlannerFlowPage({ step }: Props) {
     addPlannerPlacesMutation,
     activeVote,
     castBallotMutation,
+    canManageCandidates,
     canManagePlanner,
     canCloseVotes,
     closeVoteMutation,
@@ -1196,6 +1197,7 @@ function PlannerFlowPage({ step }: Props) {
                       <span>선택한 장소 {selectedPlaceCount}</span>
                       <button
                         type="button"
+                        disabled={!canManageCandidates}
                         onClick={() =>
                           setSelected(places.map((_, index) => index))
                         }
@@ -1220,6 +1222,7 @@ function PlannerFlowPage({ step }: Props) {
                             type="button"
                             $active={isSelected}
                             aria-pressed={isSelected}
+                            disabled={!canManageCandidates}
                             onClick={() =>
                               setSelected((current) =>
                                 isSelected
@@ -1243,6 +1246,7 @@ function PlannerFlowPage({ step }: Props) {
                       type="button"
                       disabled={
                         isSavingCandidates ||
+                        !canManageCandidates ||
                         selectedPlaceCount === 0
                       }
                       onClick={() => void handleSaveCandidates()}
@@ -1523,7 +1527,7 @@ function PlannerFlowPage({ step }: Props) {
                         <PartTripButton
                           type="button"
                           $variant="secondary"
-                          disabled={votes.some((vote) => voteStatus(vote.status) !== "OPEN")}
+                          disabled={!canManageCandidates}
                           onClick={() =>
                             flowNavigate({ to: paths.plannerExplore })
                           }
@@ -1711,7 +1715,7 @@ function PlannerFlowPage({ step }: Props) {
                       <p>{place.description || "장소 설명이 없습니다."}</p>
                       <PartTripButton
                         type="button"
-                        disabled={addPlannerPlacesMutation.isPending}
+                        disabled={!canManageCandidates || addPlannerPlacesMutation.isPending}
                         onClick={() => void handleAddPlaceCandidate()}
                       >
                         {addPlannerPlacesMutation.isPending
