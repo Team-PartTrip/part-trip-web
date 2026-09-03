@@ -490,7 +490,7 @@ export const Form = styled.form`
   height: calc(100% - 36px);
   flex-direction: column;
   align-items: flex-start;
-  > button { width: 139px; height: 46px; min-height: 46px; margin-top: 12px; border-radius: 14px; font-size: 14px; }
+  > button { width: 160px; height: 46px; min-height: 46px; margin-top: 12px; border-radius: 14px; font-size: 14px; white-space: nowrap; }
 `;
 
 export const FieldLabel = styled.label`
@@ -498,6 +498,25 @@ export const FieldLabel = styled.label`
   font-size: 13px;
   line-height: 16px;
   font-weight: 600;
+`;
+
+export const CardField = styled.div`
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+`;
+
+export const CardSelector = styled.select`
+  width: 100%;
+  height: 44px;
+  border: 1px solid ${({ theme }) => theme.colors.border.default};
+  border-radius: 12px;
+  padding: 0 12px;
+  background: ${({ theme }) => theme.colors.background.soft};
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 14px;
 `;
 
 export const Gallery = styled.div`

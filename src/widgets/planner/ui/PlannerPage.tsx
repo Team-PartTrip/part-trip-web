@@ -226,12 +226,19 @@ function PlannerFlowPage({ step }: Props) {
   const { data: profile } = useUserProfileQuery();
   const [plannerTab, setPlannerTab] = useState<PlannerTab>("active");
   const [travelStyle, setTravelStyle] = useState("맛집");
-  const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [isInviteOpen, setIsInviteOpen] = useState(() =>
+    typeof window !== "undefined" &&
+    Boolean(new URLSearchParams(window.location.search).get("inviteCode")),
+  );
+  const [inviteLinkFeedback, setInviteLinkFeedback] = useState("");
+  const [inviteLinkError, setInviteLinkError] = useState("");
   const [shareError, setShareError] = useState("");
   const {
     addPlannerPlacesMutation,
     activeVote,
+    candidateManagementError,
     castBallotMutation,
+    canManageCandidates,
     canManagePlanner,
     canCloseVotes,
     closeVoteMutation,
@@ -293,6 +300,7 @@ function PlannerFlowPage({ step }: Props) {
     saveDestination,
     saveGroupSettings,
     selected,
+    selectedPlaceCount,
     selectedCountryName,
     selectedCityName,
     selectedCountryInfoId,
@@ -317,6 +325,7 @@ function PlannerFlowPage({ step }: Props) {
     setVoteCategory,
     voteCategory,
     votes,
+    votesError,
   } = usePlannerFlow(step);
   const flowNavigate = navigate;
   const [calendarMonthOverride, setCalendarMonthOverride] = useState<Date>();
@@ -480,6 +489,21 @@ function PlannerFlowPage({ step }: Props) {
       setShareError("");
     } catch {
       setShareError("일정 공유 링크를 복사하지 못했습니다.");
+    }
+  };
+  const handleCopyInviteLink = async () => {
+    setInviteLinkFeedback("");
+    setInviteLinkError("");
+    if (!plannerInviteLink) {
+      setInviteLinkError("초대 링크를 찾을 수 없습니다.");
+      return;
+    }
+    try {
+      if (!navigator.clipboard) throw new Error("clipboard is unavailable");
+      await navigator.clipboard.writeText(plannerInviteLink);
+      setInviteLinkFeedback("초대 링크를 복사했습니다.");
+    } catch {
+      setInviteLinkError("초대 링크를 복사하지 못했습니다.");
     }
   };
 
@@ -673,9 +697,9 @@ function PlannerFlowPage({ step }: Props) {
           memberCount={plannerDetail?.memberCount ?? members.length}
           isLoading={isLoading}
         />
-        {errorMessage || hasError ? (
+        {errorMessage || hasError || votesError ? (
           <S.Error role="alert">
-            {errorMessage || "플래너 정보를 불러오지 못했습니다."}
+            {errorMessage || (votesError ? candidateManagementError : "플래너 정보를 불러오지 못했습니다.")}
           </S.Error>
         ) : null}
 
@@ -722,7 +746,6 @@ function PlannerFlowPage({ step }: Props) {
                   <S.PlanListPanel>
                     {availablePlanners.map((planner, index) => {
                       const title = planner.title || `${planner.cityName || planner.countryName || "여행"} 여행`;
-                      const isOwner = planner.role?.trim().toUpperCase() === "OWNER";
                       return (
                         <S.PlanItem key={planner.plannerId ?? index}>
                           <S.PlanRow
@@ -758,20 +781,6 @@ function PlannerFlowPage({ step }: Props) {
                               </S.PlanAside>
                             </S.PlanContent>
                           </S.PlanRow>
-                          {isOwner ? (
-                            <S.DeletePlannerButton
-                              type="button"
-                              aria-label={`${title} 삭제`}
-                              disabled={deletePlannerMutation.isPending}
-                              onClick={() => {
-                                if (window.confirm("이 플래너를 삭제할까요?")) {
-                                  void handleDeletePlanner(planner.plannerId);
-                                }
-                              }}
-                            >
-                              {deletePlannerMutation.isPending ? "삭제 중" : "삭제"}
-                            </S.DeletePlannerButton>
-                          ) : null}
                         </S.PlanItem>
                       );
                     })}
@@ -846,11 +855,7 @@ function PlannerFlowPage({ step }: Props) {
                         <PartTripButton
                           type="button"
                           $variant="secondary"
-                          onClick={() =>
-                            void navigator.clipboard?.writeText(
-                              plannerInviteLink,
-                            )
-                          }
+                          onClick={() => void handleCopyInviteLink()}
                         >
                           링크 복사
                         </PartTripButton>
@@ -1178,10 +1183,7 @@ function PlannerFlowPage({ step }: Props) {
                       type="button"
                       className={voteCategory === category ? "active" : ""}
                       $active={voteCategory === category}
-                      onClick={() => {
-                        setSelected([]);
-                        setVoteCategory(category);
-                      }}
+                      onClick={() => setVoteCategory(category)}
                     >
                       {category}
                     </S.CategoryChip>
@@ -1190,9 +1192,10 @@ function PlannerFlowPage({ step }: Props) {
                 <S.PlaceBody>
                   <S.PlaceListPanel>
                     <S.PlaceListHeader>
-                      <span>선택한 장소 {selectedPlaces.length}</span>
+                      <span>선택한 장소 {selectedPlaceCount}</span>
                       <button
                         type="button"
+                        disabled={!canManageCandidates}
                         onClick={() =>
                           setSelected(places.map((_, index) => index))
                         }
@@ -1217,6 +1220,7 @@ function PlannerFlowPage({ step }: Props) {
                             type="button"
                             $active={isSelected}
                             aria-pressed={isSelected}
+                            disabled={!canManageCandidates}
                             onClick={() =>
                               setSelected((current) =>
                                 isSelected
@@ -1240,7 +1244,8 @@ function PlannerFlowPage({ step }: Props) {
                       type="button"
                       disabled={
                         isSavingCandidates ||
-                        selectedPlaces.length === 0
+                        !canManageCandidates ||
+                        selectedPlaceCount === 0
                       }
                       onClick={() => void handleSaveCandidates()}
                     >
@@ -1264,10 +1269,7 @@ function PlannerFlowPage({ step }: Props) {
                       type="button"
                       className={voteCategory === category ? "active" : ""}
                       $active={voteCategory === category}
-                      onClick={() => {
-                        setSelected([]);
-                        setVoteCategory(category);
-                      }}
+                      onClick={() => setVoteCategory(category)}
                     >
                       {category}
                     </S.CategoryChip>
@@ -1523,6 +1525,7 @@ function PlannerFlowPage({ step }: Props) {
                         <PartTripButton
                           type="button"
                           $variant="secondary"
+                          disabled={!canManageCandidates}
                           onClick={() =>
                             flowNavigate({ to: paths.plannerExplore })
                           }
@@ -1576,11 +1579,41 @@ function PlannerFlowPage({ step }: Props) {
                       >
                         일정 확정하기
                       </PartTripButton>
+                      <PartTripButton
+                        type="button"
+                        $variant="secondary"
+                        disabled={!plannerInviteLink}
+                        onClick={() => void handleCopyInviteLink()}
+                      >
+                        초대링크 복사
+                      </PartTripButton>
+                      {canManagePlanner ? (
+                        <S.DeletePlannerButton
+                          type="button"
+                          aria-label="현재 플래너 삭제"
+                          disabled={deletePlannerMutation.isPending}
+                          onClick={() => {
+                            if (window.confirm("이 플래너를 삭제할까요?")) {
+                              void handleDeletePlanner(plannerDetail?.plannerId);
+                            }
+                          }}
+                        >
+                          {deletePlannerMutation.isPending ? "삭제 중" : "삭제"}
+                        </S.DeletePlannerButton>
+                      ) : null}
                     </S.ActionRow>
                     {remindFeedback ? (
                       <S.ActionFeedback role="status">
                         {remindFeedback}
                       </S.ActionFeedback>
+                    ) : null}
+                    {inviteLinkFeedback ? (
+                      <S.ActionFeedback role="status">
+                        {inviteLinkFeedback}
+                      </S.ActionFeedback>
+                    ) : null}
+                    {inviteLinkError ? (
+                      <S.Error role="alert">{inviteLinkError}</S.Error>
                     ) : null}
                   </S.MemberResponses>
                 </S.ProgressBody>
@@ -1680,7 +1713,7 @@ function PlannerFlowPage({ step }: Props) {
                       <p>{place.description || "장소 설명이 없습니다."}</p>
                       <PartTripButton
                         type="button"
-                        disabled={addPlannerPlacesMutation.isPending}
+                        disabled={!canManageCandidates || addPlannerPlacesMutation.isPending}
                         onClick={() => void handleAddPlaceCandidate()}
                       >
                         {addPlannerPlacesMutation.isPending

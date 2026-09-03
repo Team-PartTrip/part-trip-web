@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useMyTrips } from "@/entities/trip-plan";
+import { useWorldMapQuery } from "@/entities/world-map";
 import { useProfileStatsQuery, useUserProfileQuery } from "@/entities/user";
 import { ProfileForm } from "@/features/fix-profile";
-import { figmaWorldMap } from "@/shared/assets";
 import { paths } from "@/shared/config";
 import { Button as PartTripButton } from "@/shared/ui/parttrip";
+import { WorldMap } from "@/shared/ui";
 import { AppShell } from "@/widgets/app-shell";
 import { LogoutDialog } from "@/widgets/sidebar";
 
@@ -29,10 +30,20 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
     isLoading: isProfileLoading,
   } = useUserProfileQuery();
   const { data: profileStats, isLoading: isProfileStatsLoading } = useProfileStatsQuery();
-  const isLoading = isTripsLoading || isProfileLoading || isProfileStatsLoading;
-  const countries = new Set(
+  const {
+    data: worldMap,
+    isError: hasWorldMapError,
+    isLoading: isWorldMapLoading,
+  } = useWorldMapQuery();
+  const isLoading = isTripsLoading || isProfileLoading || isProfileStatsLoading || isWorldMapLoading;
+  const hasPageError = hasProfileError || hasTripsError || hasWorldMapError;
+  const tripCountryCount = new Set(
     trips.map((trip) => trip.countryName).filter(Boolean),
   ).size;
+  const visitedCountries = worldMap?.visited ?? [];
+  const countryCount = worldMap
+    ? new Set(visitedCountries.map((country) => country.countryName).filter(Boolean)).size
+    : tripCountryCount;
   const recordCount = trips.reduce((total, trip) => total + (trip.images?.length ?? 0), 0);
   const displayedRecordCount = profileStats?.recordCount ?? recordCount;
   const name = profile?.name || "닉네임 미설정";
@@ -46,7 +57,7 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
             내 여행과 기록을 한눈에 확인하세요.
           </S.Subtitle>
         </S.Header>
-        {hasProfileError || hasTripsError ? (
+        {hasPageError ? (
           <>
             <S.State role="alert">정보를 불러오지 못했습니다.</S.State>
             <S.ErrorActions>
@@ -56,7 +67,7 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
             </S.ErrorActions>
           </>
         ) : null}
-        {!hasProfileError && !hasTripsError && isLoading ? <S.LoadingLayout aria-busy="true" aria-label="프로필 정보 로딩 중"><S.LoadingRow><S.LoadingCard /><S.LoadingStats /></S.LoadingRow><S.LoadingLower><S.LoadingMap /></S.LoadingLower></S.LoadingLayout> : !hasProfileError && !hasTripsError ? (
+        {!hasPageError && isLoading ? <S.LoadingLayout aria-busy="true" aria-label="프로필 정보 로딩 중"><S.LoadingRow><S.LoadingCard /><S.LoadingStats /></S.LoadingRow><S.LoadingLower><S.LoadingMap /></S.LoadingLower></S.LoadingLayout> : !hasPageError ? (
           <>
             <S.ProfileBody>
               <S.ProfileCard>
@@ -92,7 +103,7 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
                   </div>
                   <div>
                     <small>국가</small>
-                    <strong>{profileStats?.countryCount ?? countries}</strong>
+                    <strong>{profileStats?.countryCount ?? countryCount}</strong>
                   </div>
                   <div>
                     <small>기록</small>
@@ -105,12 +116,15 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
               <S.WorldMapSummary>
                 <S.WorldMapCopy>
                   <S.SectionTitle>내 세계지도</S.SectionTitle>
-                  <p>{countries}개국 여행 기록</p>
+                  <p>{countryCount}개국 여행 기록</p>
                   <S.WorldMapMore type="button" onClick={() => navigate({ to: paths.profileMap })}>
                     세계지도 보기
                   </S.WorldMapMore>
                 </S.WorldMapCopy>
-                <img src={figmaWorldMap} alt="방문 국가 세계 지도" />
+                <WorldMap
+                  ariaLabel="방문 국가 세계 지도"
+                  countryCodes={visitedCountries.map((country) => country.countryCode)}
+                />
               </S.WorldMapSummary>
             </S.LowerBody>
           </>

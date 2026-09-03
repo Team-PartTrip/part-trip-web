@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useMyTrips } from '@/entities/trip-plan'
+import { paths } from '@/shared/config'
+import { Button as PartTripButton } from '@/shared/ui/parttrip'
 import { formatDate } from '@/shared/utils'
 import { AppShell } from '@/widgets/app-shell'
 
@@ -26,7 +28,7 @@ export function RecordPage() {
   return (
     <AppShell>
       <S.Page>
-        <S.Header><S.Title>기록</S.Title></S.Header>
+        <S.Header><S.Title>기록</S.Title><PartTripButton type="button" onClick={() => navigate({ to: paths.recordWrite })}>사진 추가</PartTripButton></S.Header>
         <S.YearTabs aria-label="기록 연도 필터">
           {['all', ...years].map((value) => (
             <button key={value} type="button" className={year === value ? 'active' : ''} aria-pressed={year === value} onClick={() => setYear(value)}>

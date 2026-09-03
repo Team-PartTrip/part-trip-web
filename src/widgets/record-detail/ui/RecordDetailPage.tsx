@@ -36,6 +36,7 @@ export function RecordDetailPage() {
               <h1>촬영 기록 상세</h1>
               {record && hasRecordPhotos ? <p>사진 {currentPhotoIndex + 1} / {recordImages.length}</p> : null}
             </div>
+            {record?.tripId != null ? <div><button type="button" onClick={() => navigate({ search: { cardId: String(record.tripId) }, to: paths.recordWrite })}>사진 추가</button></div> : null}
           </S.TopBar>
         ) : null}
         {hasRecordError ? <S.ErrorMessage role="alert">여행 기록을 불러오지 못했습니다.</S.ErrorMessage> : null}

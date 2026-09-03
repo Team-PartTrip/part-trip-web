@@ -14,6 +14,10 @@ export const Page = styled.main`
 `
 
 export const Header = styled.header`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   min-height: 48px;
   padding-inline: 24px;
   margin-bottom: 24px;

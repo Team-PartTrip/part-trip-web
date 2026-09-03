@@ -191,27 +191,19 @@ export const LowerBody = styled.section`
 
 export const WorldMapSummary = styled.section`
   position: relative;
-  display: block;
-  min-height: 260px;
+  display: grid;
+  align-items: center;
+  gap: 24px;
+  grid-template-columns: minmax(220px, 1fr) minmax(0, 2fr);
+  min-height: 320px;
   box-sizing: border-box;
   border: 1px solid #dceaf7;
   border-radius: 16px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.muted};
 
-  img {
-    display: block;
-    position: absolute;
-    top: 57px;
-    right: 16px;
-    width: min(360px, calc(100% - 48px));
-    height: 180px;
-    object-fit: contain;
-  }
-
   @media (max-width: 700px) {
     grid-template-columns: 1fr;
-    img { height: 160px; }
   }
 `
 

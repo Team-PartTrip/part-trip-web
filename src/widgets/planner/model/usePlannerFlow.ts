@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useDeferredValue, useEffect, useRef, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
 
 import {
@@ -19,11 +19,11 @@ import {
   useSelectRandomPlannerPlaceMutation,
   useUpdatePlannerMutation,
 } from '@/entities/planner'
-import type { CountryInfoResponseDto } from '@/entities/travel'
+import type { CountryInfoResponseDto, TourPlaceResponseDto } from '@/entities/travel'
 import { paths } from '@/shared/config'
 import { getErrorMessage, isPositiveSafeInteger } from '@/shared/utils'
 
-import { ACTIVE_VOTE_ID_KEY, parsePlannerGroupSettings, parsePlannerSelectedIndexes } from './storage'
+import { ACTIVE_VOTE_ID_KEY, parsePlannerGroupSettings, parsePlannerSelectedPlacesByCategory } from './storage'
 import type { PlannerStep } from './types'
 import { usePlannerData } from './usePlannerData'
 
@@ -59,6 +59,15 @@ function normalizeVoteStatus(status?: string) {
 function isPlannerLeader(role?: string) {
   const normalizedRole = role?.trim().toUpperCase() ?? ''
   return ['ADMIN', 'CREATOR', 'GROUP_LEADER', 'HOST', 'LEADER', 'OWNER', '그룹장', '방장'].some((value) => normalizedRole.includes(value))
+}
+
+function isSamePlace(left: TourPlaceResponseDto, right: TourPlaceResponseDto) {
+  if (isPositiveSafeInteger(left.tourPlaceId) && isPositiveSafeInteger(right.tourPlaceId)) {
+    return left.tourPlaceId === right.tourPlaceId
+  }
+  const leftKey = [left.placeName, left.address, left.imageUrl].filter(Boolean).join('|')
+  const rightKey = [right.placeName, right.address, right.imageUrl].filter(Boolean).join('|')
+  return Boolean(leftKey) && leftKey === rightKey
 }
 
 export function usePlannerFlow(step: PlannerStep) {
@@ -99,8 +108,12 @@ export function usePlannerFlow(step: PlannerStep) {
     setPlan,
     votes,
     voteDetail,
+    votesError,
+    votesLoading,
   } = usePlannerData(step, voteCategory, activePlannerId, activeVoteId, searchKeyword)
-  const [selected, setSelected] = useState<number[]>(() => parsePlannerSelectedIndexes(readSessionValue(PLANNER_SELECTED_KEY)))
+  const [selectedPlacesByCategory, setSelectedPlacesByCategory] = useState<Record<string, TourPlaceResponseDto[]>>(() =>
+    parsePlannerSelectedPlacesByCategory(readSessionValue(PLANNER_SELECTED_KEY)),
+  )
   const [headcount, setHeadcount] = useState(String(savedGroupSettings.memberCount))
   const [plannerTitle, setPlannerTitle] = useState('나의 여행 계획')
   const [memberCount, setMemberCount] = useState(() => String(savedGroupSettings.memberCount))
@@ -108,9 +121,11 @@ export function usePlannerFlow(step: PlannerStep) {
   const [inviteCode, setInviteCode] = useState(() =>
     typeof window === 'undefined' ? '' : new URLSearchParams(window.location.search).get('inviteCode') ?? '',
   )
+  const inviteCodeFromUrlRef = useRef(inviteCode)
   const [selectedOptionId, setSelectedOptionId] = useState<number>()
   const [lineupChoice, setLineupChoice] = useState<number | null>(null)
   const [lineupMode, setLineupMode] = useState<'direct' | 'random'>('direct')
+  const autoJoinInviteCodeRef = useRef('')
   const plannerConfirmationKey = `${PLANNER_CONFIRMED_KEY}:${activePlannerId}`
   const [confirmedPlannerId, setConfirmedPlannerId] = useState(() => readSessionValue(plannerConfirmationKey) === 'true' ? activePlannerId : 0)
   const hasConfirmedLocally = confirmedPlannerId === activePlannerId
@@ -134,9 +149,23 @@ export function usePlannerFlow(step: PlannerStep) {
   const deleteVoteOptionMutation = useDeleteVoteOptionMutation()
   const isSaving = createPlannerMutation.isPending || updatePlannerMutation.isPending
 
+  const selectedItems = selectedPlacesByCategory[voteCategory] ?? []
+  const selected = places.flatMap((item, index) => selectedItems.some((selectedItem) => isSamePlace(item, selectedItem)) ? [index] : [])
+  const setSelected = (next: number[] | ((current: number[]) => number[])) => {
+    setSelectedPlacesByCategory((current) => {
+      const currentIndexes = places.flatMap((item, index) => (current[voteCategory] ?? []).some((selectedItem) => isSamePlace(item, selectedItem)) ? [index] : [])
+      const nextIndexes = typeof next === 'function' ? next(currentIndexes) : next
+      return {
+        ...current,
+        [voteCategory]: nextIndexes.map((index) => places[index]).filter((item): item is TourPlaceResponseDto => Boolean(item)),
+      }
+    })
+  }
+  const clearSelected = () => setSelectedPlacesByCategory({})
+
   useEffect(() => {
-    writeSessionValue(PLANNER_SELECTED_KEY, JSON.stringify(selected))
-  }, [selected])
+    writeSessionValue(PLANNER_SELECTED_KEY, JSON.stringify(selectedPlacesByCategory))
+  }, [selectedPlacesByCategory])
 
   useEffect(() => {
     writeSessionValue(ACTIVE_VOTE_CATEGORY_KEY, voteCategory)
@@ -150,6 +179,8 @@ export function usePlannerFlow(step: PlannerStep) {
   const selectedEndDate = endDate ?? plannerDetail?.endDate ?? ''
   const selectedHeadcount = headcount.trim() || String(plannerDetail?.memberCount ?? savedGroupSettings.memberCount)
   const selectedPlaces = places.flatMap((item, index) => selected.includes(index) ? [{ index, item }] : [])
+  const allSelectedPlaces = Object.values(selectedPlacesByCategory).flat()
+  const selectedPlaceCount = allSelectedPlaces.length
   const placeParam = Number(placeId)
   const place = places.find((item) => item.tourPlaceId === placeParam)
   const categoryVote = votes.find((vote) => vote.category === voteCategory || vote.categoryLabel === voteCategory)
@@ -162,6 +193,16 @@ export function usePlannerFlow(step: PlannerStep) {
   const openVotes = votes.filter((vote) => normalizeVoteStatus(vote.status) === 'OPEN')
   const canCloseVotes = openVotes.length > 0 && openVotes.every((vote) => isPositiveSafeInteger(vote.voteId) && vote.options.some((option) => option.selectedByMe))
   const canManagePlanner = isPositiveSafeInteger(activePlannerId) && isPlannerLeader(plannerDetail?.role)
+  const allVotesOpen = votes.every((vote) => normalizeVoteStatus(vote.status) === 'OPEN')
+  const hasNonOpenVote = !votesLoading && !votesError && votes.length > 0 && !allVotesOpen
+  const canManageCandidates = !votesLoading && !votesError && allVotesOpen
+  const candidateManagementError = votesLoading
+    ? '투표 상태를 확인하는 중입니다.'
+    : votesError
+      ? '투표 상태를 불러오지 못했습니다. 새로고침 후 다시 시도해주세요.'
+      : hasNonOpenVote
+        ? '투표가 시작되거나 마감된 뒤에는 후보를 변경할 수 없습니다.'
+        : ''
   const isRemindAvailable = canManagePlanner && openVotes.length > 0
   const handleDestinationSelect = (country: CountryInfoResponseDto) => {
     setSelectedDestination(country)
@@ -181,7 +222,6 @@ export function usePlannerFlow(step: PlannerStep) {
     removeSessionValue(ACTIVE_VOTE_ID_KEY)
     setStoredActiveVoteId(0)
     setVoteCategory(category)
-    setSelected([])
     setSelectedOptionId(undefined)
   }
 
@@ -257,7 +297,7 @@ export function usePlannerFlow(step: PlannerStep) {
       removeSessionValue(ACTIVE_VOTE_ID_KEY)
       setStoredActiveVoteId(0)
       writeSessionValue(ACTIVE_VOTE_CATEGORY_KEY, voteCategory)
-      setSelected([])
+      clearSelected()
       continueTo(paths.plannerExplore)
     } catch {
       setErrorMessage('여행 정보를 저장하지 못했습니다.')
@@ -290,7 +330,7 @@ export function usePlannerFlow(step: PlannerStep) {
         removeSessionValue(ACTIVE_VOTE_ID_KEY)
         removeSessionValue(PLANNER_SELECTED_KEY)
         setStoredActiveVoteId(0)
-        setSelected([])
+        clearSelected()
         setSelectedOptionId(undefined)
       }
       navigate({ to: paths.plannerDestination })
@@ -299,7 +339,7 @@ export function usePlannerFlow(step: PlannerStep) {
     }
   }
 
-  const handleJoinPlanner = async () => {
+  const handleJoinPlanner = useCallback(async () => {
     if (!inviteCode.trim()) {
       setErrorMessage('초대 코드를 입력해주세요.')
       return
@@ -314,14 +354,21 @@ export function usePlannerFlow(step: PlannerStep) {
       removeSessionValue(ACTIVE_VOTE_ID_KEY)
       removeSessionValue(PLANNER_SELECTED_KEY)
       setStoredActiveVoteId(0)
-      setSelected([])
+      clearSelected()
       setSelectedOptionId(undefined)
       setConfirmedPlannerId(readSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`) === 'true' ? plannerId : 0)
       navigate({ to: paths.plannerProgress })
     } catch {
       setErrorMessage('초대 코드로 여행 그룹에 참여하지 못했습니다.')
     }
-  }
+  }, [inviteCode, joinPlannerMutation, navigate])
+
+  useEffect(() => {
+    const code = inviteCodeFromUrlRef.current.trim()
+    if (step !== 'group' || !code || autoJoinInviteCodeRef.current === code) return
+    autoJoinInviteCodeRef.current = code
+    void handleJoinPlanner()
+  }, [handleJoinPlanner, step])
 
   const handleAcceptPlannerInvitation = async (invitationId?: number) => {
     if (!isPositiveSafeInteger(invitationId)) {
@@ -337,7 +384,7 @@ export function usePlannerFlow(step: PlannerStep) {
         removeSessionValue(ACTIVE_VOTE_ID_KEY)
         removeSessionValue(PLANNER_SELECTED_KEY)
         setStoredActiveVoteId(0)
-        setSelected([])
+        clearSelected()
         setSelectedOptionId(undefined)
         setConfirmedPlannerId(readSessionValue(`${PLANNER_CONFIRMED_KEY}:${invitation.plannerId}`) === 'true' ? invitation.plannerId : 0)
         navigate({ to: paths.plannerProgress })
@@ -388,8 +435,12 @@ export function usePlannerFlow(step: PlannerStep) {
 
   const handleSaveCandidates = async () => {
     const plannerId = activePlannerId
-    const placeIds = [...new Set(selectedPlaces
-      .map(({ item }) => item.tourPlaceId)
+    if (candidateManagementError) {
+      setErrorMessage(candidateManagementError)
+      return
+    }
+    const placeIds = [...new Set(allSelectedPlaces
+      .map((item) => item.tourPlaceId)
       .filter((placeId): placeId is number => isPositiveSafeInteger(placeId)))]
 
     if (!isPositiveSafeInteger(plannerId)) {
@@ -400,7 +451,7 @@ export function usePlannerFlow(step: PlannerStep) {
       setErrorMessage('검색 결과를 선택해주세요.')
       return
     }
-    if (placeIds.length !== selectedPlaces.length) {
+    if (placeIds.length !== allSelectedPlaces.length) {
       setErrorMessage('실제 API 장소 정보가 없어 후보를 저장할 수 없습니다.')
       return
     }
@@ -412,7 +463,7 @@ export function usePlannerFlow(step: PlannerStep) {
       setStoredActiveVoteId(0)
 
       writeSessionValue(ACTIVE_VOTE_CATEGORY_KEY, voteCategory)
-      setSelected([])
+      clearSelected()
       navigate({ to: paths.plannerVote })
     } catch (error) {
       setErrorMessage(getErrorMessage(error))
@@ -422,6 +473,11 @@ export function usePlannerFlow(step: PlannerStep) {
   const handleAddPlaceCandidate = async () => {
     const plannerId = activePlannerId
     const placeId = place?.tourPlaceId
+
+    if (candidateManagementError) {
+      setErrorMessage(candidateManagementError)
+      return
+    }
 
     if (!isPositiveSafeInteger(plannerId)) {
       setErrorMessage('먼저 여행 계획을 저장해주세요.')
@@ -504,7 +560,7 @@ export function usePlannerFlow(step: PlannerStep) {
         removeSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`)
         setStoredActivePlannerId(0)
         setStoredActiveVoteId(0)
-        setSelected([])
+        clearSelected()
         setConfirmedPlannerId(0)
       }
     } catch (error) {
@@ -522,6 +578,7 @@ export function usePlannerFlow(step: PlannerStep) {
       for (const vote of openVotes) {
         if (vote.voteId != null) await closeVoteMutation.mutateAsync({ plannerId: activePlannerId, voteId: vote.voteId })
       }
+      if (step === 'vote') navigate({ to: paths.plannerProgress })
     } catch {
       setErrorMessage('투표를 마감하지 못했습니다.')
     }
@@ -608,7 +665,7 @@ export function usePlannerFlow(step: PlannerStep) {
     setConfirmedPlannerId(readSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`) === 'true' ? plannerId : 0)
     removeSessionValue(ACTIVE_VOTE_ID_KEY)
     setStoredActiveVoteId(0)
-    setSelected([])
+    clearSelected()
     setSelectedOptionId(undefined)
     navigate({ to: paths.plannerProgress })
   }
@@ -626,7 +683,7 @@ export function usePlannerFlow(step: PlannerStep) {
     setCityName(undefined)
     setStartDate(undefined)
     setEndDate(undefined)
-    setSelected([])
+    clearSelected()
     setSelectedOptionId(undefined)
     setConfirmedPlannerId(0)
     navigate({ to: paths.plannerGroup })
@@ -634,7 +691,9 @@ export function usePlannerFlow(step: PlannerStep) {
 
   return {
     activeVote,
+    candidateManagementError,
     countries,
+    canManageCandidates,
     canManagePlanner,
     confirmedPlaces,
     countryInfoId,
@@ -661,6 +720,7 @@ export function usePlannerFlow(step: PlannerStep) {
     handleSelectPlanner,
     handleStartNewPlanner,
     hasActivePlanner: isPositiveSafeInteger(activePlannerId),
+    hasNonOpenVote,
     hasError,
     headcount,
     inviteCode,
@@ -689,6 +749,7 @@ export function usePlannerFlow(step: PlannerStep) {
     saveDestination,
     saveGroupSettings,
     selected,
+    selectedPlaceCount,
     selectedCountryInfoId,
     selectedCountryName,
     selectedCityName,
@@ -714,6 +775,8 @@ export function usePlannerFlow(step: PlannerStep) {
     startDate,
     voteCategory,
     votes,
+    votesError,
+    votesLoading,
     confirmPlannerMutation,
     confirmVoteMutation,
     deleteVoteOptionMutation,

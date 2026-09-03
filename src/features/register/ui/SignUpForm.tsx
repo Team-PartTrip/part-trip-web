@@ -34,8 +34,6 @@ type CredentialsFormValues = {
   id: string
   password: string
   passwordConfirm: string
-  phoneNumber: string
-  myCountry: string
 }
 
 type VerificationFormValues = {
@@ -47,8 +45,6 @@ type FormMessage = {
   text: string
   tone: 'error' | 'success'
 }
-
-const phoneNumberPattern = /^\+?[0-9-]{9,20}$/
 
 type SignUpFormProps = {
   redirect?: string
@@ -69,8 +65,6 @@ export function SignUpForm({ redirect }: SignUpFormProps) {
       id: '',
       password: '',
       passwordConfirm: '',
-      phoneNumber: '',
-      myCountry: '',
     },
   })
   const verificationForm = useForm<VerificationFormValues>({
@@ -94,11 +88,6 @@ export function SignUpForm({ redirect }: SignUpFormProps) {
     required: '비밀번호 확인을 입력해주세요.',
     setValueAs: (value) => sanitizePassword(trimFormValue(value)),
     validate: (value, values) => value === values.password || '비밀번호가 일치하지 않습니다.',
-  })
-  const phoneNumberField = credentialsForm.register('phoneNumber', {
-    required: '전화번호를 입력해주세요.',
-    setValueAs: trimFormValue,
-    validate: (value) => phoneNumberPattern.test(value) || '전화번호는 숫자와 하이픈으로 입력해주세요.',
   })
   const emailField = verificationForm.register('email', {
     required: '이메일을 입력해주세요.',
@@ -167,10 +156,8 @@ export function SignUpForm({ redirect }: SignUpFormProps) {
 
     try {
       setIsSendingCode(true)
-      const { id, password, phoneNumber, myCountry } = credentialsForm.getValues()
+      const { id, password } = credentialsForm.getValues()
       await signUp({
-        myCountry,
-        phoneNumber,
         signUpDivision: 'USER',
         userId: id,
         userMail: email,
@@ -258,14 +245,6 @@ export function SignUpForm({ redirect }: SignUpFormProps) {
           <S.Field>
             <S.Input {...passwordConfirmField} aria-label="비밀번호 확인" type="password" autoComplete="new-password" placeholder="비밀번호 다시 입력" minLength={authValidationRules.password.minLength} maxLength={authValidationRules.password.maxLength} pattern={authValidationRules.password.pattern} title="비밀번호는 영문, 숫자, 특수문자 중 2종 이상을 포함해주세요." onChange={createSanitizedChangeHandler(passwordConfirmField, sanitizePassword)} disabled={isCredentialsBusy} required />
             <S.FieldHint>비밀번호가 일치해야 해요</S.FieldHint>
-          </S.Field>
-          <S.Field>
-            <S.Input {...phoneNumberField} aria-label="전화번호" type="tel" inputMode="tel" autoComplete="tel" placeholder="대한민국  +82  전화번호 입력" maxLength={20} disabled={isCredentialsBusy} required />
-            <S.FieldHint>인증번호를 받을 수 있는 번호를 입력하세요</S.FieldHint>
-          </S.Field>
-          <S.Field>
-            <S.Input {...credentialsForm.register('myCountry', { required: '거주 국가를 입력해주세요.', setValueAs: trimFormValue })} aria-label="거주 국가" type="text" autoComplete="country-name" placeholder="거주 국가 입력" disabled={isCredentialsBusy} required />
-            <S.FieldHint>거주 국가를 입력하세요</S.FieldHint>
           </S.Field>
           {message ? <S.Message $tone={message.tone} aria-live="polite">{message.text}</S.Message> : null}
           <S.Actions>

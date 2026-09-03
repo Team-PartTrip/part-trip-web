@@ -16,9 +16,11 @@ export function useDeleteTravelCardsMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (payload: TravelCardDeleteRequestDto) => deleteTravelCards(payload),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: tripCardQueryKeys.all })
-      void queryClient.invalidateQueries({ queryKey: tripPlanQueryKeys.all })
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: tripCardQueryKeys.all }),
+        queryClient.invalidateQueries({ queryKey: tripPlanQueryKeys.all }),
+      ])
     },
   })
 }
