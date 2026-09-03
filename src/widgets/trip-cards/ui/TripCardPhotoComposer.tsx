@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { useSearch } from "@tanstack/react-router";
 import { useCreateTravelCardEntryMutation } from "@/entities/trip-card";
 import type { TripPlanResponseDto } from "@/entities/trip-plan";
+import { getErrorMessage } from "@/shared/utils";
 import {
   Button as PartTripButton,
   Textarea as PartTripTextarea,
@@ -14,6 +16,8 @@ const MAX_PHOTOS = 4;
 type Props = { cards: TripPlanResponseDto[] };
 
 export function TripCardPhotoComposer({ cards }: Props) {
+  const search = useSearch({ strict: false }) as { cardId?: string };
+  const [selectedCardId, setSelectedCardId] = useState(search.cardId ?? "");
   const [photos, setPhotos] = useState<PhotoDraft[]>([]);
   const [comment, setComment] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -21,7 +25,7 @@ export function TripCardPhotoComposer({ cards }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const photosRef = useRef<PhotoDraft[]>([]);
   const createEntryMutation = useCreateTravelCardEntryMutation();
-  const selectedCard = cards[0];
+  const selectedCard = cards.find((card) => String(card.tripId) === selectedCardId) ?? cards[0];
 
   useEffect(
     () => () => photosRef.current.forEach(({ url }) => URL.revokeObjectURL(url)),
@@ -82,8 +86,8 @@ export function TripCardPhotoComposer({ cards }: Props) {
       setPhotos([]);
       setComment("");
       if (fileInputRef.current) fileInputRef.current.value = "";
-    } catch {
-      setErrorMessage("사진을 여행 카드에 추가하지 못했습니다.");
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
     }
   };
 
@@ -93,6 +97,7 @@ export function TripCardPhotoComposer({ cards }: Props) {
         <S.CreateFormPanel>
           <S.FormHeading>{selectedCard ? `${selectedCard.title || `${selectedCard.cityName || selectedCard.countryName || "여행"} 여행`} · ${(selectedCard.startDate || "").replaceAll("-", ".")} 시작` : "사진 · 코멘트"}</S.FormHeading>
           <S.Form onSubmit={(event) => void handleSubmit(event)}>
+            {cards.length > 1 ? <S.CardField><S.FieldLabel htmlFor="trip-card-select">여행 카드</S.FieldLabel><S.CardSelector id="trip-card-select" value={selectedCard?.tripId == null ? "" : String(selectedCard.tripId)} onChange={(event) => setSelectedCardId(event.target.value)} disabled={createEntryMutation.isPending}>{cards.filter((card) => card.tripId != null).map((card) => <option key={card.tripId} value={card.tripId}>{card.title || `${card.cityName || card.countryName || "여행"} 기록`}</option>)}</S.CardSelector></S.CardField> : null}
             <S.FieldLabel htmlFor="trip-card-photos">사진 선택</S.FieldLabel>
             <S.Gallery>
               {photos.slice(0, 4).map((photo) => (

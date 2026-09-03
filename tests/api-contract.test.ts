@@ -11,6 +11,8 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
   const plannerFlow = read('/src/widgets/planner/model/usePlannerFlow.ts')
   const plannerPage = read('/src/widgets/planner/ui/PlannerPage.tsx')
   const session = read('/src/entities/session/api.ts')
+  const googleControl = read('/src/shared/ui/auth-form/GoogleLoginControl.tsx')
+  const loginForm = read('/src/features/login/ui/LoginForm.tsx')
   const signUp = read('/src/features/register/ui/SignUpForm.tsx')
   const travel = read('/src/entities/travel/api.ts')
   const tripCard = read('/src/entities/trip-card/api.ts')
@@ -33,6 +35,8 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
   assert.doesNotMatch(plannerDetailResponse, /inviteCode/)
   assert.match(joinPlannerRequest, /inviteCode: string/)
   assert.match(plannerFlow, /const visiblePlannerInviteLink = plannerDetail\?\.inviteLink \?\? ''/)
+  assert.match(plannerFlow, /autoJoinInviteCodeRef/)
+  assert.match(plannerFlow, /void handleJoinPlanner\(\)/)
   assert.doesNotMatch(
     plannerFlow,
     /PLANNER_INVITE_(?:LINK|CODE)_KEY|plannerInviteCode|const\s*\[\s*plannerInviteLink\s*,|window\.location\.origin/,
@@ -56,8 +60,13 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
   assert.match(session, /resetToken: string\s+newPassword: string/)
   assert.match(session, /apiClient\.post<string>\(AUTH_API_PATHS\.session\.logout, payload\)/)
   assert.match(session, /export type LogoutRequestDto/)
+  assert.doesNotMatch(session.slice(session.indexOf('export type SignUpRequestDto'), session.indexOf('export type RefreshRequestDto')), /phoneNumber|myCountry/)
+  assert.match(googleControl, /flow: 'auth-code'/)
+  assert.match(loginForm, /googleLogin\(\{ code \}\)/)
   assert.match(signUp, /await signUp\(\{/)
   assert.match(signUp, /await verifyCode\(\{ code: verificationCode, email \}\)/)
+  assert.doesNotMatch(signUp, /phoneNumber|myCountry|전화번호|거주 국가/)
   assert.ok(signUp.indexOf('await signUp({') < signUp.indexOf('await verifyCode({ code: verificationCode, email })'))
+  assert.match(tripCard, /updateTravelCardEntryComment/)
   assert.match(tripCard, /comment\?: string\s+imageFile: File/)
 })

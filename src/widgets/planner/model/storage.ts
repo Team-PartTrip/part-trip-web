@@ -1,3 +1,5 @@
+import type { TourPlaceResponseDto } from '@/entities/travel'
+
 export type PlannerGroupSettings = {
   isSolo: boolean
   memberCount: number
@@ -34,11 +36,37 @@ export function parsePlannerGroupSettings(value: string | null): PlannerGroupSet
 export function parsePlannerSelectedIndexes(value: string | null) {
   try {
     const parsed: unknown = JSON.parse(value ?? '[]')
-    return Array.isArray(parsed) &&
-      parsed.every((item): item is number => Number.isSafeInteger(item) && item >= 0)
+    return isSelectedIndexes(parsed)
       ? parsed
       : []
   } catch {
     return []
+  }
+}
+
+function isSelectedIndexes(value: unknown): value is number[] {
+  return Array.isArray(value) &&
+    value.every((item): item is number => Number.isSafeInteger(item) && item >= 0)
+}
+
+function isSelectedPlace(value: unknown): value is TourPlaceResponseDto {
+  if (!isRecord(value)) return false
+  const stringFields = ['category', 'address', 'placeName', 'description', 'imageUrl']
+  const numberFields = ['latitude', 'longitude', 'rating']
+  return (value.tourPlaceId == null || (typeof value.tourPlaceId === 'number' && Number.isSafeInteger(value.tourPlaceId) && value.tourPlaceId > 0)) &&
+    stringFields.every((field) => value[field] == null || typeof value[field] === 'string') &&
+    numberFields.every((field) => value[field] == null || (typeof value[field] === 'number' && Number.isFinite(value[field])))
+}
+
+export function parsePlannerSelectedPlacesByCategory(value: string | null) {
+  try {
+    const parsed: unknown = JSON.parse(value ?? '{}')
+    if (!isRecord(parsed)) return {}
+
+    return Object.fromEntries(
+      Object.entries(parsed).filter(([, places]) => Array.isArray(places) && places.every(isSelectedPlace)),
+    ) as Record<string, TourPlaceResponseDto[]>
+  } catch {
+    return {}
   }
 }

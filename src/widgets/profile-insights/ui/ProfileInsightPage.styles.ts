@@ -101,13 +101,15 @@ export const MapCard = styled.section`
 
 export const MapCanvas = styled.div`
   position: relative;
+  display: grid;
+  place-items: center;
   width: 100%;
   height: 470px;
   overflow: hidden;
   border: 1px solid rgba(216, 221, 221, .55);
   border-radius: 16px;
   background: ${({ theme }) => theme.colors.background.default};
-  img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  > div { width: 100%; }
   @media (max-width: 560px) { height: 260px; }
 `
 

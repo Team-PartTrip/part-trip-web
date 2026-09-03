@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useMyTrips } from '@/entities/trip-plan'
 import { useAcquireCountryMutation, useWorldMapQuery, useWorldMapStatsQuery } from '@/entities/world-map'
-import { figmaWorldMap } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import { Button as PartTripButton } from '@/shared/ui/parttrip'
+import { WorldMap } from '@/shared/ui'
 import { isPositiveSafeInteger } from '@/shared/utils'
 import { AppShell } from '@/widgets/app-shell'
 
@@ -73,7 +73,6 @@ export function ProfileInsightPage({ kind }: { kind: ProfileInsightKind }) {
   const continentProgress = worldMapStatsQuery.data?.byContinent?.length
     ? worldMapStatsQuery.data.byContinent.map((item) => [item.continent || '대륙', item.acquiredCount || 0, item.totalCount || 0] as const)
     : []
-
   const selectCountry = (country: string) => {
     setSelectedCountry(country)
     saveSelectedCountry(country)
@@ -103,7 +102,7 @@ export function ProfileInsightPage({ kind }: { kind: ProfileInsightKind }) {
         {hasError ? <S.State role="alert">세계지도 정보를 불러오지 못했습니다.</S.State> : null}
         {isLoading ? <S.LoadingLayout aria-busy="true" aria-label="세계지도 정보 로딩 중"><S.LoadingHeader />{kind === 'map' || kind === 'countries' ? <S.LoadingGrid><S.LoadingPanel /><S.LoadingPanel /></S.LoadingGrid> : <S.LoadingSingle />}</S.LoadingLayout> : null}
 
-        {!isLoading && !hasError && kind === 'map' ? <S.MapBody><S.MapCard><S.SectionTitle>방문한 국가</S.SectionTitle><S.MapCanvas><img src={figmaWorldMap} alt="방문 국가 세계 지도" /></S.MapCanvas></S.MapCard><S.CountryStats><S.SectionTitle>획득한 국가 {visitedCountries.length} / {totalCountries || '-'}</S.SectionTitle>{visitedCountries.length ? <S.CountrySummaryList>{visitedCountries.slice(0, 3).map((country) => <S.CountrySummaryRow key={country} type="button" onClick={() => { selectCountry(country); navigate({ to: paths.profileCountries }) }}><strong>{country}</strong><span>{trips.filter((trip) => trip.countryName === country).length}회 방문 <b>›</b></span></S.CountrySummaryRow>)}</S.CountrySummaryList> : <S.Empty>아직 방문한 국가가 없습니다.</S.Empty>}{visitedCountries.length < totalCountries ? <S.MoreLink type="button" onClick={() => navigate({ to: paths.profileCountries })}>+ {Math.max(0, totalCountries - visitedCountries.length)}개국 더 보기</S.MoreLink> : null}</S.CountryStats></S.MapBody> : null}
+        {!isLoading && !hasError && kind === 'map' ? <S.MapBody><S.MapCard><S.SectionTitle>방문한 국가</S.SectionTitle><S.MapCanvas><WorldMap ariaLabel="방문 국가 세계 지도" countryCodes={visited.map((country) => country.countryCode)} /></S.MapCanvas></S.MapCard><S.CountryStats><S.SectionTitle>획득한 국가 {visitedCountries.length} / {totalCountries || '-'}</S.SectionTitle>{visitedCountries.length ? <S.CountrySummaryList>{visitedCountries.slice(0, 3).map((country) => <S.CountrySummaryRow key={country} type="button" onClick={() => { selectCountry(country); navigate({ to: paths.profileCountries }) }}><strong>{country}</strong><span>{trips.filter((trip) => trip.countryName === country).length}회 방문 <b>›</b></span></S.CountrySummaryRow>)}</S.CountrySummaryList> : <S.Empty>아직 방문한 국가가 없습니다.</S.Empty>}{visitedCountries.length < totalCountries ? <S.MoreLink type="button" onClick={() => navigate({ to: paths.profileCountries })}>+ {Math.max(0, totalCountries - visitedCountries.length)}개국 더 보기</S.MoreLink> : null}</S.CountryStats></S.MapBody> : null}
 
         {!isLoading && !hasError && kind === 'claim' ? activeCountry ? <S.ClaimBody>{claimCountries.length > 1 ? <S.CityTabs aria-label="획득할 국가 선택">{claimCountries.map((country) => <button key={country} type="button" className={activeCountry === country ? 'active' : ''} onClick={() => selectCountry(country)}>{country}</button>)}</S.CityTabs> : null}<S.ClaimCountry>{countryCode}</S.ClaimCountry><S.ClaimNew>CLAIM</S.ClaimNew><S.ClaimTitle>{activeCountry} 국가를 획득하세요</S.ClaimTitle><S.ClaimSubtitle>{countryTrips.length ? `${countryTrips.length}개의 여행 기록을 바탕으로 처리합니다.` : '여행 기록을 남기면 국가를 획득할 수 있어요'}</S.ClaimSubtitle><S.ClaimInfo><S.InfoRow><span>국가</span><strong>{activeCountry}</strong></S.InfoRow><S.InfoRow><span>여행 기록</span><strong>{selectedTrip?.title || `${activeCountry} 여행`}</strong></S.InfoRow><S.InfoRow><span>여행 기간</span><strong>{selectedTrip?.startDate || '-'} – {selectedTrip?.endDate || '-'}</strong></S.InfoRow></S.ClaimInfo><S.ClaimNotice>종료된 여행 기록만 국가로 등록할 수 있어요.</S.ClaimNotice><S.ClaimProgress><strong>획득 진행도 <b>{acquiredCount} / {totalCountries || '-'}</b></strong><S.ProgressTrack><S.ProgressBar $progress={achievementPercentage} /></S.ProgressTrack></S.ClaimProgress><S.ActionRow><PartTripButton type="button" disabled={!selectedTrip?.tripId || acquireCountryMutation.isPending} onClick={() => void handleAcquireCountry()}>{acquireCountryMutation.isPending ? '획득 중' : '국가 획득'}</PartTripButton><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.profileMap })}>세계지도에서 보기</PartTripButton></S.ActionRow>{claimFeedback ? <S.ClaimSubtitle role="status">{claimFeedback}</S.ClaimSubtitle> : null}</S.ClaimBody> : <S.State>획득할 여행 기록이 없습니다.</S.State> : null}
 

@@ -226,7 +226,10 @@ function PlannerFlowPage({ step }: Props) {
   const { data: profile } = useUserProfileQuery();
   const [plannerTab, setPlannerTab] = useState<PlannerTab>("active");
   const [travelStyle, setTravelStyle] = useState("맛집");
-  const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [isInviteOpen, setIsInviteOpen] = useState(() =>
+    typeof window !== "undefined" &&
+    Boolean(new URLSearchParams(window.location.search).get("inviteCode")),
+  );
   const [inviteLinkFeedback, setInviteLinkFeedback] = useState("");
   const [inviteLinkError, setInviteLinkError] = useState("");
   const [shareError, setShareError] = useState("");
@@ -295,6 +298,7 @@ function PlannerFlowPage({ step }: Props) {
     saveDestination,
     saveGroupSettings,
     selected,
+    selectedPlaceCount,
     selectedCountryName,
     selectedCityName,
     selectedCountryInfoId,
@@ -739,7 +743,6 @@ function PlannerFlowPage({ step }: Props) {
                   <S.PlanListPanel>
                     {availablePlanners.map((planner, index) => {
                       const title = planner.title || `${planner.cityName || planner.countryName || "여행"} 여행`;
-                      const isOwner = planner.role?.trim().toUpperCase() === "OWNER";
                       return (
                         <S.PlanItem key={planner.plannerId ?? index}>
                           <S.PlanRow
@@ -775,20 +778,6 @@ function PlannerFlowPage({ step }: Props) {
                               </S.PlanAside>
                             </S.PlanContent>
                           </S.PlanRow>
-                          {isOwner ? (
-                            <S.DeletePlannerButton
-                              type="button"
-                              aria-label={`${title} 삭제`}
-                              disabled={deletePlannerMutation.isPending}
-                              onClick={() => {
-                                if (window.confirm("이 플래너를 삭제할까요?")) {
-                                  void handleDeletePlanner(planner.plannerId);
-                                }
-                              }}
-                            >
-                              {deletePlannerMutation.isPending ? "삭제 중" : "삭제"}
-                            </S.DeletePlannerButton>
-                          ) : null}
                         </S.PlanItem>
                       );
                     })}
@@ -1195,10 +1184,7 @@ function PlannerFlowPage({ step }: Props) {
                       type="button"
                       className={voteCategory === category ? "active" : ""}
                       $active={voteCategory === category}
-                      onClick={() => {
-                        setSelected([]);
-                        setVoteCategory(category);
-                      }}
+                      onClick={() => setVoteCategory(category)}
                     >
                       {category}
                     </S.CategoryChip>
@@ -1207,7 +1193,7 @@ function PlannerFlowPage({ step }: Props) {
                 <S.PlaceBody>
                   <S.PlaceListPanel>
                     <S.PlaceListHeader>
-                      <span>선택한 장소 {selectedPlaces.length}</span>
+                      <span>선택한 장소 {selectedPlaceCount}</span>
                       <button
                         type="button"
                         onClick={() =>
@@ -1257,7 +1243,7 @@ function PlannerFlowPage({ step }: Props) {
                       type="button"
                       disabled={
                         isSavingCandidates ||
-                        selectedPlaces.length === 0
+                        selectedPlaceCount === 0
                       }
                       onClick={() => void handleSaveCandidates()}
                     >
@@ -1281,10 +1267,7 @@ function PlannerFlowPage({ step }: Props) {
                       type="button"
                       className={voteCategory === category ? "active" : ""}
                       $active={voteCategory === category}
-                      onClick={() => {
-                        setSelected([]);
-                        setVoteCategory(category);
-                      }}
+                      onClick={() => setVoteCategory(category)}
                     >
                       {category}
                     </S.CategoryChip>
@@ -1540,6 +1523,7 @@ function PlannerFlowPage({ step }: Props) {
                         <PartTripButton
                           type="button"
                           $variant="secondary"
+                          disabled={votes.some((vote) => voteStatus(vote.status) !== "OPEN")}
                           onClick={() =>
                             flowNavigate({ to: paths.plannerExplore })
                           }
@@ -1601,6 +1585,20 @@ function PlannerFlowPage({ step }: Props) {
                       >
                         초대링크 복사
                       </PartTripButton>
+                      {canManagePlanner ? (
+                        <S.DeletePlannerButton
+                          type="button"
+                          aria-label="현재 플래너 삭제"
+                          disabled={deletePlannerMutation.isPending}
+                          onClick={() => {
+                            if (window.confirm("이 플래너를 삭제할까요?")) {
+                              void handleDeletePlanner(plannerDetail?.plannerId);
+                            }
+                          }}
+                        >
+                          {deletePlannerMutation.isPending ? "삭제 중" : "삭제"}
+                        </S.DeletePlannerButton>
+                      ) : null}
                     </S.ActionRow>
                     {remindFeedback ? (
                       <S.ActionFeedback role="status">

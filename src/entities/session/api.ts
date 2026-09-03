@@ -5,12 +5,10 @@ export * from '@/shared/libs/token-storage'
 // === Swagger DTO Types ===
 
 export type SignUpRequestDto = {
-  phoneNumber: string
   userId: string
   userPwd: string
   userMail: string
   signUpDivision: string
-  myCountry: string
 }
 
 export type RefreshRequestDto = {
