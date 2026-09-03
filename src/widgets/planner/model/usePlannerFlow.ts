@@ -193,7 +193,16 @@ export function usePlannerFlow(step: PlannerStep) {
   const openVotes = votes.filter((vote) => normalizeVoteStatus(vote.status) === 'OPEN')
   const canCloseVotes = openVotes.length > 0 && openVotes.every((vote) => isPositiveSafeInteger(vote.voteId) && vote.options.some((option) => option.selectedByMe))
   const canManagePlanner = isPositiveSafeInteger(activePlannerId) && isPlannerLeader(plannerDetail?.role)
-  const canManageCandidates = !votesLoading && !votesError && votes.every((vote) => normalizeVoteStatus(vote.status) === 'OPEN')
+  const allVotesOpen = votes.every((vote) => normalizeVoteStatus(vote.status) === 'OPEN')
+  const hasNonOpenVote = !votesLoading && !votesError && votes.length > 0 && !allVotesOpen
+  const canManageCandidates = !votesLoading && !votesError && allVotesOpen
+  const candidateManagementError = votesLoading
+    ? '투표 상태를 확인하는 중입니다.'
+    : votesError
+      ? '투표 상태를 불러오지 못했습니다. 새로고침 후 다시 시도해주세요.'
+      : hasNonOpenVote
+        ? '투표가 시작되거나 마감된 뒤에는 후보를 변경할 수 없습니다.'
+        : ''
   const isRemindAvailable = canManagePlanner && openVotes.length > 0
   const handleDestinationSelect = (country: CountryInfoResponseDto) => {
     setSelectedDestination(country)
@@ -426,8 +435,8 @@ export function usePlannerFlow(step: PlannerStep) {
 
   const handleSaveCandidates = async () => {
     const plannerId = activePlannerId
-    if (!canManageCandidates) {
-      setErrorMessage(votesLoading ? '투표 상태를 확인하는 중입니다.' : '투표가 시작되거나 마감된 뒤에는 후보를 변경할 수 없습니다.')
+    if (candidateManagementError) {
+      setErrorMessage(candidateManagementError)
       return
     }
     const placeIds = [...new Set(allSelectedPlaces
@@ -465,8 +474,8 @@ export function usePlannerFlow(step: PlannerStep) {
     const plannerId = activePlannerId
     const placeId = place?.tourPlaceId
 
-    if (!canManageCandidates) {
-      setErrorMessage(votesLoading ? '투표 상태를 확인하는 중입니다.' : '투표가 시작되거나 마감된 뒤에는 후보를 변경할 수 없습니다.')
+    if (candidateManagementError) {
+      setErrorMessage(candidateManagementError)
       return
     }
 
@@ -682,6 +691,7 @@ export function usePlannerFlow(step: PlannerStep) {
 
   return {
     activeVote,
+    candidateManagementError,
     countries,
     canManageCandidates,
     canManagePlanner,
@@ -710,6 +720,7 @@ export function usePlannerFlow(step: PlannerStep) {
     handleSelectPlanner,
     handleStartNewPlanner,
     hasActivePlanner: isPositiveSafeInteger(activePlannerId),
+    hasNonOpenVote,
     hasError,
     headcount,
     inviteCode,
@@ -764,6 +775,8 @@ export function usePlannerFlow(step: PlannerStep) {
     startDate,
     voteCategory,
     votes,
+    votesError,
+    votesLoading,
     confirmPlannerMutation,
     confirmVoteMutation,
     deleteVoteOptionMutation,

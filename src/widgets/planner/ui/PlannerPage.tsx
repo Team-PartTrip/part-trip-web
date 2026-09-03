@@ -236,6 +236,7 @@ function PlannerFlowPage({ step }: Props) {
   const {
     addPlannerPlacesMutation,
     activeVote,
+    candidateManagementError,
     castBallotMutation,
     canManageCandidates,
     canManagePlanner,
@@ -324,6 +325,7 @@ function PlannerFlowPage({ step }: Props) {
     setVoteCategory,
     voteCategory,
     votes,
+    votesError,
   } = usePlannerFlow(step);
   const flowNavigate = navigate;
   const [calendarMonthOverride, setCalendarMonthOverride] = useState<Date>();
@@ -695,9 +697,9 @@ function PlannerFlowPage({ step }: Props) {
           memberCount={plannerDetail?.memberCount ?? members.length}
           isLoading={isLoading}
         />
-        {errorMessage || hasError ? (
+        {errorMessage || hasError || votesError ? (
           <S.Error role="alert">
-            {errorMessage || "플래너 정보를 불러오지 못했습니다."}
+            {errorMessage || (votesError ? candidateManagementError : "플래너 정보를 불러오지 못했습니다.")}
           </S.Error>
         ) : null}
 
@@ -853,11 +855,7 @@ function PlannerFlowPage({ step }: Props) {
                         <PartTripButton
                           type="button"
                           $variant="secondary"
-                          onClick={() =>
-                            void navigator.clipboard?.writeText(
-                              plannerInviteLink,
-                            )
-                          }
+                          onClick={() => void handleCopyInviteLink()}
                         >
                           링크 복사
                         </PartTripButton>
