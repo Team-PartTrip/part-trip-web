@@ -8,10 +8,6 @@ import { AppShell } from '@/widgets/app-shell'
 import { formatDday, hasTravelPlan } from '../model/dday'
 import * as S from './MainPage.styles'
 
-function durationLabel(startDate?: string | null, endDate?: string | null) {
-  return formatTripDuration(startDate, endDate) || '여행 기간 미설정'
-}
-
 export function MainPage() {
   const navigate = useNavigate()
   const { data, isError, isLoading } = useMainTravelQuery()
@@ -29,7 +25,7 @@ export function MainPage() {
           <S.Hero>
             <S.HeroLabel>다가오는 여행</S.HeroLabel>
             <S.Dday>{formatDday(plan?.dday)}</S.Dday>
-            <S.Destination>{destination} · {durationLabel(plan?.startDate, plan?.endDate)}</S.Destination>
+            <S.Destination>{destination} · {formatTripDuration(plan?.startDate, plan?.endDate) || '여행 기간 미설정'}</S.Destination>
             <S.HeroMeta>{dateRange} · {plan?.headcount ?? '-'}명</S.HeroMeta>
           </S.Hero>
 
