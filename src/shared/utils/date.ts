@@ -138,6 +138,14 @@ export function formatDate(value: DateValue) {
   return value?.replaceAll('-', '.') ?? '-'
 }
 
+export function formatDateRange(startDate: DateValue, endDate: DateValue) {
+  const start = formatDate(startDate)
+  const end = formatDate(endDate)
+  return start.length >= 7 && end.length >= 7 && start.slice(0, 7) === end.slice(0, 7)
+    ? `${start} – ${end.slice(5)}`
+    : `${start} – ${end}`
+}
+
 export function formatTravelDateTime(value: DateValue, countryCode?: string, countryName?: string, cityName?: string) {
   if (!value) return '-'
   const normalized = value.trim()

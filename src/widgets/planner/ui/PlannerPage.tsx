@@ -7,7 +7,7 @@ import {
   Button as PartTripButton,
   Input as PartTripInput,
 } from "@/shared/ui/parttrip";
-import { formatDate, getMonthCalendarDays } from "@/shared/utils";
+import { formatDate, formatDateRange, getMonthCalendarDays } from "@/shared/utils";
 import { AppShell } from "@/widgets/app-shell";
 
 import { plannerStatusKey, plannerStatusLabel } from "../model/status";
@@ -24,20 +24,12 @@ function voteStatus(status?: string) {
   return status?.trim().toUpperCase() ?? "";
 }
 
-function dateRange(startDate?: string, endDate?: string) {
-  const start = formatDate(startDate);
-  const end = formatDate(endDate);
-  return start.length >= 7 && end.length >= 7 && start.slice(0, 7) === end.slice(0, 7)
-    ? `${start} – ${end.slice(5)}`
-    : `${start} – ${end}`;
-}
-
 function shortDateRange(startDate?: string, endDate?: string) {
   const start = formatDate(startDate);
   const end = formatDate(endDate);
   return start.length >= 10 && end.length >= 10
     ? `${start.slice(5)} – ${end.slice(5)}`
-    : dateRange(startDate, endDate);
+    : formatDateRange(startDate, endDate);
 }
 
 function tripDuration(startDate?: string, endDate?: string) {
@@ -747,7 +739,7 @@ function PlannerFlowPage({ step }: Props) {
                               <S.PlanDetails>
                                 <strong>{title}</strong>
                                 <span>
-                                  {dateRange(planner.startDate, planner.endDate)}
+                                  {formatDateRange(planner.startDate, planner.endDate)}
                                 </span>
                                 <S.PlanStatusRow>
                                   <S.PlanStatus
@@ -1621,7 +1613,7 @@ function PlannerFlowPage({ step }: Props) {
                   )}
                 </S.FinalTripTitle>
                 <S.FinalDate>
-                  {dateRange(
+                  {formatDateRange(
                     plannerDetail?.startDate || plan?.startDate,
                     plannerDetail?.endDate || plan?.endDate,
                   )}
