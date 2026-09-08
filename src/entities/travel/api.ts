@@ -191,8 +191,8 @@ export async function getCountries(keyword?: string): Promise<CountryInfoRespons
       return mockCountries.filter((country) => {
         const aliases = country.countryInfoId ? mockCountrySearchAliases[country.countryInfoId] ?? [] : []
         return [country.countryName, country.cityName, ...aliases]
-          .filter(Boolean)
-          .some((value) => value!.toLocaleLowerCase().includes(normalizedKeyword))
+          .filter((value): value is string => Boolean(value))
+          .some((value) => value.toLocaleLowerCase().includes(normalizedKeyword))
       })
     },
   )

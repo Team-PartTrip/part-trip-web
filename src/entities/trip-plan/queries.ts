@@ -2,7 +2,6 @@ import { queryOptions, useQuery } from '@tanstack/react-query'
 import { isPositiveSafeInteger } from '@/shared/utils'
 import { getMyTrips, getTrip } from './api'
 import { tripPlanQueryKeys } from './query-keys'
-import type { TripPlanResponseDto } from './types'
 
 export const tripQueryOptions = (tripId: number) =>
   queryOptions({
@@ -24,7 +23,7 @@ export function useMyTrips(enabled = true) {
   return {
     hasError: query.isError,
     isLoading: query.isLoading,
-    trips: query.data ?? ([] as TripPlanResponseDto[]),
+    trips: query.data ?? [],
   }
 }
 

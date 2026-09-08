@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { usePlannerMembersQuery } from "@/entities/planner";
 import { useUserProfileQuery } from "@/entities/user";
 import { figmaTripPlanning } from "@/shared/assets";
@@ -7,7 +7,7 @@ import {
   Button as PartTripButton,
   Input as PartTripInput,
 } from "@/shared/ui/parttrip";
-import { formatDate } from "@/shared/utils";
+import { formatDate, getMonthCalendarDays } from "@/shared/utils";
 import { AppShell } from "@/widgets/app-shell";
 
 import { plannerStatusKey, plannerStatusLabel } from "../model/status";
@@ -339,22 +339,10 @@ function PlannerFlowPage({ step }: Props) {
         ? new Date()
         : new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
     })();
-  const calendarDays = useMemo<Array<number | null>>(() => {
-    const leadingDays = new Date(
-      calendarMonth.getFullYear(),
-      calendarMonth.getMonth(),
-      1,
-    ).getDay();
-    const daysInMonth = new Date(
-      calendarMonth.getFullYear(),
-      calendarMonth.getMonth() + 1,
-      0,
-    ).getDate();
-    return [
-      ...Array(leadingDays).fill(null),
-      ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
-    ];
-  }, [calendarMonth]);
+  const calendarDays = getMonthCalendarDays(
+    calendarMonth.getFullYear(),
+    calendarMonth.getMonth(),
+  );
 
   const availablePlanners = planners.filter(
     (planner) => plannerStatusKey(planner.status) === plannerTab,

@@ -1,4 +1,8 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  useMutation,
+  useQueryClient,
+  type MutationFunction,
+} from '@tanstack/react-query'
 
 import {
   castBallot,
@@ -30,79 +34,68 @@ import {
 } from './api'
 import { plannerQueryKeys } from './query-keys'
 
-export function useCreatePlannerMutation() {
+function usePlannerMutation<TData, TVariables>(
+  mutationFn: MutationFunction<TData, TVariables>,
+) {
   const queryClient = useQueryClient()
+
   return useMutation({
-    mutationFn: (payload: CreatePlannerRequestDto) => createPlanner(payload),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
+    mutationFn,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all })
+    },
   })
+}
+
+export function useCreatePlannerMutation() {
+  return usePlannerMutation((payload: CreatePlannerRequestDto) => createPlanner(payload))
 }
 
 export function useJoinPlannerMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (payload: JoinPlannerRequestDto) => joinPlanner(payload),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
-  })
+  return usePlannerMutation((payload: JoinPlannerRequestDto) => joinPlanner(payload))
 }
 
 export function useUpdatePlannerMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ plannerId, payload }: { plannerId: number; payload: SavePlannerTravelPlanRequestDto }) => updatePlanner(plannerId, payload),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
-  })
+  return usePlannerMutation(
+    ({ plannerId, payload }: { plannerId: number; payload: SavePlannerTravelPlanRequestDto }) =>
+      updatePlanner(plannerId, payload),
+  )
 }
 
 export function useCastBallotMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ plannerId, voteId, payload }: { plannerId: number; voteId: number; payload: VoteBallotRequestDto }) =>
+  return usePlannerMutation(
+    ({ plannerId, voteId, payload }: { plannerId: number; voteId: number; payload: VoteBallotRequestDto }) =>
       castBallot(plannerId, voteId, payload),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
-  })
+  )
 }
 
 export function useCloseVoteMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ plannerId, voteId }: { plannerId: number; voteId: number }) =>
+  return usePlannerMutation(
+    ({ plannerId, voteId }: { plannerId: number; voteId: number }) =>
       closeVote(plannerId, voteId),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
-  })
+  )
 }
 
 export function useConfirmVoteMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ plannerId, voteId, payload }: { plannerId: number; voteId: number; payload: VoteConfirmRequestDto }) =>
+  return usePlannerMutation(
+    ({ plannerId, voteId, payload }: { plannerId: number; voteId: number; payload: VoteConfirmRequestDto }) =>
       confirmVote(plannerId, voteId, payload),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
-  })
+  )
 }
 
 export function useAddPlannerPlacesMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ plannerId, payload }: { plannerId: number; payload: PlannerCartRequestDto }) => addPlannerPlaces(plannerId, payload),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
-  })
+  return usePlannerMutation(
+    ({ plannerId, payload }: { plannerId: number; payload: PlannerCartRequestDto }) =>
+      addPlannerPlaces(plannerId, payload),
+  )
 }
 
 export function useSelectRandomPlannerPlaceMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (plannerId: number) => selectRandomPlannerPlace(plannerId),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
-  })
+  return usePlannerMutation((plannerId: number) => selectRandomPlannerPlace(plannerId))
 }
 
 export function useConfirmPlannerMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (plannerId: number) => confirmPlanner(plannerId),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
-  })
+  return usePlannerMutation((plannerId: number) => confirmPlanner(plannerId))
 }
 
 export function useRemindPlannerMembersMutation() {
@@ -110,55 +103,48 @@ export function useRemindPlannerMembersMutation() {
 }
 
 export function useDeleteVoteOptionMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ plannerId, voteId, optionId }: { plannerId: number; voteId: number; optionId: number }) => deleteVoteOption(plannerId, voteId, optionId),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
-  })
+  return usePlannerMutation(
+    ({ plannerId, voteId, optionId }: { plannerId: number; voteId: number; optionId: number }) =>
+      deleteVoteOption(plannerId, voteId, optionId),
+  )
 }
 
 export function useAddVoteOptionMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ plannerId, voteId, payload }: { plannerId: number; voteId: number; payload: VoteOptionCreateRequestDto }) =>
+  return usePlannerMutation(
+    ({ plannerId, voteId, payload }: { plannerId: number; voteId: number; payload: VoteOptionCreateRequestDto }) =>
       addVoteOption(plannerId, voteId, payload),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
-  })
+  )
 }
 
 export function useCreateVoteMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ plannerId, payload }: { plannerId: number; payload: CreateVoteRequestDto }) =>
+  return usePlannerMutation(
+    ({ plannerId, payload }: { plannerId: number; payload: CreateVoteRequestDto }) =>
       createVote(plannerId, payload),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
-  })
+  )
 }
 
 export function useDeletePlannerMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (plannerId: number) => deletePlanner(plannerId),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) },
-  })
+  return usePlannerMutation((plannerId: number) => deletePlanner(plannerId))
 }
 
 export function useAcceptPlannerInvitationMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({ mutationFn: (invitationId: number) => acceptPlannerInvitation(invitationId), onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) } })
+  return usePlannerMutation((invitationId: number) => acceptPlannerInvitation(invitationId))
 }
 
 export function useRejectPlannerInvitationMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({ mutationFn: (invitationId: number) => rejectPlannerInvitation(invitationId), onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) } })
+  return usePlannerMutation((invitationId: number) => rejectPlannerInvitation(invitationId))
 }
 
 export function useCancelPlannerInvitationMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({ mutationFn: ({ plannerId, invitationId }: { plannerId: number; invitationId: number }) => cancelPlannerInvitation(plannerId, invitationId), onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) } })
+  return usePlannerMutation(
+    ({ plannerId, invitationId }: { plannerId: number; invitationId: number }) =>
+      cancelPlannerInvitation(plannerId, invitationId),
+  )
 }
 
 export function useRemovePlannerMemberMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({ mutationFn: ({ plannerId, memberUserId }: { plannerId: number; memberUserId: string }) => removePlannerMember(plannerId, memberUserId), onSuccess: () => { void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.all }) } })
+  return usePlannerMutation(
+    ({ plannerId, memberUserId }: { plannerId: number; memberUserId: string }) =>
+      removePlannerMember(plannerId, memberUserId),
+  )
 }

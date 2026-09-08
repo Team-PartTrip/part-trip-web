@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { formatDate, formatTravelDateTime, getCalendarMonthsInRange, getDateRangeDays, getDateRangeWithPadding, isDateInRange, isInCurrentCalendarWeek, MAX_FESTIVAL_QUERY_MONTHS } from '../src/shared/utils/date.ts'
+import { formatDate, formatTravelDateTime, getCalendarMonthsInRange, getMonthCalendarDays, getDateRangeDays, getDateRangeWithPadding, isDateInRange, isInCurrentCalendarWeek, MAX_FESTIVAL_QUERY_MONTHS } from '../src/shared/utils/date.ts'
 
 test('날짜 포맷과 양끝 포함 기간을 공통 규칙으로 계산한다', () => {
   assert.equal(formatDate('2026-07-01'), '2026.07.01')
@@ -41,4 +41,18 @@ test('촬영 시각을 여행 국가 시간대로 표시한다', () => {
   assert.equal(formatTravelDateTime('2026-08-31T15:00:00', 'US', '미국'), '2026. 8. 31. 오후 3:00')
   assert.equal(formatTravelDateTime('2026-08-31T15:00:00', 'XX'), '2026. 8. 31. 오후 3:00')
   assert.equal(formatTravelDateTime('2026-08-31T15:00:00', 'NZ', '뉴질랜드', 'Auckland'), '2026. 9. 1. 오전 3:00')
+})
+
+test('월 달력은 일요일 기준 빈칸과 해당 월의 날짜만 포함한다', () => {
+  assert.deepEqual(getMonthCalendarDays(2026, 1), Array.from({ length: 28 }, (_, index) => index + 1))
+  assert.deepEqual(getMonthCalendarDays(2024, 1), [
+    null, null, null, null,
+    ...Array.from({ length: 29 }, (_, index) => index + 1),
+  ])
+  assert.deepEqual(getMonthCalendarDays(2026, 7), [
+    null, null, null, null, null, null,
+    ...Array.from({ length: 31 }, (_, index) => index + 1),
+  ])
+  assert.deepEqual(getMonthCalendarDays(2026, 12), getMonthCalendarDays(2027, 0))
+  assert.deepEqual(getMonthCalendarDays(2026, -1), getMonthCalendarDays(2025, 11))
 })

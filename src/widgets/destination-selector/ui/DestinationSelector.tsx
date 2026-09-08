@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useCountriesQuery, useDdayQuery } from '@/entities/travel'
 import { Button as PartTripButton, Input as PartTripInput } from '@/shared/ui/parttrip'
-import { getDateRangeDays } from '@/shared/utils'
+import { getDateRangeDays, getMonthCalendarDays } from '@/shared/utils'
 
 import * as S from './DestinationSelector.styles'
 
@@ -38,11 +38,7 @@ export function DestinationSelector({ onBack }: Props) {
     if (nextMonth && !monthChangedRef.current) setMonth(nextMonth)
   }, [plan?.startDate])
 
-  const cells = useMemo(() => {
-    const first = new Date(month.getFullYear(), month.getMonth(), 1).getDay()
-    const days = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate()
-    return [...Array(first).fill(null), ...Array.from({ length: days }, (_, index) => index + 1)]
-  }, [month])
+  const cells = useMemo(() => getMonthCalendarDays(month.getFullYear(), month.getMonth()), [month])
 
   return (
     <S.Root>

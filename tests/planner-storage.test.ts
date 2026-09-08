@@ -22,3 +22,17 @@ test('플래너 세션 저장값은 허용된 범위만 복원한다', () => {
   )
   assert.deepEqual(parsePlannerSelectedPlacesByCategory('{"맛집":[{"tourPlaceId":0}]}'), {})
 })
+
+test('장소 저장값은 유효하지 않은 카테고리만 제외하고 빈 목록과 추가 필드는 보존한다', () => {
+  assert.deepEqual(parsePlannerSelectedPlacesByCategory(JSON.stringify({
+    맛집: [{ tourPlaceId: 1, placeName: '라멘', extra: '보존' }],
+    명소: [{ tourPlaceId: 2 }, { latitude: 'invalid' }],
+    숙소: [],
+    카페: null,
+  })), {
+    맛집: [{ tourPlaceId: 1, placeName: '라멘', extra: '보존' }],
+    숙소: [],
+  })
+  assert.deepEqual(parsePlannerSelectedPlacesByCategory('invalid'), {})
+  assert.deepEqual(parsePlannerSelectedPlacesByCategory(null), {})
+})

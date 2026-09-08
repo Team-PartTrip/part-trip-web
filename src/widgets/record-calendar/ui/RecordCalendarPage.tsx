@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useDdayQuery, useTripFestivalsQuery, type FestivalResponseDto } from '@/entities/travel'
 import { paths } from '@/shared/config'
 import { Skeleton } from '@/shared/ui/parttrip'
-import { formatDate } from '@/shared/utils'
+import { formatDate, getMonthCalendarDays } from '@/shared/utils'
 import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './RecordCalendarPage.styles'
@@ -27,11 +27,7 @@ export function RecordCalendarPage() {
   const viewMonthIndex = viewMonth.getMonth()
   const safeFestivals = festivals.filter((festival): festival is FestivalResponseDto => Boolean(festival))
   const visibleFestivals = selectedDate ? safeFestivals.filter((festival) => festival.startDate === selectedDate) : safeFestivals
-  const cells = useMemo(() => {
-    const first = new Date(viewYear, viewMonthIndex, 1).getDay()
-    const days = new Date(viewYear, viewMonthIndex + 1, 0).getDate()
-    return [...Array(first).fill(null), ...Array.from({ length: days }, (_, index) => index + 1)]
-  }, [viewYear, viewMonthIndex])
+  const cells = useMemo(() => getMonthCalendarDays(viewYear, viewMonthIndex), [viewYear, viewMonthIndex])
   const eventByDay = new Map(safeFestivals.flatMap((festival) => festival.startDate ? [[festival.startDate, festival] as const] : []))
   const isLoading = isPlanLoading || isFestivalsLoading
   const hasError = isPlanError || isFestivalsError

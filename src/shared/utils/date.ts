@@ -11,6 +11,15 @@ type CalendarMonth = {
   month: number
 }
 
+export function getMonthCalendarDays(year: number, monthIndex: number): Array<number | null> {
+  const leadingDays = new Date(year, monthIndex, 1).getDay()
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate()
+  return [
+    ...Array<null>(leadingDays).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
+  ]
+}
+
 // ponytail: cap festival fan-out at 14 months; add a range/pagination API if longer trips need support.
 export const MAX_FESTIVAL_QUERY_MONTHS = 14
 

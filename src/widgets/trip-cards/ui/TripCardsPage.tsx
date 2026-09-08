@@ -157,14 +157,16 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
                       card.tripId != null && selected.includes(card.tripId)
                     }
                     disabled={card.tripId == null}
-                    onChange={() =>
-                      card.tripId != null &&
+                    onChange={() => {
+                      const tripId = card.tripId
+                      if (tripId == null) return
+
                       setSelected((current) =>
-                        current.includes(card.tripId as number)
-                          ? current.filter((id) => id !== card.tripId)
-                          : [...current, card.tripId as number],
+                        current.includes(tripId)
+                          ? current.filter((id) => id !== tripId)
+                          : [...current, tripId],
                       )
-                    }
+                    }}
                   />
                   <span>IMG</span>
                   <div>

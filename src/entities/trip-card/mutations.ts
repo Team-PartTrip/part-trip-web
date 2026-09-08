@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
 
 import {
   createTravelCardEntry,
@@ -12,16 +12,18 @@ import {
 import { tripPlanQueryKeys } from '@/entities/trip-plan/query-keys'
 import { tripCardQueryKeys } from './query-keys'
 
+function invalidateTripCardQueries(queryClient: QueryClient) {
+  return Promise.all([
+    queryClient.invalidateQueries({ queryKey: tripCardQueryKeys.all }),
+    queryClient.invalidateQueries({ queryKey: tripPlanQueryKeys.all }),
+  ])
+}
+
 export function useDeleteTravelCardsMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (payload: TravelCardDeleteRequestDto) => deleteTravelCards(payload),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: tripCardQueryKeys.all }),
-        queryClient.invalidateQueries({ queryKey: tripPlanQueryKeys.all }),
-      ])
-    },
+    onSuccess: () => invalidateTripCardQueries(queryClient),
   })
 }
 
@@ -30,8 +32,7 @@ export function useCreateTravelCardEntryMutation() {
   return useMutation({
     mutationFn: ({ cardId, payload }: { cardId: number; payload: TravelCardEntryRequestDto }) => createTravelCardEntry(cardId, payload),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: tripCardQueryKeys.all })
-      void queryClient.invalidateQueries({ queryKey: tripPlanQueryKeys.all })
+      void invalidateTripCardQueries(queryClient)
     },
   })
 }
@@ -41,8 +42,7 @@ export function useDeleteTravelCardEntryMutation() {
   return useMutation({
     mutationFn: ({ cardId, entryId }: { cardId: number; entryId: number }) => deleteTravelCardEntry(cardId, entryId),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: tripCardQueryKeys.all })
-      void queryClient.invalidateQueries({ queryKey: tripPlanQueryKeys.all })
+      void invalidateTripCardQueries(queryClient)
     },
   })
 }
@@ -52,8 +52,7 @@ export function useUpdateTravelCardEntryCommentMutation() {
   return useMutation({
     mutationFn: ({ cardId, entryId, payload }: { cardId: number; entryId: number; payload: TravelCardEntryCommentRequestDto }) => updateTravelCardEntryComment(cardId, entryId, payload),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: tripCardQueryKeys.all })
-      void queryClient.invalidateQueries({ queryKey: tripPlanQueryKeys.all })
+      void invalidateTripCardQueries(queryClient)
     },
   })
 }
