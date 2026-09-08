@@ -4,12 +4,16 @@ import { useMyTrips } from '@/entities/trip-plan'
 import { useAcquireCountryMutation, useWorldMapQuery, useWorldMapStatsQuery } from '@/entities/world-map'
 import { paths } from '@/shared/config'
 import { readSessionValue, writeSessionValue } from '@/shared/libs/session-storage'
-import { Button as PartTripButton } from '@/shared/ui/parttrip'
-import { WorldMap } from '@/shared/ui'
 import { isPositiveSafeInteger } from '@/shared/utils'
 import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './ProfileInsightPage.styles'
+import {
+  ProfileAchievementsView,
+  ProfileClaimView,
+  ProfileCountriesView,
+  ProfileMapView,
+} from './ProfileInsightModeViews'
 
 export type ProfileInsightKind = 'map' | 'claim' | 'countries' | 'achievements'
 
@@ -41,11 +45,9 @@ export function ProfileInsightPage({ kind }: { kind: ProfileInsightKind }) {
   const countryChoices = kind === 'claim' ? claimCountries : visitedCountries
   const activeCountry = countryChoices.includes(selectedCountry) ? selectedCountry : countryChoices[0]
   const countryTrips = trips.filter((trip) => trip.countryName === activeCountry)
-  const activeTrips = selectedCity ? countryTrips.filter((trip) => trip.cityName === selectedCity) : countryTrips
   const selectedTrip = countryTrips.find((trip) => isPositiveSafeInteger(trip.tripId))
   const countryCode = visited.find((country) => country.countryName === activeCountry)?.countryCode ?? '--'
   const countryCities = [...new Set(countryTrips.map((trip) => trip.cityName).filter((city): city is string => Boolean(city)))]
-  const countryPhotoCount = activeTrips.reduce((total, trip) => total + (trip.images?.length ?? 0), 0)
   const firstVisit = countryTrips.map((trip) => trip.startDate).filter(Boolean).sort()[0]?.replaceAll('-', '.') || '-'
   const totalCountries = worldMapQuery.data?.totalCountries ?? worldMapStatsQuery.data?.totalCount ?? 0
   const acquiredCount = worldMapStatsQuery.data?.acquiredCount ?? visitedCountries.length
@@ -56,6 +58,7 @@ export function ProfileInsightPage({ kind }: { kind: ProfileInsightKind }) {
   const continentProgress = worldMapStatsQuery.data?.byContinent?.length
     ? worldMapStatsQuery.data.byContinent.map((item) => [item.continent || '대륙', item.acquiredCount || 0, item.totalCount || 0] as const)
     : []
+
   const selectCountry = (country: string) => {
     setSelectedCountry(country)
     writeSessionValue(PROFILE_COUNTRY_KEY, country)
@@ -85,13 +88,10 @@ export function ProfileInsightPage({ kind }: { kind: ProfileInsightKind }) {
         {hasError ? <S.State role="alert">세계지도 정보를 불러오지 못했습니다.</S.State> : null}
         {isLoading ? <S.LoadingLayout aria-busy="true" aria-label="세계지도 정보 로딩 중"><S.LoadingHeader />{kind === 'map' || kind === 'countries' ? <S.LoadingGrid><S.LoadingPanel /><S.LoadingPanel /></S.LoadingGrid> : <S.LoadingSingle />}</S.LoadingLayout> : null}
 
-        {!isLoading && !hasError && kind === 'map' ? <S.MapBody><S.MapCard><S.SectionTitle>방문한 국가</S.SectionTitle><S.MapCanvas><WorldMap ariaLabel="방문 국가 세계 지도" countryCodes={visited.map((country) => country.countryCode)} /></S.MapCanvas></S.MapCard><S.CountryStats><S.SectionTitle>획득한 국가 {visitedCountries.length} / {totalCountries || '-'}</S.SectionTitle>{visitedCountries.length ? <S.CountrySummaryList>{visitedCountries.slice(0, 3).map((country) => <S.CountrySummaryRow key={country} type="button" onClick={() => { selectCountry(country); navigate({ to: paths.profileCountries }) }}><strong>{country}</strong><span>{trips.filter((trip) => trip.countryName === country).length}회 방문 <b>›</b></span></S.CountrySummaryRow>)}</S.CountrySummaryList> : <S.Empty>아직 방문한 국가가 없습니다.</S.Empty>}{visitedCountries.length < totalCountries ? <S.MoreLink type="button" onClick={() => navigate({ to: paths.profileCountries })}>+ {Math.max(0, totalCountries - visitedCountries.length)}개국 더 보기</S.MoreLink> : null}</S.CountryStats></S.MapBody> : null}
-
-        {!isLoading && !hasError && kind === 'claim' ? activeCountry ? <S.ClaimBody>{claimCountries.length > 1 ? <S.CityTabs aria-label="획득할 국가 선택">{claimCountries.map((country) => <button key={country} type="button" className={activeCountry === country ? 'active' : ''} onClick={() => selectCountry(country)}>{country}</button>)}</S.CityTabs> : null}<S.ClaimCountry>{countryCode}</S.ClaimCountry><S.ClaimNew>CLAIM</S.ClaimNew><S.ClaimTitle>{activeCountry} 국가를 획득하세요</S.ClaimTitle><S.ClaimSubtitle>{countryTrips.length ? `${countryTrips.length}개의 여행 기록을 바탕으로 처리합니다.` : '여행 기록을 남기면 국가를 획득할 수 있어요'}</S.ClaimSubtitle><S.ClaimInfo><S.InfoRow><span>국가</span><strong>{activeCountry}</strong></S.InfoRow><S.InfoRow><span>여행 기록</span><strong>{selectedTrip?.title || `${activeCountry} 여행`}</strong></S.InfoRow><S.InfoRow><span>여행 기간</span><strong>{selectedTrip?.startDate || '-'} – {selectedTrip?.endDate || '-'}</strong></S.InfoRow></S.ClaimInfo><S.ClaimNotice>종료된 여행 기록만 국가로 등록할 수 있어요.</S.ClaimNotice><S.ClaimProgress><strong>획득 진행도 <b>{acquiredCount} / {totalCountries || '-'}</b></strong><S.ProgressTrack><S.ProgressBar $progress={achievementPercentage} /></S.ProgressTrack></S.ClaimProgress><S.ActionRow><PartTripButton type="button" disabled={!selectedTrip?.tripId || acquireCountryMutation.isPending} onClick={() => void handleAcquireCountry()}>{acquireCountryMutation.isPending ? '획득 중' : '국가 획득'}</PartTripButton><PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.profileMap })}>세계지도에서 보기</PartTripButton></S.ActionRow>{claimFeedback ? <S.ClaimSubtitle role="status">{claimFeedback}</S.ClaimSubtitle> : null}</S.ClaimBody> : <S.State>획득할 여행 기록이 없습니다.</S.State> : null}
-
-        {!isLoading && !hasError && kind === 'countries' ? activeCountry ? <S.CountryRecordsLayout><S.CountrySummaryCard><S.CountryCode>{countryCode}</S.CountryCode><h2>{activeCountry}</h2><p>첫 방문 {firstVisit}</p><S.CountryMetrics><div><strong>{activeTrips.length}</strong><span>방문 횟수</span></div><div><strong>{countryCities.length}</strong><span>방문 도시</span></div><div><strong>{countryPhotoCount}</strong><span>총 기록</span></div></S.CountryMetrics><S.CountryProgress><S.ProgressTrack><S.ProgressBar $progress={totalCountries ? acquiredCount / totalCountries * 100 : 0} /></S.ProgressTrack><span>획득 국가 {acquiredCount} / {totalCountries || '-'}</span></S.CountryProgress></S.CountrySummaryCard><S.CountryRecordsPanel>{visitedCountries.length > 1 ? <S.CityTabs aria-label="방문 국가 선택">{visitedCountries.map((country) => <button key={country} type="button" className={activeCountry === country ? 'active' : ''} onClick={() => selectCountry(country)}>{country}</button>)}</S.CityTabs> : null}<S.SectionTitle>방문 도시</S.SectionTitle><S.CityTabs>{countryCities.map((city) => <button key={city} type="button" className={selectedCity === city ? 'active' : ''} onClick={() => setSelectedCity((current) => current === city ? '' : city)}>{city}</button>)}</S.CityTabs><S.SectionTitle>여행 기록</S.SectionTitle><S.CountryRecordList>{activeTrips.map((trip, index) => <S.CountryRecordRow key={trip.tripId ?? index} type="button" onClick={() => trip.tripId && navigate({ params: { recordId: String(trip.tripId) }, to: '/record/$recordId' })}><strong>{trip.title || `${trip.cityName || activeCountry} 여행`}</strong><span>{trip.startDate || '-'} – {trip.endDate || '-'}</span><b aria-hidden="true">›</b></S.CountryRecordRow>)}{activeTrips.length === 0 ? <S.Empty>선택한 국가의 여행 기록이 없습니다.</S.Empty> : null}</S.CountryRecordList></S.CountryRecordsPanel></S.CountryRecordsLayout> : <S.State>방문한 국가가 없습니다.</S.State> : null}
-
-        {!isLoading && !hasError && kind === 'achievements' ? <><S.AchievementSummary><S.AchievementCount $progress={achievementPercentage}><strong>{acquiredCount}</strong><span>국가</span></S.AchievementCount><S.AchievementCopy><span>전 세계 {totalCountries || '-'}개국 중</span><strong>{achievementPercentage.toFixed(1)}% 달성</strong><b>획득 국가 현황</b><em>다음 여행을 기록해보세요.</em></S.AchievementCopy></S.AchievementSummary><S.ContinentSection><S.SectionTitle>대륙별 현황</S.SectionTitle>{continentProgress.length ? continentProgress.map(([name, count, total]) => <S.ContinentRow key={name}><div><strong>{name}</strong><span>{count} / {total}</span></div><S.ProgressTrack><S.ProgressBar $tone={name === '유럽' ? 'accent' : 'primary'} $progress={total ? count / total * 100 : 0} /></S.ProgressTrack></S.ContinentRow>) : <S.Empty>대륙별 현황이 없습니다.</S.Empty>}</S.ContinentSection></> : null}
+        {!isLoading && !hasError && kind === 'map' ? <ProfileMapView totalCountries={totalCountries} trips={trips} visited={visited} visitedCountries={visitedCountries} onOpenCountries={() => navigate({ to: paths.profileCountries })} onSelectCountry={selectCountry} /> : null}
+        {!isLoading && !hasError && kind === 'claim' ? <ProfileClaimView acquiredCount={acquiredCount} activeCountry={activeCountry} claimCountries={claimCountries} claimFeedback={claimFeedback} countryCode={countryCode} countryTrips={countryTrips} isPending={acquireCountryMutation.isPending} onAcquire={() => void handleAcquireCountry()} onMap={() => navigate({ to: paths.profileMap })} onSelectCountry={selectCountry} totalCountries={totalCountries} achievementPercentage={achievementPercentage} /> : null}
+        {!isLoading && !hasError && kind === 'countries' ? <ProfileCountriesView activeCountry={activeCountry} acquiredCount={acquiredCount} countryCities={countryCities} countryCode={countryCode} firstVisit={firstVisit} onOpenRecord={(tripId) => navigate({ params: { recordId: String(tripId) }, to: '/record/$recordId' })} onSelectCity={setSelectedCity} onSelectCountry={selectCountry} selectedCity={selectedCity} totalCountries={totalCountries} visitedCountries={visitedCountries} trips={countryTrips} /> : null}
+        {!isLoading && !hasError && kind === 'achievements' ? <ProfileAchievementsView acquiredCount={acquiredCount} achievementPercentage={achievementPercentage} continentProgress={continentProgress} totalCountries={totalCountries} /> : null}
       </S.Page>
     </AppShell>
   )
