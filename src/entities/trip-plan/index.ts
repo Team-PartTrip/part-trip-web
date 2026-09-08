@@ -6,4 +6,4 @@ export { useTripQuery, tripQueryOptions } from './queries'
 export type {
   TripPlanPlaceResponseDto,
   TripPlanResponseDto,
-} from './types'
+} from './api'
