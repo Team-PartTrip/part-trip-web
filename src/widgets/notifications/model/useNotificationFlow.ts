@@ -12,6 +12,8 @@ import { ACTIVE_PLANNER_ID_KEY, ACTIVE_VOTE_ID_KEY, paths } from '@/shared/confi
 import { readSessionId, writeSessionValue } from '@/shared/libs/session-storage'
 import { isPositiveSafeInteger } from '@/shared/utils'
 
+import { normalizeNotificationLinkType } from './notification-presentation'
+
 export type NotificationMode = 'list' | 'detail'
 
 export function notificationDate(value?: string) {
@@ -41,8 +43,8 @@ export function useNotificationFlow(mode: NotificationMode) {
     ? fetchedNotifications.map((notification) => ({ ...notification, read: true }))
     : fetchedNotifications
   const detail = notifications.find((item) => String(item.notificationId) === notificationId)
-  const canNavigateToVote = detail?.linkType?.trim().toUpperCase() === 'VOTE'
-    && isPositiveSafeInteger(detail.linkId)
+  const canNavigateToVote = normalizeNotificationLinkType(detail?.linkType) === 'VOTE'
+    && isPositiveSafeInteger(detail?.linkId)
     && isPositiveSafeInteger(readSessionId(ACTIVE_PLANNER_ID_KEY))
   const hasUnread = (unreadCountQuery.data?.unreadCount ?? 0) > 0
     || notifications.some((item) => item.read !== true && item.notificationId != null)
@@ -66,7 +68,7 @@ export function useNotificationFlow(mode: NotificationMode) {
   const handleNotificationAction = async () => {
     if (!detail) return
     await handleMarkRead(detail.notificationId)
-    const linkType = detail.linkType?.trim().toUpperCase()
+    const linkType = normalizeNotificationLinkType(detail.linkType)
     const linkId = detail.linkId
 
     if (linkType === 'TRIP_CARD' && linkId != null) {
