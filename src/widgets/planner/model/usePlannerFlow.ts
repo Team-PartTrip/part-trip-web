@@ -17,6 +17,7 @@ import { readSessionId, readSessionValue, removeSessionValue, writeSessionValue 
 import { getErrorMessage, isPositiveSafeInteger } from '@/shared/utils'
 
 import { parsePlannerGroupSettings, parsePlannerSelectedPlacesByCategory } from './storage'
+import { activatePlannerSession, clearPlannerSession, clearPlannerVoteSession } from './planner-session'
 import { normalizeStatus } from './status'
 import type { PlannerStep } from './types'
 
@@ -129,7 +130,19 @@ export function usePlannerFlow(step: PlannerStep) {
       }
     })
   }
-  const clearSelected = () => setSelectedPlacesByCategory({})
+  const clearSelected = useCallback(() => setSelectedPlacesByCategory({}), [])
+  const resetVoteSession = useCallback(() => {
+    clearPlannerVoteSession()
+    setStoredActiveVoteId(0)
+    setSelectedOptionId(undefined)
+  }, [])
+  const activatePlanner = useCallback((plannerId: number) => {
+    activatePlannerSession(plannerId)
+    setStoredActivePlannerId(plannerId)
+    resetVoteSession()
+    clearSelected()
+    setConfirmedPlannerId(readSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`) === 'true' ? plannerId : 0)
+  }, [clearSelected, resetVoteSession])
 
   useEffect(() => {
     writeSessionValue(PLANNER_SELECTED_KEY, JSON.stringify(selectedPlacesByCategory))
@@ -187,10 +200,8 @@ export function usePlannerFlow(step: PlannerStep) {
   }
 
   const handleVoteCategoryChange = (category: (typeof plannerCategories)[number]) => {
-    removeSessionValue(ACTIVE_VOTE_ID_KEY)
-    setStoredActiveVoteId(0)
+    resetVoteSession()
     setVoteCategory(category)
-    setSelectedOptionId(undefined)
   }
 
   const handleStartDateChange = (value: string) => {
@@ -262,8 +273,7 @@ export function usePlannerFlow(step: PlannerStep) {
         headcount: nextMemberCount,
         startDate: savedPlan.startDate ?? selectedStartDate,
       })
-      removeSessionValue(ACTIVE_VOTE_ID_KEY)
-      setStoredActiveVoteId(0)
+      resetVoteSession()
       writeSessionValue(ACTIVE_VOTE_CATEGORY_KEY, voteCategory)
       clearSelected()
       continueTo(paths.plannerExplore)
@@ -293,13 +303,7 @@ export function usePlannerFlow(step: PlannerStep) {
           title: plannerTitle.trim() || '나의 여행 계획',
         })
         if (!isPositiveSafeInteger(planner.plannerId)) throw new Error('plannerId is missing')
-        writeSessionValue(ACTIVE_PLANNER_ID_KEY, String(planner.plannerId))
-        setStoredActivePlannerId(planner.plannerId)
-        removeSessionValue(ACTIVE_VOTE_ID_KEY)
-        removeSessionValue(PLANNER_SELECTED_KEY)
-        setStoredActiveVoteId(0)
-        clearSelected()
-        setSelectedOptionId(undefined)
+        activatePlanner(planner.plannerId)
       }
       navigate({ to: paths.plannerDestination })
     } catch {
@@ -317,19 +321,12 @@ export function usePlannerFlow(step: PlannerStep) {
       const joined = await joinPlannerMutation.mutateAsync({ inviteCode: inviteCode.trim() })
       const plannerId = joined.plannerId
       if (!isPositiveSafeInteger(plannerId)) throw new Error('plannerId is missing')
-      writeSessionValue(ACTIVE_PLANNER_ID_KEY, String(plannerId))
-      setStoredActivePlannerId(plannerId)
-      removeSessionValue(ACTIVE_VOTE_ID_KEY)
-      removeSessionValue(PLANNER_SELECTED_KEY)
-      setStoredActiveVoteId(0)
-      clearSelected()
-      setSelectedOptionId(undefined)
-      setConfirmedPlannerId(readSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`) === 'true' ? plannerId : 0)
+      activatePlanner(plannerId)
       navigate({ to: paths.plannerProgress })
     } catch {
       setErrorMessage('초대 코드로 여행 그룹에 참여하지 못했습니다.')
     }
-  }, [inviteCode, joinPlannerMutation, navigate])
+  }, [activatePlanner, inviteCode, joinPlannerMutation, navigate])
 
   useEffect(() => {
     const code = inviteCodeFromUrlRef.current.trim()
@@ -347,14 +344,7 @@ export function usePlannerFlow(step: PlannerStep) {
       setErrorMessage('')
       const invitation = await acceptPlannerInvitationMutation.mutateAsync(invitationId)
       if (isPositiveSafeInteger(invitation.plannerId)) {
-        writeSessionValue(ACTIVE_PLANNER_ID_KEY, String(invitation.plannerId))
-        setStoredActivePlannerId(invitation.plannerId)
-        removeSessionValue(ACTIVE_VOTE_ID_KEY)
-        removeSessionValue(PLANNER_SELECTED_KEY)
-        setStoredActiveVoteId(0)
-        clearSelected()
-        setSelectedOptionId(undefined)
-        setConfirmedPlannerId(readSessionValue(`${PLANNER_CONFIRMED_KEY}:${invitation.plannerId}`) === 'true' ? invitation.plannerId : 0)
+        activatePlanner(invitation.plannerId)
         navigate({ to: paths.plannerProgress })
       }
     } catch {
@@ -427,8 +417,7 @@ export function usePlannerFlow(step: PlannerStep) {
     try {
       setErrorMessage('')
       await addPlannerPlacesMutation.mutateAsync({ plannerId, payload: { placeIds } })
-      removeSessionValue(ACTIVE_VOTE_ID_KEY)
-      setStoredActiveVoteId(0)
+      resetVoteSession()
 
       writeSessionValue(ACTIVE_VOTE_CATEGORY_KEY, voteCategory)
       clearSelected()
@@ -459,8 +448,7 @@ export function usePlannerFlow(step: PlannerStep) {
     try {
       setErrorMessage('')
       await addPlannerPlacesMutation.mutateAsync({ plannerId, payload: { placeIds: [placeId] } })
-      removeSessionValue(ACTIVE_VOTE_ID_KEY)
-      setStoredActiveVoteId(0)
+      resetVoteSession()
       writeSessionValue(ACTIVE_VOTE_CATEGORY_KEY, voteCategory)
       navigate({ to: paths.plannerVote })
     } catch (error) {
@@ -522,13 +510,10 @@ export function usePlannerFlow(step: PlannerStep) {
       setErrorMessage('')
       await deletePlannerMutation.mutateAsync(plannerId)
       if (plannerId === activePlannerId) {
-        removeSessionValue(ACTIVE_PLANNER_ID_KEY)
-        removeSessionValue(ACTIVE_VOTE_ID_KEY)
-        removeSessionValue(PLANNER_SELECTED_KEY)
-        removeSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`)
+        clearPlannerSession(plannerId)
         setStoredActivePlannerId(0)
-        setStoredActiveVoteId(0)
         clearSelected()
+        resetVoteSession()
         setConfirmedPlannerId(0)
       }
     } catch (error) {
@@ -628,23 +613,14 @@ export function usePlannerFlow(step: PlannerStep) {
       setErrorMessage('선택한 여행 계획을 확인할 수 없습니다.')
       return
     }
-    writeSessionValue(ACTIVE_PLANNER_ID_KEY, String(plannerId))
-    setStoredActivePlannerId(plannerId)
-    setConfirmedPlannerId(readSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`) === 'true' ? plannerId : 0)
-    removeSessionValue(ACTIVE_VOTE_ID_KEY)
-    setStoredActiveVoteId(0)
-    clearSelected()
-    setSelectedOptionId(undefined)
+    activatePlanner(plannerId)
     navigate({ to: paths.plannerProgress })
   }
 
   const handleStartNewPlanner = () => {
-    removeSessionValue(ACTIVE_PLANNER_ID_KEY)
-    removeSessionValue(ACTIVE_VOTE_ID_KEY)
+    clearPlannerSession()
     removeSessionValue(ACTIVE_VOTE_CATEGORY_KEY)
-    removeSessionValue(PLANNER_SELECTED_KEY)
     setStoredActivePlannerId(0)
-    setStoredActiveVoteId(0)
     setSelectedDestination(undefined)
     setCountryInfoId('')
     setCountryName(undefined)
@@ -652,7 +628,7 @@ export function usePlannerFlow(step: PlannerStep) {
     setStartDate(undefined)
     setEndDate(undefined)
     clearSelected()
-    setSelectedOptionId(undefined)
+    resetVoteSession()
     setConfirmedPlannerId(0)
     navigate({ to: paths.plannerGroup })
   }
