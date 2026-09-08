@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useUserProfileQuery } from "@/entities/user";
-import { figmaTripPlanning } from "@/shared/assets";
 import { paths } from "@/shared/config";
 import {
   Button as PartTripButton,
@@ -22,8 +21,10 @@ import {
 import { usePlannerFlow } from "../model/usePlannerFlow";
 import type { PlannerStep } from "../model/types";
 import { PlannerHeader, PlannerMemberAvatars } from "./PlannerHeader";
+import { PlannerFinalStep } from "./PlannerFinalStep";
 import { PlannerGroupManagementPanel } from "./PlannerGroupManagementPanel";
 import * as S from "./PlannerPage.styles";
+import { PlannerPlaceStep } from "./PlannerPlaceStep";
 import { PlannerProgressManagementPanel } from "./PlannerProgressManagementPanel";
 
 export type { PlannerStep } from "../model/types";
@@ -1289,110 +1290,28 @@ function PlannerFlowPage({ step }: Props) {
             ) : null}
 
             {step === "final" ? (
-              <S.FinalConfirmBody>
-                <S.SuccessMark aria-hidden="true">✓</S.SuccessMark>
-                <S.FinalTitle>여행 계획이 확정됐어요</S.FinalTitle>
-                <S.FinalTripTitle>
-                  {plannerDetail?.cityName || plan?.cityName || "여행"}{" "}
-                  {formatTripDuration(
-                    plannerDetail?.startDate || plan?.startDate,
-                    plannerDetail?.endDate || plan?.endDate,
-                  )}
-                </S.FinalTripTitle>
-                <S.FinalDate>
-                  {formatDateRange(
-                    plannerDetail?.startDate || plan?.startDate,
-                    plannerDetail?.endDate || plan?.endDate,
-                  )}
-                </S.FinalDate>
-                <S.FinalMembers aria-label="참여 멤버">
-                  {(members.length
-                    ? members
-                    : [
-                        {
-                          nickName: currentUserName,
-                          userId: currentUserInitial,
-                        },
-                      ]
-                  ).map((member, index) => (
-                    <S.Avatar key={member.userId ?? member.nickName ?? index}>
-                      {(member.nickName || member.userId || "멤버")
-                        .slice(0, 1)
-                        .toUpperCase()}
-                    </S.Avatar>
-                  ))}
-                </S.FinalMembers>
-                <S.FinalMemberSummary>
-                  {plannerDetail?.joinedMemberCount ?? members.length ?? "-"}명
-                  모두 참여
-                </S.FinalMemberSummary>
-                <S.FinalSchedulePanel>
-                  <S.SectionTitle>확정된 일정</S.SectionTitle>
-                  <S.FinalPlaceList>
-                    {finalPlaces.map((item, index) => (
-                      <S.FinalPlaceRow key={`${item.placeName}-${index}`}>
-                        <small>
-                          {item.categoryLabel || item.category || "장소"}
-                        </small>
-                        <strong>{item.placeName || "장소"}</strong>
-                        <span>{item.voteCount ?? "-"}표</span>
-                      </S.FinalPlaceRow>
-                    ))}
-                    {finalPlaces.length === 0 ? (
-                      <S.Empty>확정된 장소가 없습니다.</S.Empty>
-                    ) : null}
-                  </S.FinalPlaceList>
-                </S.FinalSchedulePanel>
-                <S.FinalActions>
-                  <PartTripButton
-                    type="button"
-                    disabled={!isConfirmed}
-                    onClick={() => navigate({ to: paths.main })}
-                  >
-                    여행 시작하기
-                  </PartTripButton>
-                  <PartTripButton
-                    type="button"
-                    $variant="secondary"
-                    onClick={() => void handleSharePlan()}
-                  >
-                    일정 공유하기
-                  </PartTripButton>
-                </S.FinalActions>
-                {shareError ? <S.Error role="alert">{shareError}</S.Error> : null}
-                <S.FinalHint>
-                  일정이 마음에 들지 않나요? 이전 단계에서 수정할 수 있어요
-                </S.FinalHint>
-              </S.FinalConfirmBody>
+              <PlannerFinalStep
+                cityName={plannerDetail?.cityName || plan?.cityName}
+                endDate={plannerDetail?.endDate || plan?.endDate}
+                finalPlaces={finalPlaces}
+                isConfirmed={isConfirmed}
+                members={members}
+                onShare={() => void handleSharePlan()}
+                onStart={() => navigate({ to: paths.main })}
+                shareError={shareError}
+                startDate={plannerDetail?.startDate || plan?.startDate}
+                userInitial={currentUserInitial}
+                userName={currentUserName}
+              />
             ) : null}
 
             {step === "place" ? (
-              <S.PlaceDetailLayout>
-                {place ? (
-                  <>
-                    <S.PlaceImage
-                      src={place.imageUrl || figmaTripPlanning}
-                      alt=""
-                    />
-                    <S.StepCard>
-                      <S.Badge>추천 장소</S.Badge>
-                      <h2>{place.placeName}</h2>
-                      <p>{place.description || "장소 설명이 없습니다."}</p>
-                      <PartTripButton
-                        type="button"
-                        disabled={!canManageCandidates || addPlannerPlacesMutation.isPending}
-                        onClick={() => void handleAddPlaceCandidate()}
-                      >
-                        {addPlannerPlacesMutation.isPending
-                          ? "후보 저장 중"
-                          : "투표 후보에 추가"}
-                      </PartTripButton>
-                    </S.StepCard>
-                  </>
-                ) : (
-                  <S.Empty>장소 정보를 찾을 수 없습니다.</S.Empty>
-                )}
-              </S.PlaceDetailLayout>
+              <PlannerPlaceStep
+                canManageCandidates={canManageCandidates}
+                isSaving={addPlannerPlacesMutation.isPending}
+                onAdd={() => void handleAddPlaceCandidate()}
+                place={place}
+              />
             ) : null}
           </>
         )}
