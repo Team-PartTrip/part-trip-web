@@ -82,7 +82,6 @@ export function usePlannerFlow(step: PlannerStep) {
     parsePlannerSelectedPlacesByCategory(readSessionValue(PLANNER_SELECTED_KEY)),
   )
   const [headcount, setHeadcount] = useState(String(savedGroupSettings.memberCount))
-  const [plannerTitle, setPlannerTitle] = useState('나의 여행 계획')
   const [memberCount, setMemberCount] = useState(() => String(savedGroupSettings.memberCount))
   const [isSolo, setIsSolo] = useState(() => savedGroupSettings.isSolo)
   const [inviteCode, setInviteCode] = useState(() =>
@@ -300,7 +299,7 @@ export function usePlannerFlow(step: PlannerStep) {
         const planner = await createPlannerMutation.mutateAsync({
           isSolo,
           memberCount: nextMemberCount,
-          title: plannerTitle.trim() || '나의 여행 계획',
+          title: '나의 여행 계획',
         })
         if (!isPositiveSafeInteger(planner.plannerId)) throw new Error('plannerId is missing')
         activatePlanner(planner.plannerId)
@@ -687,7 +686,6 @@ export function usePlannerFlow(step: PlannerStep) {
     plannerCategories,
     plannerDetail,
     plannerInviteLink: visiblePlannerInviteLink,
-    plannerTitle,
     planners,
     popularCities,
     saveDestination,
@@ -703,8 +701,6 @@ export function usePlannerFlow(step: PlannerStep) {
     selectedOptionId,
     selectedStartDate,
     setCityName: handleCityNameChange,
-    setCountryInfoId,
-    setCountryName,
     setEndDate: handleEndDateChange,
     setHeadcount,
     setInviteCode,
@@ -712,7 +708,6 @@ export function usePlannerFlow(step: PlannerStep) {
     setLineupChoice,
     setLineupMode,
     setMemberCount,
-    setPlannerTitle,
     setSelected,
     setStartDate: handleStartDateChange,
     setVoteCategory: handleVoteCategoryChange,
