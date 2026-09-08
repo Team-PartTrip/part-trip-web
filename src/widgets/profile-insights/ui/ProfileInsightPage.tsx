@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useMyTrips } from '@/entities/trip-plan'
 import { useAcquireCountryMutation, useWorldMapQuery, useWorldMapStatsQuery } from '@/entities/world-map'
 import { paths } from '@/shared/config'
+import { readSessionValue, writeSessionValue } from '@/shared/libs/session-storage'
 import { Button as PartTripButton } from '@/shared/ui/parttrip'
 import { WorldMap } from '@/shared/ui'
 import { isPositiveSafeInteger } from '@/shared/utils'
@@ -21,24 +22,6 @@ const copy: Record<ProfileInsightKind, { title: string; subtitle: string }> = {
 
 const PROFILE_COUNTRY_KEY = 'parttrip:profile-selected-country'
 
-function readSelectedCountry() {
-  if (typeof window === 'undefined') return ''
-  try {
-    return window.sessionStorage.getItem(PROFILE_COUNTRY_KEY) ?? ''
-  } catch {
-    return ''
-  }
-}
-
-function saveSelectedCountry(country: string) {
-  if (typeof window === 'undefined') return
-  try {
-    window.sessionStorage.setItem(PROFILE_COUNTRY_KEY, country)
-  } catch {
-    // Storage access can be blocked by browser privacy settings.
-  }
-}
-
 export function ProfileInsightPage({ kind }: { kind: ProfileInsightKind }) {
   const navigate = useNavigate()
   const { hasError: hasTripsError, isLoading: isTripsLoading, trips } = useMyTrips()
@@ -48,7 +31,7 @@ export function ProfileInsightPage({ kind }: { kind: ProfileInsightKind }) {
   const worldMapStatsQuery = useWorldMapStatsQuery(needsStats)
   const acquireCountryMutation = useAcquireCountryMutation()
   const [selectedCity, setSelectedCity] = useState('')
-  const [selectedCountry, setSelectedCountry] = useState(readSelectedCountry)
+  const [selectedCountry, setSelectedCountry] = useState(() => readSessionValue(PROFILE_COUNTRY_KEY) ?? '')
   const [claimFeedback, setClaimFeedback] = useState('')
   const isLoading = isTripsLoading || (needsWorldMap && worldMapQuery.isLoading) || (needsStats && worldMapStatsQuery.isLoading)
   const hasError = hasTripsError || (needsWorldMap && worldMapQuery.isError) || (needsStats && worldMapStatsQuery.isError)
@@ -75,7 +58,7 @@ export function ProfileInsightPage({ kind }: { kind: ProfileInsightKind }) {
     : []
   const selectCountry = (country: string) => {
     setSelectedCountry(country)
-    saveSelectedCountry(country)
+    writeSessionValue(PROFILE_COUNTRY_KEY, country)
     setSelectedCity('')
     setClaimFeedback('')
   }

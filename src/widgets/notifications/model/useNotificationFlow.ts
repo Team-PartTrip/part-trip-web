@@ -8,21 +8,9 @@ import {
   useUnreadNotificationCountQuery,
   type NotificationResponseDto,
 } from '@/entities/notification'
-import { paths } from '@/shared/config'
+import { ACTIVE_PLANNER_ID_KEY, ACTIVE_VOTE_ID_KEY, paths } from '@/shared/config'
+import { readSessionId, writeSessionValue } from '@/shared/libs/session-storage'
 import { isPositiveSafeInteger } from '@/shared/utils'
-
-const ACTIVE_PLANNER_ID_KEY = 'parttrip:active-planner-id'
-const ACTIVE_VOTE_ID_KEY = 'parttrip:active-vote-id'
-
-function readSessionId(key: string) {
-  if (typeof window === 'undefined') return 0
-  try {
-    const value = Number(window.sessionStorage.getItem(key))
-    return isPositiveSafeInteger(value) ? value : 0
-  } catch {
-    return 0
-  }
-}
 
 export type NotificationMode = 'list' | 'detail'
 
@@ -87,7 +75,7 @@ export function useNotificationFlow(mode: NotificationMode) {
     }
 
     if ((linkType === 'GROUP' || linkType === 'GROUP_INVITATION') && linkId != null) {
-      sessionStorage.setItem(ACTIVE_PLANNER_ID_KEY, String(linkId))
+      writeSessionValue(ACTIVE_PLANNER_ID_KEY, String(linkId))
       navigate({ to: paths.plannerProgress })
       return
     }
@@ -100,7 +88,7 @@ export function useNotificationFlow(mode: NotificationMode) {
         return
       }
       try {
-        window.sessionStorage.setItem(ACTIVE_VOTE_ID_KEY, String(linkId))
+        writeSessionValue(ACTIVE_VOTE_ID_KEY, String(linkId))
       } catch {
         setActionError('투표 알림을 열 수 없습니다.')
         return

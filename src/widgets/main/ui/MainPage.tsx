@@ -2,15 +2,14 @@ import { useNavigate } from '@tanstack/react-router'
 import { useMainTravelQuery } from '@/entities/travel'
 import { figmaPlannerIcon } from '@/shared/assets'
 import { paths } from '@/shared/config'
-import { formatDateRange, getDateRangeDays } from '@/shared/utils'
+import { formatDateRange, formatTripDuration } from '@/shared/utils'
 import { AppShell } from '@/widgets/app-shell'
 
 import { formatDday, hasTravelPlan } from '../model/dday'
 import * as S from './MainPage.styles'
 
 function durationLabel(startDate?: string | null, endDate?: string | null) {
-  const days = getDateRangeDays(startDate, endDate)
-  return days == null ? '여행 기간 미설정' : `${Math.max(0, days - 1)}박 ${days}일`
+  return formatTripDuration(startDate, endDate) || '여행 기간 미설정'
 }
 
 export function MainPage() {

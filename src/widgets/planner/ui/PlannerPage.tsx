@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { usePlannerMembersQuery } from "@/entities/planner";
 import { useUserProfileQuery } from "@/entities/user";
 import { figmaTripPlanning } from "@/shared/assets";
 import { paths } from "@/shared/config";
@@ -7,184 +6,30 @@ import {
   Button as PartTripButton,
   Input as PartTripInput,
 } from "@/shared/ui/parttrip";
-import { formatDate, formatDateRange, getMonthCalendarDays } from "@/shared/utils";
+import {
+  formatDate,
+  formatDateRange,
+  formatTripDuration,
+  getMonthCalendarDays,
+} from "@/shared/utils";
 import { AppShell } from "@/widgets/app-shell";
 
-import { plannerStatusKey, plannerStatusLabel } from "../model/status";
+import {
+  normalizeStatus,
+  plannerStatusKey,
+  plannerStatusLabel,
+} from "../model/status";
 import { usePlannerFlow } from "../model/usePlannerFlow";
 import type { PlannerStep } from "../model/types";
+import { PlannerHeader, PlannerMemberAvatars } from "./PlannerHeader";
+import { PlannerGroupManagementPanel } from "./PlannerGroupManagementPanel";
 import * as S from "./PlannerPage.styles";
+import { PlannerProgressManagementPanel } from "./PlannerProgressManagementPanel";
 
 export type { PlannerStep } from "../model/types";
 
 type Props = { step: PlannerStep };
 type PlannerTab = "active" | "planned" | "completed";
-
-function voteStatus(status?: string) {
-  return status?.trim().toUpperCase() ?? "";
-}
-
-function shortDateRange(startDate?: string, endDate?: string) {
-  const start = formatDate(startDate);
-  const end = formatDate(endDate);
-  return start.length >= 10 && end.length >= 10
-    ? `${start.slice(5)} – ${end.slice(5)}`
-    : formatDateRange(startDate, endDate);
-}
-
-function tripDuration(startDate?: string, endDate?: string) {
-  if (!startDate || !endDate) return "";
-  const start = new Date(`${startDate}T00:00:00`);
-  const end = new Date(`${endDate}T00:00:00`);
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return "";
-  const nights = Math.max(
-    0,
-    Math.round((end.getTime() - start.getTime()) / 86_400_000),
-  );
-  return `${nights}박 ${nights + 1}일`;
-}
-
-function deadlineTime(deadline?: string) {
-  const time = deadline?.slice(11, 16);
-  return time && /^\d{2}:\d{2}$/.test(time) ? `${time} 마감` : "";
-}
-
-function PlannerMemberAvatars({ plannerId }: { plannerId?: number }) {
-  const { data: members = [] } = usePlannerMembersQuery(
-    plannerId ?? 0,
-    plannerId != null,
-  );
-  const visibleMembers = members.slice(0, 4);
-  if (!visibleMembers.length) return null;
-
-  return (
-    <S.PlanMemberAvatars aria-label={`${members.length}명 참여`}>
-      {visibleMembers.map((member, index) => (
-        <S.Avatar key={member.userId ?? member.nickName ?? index}>
-          {(member.nickName || member.userId || "멤버")
-            .slice(0, 1)
-            .toUpperCase()}
-        </S.Avatar>
-      ))}
-      {members.length > visibleMembers.length ? (
-        <S.PlanMemberOverflow>
-          +{members.length - visibleMembers.length}
-        </S.PlanMemberOverflow>
-      ) : null}
-    </S.PlanMemberAvatars>
-  );
-}
-
-function Header({
-  onNewTrip,
-  plan,
-  showNewTrip,
-  wide,
-  step,
-  voteCategory,
-  vote,
-  memberCount,
-  isLoading,
-}: {
-  onNewTrip?: () => void;
-  plan?: {
-    cityName?: string;
-    countryName?: string;
-    startDate?: string;
-    endDate?: string;
-  };
-  showNewTrip?: boolean;
-  wide?: boolean;
-  step: PlannerStep;
-  voteCategory: string;
-  vote?: {
-    votedMemberCount?: number;
-    eligibleMemberCount?: number;
-    deadline?: string;
-  };
-  memberCount?: number;
-  isLoading: boolean;
-}) {
-  const destination = plan?.cityName || plan?.countryName || "여행지";
-  const duration = tripDuration(plan?.startDate, plan?.endDate);
-  const voteMembers = vote
-    ? `${vote.votedMemberCount ?? 0} / ${vote.eligibleMemberCount ?? memberCount ?? 0}명 참여`
-    : "";
-  const voteDeadline = deadlineTime(vote?.deadline);
-  const isFinal = step === "final";
-  const copy: Record<PlannerStep, [string, string]> = {
-    list: ["플래너", ""],
-    group: ["여행 그룹 정하기", "1 / 4 단계 · 여행 방식과 인원"],
-    destination: ["여행지 & 기간", "2 / 4 단계 · 여행지와 날짜를 정해요"],
-    explore: [
-      "장소 둘러보기",
-      `${destination} · ${shortDateRange(plan?.startDate, plan?.endDate)}`,
-    ],
-    vote: [
-      `${voteCategory} 투표`,
-      voteMembers
-        ? `${voteMembers} · 카테고리별 1곳 선택${voteDeadline ? ` · ${voteDeadline}` : ""}`
-        : "카테고리별 후보 중 1곳을 선택하세요.",
-    ],
-    lineup: [
-      "장바구니",
-      "소수 인원이라 투표 대신 직접 고르거나 랜덤으로 정할 수 있어요",
-    ],
-    progress: [
-      duration ? `${destination} ${duration}` : `${destination} 여행`,
-      `${shortDateRange(plan?.startDate, plan?.endDate)}${memberCount ? ` · ${memberCount}명` : ""}`,
-    ],
-    final: ["", ""],
-    place: ["장소 상세", "후보 장소의 정보와 설명을 확인하세요."],
-  };
-  const [title, subtitle] = copy[step];
-  const activeStep =
-    step === "group"
-      ? 1
-      : step === "destination"
-        ? 2
-        : ["explore", "vote"].includes(step)
-          ? 3
-          : step === "final"
-            ? 4
-            : 0;
-  return (
-    <S.Header $final={isFinal} $hasSubtitle={Boolean(subtitle)} $wide={wide}>
-      {isLoading ? (
-        <S.LoadingHeader />
-      ) : (
-        <>
-          {!isFinal ? (
-            <div>
-              <S.Title>{title}</S.Title>
-              {subtitle ? <S.Subtitle>{subtitle}</S.Subtitle> : null}
-            </div>
-          ) : null}
-          {showNewTrip ? (
-            <PartTripButton type="button" onClick={onNewTrip}>
-              + 생성
-            </PartTripButton>
-          ) : null}
-          {activeStep > 0 ? (
-            <S.FlowStepper $final={isFinal} aria-label="여행 플래너 진행 단계">
-              {["그룹", "여행지·기간", "장소·투표", "확정"].map(
-                (label, index) => (
-                  <S.FlowStep
-                    key={label}
-                    $active={index + 1 === activeStep}
-                    $complete={index + 1 < activeStep}
-                  >
-                    {index + 1} {label}
-                  </S.FlowStep>
-                ),
-              )}
-            </S.FlowStepper>
-          ) : null}
-        </>
-      )}
-    </S.Header>
-  );
-}
 
 export function PlannerPage() {
   return <PlannerFlowPage step="list" />;
@@ -382,22 +227,22 @@ function PlannerFlowPage({ step }: Props) {
   const pendingInvitations = invitations.filter(
     (invitation) =>
       !["ACCEPTED", "REJECTED", "CANCELED", "CANCELLED"].includes(
-        voteStatus(invitation.status),
+        normalizeStatus(invitation.status),
       ),
   );
   const voteOptions = activeVote?.options ?? [];
   const confirmedCount = votes.filter(
     (vote) =>
-      vote.confirmedOptionId != null || voteStatus(vote.status) === "CONFIRMED",
+      vote.confirmedOptionId != null || normalizeStatus(vote.status) === "CONFIRMED",
   ).length;
   const votingCount = votes.filter(
-    (vote) => voteStatus(vote.status) === "OPEN",
+    (vote) => normalizeStatus(vote.status) === "OPEN",
   ).length;
   const hasOpenVote = votes.some(
-    (vote) => voteStatus(vote.status) === "OPEN" && vote.voteId != null,
+    (vote) => normalizeStatus(vote.status) === "OPEN" && vote.voteId != null,
   );
   const canVote =
-    voteStatus(activeVote?.status) === "OPEN" &&
+    normalizeStatus(activeVote?.status) === "OPEN" &&
     activeVote?.deadlinePassed !== true;
   const myVoteCount = voteOptions.some((option) => option.selectedByMe === true)
     ? 1
@@ -487,186 +332,10 @@ function PlannerFlowPage({ step }: Props) {
     }
   };
 
-  const groupManagementPanel =
-    step === "group" ? (
-      <>
-        {invitationLoading ? (
-          <S.InvitationPanel>
-            <S.SectionTitle>받은 플래너 초대</S.SectionTitle>
-            <S.Notice>초대 정보를 불러오는 중입니다.</S.Notice>
-          </S.InvitationPanel>
-        ) : invitationError ? (
-          <S.InvitationPanel>
-            <S.SectionTitle>받은 플래너 초대</S.SectionTitle>
-            <S.Notice>초대 정보를 불러오지 못했습니다.</S.Notice>
-          </S.InvitationPanel>
-        ) : pendingInvitations.length ? (
-          <S.InvitationPanel>
-            <S.SectionTitle>받은 플래너 초대</S.SectionTitle>
-            {pendingInvitations.map((invitation, index) => (
-              <S.InvitationRow key={invitation.invitationId ?? index}>
-                <strong>
-                  {invitation.plannerTitle ||
-                    `플래너 #${invitation.plannerId ?? "-"}`}
-                </strong>
-                <span>{invitation.invitedByUserId || "그룹장"}님의 초대</span>
-                <S.SmallActionButton
-                  type="button"
-                  disabled={isManagingMembers}
-                  onClick={() =>
-                    void handleAcceptPlannerInvitation(invitation.invitationId)
-                  }
-                >
-                  수락
-                </S.SmallActionButton>
-                <S.SmallActionButton
-                  type="button"
-                  disabled={isManagingMembers}
-                  onClick={() =>
-                    void handleRejectPlannerInvitation(invitation.invitationId)
-                  }
-                >
-                  거절
-                </S.SmallActionButton>
-              </S.InvitationRow>
-            ))}
-          </S.InvitationPanel>
-        ) : null}
-        {otherMembers.length ? (
-          <S.InvitePanel>
-            <S.SectionTitle>멤버 관리</S.SectionTitle>
-            {members.length ? (
-            <S.MemberList>
-              {otherMembers.map((member, index) => {
-                const memberStatus = voteStatus(member.status);
-                const isPendingMember =
-                  member.invitationId != null &&
-                  !["ACCEPTED", "JOINED", "ACTIVE"].includes(memberStatus);
-                return (
-                  <S.MemberRow
-                    key={`${member.userId ?? member.nickName}-${index}`}
-                  >
-                    <S.Avatar>
-                      {(member.nickName || member.userId || "멤버")
-                        .slice(0, 2)
-                        .toUpperCase()}
-                    </S.Avatar>
-                    <S.MemberDetails>
-                      <strong>
-                        {member.nickName || member.userId || "멤버"}
-                      </strong>
-                      <span>{memberStatus || "상태 확인 중"}</span>
-                    </S.MemberDetails>
-                    {canManagePlanner && isPendingMember ? (
-                      <S.SmallActionButton
-                        type="button"
-                        disabled={isManagingMembers}
-                        onClick={() => {
-                          if (window.confirm("이 초대를 취소할까요?"))
-                            void handleCancelPlannerInvitation(
-                              member.invitationId,
-                            );
-                        }}
-                      >
-                        초대 취소
-                      </S.SmallActionButton>
-                    ) : canManagePlanner && member.userId ? (
-                      <S.SmallActionButton
-                        type="button"
-                        disabled={isManagingMembers}
-                        onClick={() => {
-                          if (window.confirm("이 멤버를 내보낼까요?"))
-                            void handleRemovePlannerMember(member.userId);
-                        }}
-                      >
-                        내보내기
-                      </S.SmallActionButton>
-                    ) : null}
-                  </S.MemberRow>
-                );
-              })}
-            </S.MemberList>
-            ) : null}
-          </S.InvitePanel>
-        ) : null}
-      </>
-    ) : null;
-
-  const closedVotes = votes.filter(
-    (vote) => voteStatus(vote.status) === "CLOSED",
-  );
-  const progressManagementPanel =
-    step === "progress" && closedVotes.length ? (
-      <S.InvitePanel>
-        <S.SectionTitle>마감 투표 확정</S.SectionTitle>
-        {closedVotes.length ? (
-          closedVotes.map((vote, index) => {
-            const options = vote.options ?? [];
-            const highestVoteCount = Math.max(
-              ...options.map((option) => option.voteCount ?? 0),
-              0,
-            );
-            const topOptions = options.filter(
-              (option) => (option.voteCount ?? 0) === highestVoteCount,
-            );
-            return (
-              <div key={vote.voteId ?? index}>
-                <S.StatusLine>
-                  <span>
-                    {vote.categoryLabel || vote.category || "카테고리"}
-                  </span>
-                  <strong>
-                    {vote.confirmedOptionId
-                      ? "확정 후보 선택됨"
-                      : "확정할 후보를 선택하세요"}
-                  </strong>
-                  <small>마감</small>
-                </S.StatusLine>
-                <S.ConfirmOptions>
-                  {topOptions.map((option, optionIndex) => (
-                    <S.ConfirmOptionButton
-                      key={option.optionId ?? optionIndex}
-                      type="button"
-                      $confirmed={
-                        option.optionId === vote.confirmedOptionId ||
-                        option.confirmed === true
-                      }
-                      disabled={
-                        !canManagePlanner ||
-                        confirmVoteMutation.isPending ||
-                        option.optionId == null ||
-                        vote.confirmedOptionId != null
-                      }
-                      onClick={() =>
-                        void handleConfirmVote(vote.voteId, option.optionId)
-                      }
-                    >
-                      {option.placeName || "장소"} · {option.voteCount ?? 0}표
-                    </S.ConfirmOptionButton>
-                  ))}
-                </S.ConfirmOptions>
-              </div>
-            );
-          })
-        ) : (
-          <S.Notice>마감된 투표가 없습니다.</S.Notice>
-        )}
-        <S.ActionRow>
-          <PartTripButton
-            type="button"
-            $variant="secondary"
-            onClick={() => flowNavigate({ to: paths.plannerGroup })}
-          >
-            그룹 관리
-          </PartTripButton>
-        </S.ActionRow>
-      </S.InvitePanel>
-    ) : null;
-
   return (
     <AppShell>
       <S.Page $wide={step === "destination" || step === "place"}>
-        <Header
+        <PlannerHeader
           onNewTrip={handleStartNewPlanner}
           plan={plan}
           showNewTrip={step === "list"}
@@ -916,9 +585,21 @@ function PlannerFlowPage({ step }: Props) {
               </S.GroupForm>
             ) : null}
 
-            {step === "group" && (plannerDetail || invitations.length > 0)
-              ? groupManagementPanel
-              : null}
+            {step === "group" && (plannerDetail || invitations.length > 0) ? (
+              <PlannerGroupManagementPanel
+                invitationLoading={invitationLoading}
+                invitationError={invitationError}
+                pendingInvitations={pendingInvitations}
+                otherMembers={otherMembers}
+                members={members}
+                isManagingMembers={isManagingMembers}
+                canManagePlanner={canManagePlanner}
+                onAcceptInvitation={handleAcceptPlannerInvitation}
+                onRejectInvitation={handleRejectPlannerInvitation}
+                onCancelInvitation={handleCancelPlannerInvitation}
+                onRemoveMember={handleRemovePlannerMember}
+              />
+            ) : null}
 
             {step === "destination" ? (
               <>
@@ -1138,7 +819,7 @@ function PlannerFlowPage({ step }: Props) {
                       </strong>
                       {selectedStartDate && selectedEndDate ? (
                         <span>
-                          {tripDuration(selectedStartDate, selectedEndDate)}
+                          {formatTripDuration(selectedStartDate, selectedEndDate)}
                         </span>
                       ) : null}
                     </S.CalendarSummary>
@@ -1262,7 +943,7 @@ function PlannerFlowPage({ step }: Props) {
                         이 투표는{" "}
                         {activeVote.deadlinePassed === true
                           ? "마감"
-                          : voteStatus(activeVote.status) === "CONFIRMED"
+                          : normalizeStatus(activeVote.status) === "CONFIRMED"
                             ? "확정"
                             : "마감"}
                         되어 참여할 수 없습니다.
@@ -1281,7 +962,7 @@ function PlannerFlowPage({ step }: Props) {
                             <strong>{option.placeName || "장소"}</strong>
                             <span>{option.voteCount ?? 0}표</span>
                             {(canManagePlanner || (profile?.id != null && option.addedByUserId === profile.id)) &&
-                            voteStatus(activeVote?.status) === "OPEN" ? (
+                            normalizeStatus(activeVote?.status) === "OPEN" ? (
                               <S.DeleteOptionButton
                                 type="button"
                                 disabled={
@@ -1445,7 +1126,7 @@ function PlannerFlowPage({ step }: Props) {
                           item.categoryLabel === category ||
                           item.category === category,
                       );
-                      const status = voteStatus(vote?.status);
+                      const status = normalizeStatus(vote?.status);
                       const confirmed =
                         vote?.confirmedOptionId != null ||
                         status === "CONFIRMED";
@@ -1597,7 +1278,13 @@ function PlannerFlowPage({ step }: Props) {
                     ) : null}
                   </S.MemberResponses>
                 </S.ProgressBody>
-                {progressManagementPanel}
+                <PlannerProgressManagementPanel
+                  closedVotes={votes.filter((vote) => normalizeStatus(vote.status) === "CLOSED")}
+                  canManagePlanner={canManagePlanner}
+                  confirmVotePending={confirmVoteMutation.isPending}
+                  onConfirmVote={handleConfirmVote}
+                  onOpenGroupManagement={() => flowNavigate({ to: paths.plannerGroup })}
+                />
               </>
             ) : null}
 
@@ -1607,7 +1294,7 @@ function PlannerFlowPage({ step }: Props) {
                 <S.FinalTitle>여행 계획이 확정됐어요</S.FinalTitle>
                 <S.FinalTripTitle>
                   {plannerDetail?.cityName || plan?.cityName || "여행"}{" "}
-                  {tripDuration(
+                  {formatTripDuration(
                     plannerDetail?.startDate || plan?.startDate,
                     plannerDetail?.endDate || plan?.endDate,
                   )}

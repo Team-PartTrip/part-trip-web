@@ -175,6 +175,11 @@ export function getDateRangeDays(
   return Math.round((end - start) / MILLISECONDS_PER_DAY) + 1
 }
 
+export function formatTripDuration(startDate: DateValue, endDate: DateValue) {
+  const days = getDateRangeDays(startDate, endDate)
+  return days == null ? '' : `${Math.max(0, days - 1)}박 ${days}일`
+}
+
 export function isInCurrentCalendarWeek(value: DateValue, today = new Date()) {
   if (!value) return false
   const date = new Date(value)

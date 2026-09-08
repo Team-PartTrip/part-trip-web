@@ -1,0 +1,6 @@
+export const ACTIVE_PLANNER_ID_KEY = 'parttrip:active-planner-id'
+export const ACTIVE_VOTE_ID_KEY = 'parttrip:active-vote-id'
+export const ACTIVE_VOTE_CATEGORY_KEY = 'parttrip:active-vote-category'
+export const PLANNER_GROUP_SETTINGS_KEY = 'parttrip:planner-group-settings'
+export const PLANNER_SELECTED_KEY = 'parttrip:planner-selected'
+export const PLANNER_CONFIRMED_KEY = 'parttrip:planner-confirmed'

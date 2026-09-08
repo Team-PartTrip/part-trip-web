@@ -1,60 +1,26 @@
 import { useCallback, useDeferredValue, useEffect, useRef, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
 
-import {
-  useAcceptPlannerInvitationMutation,
-  useAddPlannerPlacesMutation,
-  useCastBallotMutation,
-  useCloseVoteMutation,
-  useConfirmVoteMutation,
-  useConfirmPlannerMutation,
-  useCreatePlannerMutation,
-  useDeletePlannerMutation,
-  useDeleteVoteOptionMutation,
-  useCancelPlannerInvitationMutation,
-  useJoinPlannerMutation,
-  useRemovePlannerMemberMutation,
-  useRejectPlannerInvitationMutation,
-  useRemindPlannerMembersMutation,
-  useSelectRandomPlannerPlaceMutation,
-  useUpdatePlannerMutation,
-} from '@/entities/planner'
+import { usePlannerMutations } from './usePlannerMutations'
+import { usePlannerData } from './usePlannerData'
 import type { CountryInfoResponseDto, TourPlaceResponseDto } from '@/entities/travel'
-import { paths } from '@/shared/config'
+import {
+  ACTIVE_PLANNER_ID_KEY,
+  ACTIVE_VOTE_CATEGORY_KEY,
+  ACTIVE_VOTE_ID_KEY,
+  PLANNER_CONFIRMED_KEY,
+  PLANNER_GROUP_SETTINGS_KEY,
+  PLANNER_SELECTED_KEY,
+  paths,
+} from '@/shared/config'
+import { readSessionId, readSessionValue, removeSessionValue, writeSessionValue } from '@/shared/libs/session-storage'
 import { getErrorMessage, isPositiveSafeInteger } from '@/shared/utils'
 
-import { ACTIVE_VOTE_ID_KEY, parsePlannerGroupSettings, parsePlannerSelectedPlacesByCategory } from './storage'
+import { parsePlannerGroupSettings, parsePlannerSelectedPlacesByCategory } from './storage'
+import { normalizeStatus } from './status'
 import type { PlannerStep } from './types'
-import { usePlannerData } from './usePlannerData'
 
 export const plannerCategories = ['맛집', '명소', '숙소', '카페', '액티비티', '쇼핑'] as const
-
-const PLANNER_GROUP_SETTINGS_KEY = 'parttrip:planner-group-settings'
-const ACTIVE_PLANNER_ID_KEY = 'parttrip:active-planner-id'
-const PLANNER_SELECTED_KEY = 'parttrip:planner-selected'
-const PLANNER_CONFIRMED_KEY = 'parttrip:planner-confirmed'
-const ACTIVE_VOTE_CATEGORY_KEY = 'parttrip:active-vote-category'
-
-function readSessionValue(key: string) {
-  return typeof window === 'undefined' ? null : window.sessionStorage.getItem(key)
-}
-
-function writeSessionValue(key: string, value: string) {
-  if (typeof window !== 'undefined') window.sessionStorage.setItem(key, value)
-}
-
-function removeSessionValue(key: string) {
-  if (typeof window !== 'undefined') window.sessionStorage.removeItem(key)
-}
-
-function readSessionId(key: string) {
-  const value = Number(readSessionValue(key))
-  return isPositiveSafeInteger(value) ? value : 0
-}
-
-function normalizeVoteStatus(status?: string) {
-  return status?.trim().toUpperCase() ?? ''
-}
 
 function isPlannerLeader(role?: string) {
   const normalizedRole = role?.trim().toUpperCase() ?? ''
@@ -131,23 +97,25 @@ export function usePlannerFlow(step: PlannerStep) {
   const hasConfirmedLocally = confirmedPlannerId === activePlannerId
   const [errorMessage, setErrorMessage] = useState('')
   const [remindFeedback, setRemindFeedback] = useState('')
-  const createPlannerMutation = useCreatePlannerMutation()
-  const joinPlannerMutation = useJoinPlannerMutation()
-  const updatePlannerMutation = useUpdatePlannerMutation()
-  const acceptPlannerInvitationMutation = useAcceptPlannerInvitationMutation()
-  const rejectPlannerInvitationMutation = useRejectPlannerInvitationMutation()
-  const cancelPlannerInvitationMutation = useCancelPlannerInvitationMutation()
-  const removePlannerMemberMutation = useRemovePlannerMemberMutation()
-  const addPlannerPlacesMutation = useAddPlannerPlacesMutation()
-  const deletePlannerMutation = useDeletePlannerMutation()
-  const remindPlannerMembersMutation = useRemindPlannerMembersMutation()
-  const selectRandomPlannerPlaceMutation = useSelectRandomPlannerPlaceMutation()
-  const confirmPlannerMutation = useConfirmPlannerMutation()
-  const castBallotMutation = useCastBallotMutation()
-  const closeVoteMutation = useCloseVoteMutation()
-  const confirmVoteMutation = useConfirmVoteMutation()
-  const deleteVoteOptionMutation = useDeleteVoteOptionMutation()
-  const isSaving = createPlannerMutation.isPending || updatePlannerMutation.isPending
+  const {
+    acceptPlannerInvitationMutation,
+    addPlannerPlacesMutation,
+    cancelPlannerInvitationMutation,
+    castBallotMutation,
+    closeVoteMutation,
+    confirmPlannerMutation,
+    confirmVoteMutation,
+    createPlannerMutation,
+    deletePlannerMutation,
+    deleteVoteOptionMutation,
+    isSaving,
+    joinPlannerMutation,
+    remindPlannerMembersMutation,
+    rejectPlannerInvitationMutation,
+    removePlannerMemberMutation,
+    selectRandomPlannerPlaceMutation,
+    updatePlannerMutation,
+  } = usePlannerMutations()
 
   const selectedItems = selectedPlacesByCategory[voteCategory] ?? []
   const selected = places.flatMap((item, index) => selectedItems.some((selectedItem) => isSamePlace(item, selectedItem)) ? [index] : [])
@@ -189,11 +157,11 @@ export function usePlannerFlow(step: PlannerStep) {
     (voteDetail?.voteId === activeVoteId ? voteDetail : undefined) ??
     votes.find((vote) => vote.voteId === activeVoteId)
   const visiblePlannerInviteLink = plannerDetail?.inviteLink ?? ''
-  const isConfirmed = hasConfirmedLocally || normalizeVoteStatus(plannerDetail?.status) === 'CONFIRMED'
-  const openVotes = votes.filter((vote) => normalizeVoteStatus(vote.status) === 'OPEN')
+  const isConfirmed = hasConfirmedLocally || normalizeStatus(plannerDetail?.status) === 'CONFIRMED'
+  const openVotes = votes.filter((vote) => normalizeStatus(vote.status) === 'OPEN')
   const canCloseVotes = openVotes.length > 0 && openVotes.every((vote) => isPositiveSafeInteger(vote.voteId) && vote.options.some((option) => option.selectedByMe))
   const canManagePlanner = isPositiveSafeInteger(activePlannerId) && isPlannerLeader(plannerDetail?.role)
-  const allVotesOpen = votes.every((vote) => normalizeVoteStatus(vote.status) === 'OPEN')
+  const allVotesOpen = votes.every((vote) => normalizeStatus(vote.status) === 'OPEN')
   const hasNonOpenVote = !votesLoading && !votesError && votes.length > 0 && !allVotesOpen
   const canManageCandidates = !votesLoading && !votesError && allVotesOpen
   const candidateManagementError = votesLoading
@@ -501,7 +469,7 @@ export function usePlannerFlow(step: PlannerStep) {
   }
 
   const handleCastBallot = async (optionId?: number) => {
-    if (normalizeVoteStatus(activeVote?.status) !== 'OPEN' || activeVote?.deadlinePassed === true || !isPositiveSafeInteger(activePlannerId) || !isPositiveSafeInteger(activeVote?.voteId) || !isPositiveSafeInteger(optionId)) {
+    if (normalizeStatus(activeVote?.status) !== 'OPEN' || activeVote?.deadlinePassed === true || !isPositiveSafeInteger(activePlannerId) || !isPositiveSafeInteger(activeVote?.voteId) || !isPositiveSafeInteger(optionId)) {
       setErrorMessage('투표할 후보 정보를 확인할 수 없습니다.')
       return
     }
@@ -520,7 +488,7 @@ export function usePlannerFlow(step: PlannerStep) {
 
   const handleConfirmVote = async (voteId?: number, optionId?: number) => {
     const vote = votes.find((item) => item.voteId === voteId)
-    if (!canManagePlanner || !isPositiveSafeInteger(activePlannerId) || !isPositiveSafeInteger(voteId) || !isPositiveSafeInteger(optionId) || normalizeVoteStatus(vote?.status) !== 'CLOSED') {
+    if (!canManagePlanner || !isPositiveSafeInteger(activePlannerId) || !isPositiveSafeInteger(voteId) || !isPositiveSafeInteger(optionId) || normalizeStatus(vote?.status) !== 'CLOSED') {
       setErrorMessage('확정할 마감 투표 정보를 확인할 수 없습니다.')
       return
     }
@@ -533,7 +501,7 @@ export function usePlannerFlow(step: PlannerStep) {
   }
 
   const handleDeleteVoteOption = async (optionId?: number) => {
-    if (!isPositiveSafeInteger(activePlannerId) || !isPositiveSafeInteger(activeVote?.voteId) || !isPositiveSafeInteger(optionId) || normalizeVoteStatus(activeVote.status) !== 'OPEN') {
+    if (!isPositiveSafeInteger(activePlannerId) || !isPositiveSafeInteger(activeVote?.voteId) || !isPositiveSafeInteger(optionId) || normalizeStatus(activeVote.status) !== 'OPEN') {
       setErrorMessage('삭제할 후보 정보를 확인할 수 없습니다.')
       return
     }
