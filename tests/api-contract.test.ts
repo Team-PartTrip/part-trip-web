@@ -1,17 +1,29 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
 
 const projectRoot = fileURLToPath(new URL('..', import.meta.url))
 const read = (path: string) => readFileSync(`${projectRoot}${path}`, 'utf8')
+const readSources = (paths: string[]) =>
+  paths
+    .filter((path) => existsSync(`${projectRoot}${path}`))
+    .map(read)
+    .join('\n')
 
 test('최신 명세의 경로·method·request body를 사용한다', () => {
-  const planner = read('/src/entities/planner/api.ts')
+  const planner = readSources([
+    '/src/entities/planner/api.ts',
+    '/src/entities/planner/types.ts',
+  ])
   const plannerData = read('/src/widgets/planner/model/usePlannerData.ts')
   const plannerFlow = read('/src/widgets/planner/model/usePlannerFlow.ts')
   const plannerMutations = read('/src/widgets/planner/model/usePlannerMutations.ts')
-  const plannerPage = read('/src/widgets/planner/ui/PlannerPage.tsx')
+  const plannerPage = readSources([
+    '/src/widgets/planner/ui/PlannerPage.tsx',
+    '/src/widgets/planner/ui/PlannerListStep.tsx',
+    '/src/widgets/planner/ui/PlannerStepViews.tsx',
+  ])
   const profile = read('/src/widgets/profile/ui/ProfilePage.tsx')
   const session = read('/src/entities/session/api.ts')
   const googleControl = read('/src/shared/ui/auth-form/GoogleLoginControl.tsx')
