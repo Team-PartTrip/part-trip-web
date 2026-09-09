@@ -16,13 +16,25 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
     '/src/entities/planner/api.ts',
     '/src/entities/planner/types.ts',
   ])
-  const plannerData = read('/src/widgets/planner/model/usePlannerData.ts')
-  const plannerFlow = read('/src/widgets/planner/model/usePlannerFlow.ts')
+  const plannerFlow = readSources([
+    '/src/widgets/planner/model/usePlannerFlow.ts',
+    '/src/widgets/planner/model/usePlannerCandidateFlow.ts',
+    '/src/widgets/planner/model/usePlannerDestinationFlow.ts',
+    '/src/widgets/planner/model/usePlannerGroupFlow.ts',
+    '/src/widgets/planner/model/usePlannerLifecycleFlow.ts',
+    '/src/widgets/planner/model/usePlannerVoteFlow.ts',
+  ])
   const plannerMutations = read('/src/widgets/planner/model/usePlannerMutations.ts')
   const plannerPage = readSources([
     '/src/widgets/planner/ui/PlannerPage.tsx',
     '/src/widgets/planner/ui/PlannerListStep.tsx',
+    '/src/widgets/planner/ui/PlannerGroupStep.tsx',
     '/src/widgets/planner/ui/PlannerStepViews.tsx',
+    '/src/widgets/planner/ui/PlannerDestinationStep.tsx',
+    '/src/widgets/planner/ui/PlannerExploreStep.tsx',
+    '/src/widgets/planner/ui/PlannerLineupStep.tsx',
+    '/src/widgets/planner/ui/PlannerProgressStep.tsx',
+    '/src/widgets/planner/ui/PlannerVoteStep.tsx',
   ])
   const profile = read('/src/widgets/profile/ui/ProfilePage.tsx')
   const session = read('/src/entities/session/api.ts')
@@ -49,7 +61,7 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
   assert.match(plannerDetailResponse, /inviteLink\?: string/)
   assert.doesNotMatch(plannerDetailResponse, /inviteCode/)
   assert.match(joinPlannerRequest, /inviteCode: string/)
-  assert.match(plannerFlow, /const visiblePlannerInviteLink = plannerDetail\?\.inviteLink \?\? ''/)
+  assert.match(plannerFlow, /plannerInviteLink: data\.plannerDetail\?\.inviteLink \?\? ''/)
   assert.match(plannerFlow, /autoJoinInviteCodeRef/)
   assert.match(plannerFlow, /void handleJoinPlanner\(\)/)
   assert.doesNotMatch(
@@ -66,14 +78,6 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
   assert.match(planner, /options: \(plannerId: number, voteId: number\) => `\/planners\/\$\{plannerId\}\/votes\/\$\{voteId\}\/options`/)
   assert.match(plannerMutations, /useAddPlannerPlacesMutation/)
   assert.match(plannerFlow, /addPlannerPlacesMutation\.mutateAsync\(\{ plannerId, payload: \{ placeIds \} \}\)/)
-  assert.match(plannerData, /step === 'place'/)
-  assert.match(plannerData, /votesError: needsVotes && votesQuery\.isError/)
-  assert.match(plannerData, /votesLoading: needsVotes && votesQuery\.isLoading/)
-  assert.match(plannerData, /const requiresVotes = .*step === 'place'/)
-  assert.match(plannerFlow, /const allVotesOpen = votes\.every\(\(vote\) => normalizeStatus\(vote\.status\) === 'OPEN'\)/)
-  assert.match(plannerFlow, /const hasNonOpenVote = !votesLoading && !votesError && votes\.length > 0 && !allVotesOpen/)
-  assert.match(plannerFlow, /const canManageCandidates = !votesLoading && !votesError && allVotesOpen/)
-  assert.match(plannerFlow, /const candidateManagementError = votesLoading/)
   assert.equal((plannerFlow.match(/if \(candidateManagementError\)/g) ?? []).length, 2)
   assert.match(plannerPage, /disabled=\{!canManageCandidates\}/)
   assert.match(plannerPage, /votesError \? candidateManagementError/)

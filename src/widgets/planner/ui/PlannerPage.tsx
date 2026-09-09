@@ -1,19 +1,21 @@
 import { useState } from "react";
 import { useUserProfileQuery } from "@/entities/user";
 import { paths } from "@/shared/config";
-import { getMonthCalendarDays } from "@/shared/utils";
 import {
   Button as PartTripButton,
-  Input as PartTripInput,
 } from "@/shared/ui/parttrip";
 import { AppShell } from "@/widgets/app-shell";
 
 import { normalizeStatus } from "../model/status";
+import { getDestinationResults } from "../model/destination";
+import { usePlannerCalendar } from "../model/usePlannerCalendar";
 import { usePlannerFlow } from "../model/usePlannerFlow";
+import { usePlannerPageActions } from "../model/usePlannerPageActions";
 import type { PlannerStep } from "../model/types";
 import { PlannerHeader } from "./PlannerHeader";
 import { PlannerFinalStep } from "./PlannerFinalStep";
 import { PlannerGroupManagementPanel } from "./PlannerGroupManagementPanel";
+import { PlannerGroupStep } from "./PlannerGroupStep";
 import { PlannerListStep, type PlannerTab } from "./PlannerListStep";
 import * as S from "./PlannerPage.styles";
 import { PlannerPlaceStep } from "./PlannerPlaceStep";
@@ -65,153 +67,128 @@ function PlannerFlowPage({ step }: Props) {
     typeof window !== "undefined" &&
     Boolean(new URLSearchParams(window.location.search).get("inviteCode")),
   );
-  const [inviteLinkFeedback, setInviteLinkFeedback] = useState("");
-  const [inviteLinkError, setInviteLinkError] = useState("");
-  const [shareError, setShareError] = useState("");
+  const { candidate, common, destination, group, planner, vote } = usePlannerFlow(step);
   const {
-    addPlannerPlacesMutation,
-    activeVote,
-    candidateManagementError,
-    castBallotMutation,
-    canManageCandidates,
-    canManagePlanner,
-    canCloseVotes,
-    closeVoteMutation,
-    confirmedPlaces,
-    countries,
-    popularCities,
-    confirmPlannerMutation,
-    confirmVoteMutation,
-    deletePlannerMutation,
-    deleteVoteOptionMutation,
     errorMessage,
-    handleAddPlaceCandidate,
-    handleAcceptPlannerInvitation,
-    handleCastBallot,
-    handleCloseVote,
-    handleConfirmPlan,
-    handleConfirmVote,
-    handleDeletePlanner,
-    handleDeleteVoteOption,
-    handleDestinationSelect,
-    handleJoinPlanner,
-    handleRemindMembers,
-    handleCancelPlannerInvitation,
-    handleRemovePlannerMember,
-    handleRejectPlannerInvitation,
-    handleSaveCandidates,
-    handleRandomLineup,
-    handleRemoveFromLineup,
-    handleSelectPlanner,
-    handleStartNewPlanner,
-    hasError,
     hasActivePlanner,
-    inviteCode,
+    hasError,
+    isLoading,
+    isSaving,
+    navigate,
+    plan,
+    plannerDetail,
+    plannerInviteLink,
+  } = common;
+  const {
+    handleAcceptPlannerInvitation,
+    handleCancelPlannerInvitation,
+    handleJoinPlanner,
+    handleRejectPlannerInvitation,
+    handleRemovePlannerMember,
     invitationError,
     invitationLoading,
     invitations,
-    acceptPlannerInvitationMutation,
-    rejectPlannerInvitationMutation,
-    cancelPlannerInvitationMutation,
-    removePlannerMemberMutation,
-    isConfirmed,
-    isLoading,
-    isRemindAvailable,
-    isSaving,
+    inviteCode,
     isSolo,
-    lineupChoice,
-    lineupMode,
+    isManagingMembers,
+    joinPlannerPending,
     memberCount,
     members,
-    navigate,
-    joinPlannerMutation,
+    saveGroupSettings,
+    setInviteCode,
+    setIsSolo,
+    setMemberCount,
+  } = group;
+  const {
+    canManageCandidates,
+    candidateManagementError,
+    handleAddPlaceCandidate,
+    handleRandomLineup,
+    handleRemoveFromLineup,
+    handleSaveCandidates,
+    isSavingCandidates,
+    isSavingPlace,
+    lineupChoice,
+    lineupMode,
     place,
     places,
-    plan,
     plannerCategories: categories,
-    plannerDetail,
-    plannerInviteLink,
-    planners,
-    saveDestination,
-    saveGroupSettings,
     selected,
     selectedPlaceCount,
-    selectedCountryName,
-    selectedCityName,
-    selectedCountryInfoId,
-    selectedEndDate,
-    selectedHeadcount,
     selectedPlaces,
-    selectedOptionId,
-    selectedStartDate,
-    remindFeedback,
-    remindPlannerMembersMutation,
-    selectRandomPlannerPlaceMutation,
-    setCityName,
-    setEndDate,
-    setInviteCode,
-    setHeadcount,
-    setIsSolo,
     setLineupChoice,
     setLineupMode,
-    setMemberCount,
     setSelected,
-    setStartDate,
     setVoteCategory,
     voteCategory,
+  } = candidate;
+  const {
+    countries,
+    handleDestinationSelect,
+    popularCities,
+    saveDestination,
+    selectedCityName,
+    selectedCountryInfoId,
+    selectedCountryName,
+    selectedEndDate,
+    selectedHeadcount,
+    selectedStartDate,
+    setCityName,
+    setEndDate,
+    setHeadcount,
+    setStartDate,
+  } = destination;
+  const {
+    activeVote,
+    canCloseVotes,
+    castBallotPending,
+    closeVotePending,
+    confirmVotePending,
+    deleteVoteOptionPending,
+    handleCastBallot,
+    handleCloseVote,
+    handleConfirmVote,
+    handleDeleteVoteOption,
+    handleRemindMembers,
+    canManagePlanner,
+    isConfirmed,
+    isRemindAvailable,
+    remindFeedback,
+    remindPending,
+    selectedOptionId,
     votes,
     votesError,
-  } = usePlannerFlow(step);
-  const flowNavigate = navigate;
-  const [calendarMonthOverride, setCalendarMonthOverride] = useState<Date>();
-  const calendarMonth =
-    calendarMonthOverride ??
-    (() => {
-      const baseDate = selectedStartDate
-        ? new Date(`${selectedStartDate}T00:00:00`)
-        : new Date();
-      return Number.isNaN(baseDate.getTime())
-        ? new Date()
-        : new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
-    })();
-  const calendarDays = getMonthCalendarDays(
-    calendarMonth.getFullYear(),
-    calendarMonth.getMonth(),
+  } = vote;
+  const {
+    confirmPlannerPending,
+    confirmedPlaces,
+    deletePlannerPending,
+    handleConfirmPlan,
+    handleDeletePlanner,
+    handleSelectPlanner,
+    handleStartNewPlanner,
+    planners,
+  } = planner;
+  const { calendarDays, calendarMonth, handleCalendarDay, setCalendarMonthOverride } = usePlannerCalendar(
+    selectedStartDate,
+    selectedEndDate,
+    setStartDate,
+    setEndDate,
   );
+  const {
+    handleCopyInviteLink,
+    handleSharePlan,
+    inviteLinkError,
+    inviteLinkFeedback,
+    shareError,
+  } = usePlannerPageActions({ handleConfirmPlan, isConfirmed, plannerInviteLink });
 
-  const isDestinationSearch =
-    selectedCityName.trim() !== "" &&
-    selectedCityName.trim().toLocaleLowerCase() !==
-      (plannerDetail?.cityName ?? "").trim().toLocaleLowerCase();
-  const destinationKeyword = selectedCityName.trim().toLocaleLowerCase();
-  const matchingCountries = countries.filter((country) =>
-    [country.countryName, country.cityName].some((value) =>
-      value?.trim().toLocaleLowerCase().includes(destinationKeyword),
-    ),
+  const { destinationResults, isDestinationSearch } = getDestinationResults(
+    countries,
+    popularCities,
+    selectedCityName,
+    plannerDetail?.cityName,
   );
-  const popularDestinations = popularCities.flatMap((city) => {
-    if (!city.countryName || !city.cityName) return [];
-    const country = countries.find(
-      (item) =>
-        item.countryName === city.countryName && item.cityName === city.cityName,
-    );
-    return [{
-      countryInfoId: country?.countryInfoId,
-      countryName: city.countryName,
-      cityName: city.cityName,
-      imageUrl: country?.imageUrl,
-      summary: country?.summary,
-    }];
-  });
-  const destinationResults = isDestinationSearch
-    ? [...matchingCountries, ...popularDestinations.filter((popular) => {
-        return [popular.countryName, popular.cityName].some((value) =>
-          value?.trim().toLocaleLowerCase().includes(destinationKeyword),
-        );
-      })].filter((destination, index, all) => all.findIndex((item) =>
-        item.countryName === destination.countryName && item.cityName === destination.cityName,
-      ) === index)
-    : popularDestinations;
   const currentUserName = profile?.name || "사용자";
   const currentUserInitial = currentUserName.slice(0, 2).toUpperCase() || "MS";
   const otherMembers = members.filter((member) =>
@@ -225,17 +202,9 @@ function PlannerFlowPage({ step }: Props) {
         normalizeStatus(invitation.status),
       ),
   );
-  const isSavingCandidates =
-    addPlannerPlacesMutation.isPending ||
-    selectRandomPlannerPlaceMutation.isPending;
-  const isManagingMembers =
-    acceptPlannerInvitationMutation.isPending ||
-    rejectPlannerInvitationMutation.isPending ||
-    cancelPlannerInvitationMutation.isPending ||
-    removePlannerMemberMutation.isPending;
   const finalPlaces = confirmedPlaces.length
     ? confirmedPlaces
-      : selectedPlaces.map(({ item }) => ({
+    : selectedPlaces.map(({ item }) => ({
         category: voteCategory,
         categoryLabel: voteCategory,
         placeName: item.placeName,
@@ -243,20 +212,6 @@ function PlannerFlowPage({ step }: Props) {
       }));
 
   const requiresActivePlanner = !["list", "group"].includes(step);
-  const handleCalendarDay = (day: number) => {
-    const date = `${calendarMonth.getFullYear()}-${String(calendarMonth.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    if (!selectedStartDate || selectedEndDate) {
-      setStartDate(date);
-      setEndDate("");
-      return;
-    }
-    if (date < selectedStartDate) {
-      setStartDate(date);
-      setEndDate(selectedStartDate);
-      return;
-    }
-    setEndDate(date);
-  };
 
   if (requiresActivePlanner && !hasActivePlanner) {
     return (
@@ -270,7 +225,7 @@ function PlannerFlowPage({ step }: Props) {
           </S.Header>
           <S.State role="alert">먼저 플래너 목록에서 여행 계획을 선택해주세요.</S.State>
           <S.ActionRow>
-            <PartTripButton type="button" onClick={() => flowNavigate({ to: paths.planner })}>
+            <PartTripButton type="button" onClick={() => navigate({ to: paths.planner })}>
               플래너 목록
             </PartTripButton>
           </S.ActionRow>
@@ -284,31 +239,6 @@ function PlannerFlowPage({ step }: Props) {
     setVoteCategory(categories[(index + 1) % categories.length]);
   };
   const nextCategory = categories[(categories.indexOf(voteCategory) + 1) % categories.length];
-  const handleSharePlan = async () => {
-    if (!isConfirmed && !(await handleConfirmPlan())) return;
-    try {
-      if (!navigator.clipboard) throw new Error("clipboard is unavailable");
-      await navigator.clipboard.writeText(window.location.href);
-      setShareError("");
-    } catch {
-      setShareError("일정 공유 링크를 복사하지 못했습니다.");
-    }
-  };
-  const handleCopyInviteLink = async () => {
-    setInviteLinkFeedback("");
-    setInviteLinkError("");
-    if (!plannerInviteLink) {
-      setInviteLinkError("초대 링크를 찾을 수 없습니다.");
-      return;
-    }
-    try {
-      if (!navigator.clipboard) throw new Error("clipboard is unavailable");
-      await navigator.clipboard.writeText(plannerInviteLink);
-      setInviteLinkFeedback("초대 링크를 복사했습니다.");
-    } catch {
-      setInviteLinkError("초대 링크를 복사하지 못했습니다.");
-    }
-  };
 
   return (
     <AppShell>
@@ -349,147 +279,25 @@ function PlannerFlowPage({ step }: Props) {
             ) : null}
 
             {step === "group" ? (
-              <S.GroupForm as="form" onSubmit={(event) => void saveGroupSettings(event)}>
-                <S.GroupTypeRow>
-                  <S.GroupTypeButton
-                    type="button"
-                    $active={isSolo}
-                    onClick={() => setIsSolo(true)}
-                  >
-                    혼자 여행
-                  </S.GroupTypeButton>
-                  <S.GroupTypeButton
-                    type="button"
-                    $active={!isSolo}
-                    onClick={() => setIsSolo(false)}
-                  >
-                    함께 여행
-                  </S.GroupTypeButton>
-                </S.GroupTypeRow>
-                <S.CountRow>
-                  <label htmlFor="planner-member-count">나를 포함한 인원</label>
-                  <S.Stepper>
-                    <button
-                      type="button"
-                      aria-label="인원 줄이기"
-                      onClick={() =>
-                        setMemberCount(
-                          String(Math.max(1, Number(memberCount) - 1)),
-                        )
-                      }
-                      disabled={isSolo}
-                    >
-                      −
-                    </button>
-                    <span id="planner-member-count">
-                      {isSolo ? 1 : memberCount}
-                    </span>
-                    <button
-                      type="button"
-                      aria-label="인원 늘리기"
-                      onClick={() =>
-                        setMemberCount(
-                          String(Math.min(30, Number(memberCount) + 1)),
-                        )
-                      }
-                      disabled={isSolo}
-                    >
-                      +
-                    </button>
-                  </S.Stepper>
-                </S.CountRow>
-                {isInviteOpen ? (
-                  <S.InvitePanel>
-                    <S.SectionTitle>초대하기</S.SectionTitle>
-                    {plannerInviteLink ? (
-                      <S.InviteLinkRow>
-                        <PartTripInput
-                          aria-label="생성된 초대 링크"
-                          value={plannerInviteLink}
-                          readOnly
-                        />
-                        <PartTripButton
-                          type="button"
-                          $variant="secondary"
-                          onClick={() => void handleCopyInviteLink()}
-                        >
-                          링크 복사
-                        </PartTripButton>
-                      </S.InviteLinkRow>
-                    ) : (
-                      <S.Notice>
-                        플래너를 생성하면 멤버 초대 링크가 표시됩니다.
-                      </S.Notice>
-                    )}
-                    <S.InviteCodeRow>
-                      <S.StepField>
-                        <label htmlFor="planner-invite-code">
-                          초대 코드로 참여
-                        </label>
-                        <PartTripInput
-                          id="planner-invite-code"
-                          value={inviteCode}
-                          onChange={(event) =>
-                            setInviteCode(event.target.value)
-                          }
-                          placeholder="초대 코드를 입력하세요"
-                        />
-                      </S.StepField>
-                      <PartTripButton
-                        type="button"
-                        $variant="secondary"
-                        disabled={joinPlannerMutation.isPending}
-                        onClick={() => void handleJoinPlanner()}
-                      >
-                        {joinPlannerMutation.isPending
-                          ? "참여 중"
-                          : "그룹 참여"}
-                      </PartTripButton>
-                    </S.InviteCodeRow>
-                  </S.InvitePanel>
-                ) : null}
-                <S.MemberPanel>
-                  <S.SectionTitle>함께할 사람</S.SectionTitle>
-                  <S.MemberList>
-                    <S.MemberRow>
-                      <S.Avatar>{currentUserInitial.slice(0, 1)}</S.Avatar>
-                      <S.MemberDetails>
-                        <strong>{currentUserName}</strong>
-                      </S.MemberDetails>
-                      <S.MemberState>나</S.MemberState>
-                    </S.MemberRow>
-                    {otherMembers.map((member, index) => (
-                      <S.MemberRow
-                        key={`${member.userId ?? member.nickName}-${index}`}
-                      >
-                        <S.Avatar>
-                          {(member.nickName || member.userId || "멤버")
-                            .slice(0, 1)
-                            .toUpperCase()}
-                        </S.Avatar>
-                        <S.MemberDetails>
-                          <strong>
-                            {member.nickName || member.userId || "멤버"}
-                          </strong>
-                        </S.MemberDetails>
-                        <S.MemberState>
-                          {member.role || "초대 대기"}
-                        </S.MemberState>
-                      </S.MemberRow>
-                    ))}
-                  </S.MemberList>
-                </S.MemberPanel>
-                <S.GroupActions>
-                  <PartTripButton
-                    type="button"
-                    $variant="secondary"
-                    onClick={() => setIsInviteOpen((current) => !current)}
-                  >
-                    {isInviteOpen ? "초대 닫기" : "+ 링크로 초대하기"}
-                  </PartTripButton>
-                  <PartTripButton type="submit" disabled={isSaving}>{isSaving ? "저장 중" : "다음: 여행지"}</PartTripButton>
-                </S.GroupActions>
-              </S.GroupForm>
+              <PlannerGroupStep
+                currentUserInitial={currentUserInitial}
+                currentUserName={currentUserName}
+                handleCopyInviteLink={handleCopyInviteLink}
+                handleJoinPlanner={handleJoinPlanner}
+                inviteCode={inviteCode}
+                isInviteOpen={isInviteOpen}
+                isSaving={isSaving}
+                isSolo={isSolo}
+                joinPlannerPending={joinPlannerPending}
+                memberCount={memberCount}
+                members={otherMembers}
+                plannerInviteLink={plannerInviteLink}
+                saveGroupSettings={saveGroupSettings}
+                setInviteCode={setInviteCode}
+                setIsInviteOpen={setIsInviteOpen}
+                setIsSolo={setIsSolo}
+                setMemberCount={setMemberCount}
+              />
             ) : null}
 
             {step === "group" && (plannerDetail || invitations.length > 0) ? (
@@ -554,9 +362,9 @@ function PlannerFlowPage({ step }: Props) {
                 activeVote={activeVote}
                 canCloseVotes={canCloseVotes}
                 canManagePlanner={canManagePlanner}
-                castBallotPending={castBallotMutation.isPending}
-                closeVotePending={closeVoteMutation.isPending}
-                deleteVoteOptionPending={deleteVoteOptionMutation.isPending}
+                castBallotPending={castBallotPending}
+                closeVotePending={closeVotePending}
+                deleteVoteOptionPending={deleteVoteOptionPending}
                 handleCastBallot={handleCastBallot}
                 handleCloseVote={handleCloseVote}
                 handleDeleteVoteOption={handleDeleteVoteOption}
@@ -592,12 +400,12 @@ function PlannerFlowPage({ step }: Props) {
                 canCloseVotes={canCloseVotes}
                 canManageCandidates={canManageCandidates}
                 canManagePlanner={canManagePlanner}
-                closeVotePending={closeVoteMutation.isPending}
-                confirmPlannerPending={confirmPlannerMutation.isPending}
-                confirmVotePending={confirmVoteMutation.isPending}
+                closeVotePending={closeVotePending}
+                confirmPlannerPending={confirmPlannerPending}
+                confirmVotePending={confirmVotePending}
                 currentUserInitial={currentUserInitial}
                 currentUserName={currentUserName}
-                deletePlannerPending={deletePlannerMutation.isPending}
+                deletePlannerPending={deletePlannerPending}
                 handleCloseVote={handleCloseVote}
                 handleConfirmPlan={handleConfirmPlan}
                 handleConfirmVote={handleConfirmVote}
@@ -610,14 +418,14 @@ function PlannerFlowPage({ step }: Props) {
                 isRemindAvailable={isRemindAvailable}
                 members={members}
                 onCopyInviteLink={() => void handleCopyInviteLink()}
-                onOpenExplore={() => flowNavigate({ to: paths.plannerExplore })}
-                onOpenFinal={() => flowNavigate({ to: paths.plannerFinal })}
-                onOpenGroupManagement={() => flowNavigate({ to: paths.plannerGroup })}
+                onOpenExplore={() => navigate({ to: paths.plannerExplore })}
+                onOpenFinal={() => navigate({ to: paths.plannerFinal })}
+                onOpenGroupManagement={() => navigate({ to: paths.plannerGroup })}
                 plannerDetail={plannerDetail}
                 plannerInviteLink={plannerInviteLink}
                 plannerCategories={categories}
                 remindFeedback={remindFeedback}
-                remindPending={remindPlannerMembersMutation.isPending}
+                remindPending={remindPending}
                 votes={votes}
                 confirmedCount={votes.filter((vote) => vote.confirmedOptionId != null || normalizeStatus(vote.status) === "CONFIRMED").length}
                 votingCount={votes.filter((vote) => normalizeStatus(vote.status) === "OPEN").length}
@@ -643,7 +451,7 @@ function PlannerFlowPage({ step }: Props) {
             {step === "place" ? (
               <PlannerPlaceStep
                 canManageCandidates={canManageCandidates}
-                isSaving={addPlannerPlacesMutation.isPending}
+                isSaving={isSavingPlace}
                 onAdd={() => void handleAddPlaceCandidate()}
                 place={place}
               />
