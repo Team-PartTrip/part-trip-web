@@ -81,14 +81,14 @@ export function PlannerHeader({
     list: ['플래너', ''],
     group: ['여행 그룹 정하기', '1 / 4 단계 · 여행 방식과 인원'],
     destination: ['여행지 & 기간', '2 / 4 단계 · 여행지와 날짜를 정해요'],
-    explore: ['장소 둘러보기', `${destination} · ${shortDateRange(plan?.startDate, plan?.endDate)}`],
+    explore: ['장소 투표', `${destination} · ${shortDateRange(plan?.startDate, plan?.endDate)} · 장소에서 바로 투표해요`],
     vote: [
       `${voteCategory} 투표`,
       voteMembers
-        ? `${voteMembers} · 카테고리별 1곳 선택${voteDeadline ? ` · ${voteDeadline}` : ''}`
-        : '카테고리별 후보 중 1곳을 선택하세요.',
+        ? `${voteMembers} · 여러 곳에 투표 가능${voteDeadline ? ` · ${voteDeadline}` : ''}`
+        : '원하는 장소를 여러 곳 선택하세요.',
     ],
-    lineup: ['장바구니', '소수 인원이라 투표 대신 직접 고르거나 랜덤으로 정할 수 있어요'],
+    lineup: ['장소 투표', '장소 리스트에서 바로 투표해요'],
     progress: [
       duration ? `${destination} ${duration}` : `${destination} 여행`,
       `${shortDateRange(plan?.startDate, plan?.endDate)}${memberCount ? ` · ${memberCount}명` : ''}`,

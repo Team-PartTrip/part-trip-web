@@ -116,7 +116,7 @@ export function PlannerProgressStep({
           <S.ActionRow>
             {!isConfirmed ? (
               <PartTripButton type="button" $variant="secondary" disabled={!canManageCandidates} onClick={onOpenExplore}>
-                {votes.length ? '후보 장소 관리' : '장소 후보 추가'}
+                {votes.length ? '장소 목록에서 투표' : '장소 투표 시작'}
               </PartTripButton>
             ) : null}
             <PartTripButton

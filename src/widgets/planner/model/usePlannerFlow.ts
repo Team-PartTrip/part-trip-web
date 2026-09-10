@@ -41,7 +41,7 @@ export function usePlannerFlow(step: PlannerStep) {
     state,
     updatePlannerMutation: mutations.updatePlannerMutation,
   })
-  const candidate = usePlannerCandidateFlow({ data, navigate, mutations, placeId, state })
+  const candidate = usePlannerCandidateFlow({ canManagePlanner: vote.canManagePlanner, data, navigate, mutations, placeId, state })
   const planner = usePlannerLifecycleFlow({
     canManagePlanner: vote.canManagePlanner,
     data,

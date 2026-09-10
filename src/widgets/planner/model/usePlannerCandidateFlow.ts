@@ -1,5 +1,6 @@
 import { type useNavigate } from '@tanstack/react-router'
 
+import { getVote } from '@/entities/planner'
 import { type usePlannerData } from './usePlannerData'
 import { type usePlannerMutations } from './usePlannerMutations'
 import { getCandidateManagementState, getSelectedPlaceIndexes } from './selectors'
@@ -7,6 +8,8 @@ import { type usePlannerState } from './usePlannerState'
 import { ACTIVE_VOTE_CATEGORY_KEY, paths } from '@/shared/config'
 import { writeSessionValue } from '@/shared/libs/session-storage'
 import { getErrorMessage, isPositiveSafeInteger } from '@/shared/utils'
+import { normalizeStatus } from './status'
+import type { TourPlaceResponseDto } from '@/entities/travel'
 
 type Data = ReturnType<typeof usePlannerData>
 type Mutations = ReturnType<typeof usePlannerMutations>
@@ -14,6 +17,7 @@ type State = ReturnType<typeof usePlannerState>
 type Navigate = ReturnType<typeof useNavigate>
 
 type Props = {
+  canManagePlanner: boolean
   data: Data
   navigate: Navigate
   mutations: Mutations
@@ -21,7 +25,7 @@ type Props = {
   state: State
 }
 
-export function usePlannerCandidateFlow({ data, navigate, mutations, placeId, state }: Props) {
+export function usePlannerCandidateFlow({ canManagePlanner, data, navigate, mutations, placeId, state }: Props) {
   const {
     activePlannerId,
     clearSelected,
@@ -36,6 +40,9 @@ export function usePlannerCandidateFlow({ data, navigate, mutations, placeId, st
   const { places, votes, votesError, votesLoading } = data
   const {
     addPlannerPlacesMutation,
+    addVoteOptionMutation,
+    castBallotMutation,
+    createVoteMutation,
     selectRandomPlannerPlaceMutation,
   } = mutations
   const selectedItems = selectedPlacesByCategory[voteCategory] ?? []
@@ -45,6 +52,71 @@ export function usePlannerCandidateFlow({ data, navigate, mutations, placeId, st
   const allSelectedPlaces = Object.values(selectedPlacesByCategory).flat()
   const selectedPlaceCount = allSelectedPlaces.length
   const place = places.find((item) => item.tourPlaceId === Number(placeId))
+
+  const findVoteOption = (vote: Data['votes'][number] | undefined, item: TourPlaceResponseDto) =>
+    vote?.options.find((option) =>
+      (item.tourPlaceId != null && option.tourPlaceId === item.tourPlaceId)
+        || (item.tourPlaceId == null && option.placeName?.trim() === item.placeName?.trim()),
+    )
+
+  const handleVotePlace = async (item: TourPlaceResponseDto) => {
+    if (!isPositiveSafeInteger(activePlannerId)) {
+      setErrorMessage('먼저 여행 계획을 저장해주세요.')
+      return
+    }
+
+    const currentVote = votes.find((vote) => vote.category === voteCategory || vote.categoryLabel === voteCategory)
+    if (currentVote && (normalizeStatus(currentVote.status) !== 'OPEN' || currentVote.deadlinePassed === true)) {
+      setErrorMessage('마감된 투표에는 참여할 수 없습니다.')
+      return
+    }
+
+    const placeId = item.tourPlaceId
+    if (!isPositiveSafeInteger(placeId) && !item.placeName?.trim()) {
+      setErrorMessage('투표할 장소 정보를 확인할 수 없습니다.')
+      return
+    }
+
+    try {
+      setErrorMessage('')
+      let voteId = currentVote?.voteId
+      let optionId = findVoteOption(currentVote, item)?.optionId
+
+      if (!isPositiveSafeInteger(voteId)) {
+        if (!canManagePlanner) {
+          setErrorMessage('그룹장이 투표를 열면 참여할 수 있습니다.')
+          return
+        }
+        const createdVote = await createVoteMutation.mutateAsync({
+          plannerId: activePlannerId,
+          payload: { category: voteCategory, placeId },
+        })
+        voteId = createdVote.voteId
+      } else if (!isPositiveSafeInteger(optionId)) {
+        const option = await addVoteOptionMutation.mutateAsync({
+          plannerId: activePlannerId,
+          voteId,
+          payload: { placeName: item.placeName, tourPlaceId: placeId },
+        })
+        optionId = option.optionId
+      }
+
+      if (!isPositiveSafeInteger(voteId)) throw new Error('voteId is missing')
+      if (!isPositiveSafeInteger(optionId)) {
+        const refreshedVote = await getVote(activePlannerId, voteId)
+        optionId = findVoteOption(refreshedVote, item)?.optionId
+      }
+      if (!isPositiveSafeInteger(optionId)) throw new Error('optionId is missing')
+
+      await castBallotMutation.mutateAsync({
+        plannerId: activePlannerId,
+        voteId,
+        payload: { optionId },
+      })
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error))
+    }
+  }
 
   const updateSelected = (next: number[] | ((current: number[]) => number[])) => {
     setSelectedPlacesByCategory((current) => {
@@ -128,7 +200,7 @@ export function usePlannerCandidateFlow({ data, navigate, mutations, placeId, st
 
   const handleRandomLineup = async () => {
     if (selectedPlaces.length === 0) {
-      setErrorMessage('먼저 장바구니에 장소를 담아주세요.')
+      setErrorMessage('먼저 장소를 선택해주세요.')
       return
     }
     const placeIds = [...new Set(selectedPlaces
@@ -157,10 +229,12 @@ export function usePlannerCandidateFlow({ data, navigate, mutations, placeId, st
     canManageCandidates,
     candidateManagementError,
     handleAddPlaceCandidate,
+    handleVotePlace,
     handleRandomLineup,
     handleRemoveFromLineup,
     handleSaveCandidates,
     isSavingCandidates: addPlannerPlacesMutation.isPending || selectRandomPlannerPlaceMutation.isPending,
+    isVotingPlace: createVoteMutation.isPending || addVoteOptionMutation.isPending || castBallotMutation.isPending,
     isSavingPlace: addPlannerPlacesMutation.isPending,
     place,
     places,

@@ -52,7 +52,7 @@ export function PlannerVoteStep({
     <>
       <S.VoteStatusRow>
         <S.VoteStatus $active>진행 중</S.VoteStatus>
-        <S.VoteStatus>내 투표 {voteOptions.some((option) => option.selectedByMe === true) ? 1 : 0} / 1</S.VoteStatus>
+        <S.VoteStatus>내 투표 {voteOptions.filter((option) => option.selectedByMe === true).length}곳</S.VoteStatus>
       </S.VoteStatusRow>
       <S.VoteCategoryChips aria-label="투표 카테고리">
         {categories.map((category) => (

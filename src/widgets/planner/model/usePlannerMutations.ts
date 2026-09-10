@@ -1,11 +1,13 @@
 import {
   useAcceptPlannerInvitationMutation,
   useAddPlannerPlacesMutation,
+  useAddVoteOptionMutation,
   useCastBallotMutation,
   useCloseVoteMutation,
   useConfirmVoteMutation,
   useConfirmPlannerMutation,
   useCreatePlannerMutation,
+  useCreateVoteMutation,
   useDeletePlannerMutation,
   useDeleteVoteOptionMutation,
   useCancelPlannerInvitationMutation,
@@ -26,10 +28,12 @@ export function usePlannerMutations() {
   const cancelPlannerInvitationMutation = useCancelPlannerInvitationMutation()
   const removePlannerMemberMutation = useRemovePlannerMemberMutation()
   const addPlannerPlacesMutation = useAddPlannerPlacesMutation()
+  const addVoteOptionMutation = useAddVoteOptionMutation()
   const deletePlannerMutation = useDeletePlannerMutation()
   const remindPlannerMembersMutation = useRemindPlannerMembersMutation()
   const selectRandomPlannerPlaceMutation = useSelectRandomPlannerPlaceMutation()
   const confirmPlannerMutation = useConfirmPlannerMutation()
+  const createVoteMutation = useCreateVoteMutation()
   const castBallotMutation = useCastBallotMutation()
   const closeVoteMutation = useCloseVoteMutation()
   const confirmVoteMutation = useConfirmVoteMutation()
@@ -38,10 +42,12 @@ export function usePlannerMutations() {
   return {
     acceptPlannerInvitationMutation,
     addPlannerPlacesMutation,
+    addVoteOptionMutation,
     cancelPlannerInvitationMutation,
     castBallotMutation,
     closeVoteMutation,
     confirmPlannerMutation,
+    createVoteMutation,
     confirmVoteMutation,
     createPlannerMutation,
     deletePlannerMutation,

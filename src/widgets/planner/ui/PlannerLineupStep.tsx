@@ -65,7 +65,7 @@ export function PlannerLineupStep({
       </S.LineupModeRow>
       <S.CartBody>
         <S.SelectedPanel>
-          <S.SectionTitle>담은 장소 {selectedPlaces.length}</S.SectionTitle>
+          <S.SectionTitle>선택한 장소 {selectedPlaces.length}</S.SectionTitle>
           <S.SelectedPlaces>
             {selectedPlaces.map(({ index, item }) => (
               <S.SelectedPlaceRow key={`${item.placeName}-${index}`}>
@@ -83,7 +83,7 @@ export function PlannerLineupStep({
         </S.SelectedPanel>
         <S.NextPanel>
           <S.SectionTitle>선택을 확정할까요?</S.SectionTitle>
-          <p>담은 장소 중 지금 고른 장소로 일정을 확정해요</p>
+          <p>선택한 장소 중 지금 고른 장소로 일정을 확정해요</p>
           <S.ActionRow>
             <PartTripButton
               type="button"

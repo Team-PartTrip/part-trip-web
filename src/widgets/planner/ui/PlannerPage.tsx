@@ -47,7 +47,7 @@ export function PlannerVotePage() {
   return <PlannerFlowPage step="vote" />;
 }
 export function PlannerLineupPage() {
-  return <PlannerFlowPage step="lineup" />;
+  return <PlannerFlowPage step="explore" />;
 }
 export function PlannerProgressPage() {
   return <PlannerFlowPage step="progress" />;
@@ -106,15 +106,15 @@ function PlannerFlowPage({ step }: Props) {
     handleRandomLineup,
     handleRemoveFromLineup,
     handleSaveCandidates,
+    handleVotePlace,
     isSavingCandidates,
     isSavingPlace,
+    isVotingPlace,
     lineupChoice,
     lineupMode,
     place,
     places,
     plannerCategories: categories,
-    selected,
-    selectedPlaceCount,
     selectedPlaces,
     setLineupChoice,
     setLineupMode,
@@ -342,14 +342,12 @@ function PlannerFlowPage({ step }: Props) {
 
             {step === "explore" ? (
               <PlannerExploreStep
-                canManageCandidates={canManageCandidates}
-                handleSaveCandidates={handleSaveCandidates}
-                isSavingCandidates={isSavingCandidates}
+                activeVote={activeVote}
+                canManagePlanner={canManagePlanner}
+                handleVotePlace={handleVotePlace}
+                isVotingPlace={isVotingPlace}
                 places={places}
                 plannerCategories={categories}
-                selected={selected}
-                selectedPlaceCount={selectedPlaceCount}
-                setSelected={setSelected}
                 setVoteCategory={setVoteCategory}
                 voteCategory={voteCategory}
               />
