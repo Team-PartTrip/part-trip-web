@@ -107,12 +107,7 @@ export const FieldHint = styled.small`
   line-height: 16px;
 `
 
-export const VerificationCodeForm = styled.form`
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  gap: 14px;
-`
+export const VerificationCodeForm = Form
 
 export const Input = styled.input<InputProps>`
   width: 100%;

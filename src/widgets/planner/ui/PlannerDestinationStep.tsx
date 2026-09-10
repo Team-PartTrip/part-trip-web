@@ -1,6 +1,6 @@
 import type { CountryInfoResponseDto } from '@/entities/travel'
 import { Input as PartTripInput } from '@/shared/ui/parttrip'
-import { formatDate, formatTripDuration } from '@/shared/utils'
+import { formatCalendarDate, formatDate, formatTripDuration } from '@/shared/utils'
 
 import { type usePlannerFlow } from '../model/usePlannerFlow'
 import * as S from './PlannerPage.styles'
@@ -195,7 +195,7 @@ export function PlannerDestinationStep({
             {calendarDays.map((day, index) => {
               const date = day == null
                 ? ''
-                : `${calendarMonth.getFullYear()}-${String(calendarMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+                : formatCalendarDate(calendarMonth.getFullYear(), calendarMonth.getMonth(), day)
               return day ? (
                 <S.CalendarDay
                   key={day}

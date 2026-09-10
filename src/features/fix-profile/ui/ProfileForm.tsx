@@ -1,117 +1,30 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useForm, useWatch, type SubmitHandler } from 'react-hook-form'
-import { useNavigate } from '@tanstack/react-router'
-import { type UserProfile, useUpdateProfileMutation, useUploadProfileImageMutation } from '@/entities/user'
-import { paths } from '@/shared/config'
-import { useLockBodyScroll } from '@/shared/hooks'
+import { type UserProfile } from '@/entities/user'
 
-import {
-  getNicknameError,
-  isProfileImageSizeAllowed,
-  isSupportedProfileImageType,
-} from '../model/profileForm'
+import { useProfileForm } from '../model/useProfileForm'
 import * as S from './ProfileForm.styles'
 
 type ProfileFormProps = {
   profile: UserProfile
 }
 
-type ProfileFormValues = {
-  name: string
-}
-
 export function ProfileForm({ profile }: ProfileFormProps) {
-  const navigate = useNavigate()
-  const closeButtonRef = useRef<HTMLButtonElement>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const photoSelectionVersionRef = useRef(0)
-  const [avatarPreview, setAvatarPreview] = useState(profile.avatarUrl ?? '')
-  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null)
-  const [photoError, setPhotoError] = useState<string | null>(null)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const updateProfileMutation = useUpdateProfileMutation()
-  const uploadProfileImageMutation = useUploadProfileImageMutation()
-  const { register, handleSubmit, formState, control } = useForm<ProfileFormValues>({
-    defaultValues: {
-      name: profile.name || '',
-    },
-  })
-  const previewName = useWatch({ control, name: 'name' })
-
-  useLockBodyScroll()
-
-  const close = useCallback(() => {
-    if (formState.isSubmitting) return
-    navigate({ to: paths.profile })
-  }, [formState.isSubmitting, navigate])
-
-  useEffect(() => {
-    closeButtonRef.current?.focus()
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') close()
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [close])
-
-  const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectionVersion = ++photoSelectionVersionRef.current
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    setPhotoError(null)
-    if (!isSupportedProfileImageType(file.type)) {
-      setPhotoError('JPG, PNG, WEBP 형식의 이미지만 선택할 수 있습니다.')
-      event.target.value = ''
-      return
-    }
-    if (!isProfileImageSizeAllowed(file.size)) {
-      setPhotoError('프로필 사진은 2MB 이하로 선택해주세요.')
-      event.target.value = ''
-      return
-    }
-
-    const reader = new FileReader()
-    reader.addEventListener('load', () => {
-      if (selectionVersion !== photoSelectionVersionRef.current) return
-      if (typeof reader.result === 'string') setAvatarPreview(reader.result)
-    })
-    reader.addEventListener('error', () => {
-      if (selectionVersion !== photoSelectionVersionRef.current) return
-      setPhotoError('사진을 불러오지 못했습니다. 다시 선택해주세요.')
-    })
-    reader.readAsDataURL(file)
-    setSelectedPhoto(file)
-  }
-
-  const handleResetPhoto = () => {
-    photoSelectionVersionRef.current += 1
-    setAvatarPreview('')
-    setSelectedPhoto(null)
-    setPhotoError(null)
-    if (fileInputRef.current) fileInputRef.current.value = ''
-  }
-
-  const onSubmit: SubmitHandler<ProfileFormValues> = async (values) => {
-    try {
-      setErrorMessage(null)
-      const uploadedUrl = selectedPhoto
-        ? await uploadProfileImageMutation.mutateAsync(selectedPhoto)
-        : undefined
-      await updateProfileMutation.mutateAsync({
-        imgUrl: selectedPhoto ? uploadedUrl : avatarPreview || undefined,
-        nickName: values.name.trim(),
-      })
-      navigate({ to: paths.profile, replace: true })
-    } catch {
-      setErrorMessage('프로필을 저장하지 못했습니다. 다시 시도해주세요.')
-    }
-  }
+  const {
+    avatarPreview,
+    close,
+    closeButtonRef,
+    errorMessage,
+    fileInputRef,
+    formState,
+    handlePhotoChange,
+    handleResetPhoto,
+    nameField,
+    onSubmit,
+    photoError,
+    previewName,
+  } = useProfileForm(profile)
 
   return (
-    <S.Form onSubmit={handleSubmit(onSubmit)} noValidate aria-labelledby="profile-edit-title">
+    <S.Form onSubmit={onSubmit} noValidate aria-labelledby="profile-edit-title">
       <S.Header>
         <div>
           <h1 id="profile-edit-title">프로필 수정</h1>
@@ -154,9 +67,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             <S.Field>
               <span>닉네임</span>
               <input
-                {...register('name', {
-                  validate: (value) => getNicknameError(value) ?? true,
-                })}
+                {...nameField}
                 aria-invalid={Boolean(formState.errors.name)}
               />
               {formState.errors.name ? <S.FieldError>{formState.errors.name.message}</S.FieldError> : null}

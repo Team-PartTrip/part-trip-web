@@ -33,7 +33,6 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
     hasQueryError,
     isLoading,
     message,
-    mine,
     navigate,
     selected,
     setSelected,
@@ -84,7 +83,7 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
           <TripCardDetailView detail={detail} firstPhoto={firstPhoto} firstPlace={firstPlace} navigate={navigate} />
         ) : null}
 
-        {mode === "create" && !isLoading ? <TripCardPhotoComposer cards={mine} /> : null}
+        {mode === "create" && !isLoading ? <TripCardPhotoComposer cards={cards} /> : null}
 
         {mode === "delete" && !isLoading ? (
           <TripCardDeleteView

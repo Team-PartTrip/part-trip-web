@@ -5,36 +5,10 @@ import { figmaRecordMap } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import { AppShell } from '@/widgets/app-shell'
 
+import { mapPosition, routeSegment } from '../model/record-map'
 import * as S from './RecordMapPage.styles'
 
 // ponytail: the bundled raster map is Osaka-only; replace with a real map viewport for other cities.
-const OSAKA_MAP_BOUNDS = {
-  east: 135.6,
-  north: 34.75,
-  south: 34.6,
-  west: 135.42,
-}
-
-function mapPosition(latitude?: number, longitude?: number) {
-  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null
-  if (latitude! < OSAKA_MAP_BOUNDS.south || latitude! > OSAKA_MAP_BOUNDS.north || longitude! < OSAKA_MAP_BOUNDS.west || longitude! > OSAKA_MAP_BOUNDS.east) return null
-  return {
-    left: (longitude! - OSAKA_MAP_BOUNDS.west) / (OSAKA_MAP_BOUNDS.east - OSAKA_MAP_BOUNDS.west) * 100,
-    top: (OSAKA_MAP_BOUNDS.north - latitude!) / (OSAKA_MAP_BOUNDS.north - OSAKA_MAP_BOUNDS.south) * 100,
-  }
-}
-
-function routeSegment(start: { left: number; top: number }, end: { left: number; top: number }) {
-  const deltaX = end.left - start.left
-  const deltaY = end.top - start.top
-  return {
-    angle: Math.atan2(deltaY, deltaX) * 180 / Math.PI,
-    left: start.left,
-    length: Math.hypot(deltaX, deltaY),
-    top: start.top,
-  }
-}
-
 export function RecordMapPage() {
   const navigate = useNavigate()
   const { hasError, isLoading, trips } = useMyTrips()

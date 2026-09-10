@@ -3,6 +3,7 @@ import type {
   PlannerMemberResponseDto,
 } from '@/entities/planner'
 
+import { getPlannerMemberDisplayName } from '../model/member'
 import { normalizeStatus } from '../model/status'
 import * as S from './PlannerPage.styles'
 
@@ -81,9 +82,9 @@ export function PlannerGroupManagementPanel({
 
                 return (
                   <S.MemberRow key={`${member.userId ?? member.nickName}-${index}`}>
-                    <S.Avatar>{(member.nickName || member.userId || '멤버').slice(0, 2).toUpperCase()}</S.Avatar>
+                    <S.Avatar>{getPlannerMemberDisplayName(member).slice(0, 2).toUpperCase()}</S.Avatar>
                     <S.MemberDetails>
-                      <strong>{member.nickName || member.userId || '멤버'}</strong>
+                      <strong>{getPlannerMemberDisplayName(member)}</strong>
                       <span>{memberStatus || '상태 확인 중'}</span>
                     </S.MemberDetails>
                     {canManagePlanner && isPendingMember ? (

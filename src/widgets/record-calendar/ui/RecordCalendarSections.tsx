@@ -1,5 +1,5 @@
 import type { FestivalResponseDto } from '@/entities/travel'
-import { formatDate } from '@/shared/utils'
+import { formatCalendarDate, formatDate } from '@/shared/utils'
 
 import * as S from './RecordCalendarPage.styles'
 
@@ -45,7 +45,7 @@ export function CalendarSection({
       <S.MonthBar><div><h2>{viewMonth.getFullYear()}년 {viewMonth.getMonth() + 1}월</h2><p>{plan?.cityName || plan?.countryName || '여행지'} · 여행 기간 {plan ? `${formatDate(plan.startDate)} – ${formatDate(plan.endDate)}` : '미설정'}</p></div><span><button type="button" aria-label="이전 달" onClick={() => onChangeMonth(-1)}>‹</button><button type="button" aria-label="다음 달" onClick={() => onChangeMonth(1)}>›</button></span></S.MonthBar>
       <S.Weekdays>{weekdays.map((day) => <span key={day}>{day}</span>)}</S.Weekdays>
       <S.CalendarGrid>{cells.map((day, index) => {
-        const date = day ? `${viewMonth.getFullYear()}-${String(viewMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}` : ''
+        const date = day ? formatCalendarDate(viewMonth.getFullYear(), viewMonth.getMonth(), day) : ''
         const event = day ? eventByDay.get(date) : undefined
         const inTrip = day != null && plan?.startDate != null && plan?.endDate != null && date >= plan.startDate && date <= plan.endDate
         return <S.Cell key={`${day}-${index}`} type="button" disabled={day === null} $empty={day === null} $inTrip={Boolean(inTrip)} $selected={date === selectedDate} aria-pressed={day === null ? undefined : date === selectedDate} onClick={() => { if (date) onSelectDate(date) }}>{day ? <><strong>{day}</strong>{event ? <S.EventLabel>{event.category || '행사'}</S.EventLabel> : null}</> : null}</S.Cell>

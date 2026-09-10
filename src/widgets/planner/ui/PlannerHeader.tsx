@@ -2,6 +2,7 @@ import { usePlannerMembersQuery } from '@/entities/planner'
 import { Button as PartTripButton } from '@/shared/ui/parttrip'
 import { formatDate, formatDateRange, formatTripDuration } from '@/shared/utils'
 
+import { getPlannerMemberDisplayName } from '../model/member'
 import type { PlannerStep } from '../model/types'
 import * as S from './PlannerPage.styles'
 
@@ -27,7 +28,7 @@ export function PlannerMemberAvatars({ plannerId }: { plannerId?: number }) {
     <S.PlanMemberAvatars aria-label={`${members.length}명 참여`}>
       {visibleMembers.map((member, index) => (
         <S.Avatar key={member.userId ?? member.nickName ?? index}>
-          {(member.nickName || member.userId || '멤버').slice(0, 1).toUpperCase()}
+          {getPlannerMemberDisplayName(member).slice(0, 1).toUpperCase()}
         </S.Avatar>
       ))}
       {members.length > visibleMembers.length ? (

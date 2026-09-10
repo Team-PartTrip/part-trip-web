@@ -1,6 +1,7 @@
 import { Button as PartTripButton, Input as PartTripInput } from '@/shared/ui/parttrip'
 
 import { type usePlannerFlow } from '../model/usePlannerFlow'
+import { getPlannerMemberDisplayName } from '../model/member'
 import * as S from './PlannerPage.styles'
 
 type GroupFlow = ReturnType<typeof usePlannerFlow>['group']
@@ -120,8 +121,8 @@ export function PlannerGroupStep({
           </S.MemberRow>
           {members.map((member, index) => (
             <S.MemberRow key={`${member.userId ?? member.nickName}-${index}`}>
-              <S.Avatar>{(member.nickName || member.userId || '멤버').slice(0, 1).toUpperCase()}</S.Avatar>
-              <S.MemberDetails><strong>{member.nickName || member.userId || '멤버'}</strong></S.MemberDetails>
+              <S.Avatar>{getPlannerMemberDisplayName(member).slice(0, 1).toUpperCase()}</S.Avatar>
+              <S.MemberDetails><strong>{getPlannerMemberDisplayName(member)}</strong></S.MemberDetails>
               <S.MemberState>{member.role || '초대 대기'}</S.MemberState>
             </S.MemberRow>
           ))}

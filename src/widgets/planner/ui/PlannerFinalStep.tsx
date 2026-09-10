@@ -1,6 +1,7 @@
 import { Button as PartTripButton } from "@/shared/ui/parttrip";
 import { formatDateRange, formatTripDuration } from "@/shared/utils";
 
+import { getPlannerMemberDisplayName } from "../model/member";
 import * as S from "./PlannerPage.styles";
 
 type PlannerMember = {
@@ -57,9 +58,7 @@ export function PlannerFinalStep({
       <S.FinalMembers aria-label="참여 멤버">
         {visibleMembers.map((member, index) => (
           <S.Avatar key={member.userId ?? member.nickName ?? index}>
-            {(member.nickName || member.userId || "멤버")
-              .slice(0, 1)
-              .toUpperCase()}
+            {getPlannerMemberDisplayName(member).slice(0, 1).toUpperCase()}
           </S.Avatar>
         ))}
       </S.FinalMembers>

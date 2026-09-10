@@ -11,6 +11,8 @@ import {
 } from './api'
 import { plannerQueryKeys } from './query-keys'
 
+const isPositiveInteger = (value: number) => Number.isInteger(value) && value > 0
+
 export const myPlannersQueryOptions = (enabled = true) =>
   queryOptions({
     queryKey: plannerQueryKeys.list(),
@@ -33,7 +35,7 @@ export const plannerDetailQueryOptions = (plannerId: number, enabled = true) =>
   queryOptions({
     queryKey: plannerQueryKeys.detail(plannerId),
     queryFn: () => getPlannerDetail(plannerId),
-    enabled: enabled && Number.isInteger(plannerId) && plannerId > 0,
+    enabled: enabled && isPositiveInteger(plannerId),
   })
 
 export function usePlannerDetailQuery(plannerId: number, enabled = true) {
@@ -44,7 +46,7 @@ export const plannerMembersQueryOptions = (plannerId: number, enabled = true) =>
   queryOptions({
     queryKey: plannerQueryKeys.members(plannerId),
     queryFn: () => getPlannerMembers(plannerId),
-    enabled: enabled && Number.isInteger(plannerId) && plannerId > 0,
+    enabled: enabled && isPositiveInteger(plannerId),
   })
 
 export function usePlannerMembersQuery(plannerId: number, enabled = true) {
@@ -55,7 +57,7 @@ export const plannerConfirmedPlacesQueryOptions = (plannerId: number, enabled = 
   queryOptions({
     queryKey: plannerQueryKeys.confirmedPlaces(plannerId),
     queryFn: () => getConfirmedPlaces(plannerId),
-    enabled: enabled && Number.isInteger(plannerId) && plannerId > 0,
+    enabled: enabled && isPositiveInteger(plannerId),
   })
 
 export function usePlannerConfirmedPlacesQuery(plannerId: number, enabled = true) {
@@ -66,7 +68,7 @@ export const plannerVotesQueryOptions = (plannerId: number, enabled = true) =>
   queryOptions({
     queryKey: plannerQueryKeys.votes(plannerId),
     queryFn: () => getVotes(plannerId),
-    enabled: enabled && Number.isInteger(plannerId) && plannerId > 0,
+    enabled: enabled && isPositiveInteger(plannerId),
   })
 
 export function usePlannerVotesQuery(plannerId: number, enabled = true) {
@@ -77,12 +79,7 @@ export const plannerVoteQueryOptions = (plannerId: number, voteId: number, enabl
   queryOptions({
     queryKey: plannerQueryKeys.vote(plannerId, voteId),
     queryFn: () => getVote(plannerId, voteId),
-    enabled:
-      enabled &&
-      Number.isInteger(plannerId) &&
-      plannerId > 0 &&
-      Number.isInteger(voteId) &&
-      voteId > 0,
+    enabled: enabled && isPositiveInteger(plannerId) && isPositiveInteger(voteId),
   })
 
 export function usePlannerVoteQuery(plannerId: number, voteId: number, enabled = true) {

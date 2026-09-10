@@ -16,18 +16,6 @@ import { normalizeNotificationLinkType } from './notification-presentation'
 
 export type NotificationMode = 'list' | 'detail'
 
-export function notificationDate(value?: string) {
-  if (!value) return '방금 전'
-  const timestamp = Date.parse(value)
-  return Number.isNaN(timestamp) ? '방금 전' : new Date(timestamp).toLocaleString('ko-KR')
-}
-
-export function notificationTypeLabel(notification: NotificationResponseDto) {
-  if (notification.category === 'VOTE') return '투표'
-  if (notification.category === 'RECORD') return '기록'
-  return '알림'
-}
-
 export function useNotificationFlow(mode: NotificationMode) {
   const navigate = useNavigate()
   const { notificationId = '' } = useParams({ strict: false })

@@ -3,6 +3,7 @@ import { type useNavigate } from '@tanstack/react-router'
 
 import { type usePlannerMutations } from './usePlannerMutations'
 import { type usePlannerState } from './usePlannerState'
+import { isValidPlannerMemberCount } from './member-count'
 import type { PlannerStep } from './types'
 import { PLANNER_GROUP_SETTINGS_KEY, paths } from '@/shared/config'
 import { writeSessionValue } from '@/shared/libs/session-storage'
@@ -53,8 +54,7 @@ export function usePlannerGroupFlow({ canManagePlanner, mutations, navigate, sta
   const saveGroupSettings = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const nextMemberCount = isSolo ? 1 : Number(memberCount)
-    const minimumMemberCount = isSolo ? 1 : 2
-    if (!Number.isSafeInteger(nextMemberCount) || nextMemberCount < minimumMemberCount || nextMemberCount > 30) {
+    if (!isValidPlannerMemberCount(nextMemberCount, isSolo)) {
       setErrorMessage(isSolo ? '혼자 여행은 1명으로 설정해주세요.' : '함께 여행은 2명에서 30명 사이로 입력해주세요.')
       return
     }

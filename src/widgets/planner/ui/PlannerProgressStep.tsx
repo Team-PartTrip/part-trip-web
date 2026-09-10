@@ -1,6 +1,7 @@
 import { Button as PartTripButton } from '@/shared/ui/parttrip'
 
 import { type usePlannerFlow } from '../model/usePlannerFlow'
+import { getPlannerMemberDisplayName } from '../model/member'
 import { normalizeStatus } from '../model/status'
 import { PlannerProgressManagementPanel } from './PlannerProgressManagementPanel'
 import * as S from './PlannerPage.styles'
@@ -107,8 +108,8 @@ export function PlannerProgressStep({
           <S.SectionTitle>멤버 응답</S.SectionTitle>
           {(members.length ? members : [{ nickName: currentUserName, userId: currentUserInitial, role: '완료' }]).map((member, index) => (
             <S.ResponseRow key={member.userId ?? member.nickName ?? index}>
-              <S.Avatar>{(member.nickName || member.userId || '멤버').slice(0, 2).toUpperCase()}</S.Avatar>
-              <strong>{member.nickName || member.userId || '멤버'}</strong>
+              <S.Avatar>{getPlannerMemberDisplayName(member).slice(0, 2).toUpperCase()}</S.Avatar>
+              <strong>{getPlannerMemberDisplayName(member)}</strong>
               <span>{member.role || '대기 중'}</span>
             </S.ResponseRow>
           ))}

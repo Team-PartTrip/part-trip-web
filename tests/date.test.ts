@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { formatDate, formatDateRange, formatTravelDateTime, formatTripDuration, getCalendarMonthsInRange, getMonthCalendarDays, getDateRangeDays, getDateRangeWithPadding, isDateInRange, isInCurrentCalendarWeek, MAX_FESTIVAL_QUERY_MONTHS } from '../src/shared/utils/date.ts'
+import { formatCalendarDate, formatDate, formatDateRange, formatTravelDateTime, formatTripDuration, getCalendarMonthsInRange, getMonthCalendarDays, getDateRangeDays, getDateRangeWithPadding, isDateInRange, isInCurrentCalendarWeek, MAX_FESTIVAL_QUERY_MONTHS } from '../src/shared/utils/date.ts'
 
 test('날짜 포맷과 양끝 포함 기간을 공통 규칙으로 계산한다', () => {
   assert.equal(formatDate('2026-07-01'), '2026.07.01')
+  assert.equal(formatCalendarDate(2026, 6, 1), '2026-07-01')
   assert.equal(formatDateRange('2026-07-01', '2026-07-03'), '2026.07.01 – 07.03')
   assert.equal(formatDateRange('2026-07-01', '2026-08-03'), '2026.07.01 – 2026.08.03')
   assert.equal(getDateRangeDays('2026-07-01', '2026-07-03'), 3)

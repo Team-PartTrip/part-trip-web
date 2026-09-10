@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { getMonthCalendarDays } from '@/shared/utils'
+import { formatCalendarDate, getMonthCalendarDays } from '@/shared/utils'
 
 type DateSetter = (value: string) => void
 
@@ -26,7 +26,7 @@ export function usePlannerCalendar(
     calendarMonth.getMonth(),
   )
   const handleCalendarDay = (day: number) => {
-    const date = `${calendarMonth.getFullYear()}-${String(calendarMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    const date = formatCalendarDate(calendarMonth.getFullYear(), calendarMonth.getMonth(), day)
     if (!selectedStartDate || selectedEndDate) {
       setStartDate(date)
       setEndDate('')

@@ -15,7 +15,6 @@ export function useTripCardsFlow(mode: TripCardsMode) {
   const myTripsQuery = useMyTrips(mode !== 'detail')
   const deleteMutation = useDeleteTravelCardsMutation()
   const cards = myTripsQuery.trips
-  const mine = myTripsQuery.trips
   const detail = tripQuery.data
   const isLoading = mode === 'detail' ? tripQuery.isLoading : myTripsQuery.isLoading
   const hasQueryError = mode === 'detail' ? tripQuery.isError : myTripsQuery.hasError
@@ -41,7 +40,6 @@ export function useTripCardsFlow(mode: TripCardsMode) {
     hasQueryError,
     isLoading,
     message,
-    mine,
     navigate,
     selected,
     setSelected,

@@ -20,6 +20,10 @@ export function getMonthCalendarDays(year: number, monthIndex: number): Array<nu
   ]
 }
 
+export function formatCalendarDate(year: number, monthIndex: number, day: number) {
+  return `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
 // ponytail: cap festival fan-out at 14 months; add a range/pagination API if longer trips need support.
 export const MAX_FESTIVAL_QUERY_MONTHS = 14
 
@@ -35,7 +39,7 @@ function parseDateOnly(value: DateValue) {
 }
 
 function formatDateOnly(date: Date) {
-  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`
+  return formatCalendarDate(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
 }
 
 export function getDateRangeWithPadding(startDate: DateValue, endDate: DateValue, paddingDays = 7): DateOnlyRange | undefined {

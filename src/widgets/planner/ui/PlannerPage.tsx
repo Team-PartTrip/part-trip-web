@@ -6,8 +6,8 @@ import {
 } from "@/shared/ui/parttrip";
 import { AppShell } from "@/widgets/app-shell";
 
-import { normalizeStatus } from "../model/status";
 import { getDestinationResults } from "../model/destination";
+import { getPlannerPageModel } from "../model/planner-page-model";
 import { usePlannerCalendar } from "../model/usePlannerCalendar";
 import { usePlannerFlow } from "../model/usePlannerFlow";
 import { usePlannerPageActions } from "../model/usePlannerPageActions";
@@ -191,25 +191,23 @@ function PlannerFlowPage({ step }: Props) {
   );
   const currentUserName = profile?.name || "사용자";
   const currentUserInitial = currentUserName.slice(0, 2).toUpperCase() || "MS";
-  const otherMembers = members.filter((member) =>
-    profile?.id
-      ? member.userId !== profile.id
-      : member.nickName !== currentUserName,
-  );
-  const pendingInvitations = invitations.filter(
-    (invitation) =>
-      !["ACCEPTED", "REJECTED", "CANCELED", "CANCELLED"].includes(
-        normalizeStatus(invitation.status),
-      ),
-  );
-  const finalPlaces = confirmedPlaces.length
-    ? confirmedPlaces
-    : selectedPlaces.map(({ item }) => ({
-        category: voteCategory,
-        categoryLabel: voteCategory,
-        placeName: item.placeName,
-        voteCount: undefined,
-      }));
+  const {
+    confirmedCount,
+    finalPlaces,
+    hasOpenVote,
+    otherMembers,
+    pendingInvitations,
+    votingCount,
+  } = getPlannerPageModel({
+    confirmedPlaces,
+    currentUserName,
+    invitations,
+    members,
+    profileId: profile?.id,
+    selectedPlaces,
+    votes,
+    voteCategory,
+  });
 
   const requiresActivePlanner = !["list", "group"].includes(step);
 
@@ -411,7 +409,7 @@ function PlannerFlowPage({ step }: Props) {
                 handleConfirmVote={handleConfirmVote}
                 handleDeletePlanner={handleDeletePlanner}
                 handleRemindMembers={handleRemindMembers}
-                hasOpenVote={votes.some((vote) => normalizeStatus(vote.status) === "OPEN" && vote.voteId != null)}
+                hasOpenVote={hasOpenVote}
                 inviteLinkError={inviteLinkError}
                 inviteLinkFeedback={inviteLinkFeedback}
                 isConfirmed={isConfirmed}
@@ -427,8 +425,8 @@ function PlannerFlowPage({ step }: Props) {
                 remindFeedback={remindFeedback}
                 remindPending={remindPending}
                 votes={votes}
-                confirmedCount={votes.filter((vote) => vote.confirmedOptionId != null || normalizeStatus(vote.status) === "CONFIRMED").length}
-                votingCount={votes.filter((vote) => normalizeStatus(vote.status) === "OPEN").length}
+                confirmedCount={confirmedCount}
+                votingCount={votingCount}
               />
             ) : null}
 

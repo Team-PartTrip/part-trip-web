@@ -2,6 +2,7 @@ import type { FormEvent } from 'react'
 import { type useNavigate } from '@tanstack/react-router'
 
 import { dedupeDestinations, findExactDestinationMatches } from './destination'
+import { isValidPlannerMemberCount } from './member-count'
 import { type usePlannerData } from './usePlannerData'
 import { type usePlannerMutations } from './usePlannerMutations'
 import { type usePlannerState } from './usePlannerState'
@@ -93,8 +94,7 @@ export function usePlannerDestinationFlow({ data, navigate, state, updatePlanner
       setErrorMessage('국가와 도시가 일치하는 여행지를 선택해주세요.')
       return
     }
-    const minimumMemberCount = isSolo ? 1 : 2
-    if (!Number.isSafeInteger(nextMemberCount) || nextMemberCount < minimumMemberCount || nextMemberCount > 30) {
+    if (!isValidPlannerMemberCount(nextMemberCount, isSolo)) {
       setErrorMessage(isSolo ? '혼자 여행은 1명에서 30명 사이로 입력해주세요.' : '함께 여행은 2명에서 30명 사이로 입력해주세요.')
       return
     }
