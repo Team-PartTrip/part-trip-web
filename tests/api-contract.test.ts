@@ -40,7 +40,10 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
   const session = read('/src/entities/session/api.ts')
   const googleControl = read('/src/shared/ui/auth-form/GoogleLoginControl.tsx')
   const loginForm = read('/src/features/login/ui/LoginForm.tsx')
-  const signUp = read('/src/features/register/ui/SignUpForm.tsx')
+  const signUp = readSources([
+    '/src/features/register/ui/SignUpForm.tsx',
+    '/src/features/register/model/useSignUpFlow.ts',
+  ])
   const travel = read('/src/entities/travel/api.ts')
   const tripCard = read('/src/entities/trip-card/api.ts')
 
