@@ -414,6 +414,35 @@ export const ActionRow = styled.div`
   margin-top: auto;
 `
 
+export const ProgressActions = styled.div`
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 20px;
+  border-top: 1px solid ${({ theme }) => theme.colors.border.subtle};
+
+  @media (max-width: 700px) {
+    align-items: stretch;
+    flex-direction: column;
+  }
+`
+
+export const ProgressActionGroup = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+
+  &:last-child { justify-content: flex-end; }
+
+  @media (max-width: 700px) {
+    &:last-child { justify-content: flex-start; }
+    > button { flex: 1 1 auto; }
+  }
+`
+
 export const FullWidthAction = styled.button`
   width: 100%;
   height: 48px;
@@ -717,6 +746,11 @@ export const PopularButton = styled.button<{ $active: boolean }>`
   text-align: left;
   strong { font-size: 14px; }
   span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
+
+  &:focus-visible {
+    outline: 3px solid ${({ theme }) => theme.colors.brand.primary};
+    outline-offset: 2px;
+  }
 `
 
 export const DateRange = styled.div`
@@ -915,8 +949,9 @@ export const PlaceListHeader = styled.header`
   button { border: 0; padding: 0; background: transparent; color: ${({ theme }) => theme.colors.brand.primary}; cursor: pointer; font-weight: 600; }
 `
 
-export const PlaceRow = styled.div<{ $active?: boolean }>`
+export const PlaceRow = styled.button<{ $active?: boolean }>`
   display: flex;
+  width: 100%;
   min-height: 102px;
   align-items: center;
   gap: 14px;
@@ -926,6 +961,20 @@ export const PlaceRow = styled.div<{ $active?: boolean }>`
   padding: 16px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+
+  &:focus-visible {
+    outline: 3px solid ${({ theme }) => theme.colors.brand.primary};
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
 `
 
 export const PlaceThumb = styled.span<{ $imageUrl?: string }>`
@@ -946,7 +995,7 @@ export const PlaceThumb = styled.span<{ $imageUrl?: string }>`
   font-weight: 600;
 `
 
-export const PlaceDetails = styled.div`
+export const PlaceDetails = styled.span`
   display: flex;
   min-width: 0;
   flex: 1;
@@ -956,7 +1005,7 @@ export const PlaceDetails = styled.div`
   span { overflow: hidden; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
 `
 
-export const PlaceAction = styled.button<{ $active: boolean }>`
+export const PlaceAction = styled.span<{ $active: boolean }>`
   display: flex;
   width: 130px;
   height: 48px;
@@ -964,10 +1013,8 @@ export const PlaceAction = styled.button<{ $active: boolean }>`
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 0;
   padding: 0;
   background: transparent;
-  cursor: pointer;
   font-weight: 600;
 
   span {
@@ -1042,7 +1089,7 @@ export const PanelActions = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: auto;
+  margin-top: 16px;
 
   > button { width: 100%; height: 48px; }
 `
@@ -1086,12 +1133,14 @@ export const CandidateRow = styled.div<{ $selected?: boolean }>`
 `
 
 export const DeleteOptionButton = styled.button`
+  align-self: flex-start;
   border: 0;
   padding: 4px;
   background: transparent;
   color: ${({ theme }) => theme.colors.text.muted};
   cursor: pointer;
   font-size: 11px;
+  text-align: left;
 
   &:disabled { cursor: not-allowed; opacity: .5; }
 `
@@ -1260,9 +1309,8 @@ export const ConfirmOptionButton = styled.button<{ $confirmed?: boolean }>`
 
 export const MemberResponses = styled.section`
   display: flex;
-  min-height: 300px;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   border-radius: 20px;
   padding: 24px;
   background: ${({ theme }) => theme.colors.background.default};

@@ -113,44 +113,56 @@ export function PlannerProgressStep({
               <span>{member.role || '대기 중'}</span>
             </S.ResponseRow>
           ))}
-          <S.ActionRow>
-            {!isConfirmed ? (
-              <PartTripButton type="button" $variant="secondary" disabled={!canManageCandidates} onClick={onOpenExplore}>
-                {votes.length ? '장소 목록에서 투표' : '장소 투표 시작'}
-              </PartTripButton>
-            ) : null}
-            <PartTripButton
-              type="button"
-              disabled={!hasOpenVote || !canCloseVotes || !canManagePlanner || closeVotePending}
-              onClick={() => void handleCloseVote()}
-            >
-              {closeVotePending ? '마감 중' : hasOpenVote ? canCloseVotes ? '투표 마감하기' : '모든 카테고리 투표 후 마감' : '마감할 투표 없음'}
-            </PartTripButton>
-            <PartTripButton type="button" $variant="secondary" disabled={!isRemindAvailable || remindPending} onClick={() => void handleRemindMembers()}>
-              {remindPending ? '알림 전송 중' : '재촉 알림 보내기'}
-            </PartTripButton>
-            <PartTripButton
-              type="button"
-              $variant="secondary"
-              disabled={!votes.length || hasOpenVote || !canManagePlanner || confirmPlannerPending}
-              onClick={() => void handleConfirmPlan().then((confirmed) => { if (confirmed) onOpenFinal() })}
-            >
-              일정 확정하기
-            </PartTripButton>
-            <PartTripButton type="button" $variant="secondary" disabled={!plannerInviteLink} onClick={onCopyInviteLink}>
-              초대링크 복사
-            </PartTripButton>
-            {canManagePlanner ? (
-              <S.DeletePlannerButton
-                type="button"
-                aria-label="현재 플래너 삭제"
-                disabled={deletePlannerPending}
-                onClick={() => { if (window.confirm('이 플래너를 삭제할까요?')) void handleDeletePlanner(plannerDetail?.plannerId) }}
-              >
-                {deletePlannerPending ? '삭제 중' : '삭제'}
-              </S.DeletePlannerButton>
-            ) : null}
-          </S.ActionRow>
+          <S.ProgressActions>
+            <S.ProgressActionGroup>
+              {!isConfirmed && canManageCandidates ? (
+                <PartTripButton type="button" $variant="secondary" onClick={onOpenExplore}>
+                  {votes.length ? '후보 장소 관리' : '장소 후보 추가'}
+                </PartTripButton>
+              ) : null}
+              {hasOpenVote && canManagePlanner ? (
+                <PartTripButton
+                  type="button"
+                  disabled={!canCloseVotes || closeVotePending}
+                  onClick={() => void handleCloseVote()}
+                >
+                  {closeVotePending ? '마감 중' : canCloseVotes ? '투표 마감하기' : '모든 카테고리 투표 후 마감'}
+                </PartTripButton>
+              ) : null}
+              {!isConfirmed && votes.length > 0 && !hasOpenVote && canManagePlanner ? (
+                <PartTripButton
+                  type="button"
+                  $variant="secondary"
+                  disabled={confirmPlannerPending}
+                  onClick={() => void handleConfirmPlan().then((confirmed) => { if (confirmed) onOpenFinal() })}
+                >
+                  일정 확정하기
+                </PartTripButton>
+              ) : null}
+            </S.ProgressActionGroup>
+            <S.ProgressActionGroup>
+              {isRemindAvailable ? (
+                <PartTripButton type="button" $variant="secondary" disabled={remindPending} onClick={() => void handleRemindMembers()}>
+                  {remindPending ? '알림 전송 중' : '재촉 알림 보내기'}
+                </PartTripButton>
+              ) : null}
+              {plannerInviteLink ? (
+                <PartTripButton type="button" $variant="secondary" onClick={onCopyInviteLink}>
+                  초대링크 복사
+                </PartTripButton>
+              ) : null}
+              {canManagePlanner ? (
+                <S.DeletePlannerButton
+                  type="button"
+                  aria-label="현재 플래너 삭제"
+                  disabled={deletePlannerPending}
+                  onClick={() => { if (window.confirm('이 플래너를 삭제할까요?')) void handleDeletePlanner(plannerDetail?.plannerId) }}
+                >
+                  {deletePlannerPending ? '삭제 중' : '삭제'}
+                </S.DeletePlannerButton>
+              ) : null}
+            </S.ProgressActionGroup>
+          </S.ProgressActions>
           {remindFeedback ? <S.ActionFeedback role="status">{remindFeedback}</S.ActionFeedback> : null}
           {inviteLinkFeedback ? <S.ActionFeedback role="status">{inviteLinkFeedback}</S.ActionFeedback> : null}
           {inviteLinkError ? <S.Error role="alert">{inviteLinkError}</S.Error> : null}

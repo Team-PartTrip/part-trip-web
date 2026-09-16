@@ -106,15 +106,15 @@ function PlannerFlowPage({ step }: Props) {
     handleRandomLineup,
     handleRemoveFromLineup,
     handleSaveCandidates,
-    handleVotePlace,
     isSavingCandidates,
     isSavingPlace,
-    isVotingPlace,
     lineupChoice,
     lineupMode,
     place,
     places,
     plannerCategories: categories,
+    selected,
+    selectedPlaceCount,
     selectedPlaces,
     setLineupChoice,
     setLineupMode,
@@ -342,12 +342,14 @@ function PlannerFlowPage({ step }: Props) {
 
             {step === "explore" ? (
               <PlannerExploreStep
-                activeVote={activeVote}
-                canManagePlanner={canManagePlanner}
-                handleVotePlace={handleVotePlace}
-                isVotingPlace={isVotingPlace}
+                canManageCandidates={canManageCandidates}
+                handleSaveCandidates={handleSaveCandidates}
+                isSavingCandidates={isSavingCandidates}
                 places={places}
                 plannerCategories={categories}
+                selected={selected}
+                selectedPlaceCount={selectedPlaceCount}
+                setSelected={setSelected}
                 setVoteCategory={setVoteCategory}
                 voteCategory={voteCategory}
               />

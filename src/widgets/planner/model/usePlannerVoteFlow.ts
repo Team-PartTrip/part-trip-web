@@ -24,8 +24,7 @@ type Props = {
 
 function isPlannerLeader(role?: string) {
   const normalizedRole = role?.trim().toUpperCase() ?? ''
-  return ['ADMIN', 'CREATOR', 'GROUP_LEADER', 'HOST', 'LEADER', 'OWNER', '그룹장', '방장']
-    .some((value) => normalizedRole.includes(value))
+  return normalizedRole === 'OWNER'
 }
 
 export function usePlannerVoteFlow({ data, navigate, mutations, state, step }: Props) {
@@ -42,6 +41,7 @@ export function usePlannerVoteFlow({ data, navigate, mutations, state, step }: P
   } = state
   const { plannerDetail, votes, voteDetail } = data
   const {
+    cancelPlaceVoteMutation,
     castBallotMutation,
     closeVoteMutation,
     confirmVoteMutation,
@@ -55,21 +55,31 @@ export function usePlannerVoteFlow({ data, navigate, mutations, state, step }: P
   const canManagePlanner = isPositiveSafeInteger(activePlannerId) && isPlannerLeader(plannerDetail?.role)
   const isRemindAvailable = canManagePlanner && openVotes.length > 0
 
-  const handleCastBallot = async (optionId?: number) => {
+  const handleCastBallot = async (optionId?: number, tourPlaceId?: number, selected = false) => {
     if (normalizeStatus(activeVote?.status) !== 'OPEN' || activeVote?.deadlinePassed === true || !isPositiveSafeInteger(activePlannerId) || !isPositiveSafeInteger(activeVote?.voteId) || !isPositiveSafeInteger(optionId)) {
       setErrorMessage('투표할 후보 정보를 확인할 수 없습니다.')
       return
     }
     try {
       setErrorMessage('')
+      if (selected) {
+        if (!isPositiveSafeInteger(tourPlaceId)) {
+          setErrorMessage('투표를 취소할 장소 정보를 확인할 수 없습니다.')
+          return
+        }
+        setSelectedOptionId(undefined)
+        await cancelPlaceVoteMutation.mutateAsync({ plannerId: activePlannerId, tourPlaceId })
+        return
+      }
+      setSelectedOptionId(optionId)
       await castBallotMutation.mutateAsync({
         payload: { optionId },
         plannerId: activePlannerId,
         voteId: activeVote.voteId,
       })
-      setSelectedOptionId(optionId)
     } catch {
-      setErrorMessage('투표를 저장하지 못했습니다.')
+      setSelectedOptionId(selected ? optionId : undefined)
+      setErrorMessage('투표 상태를 변경하지 못했습니다.')
     }
   }
 
@@ -134,7 +144,7 @@ export function usePlannerVoteFlow({ data, navigate, mutations, state, step }: P
     activeVote,
     canCloseVotes,
     canManagePlanner,
-    castBallotPending: castBallotMutation.isPending,
+    castBallotPending: castBallotMutation.isPending || cancelPlaceVoteMutation.isPending,
     closeVotePending: closeVoteMutation.isPending,
     confirmVotePending: confirmVoteMutation.isPending,
     deleteVoteOptionPending: deleteVoteOptionMutation.isPending,

@@ -97,10 +97,10 @@ export function PlannerVoteStep({
                   <button
                     type="button"
                     aria-pressed={isSelected}
-                    disabled={!canVote || castBallotPending || option.optionId == null}
-                    onClick={() => void handleCastBallot(option.optionId)}
+                    disabled={!canVote || castBallotPending || option.optionId == null || (isSelected && option.tourPlaceId == null)}
+                    onClick={() => void handleCastBallot(option.optionId, option.tourPlaceId, isSelected)}
                   >
-                    {isSelected ? '투표 완료' : '투표'}
+                    {isSelected ? '투표 취소' : '투표'}
                   </button>
                 </S.VoteMeta>
               </S.CandidateRow>
