@@ -14,7 +14,7 @@ interface ImportMeta {
 }
 
 interface KakaoAuthApi {
-  authorize(options: { redirectUri: string }): void
+  authorize(options: { redirectUri: string; state?: string }): void
 }
 
 interface KakaoSdk {

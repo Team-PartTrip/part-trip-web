@@ -4,7 +4,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { kakaoLogin, saveAuthTokens } from '@/entities/session/api'
 import { partTripLogoUrl } from '@/shared/assets'
 import { paths } from '@/shared/config'
-import { getKakaoRedirectUri, consumeKakaoRedirect } from '@/shared/libs/kakao-auth'
+import { consumeKakaoAuthRequest, getKakaoRedirectUri } from '@/shared/libs/kakao-auth'
 import { getErrorMessage, getSafeRedirect } from '@/shared/utils'
 import { AuthForm as S } from '@/shared/ui'
 
@@ -22,17 +22,26 @@ function KakaoCallbackRoute() {
       code: params.get('code') ?? '',
       error: params.get('error'),
       errorDescription: params.get('error_description'),
+      state: params.get('state'),
     }
   })
-  const [redirect] = useState(() => getSafeRedirect(consumeKakaoRedirect()))
+  const [pendingRequest] = useState(() => consumeKakaoAuthRequest())
+  const [redirect] = useState(() => getSafeRedirect(pendingRequest.redirect))
   const hasCallbackError = Boolean(callback.error || !callback.code)
+  const hasInvalidState = !hasCallbackError
+    && (!callback.state || callback.state !== pendingRequest.state)
   const [message, setMessage] = useState(
-    () => callback.errorDescription ?? (hasCallbackError ? '카카오 로그인이 취소되었습니다.' : '카카오 로그인 처리 중입니다.'),
+    () => callback.errorDescription
+      ?? (hasInvalidState
+        ? '카카오 로그인 요청이 유효하지 않습니다.'
+        : hasCallbackError
+          ? '카카오 로그인이 취소되었습니다.'
+          : '카카오 로그인 처리 중입니다.'),
   )
-  const [hasError, setHasError] = useState(hasCallbackError)
+  const [hasError, setHasError] = useState(hasCallbackError || hasInvalidState)
 
   useEffect(() => {
-    if (hasCallbackError) return
+    if (hasCallbackError || hasInvalidState) return
 
     let active = true
     void kakaoLogin({
@@ -53,7 +62,7 @@ function KakaoCallbackRoute() {
     return () => {
       active = false
     }
-  }, [callback, hasCallbackError, navigate, redirect])
+  }, [callback, hasCallbackError, hasInvalidState, navigate, redirect])
 
   return (
     <S.Container>
