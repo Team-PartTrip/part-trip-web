@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 
 import { kakaoLogin, saveAuthTokens } from '@/entities/session/api'
 import { partTripLogoUrl } from '@/shared/assets'
 import { paths } from '@/shared/config'
-import { consumeKakaoAuthRequest, getKakaoRedirectUri } from '@/shared/libs/kakao-auth'
+import { clearKakaoAuthRequest, getKakaoAuthRequest, getKakaoRedirectUri } from '@/shared/libs/kakao-auth'
 import { getErrorMessage, getSafeRedirect } from '@/shared/utils'
 import { AuthForm as S } from '@/shared/ui'
 
@@ -25,7 +25,7 @@ function KakaoCallbackRoute() {
       state: params.get('state'),
     }
   })
-  const [pendingRequest] = useState(() => consumeKakaoAuthRequest())
+  const [pendingRequest] = useState(() => getKakaoAuthRequest())
   const [redirect] = useState(() => getSafeRedirect(pendingRequest.redirect))
   const hasCallbackError = Boolean(callback.error || !callback.code)
   const hasInvalidState = !hasCallbackError
@@ -39,9 +39,12 @@ function KakaoCallbackRoute() {
           : '카카오 로그인 처리 중입니다.'),
   )
   const [hasError, setHasError] = useState(hasCallbackError || hasInvalidState)
+  const hasStartedRef = useRef(false)
 
   useEffect(() => {
-    if (hasCallbackError || hasInvalidState) return
+    clearKakaoAuthRequest()
+    if (hasCallbackError || hasInvalidState || hasStartedRef.current) return
+    hasStartedRef.current = true
 
     let active = true
     void kakaoLogin({

@@ -50,15 +50,25 @@ export function beginKakaoLogin(redirect?: string) {
   }
 }
 
-export function consumeKakaoAuthRequest(): KakaoAuthRequest {
+export function getKakaoAuthRequest(): KakaoAuthRequest {
   if (typeof window === 'undefined') return {}
 
-  const request = {
+  return {
     redirect: window.sessionStorage.getItem(PENDING_REDIRECT_KEY) ?? undefined,
     state: window.sessionStorage.getItem(PENDING_STATE_KEY) ?? undefined,
   }
+}
+
+export function clearKakaoAuthRequest() {
+  if (typeof window === 'undefined') return
+
   window.sessionStorage.removeItem(PENDING_REDIRECT_KEY)
   window.sessionStorage.removeItem(PENDING_STATE_KEY)
+}
+
+export function consumeKakaoAuthRequest(): KakaoAuthRequest {
+  const request = getKakaoAuthRequest()
+  clearKakaoAuthRequest()
   return request
 }
 
