@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as appAuthenticatedRouteRouteImport } from './routes/(app)/_authenticated/route'
 import { Route as homeIndexRouteImport } from './routes/(home)/index'
-import { Route as publicChangePasswordIndexRouteImport } from './routes/(public)/change-password/index'
 import { Route as publicLoginIndexRouteImport } from './routes/(public)/login/index'
 import { Route as publicSignUpIndexRouteImport } from './routes/(public)/sign-up/index'
 import { Route as appAuthenticatedMainIndexRouteImport } from './routes/(app)/_authenticated/main/index'
@@ -44,6 +43,7 @@ import { Route as appAuthenticatedTravelSelectIndexRouteImport } from './routes/
 import { Route as appAuthenticatedTripCardsTripIdIndexRouteImport } from './routes/(app)/_authenticated/trip-cards/$tripId/index'
 import { Route as appAuthenticatedTripCardsDeleteIndexRouteImport } from './routes/(app)/_authenticated/trip-cards/delete/index'
 import { Route as appAuthenticatedTripCardsNewIndexRouteImport } from './routes/(app)/_authenticated/trip-cards/new/index'
+import { Route as publicAuthKakaoCallbackIndexRouteImport } from './routes/(public)/auth/kakao/callback/index'
 import { Route as appAuthenticatedPlannerPlacePlaceIdIndexRouteImport } from './routes/(app)/_authenticated/planner/place/$placeId/index'
 import { Route as appAuthenticatedRecordRecordIdEditIndexRouteImport } from './routes/(app)/_authenticated/record/$recordId/edit/index'
 
@@ -56,12 +56,6 @@ const homeIndexRoute = homeIndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const publicChangePasswordIndexRoute =
-  publicChangePasswordIndexRouteImport.update({
-    id: '/(public)/change-password/',
-    path: '/change-password/',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const publicLoginIndexRoute = publicLoginIndexRouteImport.update({
   id: '/(public)/login/',
   path: '/login/',
@@ -252,6 +246,12 @@ const appAuthenticatedTripCardsNewIndexRoute =
     path: '/trip-cards/new/',
     getParentRoute: () => appAuthenticatedRouteRoute,
   } as any)
+const publicAuthKakaoCallbackIndexRoute =
+  publicAuthKakaoCallbackIndexRouteImport.update({
+    id: '/(public)/auth/kakao/callback/',
+    path: '/auth/kakao/callback/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const appAuthenticatedPlannerPlacePlaceIdIndexRoute =
   appAuthenticatedPlannerPlacePlaceIdIndexRouteImport.update({
     id: '/planner/place/$placeId/',
@@ -267,7 +267,6 @@ const appAuthenticatedRecordRecordIdEditIndexRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof homeIndexRoute
-  '/change-password/': typeof publicChangePasswordIndexRoute
   '/login/': typeof publicLoginIndexRoute
   '/sign-up/': typeof publicSignUpIndexRoute
   '/main/': typeof appAuthenticatedMainIndexRoute
@@ -300,12 +299,12 @@ export interface FileRoutesByFullPath {
   '/trip-cards/$tripId/': typeof appAuthenticatedTripCardsTripIdIndexRoute
   '/trip-cards/delete/': typeof appAuthenticatedTripCardsDeleteIndexRoute
   '/trip-cards/new/': typeof appAuthenticatedTripCardsNewIndexRoute
+  '/auth/kakao/callback/': typeof publicAuthKakaoCallbackIndexRoute
   '/planner/place/$placeId/': typeof appAuthenticatedPlannerPlacePlaceIdIndexRoute
   '/record/$recordId/edit/': typeof appAuthenticatedRecordRecordIdEditIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof homeIndexRoute
-  '/change-password': typeof publicChangePasswordIndexRoute
   '/login': typeof publicLoginIndexRoute
   '/sign-up': typeof publicSignUpIndexRoute
   '/main': typeof appAuthenticatedMainIndexRoute
@@ -338,6 +337,7 @@ export interface FileRoutesByTo {
   '/trip-cards/$tripId': typeof appAuthenticatedTripCardsTripIdIndexRoute
   '/trip-cards/delete': typeof appAuthenticatedTripCardsDeleteIndexRoute
   '/trip-cards/new': typeof appAuthenticatedTripCardsNewIndexRoute
+  '/auth/kakao/callback': typeof publicAuthKakaoCallbackIndexRoute
   '/planner/place/$placeId': typeof appAuthenticatedPlannerPlacePlaceIdIndexRoute
   '/record/$recordId/edit': typeof appAuthenticatedRecordRecordIdEditIndexRoute
 }
@@ -345,7 +345,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(app)/_authenticated': typeof appAuthenticatedRouteRouteWithChildren
   '/(home)/': typeof homeIndexRoute
-  '/(public)/change-password/': typeof publicChangePasswordIndexRoute
   '/(public)/login/': typeof publicLoginIndexRoute
   '/(public)/sign-up/': typeof publicSignUpIndexRoute
   '/(app)/_authenticated/main/': typeof appAuthenticatedMainIndexRoute
@@ -378,6 +377,7 @@ export interface FileRoutesById {
   '/(app)/_authenticated/trip-cards/$tripId/': typeof appAuthenticatedTripCardsTripIdIndexRoute
   '/(app)/_authenticated/trip-cards/delete/': typeof appAuthenticatedTripCardsDeleteIndexRoute
   '/(app)/_authenticated/trip-cards/new/': typeof appAuthenticatedTripCardsNewIndexRoute
+  '/(public)/auth/kakao/callback/': typeof publicAuthKakaoCallbackIndexRoute
   '/(app)/_authenticated/planner/place/$placeId/': typeof appAuthenticatedPlannerPlacePlaceIdIndexRoute
   '/(app)/_authenticated/record/$recordId/edit/': typeof appAuthenticatedRecordRecordIdEditIndexRoute
 }
@@ -385,7 +385,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/change-password/'
     | '/login/'
     | '/sign-up/'
     | '/main/'
@@ -418,12 +417,12 @@ export interface FileRouteTypes {
     | '/trip-cards/$tripId/'
     | '/trip-cards/delete/'
     | '/trip-cards/new/'
+    | '/auth/kakao/callback/'
     | '/planner/place/$placeId/'
     | '/record/$recordId/edit/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/change-password'
     | '/login'
     | '/sign-up'
     | '/main'
@@ -456,13 +455,13 @@ export interface FileRouteTypes {
     | '/trip-cards/$tripId'
     | '/trip-cards/delete'
     | '/trip-cards/new'
+    | '/auth/kakao/callback'
     | '/planner/place/$placeId'
     | '/record/$recordId/edit'
   id:
     | '__root__'
     | '/(app)/_authenticated'
     | '/(home)/'
-    | '/(public)/change-password/'
     | '/(public)/login/'
     | '/(public)/sign-up/'
     | '/(app)/_authenticated/main/'
@@ -495,6 +494,7 @@ export interface FileRouteTypes {
     | '/(app)/_authenticated/trip-cards/$tripId/'
     | '/(app)/_authenticated/trip-cards/delete/'
     | '/(app)/_authenticated/trip-cards/new/'
+    | '/(public)/auth/kakao/callback/'
     | '/(app)/_authenticated/planner/place/$placeId/'
     | '/(app)/_authenticated/record/$recordId/edit/'
   fileRoutesById: FileRoutesById
@@ -502,9 +502,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   appAuthenticatedRouteRoute: typeof appAuthenticatedRouteRouteWithChildren
   homeIndexRoute: typeof homeIndexRoute
-  publicChangePasswordIndexRoute: typeof publicChangePasswordIndexRoute
   publicLoginIndexRoute: typeof publicLoginIndexRoute
   publicSignUpIndexRoute: typeof publicSignUpIndexRoute
+  publicAuthKakaoCallbackIndexRoute: typeof publicAuthKakaoCallbackIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -521,13 +521,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof homeIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(public)/change-password/': {
-      id: '/(public)/change-password/'
-      path: '/change-password'
-      fullPath: '/change-password/'
-      preLoaderRoute: typeof publicChangePasswordIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(public)/login/': {
@@ -754,6 +747,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAuthenticatedTripCardsNewIndexRouteImport
       parentRoute: typeof appAuthenticatedRouteRoute
     }
+    '/(public)/auth/kakao/callback/': {
+      id: '/(public)/auth/kakao/callback/'
+      path: '/auth/kakao/callback'
+      fullPath: '/auth/kakao/callback/'
+      preLoaderRoute: typeof publicAuthKakaoCallbackIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(app)/_authenticated/planner/place/$placeId/': {
       id: '/(app)/_authenticated/planner/place/$placeId/'
       path: '/planner/place/$placeId'
@@ -871,9 +871,9 @@ const appAuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   appAuthenticatedRouteRoute: appAuthenticatedRouteRouteWithChildren,
   homeIndexRoute: homeIndexRoute,
-  publicChangePasswordIndexRoute: publicChangePasswordIndexRoute,
   publicLoginIndexRoute: publicLoginIndexRoute,
   publicSignUpIndexRoute: publicSignUpIndexRoute,
+  publicAuthKakaoCallbackIndexRoute: publicAuthKakaoCallbackIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

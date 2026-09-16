@@ -27,7 +27,6 @@ export function GoogleLoginControl({ disabled, isSubmitting, label = 'Google로 
         theme="outline"
         size="large"
         shape="rectangular"
-        width="100%"
       />
     </S.GoogleLoginContainer>
   )

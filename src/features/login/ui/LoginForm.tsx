@@ -1,35 +1,14 @@
 import { useState } from 'react'
-import {
-  useForm,
-  type SubmitErrorHandler,
-  type SubmitHandler,
-} from 'react-hook-form'
 import { useNavigate } from '@tanstack/react-router'
-import { googleLogin, login, saveAuthTokens } from '@/entities/session/api'
+import { googleLogin, saveAuthTokens } from '@/entities/session/api'
 import { partTripLogoUrl } from '@/shared/assets'
 import { paths } from '@/shared/config'
-import {
-  authValidationRules,
-  createSanitizedChangeHandler,
-  getErrorMessage,
-  getFirstErrorMessage,
-  getIdValidationError,
-  getPasswordValidationError,
-  getSafeRedirect,
-  sanitizeId,
-  sanitizePassword,
-  trimFormValue,
-} from '@/shared/utils'
-import { AuthForm as S, GoogleLoginControl } from '@/shared/ui'
+import { getErrorMessage, getSafeRedirect } from '@/shared/utils'
+import { AuthForm as S, GoogleLoginControl, KakaoLoginControl } from '@/shared/ui'
 
 type FormMessage = {
   text: string
   tone: 'error' | 'success'
-}
-
-type LoginFormValues = {
-  userId: string
-  userPwd: string
 }
 
 type LoginFormProps = {
@@ -45,50 +24,6 @@ export function LoginForm({ redirect }: LoginFormProps) {
   const [message, setMessage] = useState<FormMessage | null>(null)
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
 
-  const loginForm = useForm<LoginFormValues>({
-    defaultValues: {
-      userId: '',
-      userPwd: '',
-    },
-  })
-
-  const userIdField = loginForm.register('userId', {
-    required: '아이디를 입력해주세요.',
-    setValueAs: (value) => sanitizeId(trimFormValue(value)),
-    validate: (value) => getIdValidationError(value) ?? true,
-  })
-  const userPwdField = loginForm.register('userPwd', {
-    required: '비밀번호를 입력해주세요.',
-    setValueAs: (value) => sanitizePassword(trimFormValue(value)),
-    validate: (value) => getPasswordValidationError(value) ?? true,
-  })
-
-  const handleSubmit: SubmitHandler<LoginFormValues> = async ({
-    userId,
-    userPwd,
-  }) => {
-    try {
-      const tokens = await login({
-        userId,
-        userPwd,
-      })
-      saveAuthTokens(tokens)
-      navigateAfterAuth()
-    } catch (error) {
-      setMessage({
-        text: getErrorMessage(error),
-        tone: 'error',
-      })
-    }
-  }
-
-  const handleInvalid: SubmitErrorHandler<LoginFormValues> = (errors) => {
-    setMessage({
-      text: getFirstErrorMessage(errors),
-      tone: 'error',
-    })
-  }
-
   const handleGoogleLogin = async (idToken: string) => {
     try {
       setIsGoogleSubmitting(true)
@@ -102,60 +37,21 @@ export function LoginForm({ redirect }: LoginFormProps) {
     }
   }
 
-  const isSubmitting = loginForm.formState.isSubmitting || isGoogleSubmitting
+  const isSubmitting = isGoogleSubmitting
 
   return (
     <S.Container>
       <S.Header>
         <S.Brand><img src={partTripLogoUrl} alt="PartTrip" /></S.Brand>
         <S.Title>로그인</S.Title>
-        <S.Subtitle>아이디와 비밀번호로 로그인하세요.</S.Subtitle>
+        <S.Subtitle>카카오 또는 Google 계정으로 로그인하세요.</S.Subtitle>
       </S.Header>
 
       <S.Body>
         <S.Form
           aria-label="로그인"
-          method="post"
-          noValidate
-          onSubmit={loginForm.handleSubmit(handleSubmit, handleInvalid)}
+          onSubmit={(event) => event.preventDefault()}
         >
-          <S.Input
-            {...userIdField}
-            aria-label="아이디"
-            type="text"
-            autoComplete="username"
-            placeholder="아이디를 입력하세요"
-            minLength={authValidationRules.id.minLength}
-            maxLength={authValidationRules.id.maxLength}
-            pattern={authValidationRules.id.pattern}
-            title="아이디는 영문 소문자와 숫자만 입력해주세요."
-            onChange={createSanitizedChangeHandler(userIdField, sanitizeId)}
-            disabled={isSubmitting}
-            required
-          />
-
-          <S.Input
-            {...userPwdField}
-            aria-label="비밀번호"
-            type="password"
-            autoComplete="current-password"
-            placeholder="비밀번호를 입력하세요"
-            minLength={authValidationRules.password.minLength}
-            maxLength={authValidationRules.password.maxLength}
-            pattern={authValidationRules.password.pattern}
-            title="비밀번호는 영문, 숫자, 특수문자 중 2종 이상을 포함해주세요."
-            onChange={createSanitizedChangeHandler(
-              userPwdField,
-              sanitizePassword,
-            )}
-            disabled={isSubmitting}
-            required
-          />
-
-          <S.HintRow>
-            <S.InlineLink to={paths.changePassword}>비밀번호를 잊으셨나요?</S.InlineLink>
-          </S.HintRow>
-
           {message ? (
             <S.Message $tone={message.tone} aria-live="polite">
               {message.text}
@@ -163,9 +59,11 @@ export function LoginForm({ redirect }: LoginFormProps) {
           ) : null}
 
           <S.Actions>
-            <S.PrimaryButton type="submit" disabled={isSubmitting} $strong>
-              {isSubmitting ? '로그인 중' : '로그인'}
-            </S.PrimaryButton>
+            <KakaoLoginControl
+              disabled={isSubmitting}
+              redirect={safeRedirect}
+              onError={(error) => setMessage({ text: getErrorMessage(error), tone: 'error' })}
+            />
             <S.Divider>또는</S.Divider>
             <GoogleLoginControl
               disabled={isSubmitting}
