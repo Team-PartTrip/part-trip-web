@@ -43,24 +43,22 @@ test('빈 인증 토큰은 저장하지 않는다', () => {
   assert.equal(storage.getItem(REFRESH_TOKEN_KEY), null)
 })
 
-test('브라우저 기본 저장소는 sessionStorage를 사용하고 legacy 토큰을 제거한다', () => {
+test('브라우저 기본 저장소는 localStorage를 사용한다', () => {
+  const localStorage = createStorage()
   const sessionStorage = createStorage()
-  const legacyStorage = createStorage()
   const previousWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
-  legacyStorage.setItem(ACCESS_TOKEN_KEY, 'legacy-access')
-  legacyStorage.setItem(REFRESH_TOKEN_KEY, 'legacy-refresh')
   Object.defineProperty(globalThis, 'window', {
     configurable: true,
-    value: { localStorage: legacyStorage, sessionStorage },
+    value: { localStorage, sessionStorage },
   })
 
   try {
     saveAuthTokens({ accessToken: 'access', refreshToken: 'refresh' })
 
-    assert.equal(sessionStorage.getItem(ACCESS_TOKEN_KEY), 'access')
-    assert.equal(sessionStorage.getItem(REFRESH_TOKEN_KEY), 'refresh')
-    assert.equal(legacyStorage.getItem(ACCESS_TOKEN_KEY), null)
-    assert.equal(legacyStorage.getItem(REFRESH_TOKEN_KEY), null)
+    assert.equal(localStorage.getItem(ACCESS_TOKEN_KEY), 'access')
+    assert.equal(localStorage.getItem(REFRESH_TOKEN_KEY), 'refresh')
+    assert.equal(sessionStorage.getItem(ACCESS_TOKEN_KEY), null)
+    assert.equal(sessionStorage.getItem(REFRESH_TOKEN_KEY), null)
   } finally {
     clearAuthTokens()
     if (previousWindow) {

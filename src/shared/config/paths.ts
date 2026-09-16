@@ -1,5 +1,5 @@
 export const paths = {
-  changePassword: '/change-password',
+  kakaoCallback: '/auth/kakao/callback',
   login: '/login',
   main: '/main',
   planner: '/planner',
