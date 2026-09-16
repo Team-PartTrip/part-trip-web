@@ -47,7 +47,7 @@ export function usePlannerData(
   const needsVotes = step === 'explore' || step === 'vote' || step === 'lineup' || step === 'progress' || step === 'final' || step === 'place'
   const requiresVotes = step === 'vote' || step === 'progress' || step === 'place'
   const needsVoteDetail = step === 'vote' &&
-    isPositiveSafeInteger(activePlannerId) &&
+    hasActivePlanner &&
     isPositiveSafeInteger(activeVoteId)
   const requiresVoteList = requiresVotes && !needsVoteDetail
   const needsConfirmedPlaces = step === 'final'

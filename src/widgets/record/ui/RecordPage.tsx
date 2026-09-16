@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useMyTrips } from '@/entities/trip-plan'
 import { paths } from '@/shared/config'
 import { Button as PartTripButton } from '@/shared/ui/parttrip'
-import { formatDate } from '@/shared/utils'
+import { formatCalendarDate, formatDate } from '@/shared/utils'
 import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './RecordPage.styles'
@@ -13,7 +13,7 @@ export function RecordPage() {
   const { hasError, isLoading, trips } = useMyTrips()
   const [year, setYear] = useState('all')
   const now = new Date()
-  const today = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-')
+  const today = formatCalendarDate(now.getFullYear(), now.getMonth(), now.getDate())
   const records = trips.map((trip) => ({
     id: trip.tripId,
     title: trip.title || `${trip.cityName || trip.countryName || '여행'} 여행`,

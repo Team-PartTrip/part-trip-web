@@ -10,11 +10,9 @@ import { WorldMap } from "@/shared/ui";
 import { AppShell } from "@/widgets/app-shell";
 import { LogoutDialog } from "@/widgets/sidebar";
 
-import * as S from "./ProfilePage.styles";
+import { getProfilePageModel } from '../model/profile-page';
 
-function initials(name?: string) {
-  return name?.slice(0, 2).toUpperCase() || "MS";
-}
+import * as S from "./ProfilePage.styles";
 
 type ProfilePageProps = {
   editMode?: boolean;
@@ -37,16 +35,15 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
   } = useWorldMapQuery();
   const isLoading = isTripsLoading || isProfileLoading || isProfileStatsLoading || isWorldMapLoading;
   const hasPageError = hasProfileError || hasTripsError || hasWorldMapError;
-  const tripCountryCount = new Set(
-    trips.map((trip) => trip.countryName).filter(Boolean),
-  ).size;
-  const visitedCountries = worldMap?.visited ?? [];
-  const countryCount = worldMap
-    ? new Set(visitedCountries.map((country) => country.countryName).filter(Boolean)).size
-    : tripCountryCount;
-  const recordCount = trips.reduce((total, trip) => total + (trip.images?.length ?? 0), 0);
-  const displayedRecordCount = profileStats?.recordCount ?? recordCount;
-  const name = profile?.name || "닉네임 미설정";
+  const {
+    countryCount,
+    displayedCountryCount,
+    displayedRecordCount,
+    displayedTripCount,
+    initials,
+    name,
+    visitedCountries,
+  } = getProfilePageModel({ profile, profileStats, trips, worldMap });
 
   return (
     <AppShell>
@@ -75,7 +72,7 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
                   {profile?.avatarUrl ? (
                     <img src={profile.avatarUrl} alt={`${name} 프로필 사진`} />
                   ) : (
-                    initials(name)
+                    initials
                   )}
                 </S.Avatar>
                 <h2>{name}</h2>
@@ -99,11 +96,11 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
                 <S.Stats>
                   <div>
                     <small>여행</small>
-                    <strong>{profileStats?.tripCount ?? trips.length}</strong>
+                    <strong>{displayedTripCount}</strong>
                   </div>
                   <div>
                     <small>국가</small>
-                    <strong>{profileStats?.countryCount ?? countryCount}</strong>
+                    <strong>{displayedCountryCount}</strong>
                   </div>
                   <div>
                     <small>기록</small>

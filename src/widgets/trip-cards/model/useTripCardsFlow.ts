@@ -3,7 +3,6 @@ import { useNavigate, useParams } from '@tanstack/react-router'
 
 import { useDeleteTravelCardsMutation } from '@/entities/trip-card'
 import { useMyTrips, useTripQuery } from '@/entities/trip-plan'
-import { paths } from '@/shared/config'
 
 export type TripCardsMode = 'list' | 'detail' | 'create' | 'delete'
 
@@ -16,7 +15,6 @@ export function useTripCardsFlow(mode: TripCardsMode) {
   const myTripsQuery = useMyTrips(mode !== 'detail')
   const deleteMutation = useDeleteTravelCardsMutation()
   const cards = myTripsQuery.trips
-  const mine = myTripsQuery.trips
   const detail = tripQuery.data
   const isLoading = mode === 'detail' ? tripQuery.isLoading : myTripsQuery.isLoading
   const hasQueryError = mode === 'detail' ? tripQuery.isError : myTripsQuery.hasError
@@ -37,16 +35,12 @@ export function useTripCardsFlow(mode: TripCardsMode) {
 
   return {
     cards,
-    deleteMutation,
     detail,
     handleDelete,
     hasQueryError,
     isLoading,
     message,
-    mine,
-    myTripsQuery,
     navigate,
-    paths,
     selected,
     setSelected,
   }

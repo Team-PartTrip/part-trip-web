@@ -36,10 +36,8 @@ export const festivalsQueryOptions = (countryName: string, year?: number, month?
     enabled: Boolean(countryName),
   })
 
-export function useCountriesQuery(keywordOrEnabled: string | boolean = '', enabled = true) {
-  const keyword = typeof keywordOrEnabled === 'string' ? keywordOrEnabled : ''
-  const isEnabled = typeof keywordOrEnabled === 'boolean' ? keywordOrEnabled : enabled
-  return useQuery(countriesQueryOptions(keyword, isEnabled))
+export function useCountriesQuery(keyword = '', enabled = true) {
+  return useQuery(countriesQueryOptions(keyword, enabled))
 }
 
 export const popularCitiesQueryOptions = (limit = 8, enabled = true) =>

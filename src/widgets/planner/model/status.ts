@@ -1,6 +1,6 @@
 export type PlannerStatusKey = 'active' | 'planned' | 'completed'
 
-function normalizeStatus(status?: string) {
+export function normalizeStatus(status?: string) {
   return status?.trim().toUpperCase() ?? ''
 }
 

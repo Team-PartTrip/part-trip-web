@@ -6,6 +6,7 @@ export const userQueryKeys = {
   all: ['user'] as const,
   profile: () => [...userQueryKeys.all, 'profile'] as const,
   source: () => [...userQueryKeys.all, 'source'] as const,
+  stats: () => [...userQueryKeys.all, 'stats'] as const,
 }
 
 export const userProfileQueryOptions = () =>
@@ -30,7 +31,7 @@ export function useProfileSourceQuery() {
 
 export const profileStatsQueryOptions = () =>
   queryOptions({
-    queryKey: [...userQueryKeys.all, 'stats'] as const,
+    queryKey: userQueryKeys.stats(),
     queryFn: getProfileStats,
   })
 

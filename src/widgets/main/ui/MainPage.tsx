@@ -2,23 +2,11 @@ import { useNavigate } from '@tanstack/react-router'
 import { useMainTravelQuery } from '@/entities/travel'
 import { figmaPlannerIcon } from '@/shared/assets'
 import { paths } from '@/shared/config'
-import { formatDate, getDateRangeDays } from '@/shared/utils'
+import { formatDateRange, formatTripDuration } from '@/shared/utils'
 import { AppShell } from '@/widgets/app-shell'
 
 import { formatDday, hasTravelPlan } from '../model/dday'
 import * as S from './MainPage.styles'
-
-function dateRangeLabel(startDate?: string | null, endDate?: string | null) {
-  const start = formatDate(startDate)
-  const end = formatDate(endDate)
-  if (start.length >= 7 && end.startsWith(start.slice(0, 7))) return `${start} – ${end.slice(5)}`
-  return `${start} – ${end}`
-}
-
-function durationLabel(startDate?: string | null, endDate?: string | null) {
-  const days = getDateRangeDays(startDate, endDate)
-  return days == null ? '여행 기간 미설정' : `${Math.max(0, days - 1)}박 ${days}일`
-}
 
 export function MainPage() {
   const navigate = useNavigate()
@@ -26,7 +14,7 @@ export function MainPage() {
   const plan = data.plan
   const hasPlan = hasTravelPlan(plan)
   const destination = plan?.cityName || plan?.countryName || data.country?.cityName || data.country?.countryName || '여행지'
-  const dateRange = plan ? dateRangeLabel(plan.startDate, plan.endDate) : '여행 정보가 없습니다.'
+  const dateRange = plan ? formatDateRange(plan.startDate, plan.endDate) : '여행 정보가 없습니다.'
   const recommendations = data.tourPlaces.slice(0, 3)
 
   return (
@@ -37,7 +25,7 @@ export function MainPage() {
           <S.Hero>
             <S.HeroLabel>다가오는 여행</S.HeroLabel>
             <S.Dday>{formatDday(plan?.dday)}</S.Dday>
-            <S.Destination>{destination} · {durationLabel(plan?.startDate, plan?.endDate)}</S.Destination>
+            <S.Destination>{destination} · {formatTripDuration(plan?.startDate, plan?.endDate) || '여행 기간 미설정'}</S.Destination>
             <S.HeroMeta>{dateRange} · {plan?.headcount ?? '-'}명</S.HeroMeta>
           </S.Hero>
 

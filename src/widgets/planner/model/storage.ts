@@ -5,8 +5,6 @@ export type PlannerGroupSettings = {
   memberCount: number
 }
 
-export const ACTIVE_VOTE_ID_KEY = 'parttrip:active-vote-id'
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
@@ -64,8 +62,10 @@ export function parsePlannerSelectedPlacesByCategory(value: string | null) {
     if (!isRecord(parsed)) return {}
 
     return Object.fromEntries(
-      Object.entries(parsed).filter(([, places]) => Array.isArray(places) && places.every(isSelectedPlace)),
-    ) as Record<string, TourPlaceResponseDto[]>
+      Object.entries(parsed).filter((entry): entry is [string, TourPlaceResponseDto[]] =>
+        Array.isArray(entry[1]) && entry[1].every(isSelectedPlace),
+      ),
+    )
   } catch {
     return {}
   }

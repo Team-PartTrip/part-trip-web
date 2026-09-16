@@ -122,23 +122,22 @@ export const NotificationItem = styled.button<{ $read: boolean }>`
   min-height: 72px;
   align-items: center;
   gap: 12px;
-  grid-template-columns: 8px minmax(0, 1fr) auto;
-  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  border: 1px solid ${({ $read, theme }) => ($read ? theme.colors.border.subtle : theme.colors.border.interactive)};
   border-radius: 14px;
   padding: 16px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-  color: ${({ theme }) => theme.colors.text.strong};
+  background: ${({ $read, theme }) => ($read ? theme.colors.background.soft : theme.colors.background.default)};
+  box-shadow: ${({ $read, theme }) => ($read ? 'none' : theme.shadows.subtle)};
+  color: ${({ $read, theme }) => ($read ? theme.colors.text.muted : theme.colors.text.strong)};
   cursor: pointer;
   text-align: left;
-  opacity: ${({ $read }) => ($read ? .62 : 1)};
 `
 
 export const StatusDot = styled.span<{ $read?: boolean }>`
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: ${({ $read, theme }) => ($read ? theme.colors.border.subtle : theme.colors.brand.primary)};
+  background: ${({ $read, theme }) => ($read ? theme.colors.border.default : theme.colors.brand.primary)};
 `
 
 export const NotificationCopy = styled.span<{ $read?: boolean }>`
@@ -147,7 +146,7 @@ export const NotificationCopy = styled.span<{ $read?: boolean }>`
   flex-direction: column;
   gap: 4px;
   strong { overflow: hidden; font-size: 14px; font-weight: ${({ $read }) => ($read ? 400 : 600)}; text-overflow: ellipsis; white-space: nowrap; }
-  span { overflow: hidden; color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+  span { overflow: hidden; color: ${({ $read, theme }) => ($read ? theme.colors.text.placeholder : theme.colors.brand.primary)}; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 `
 
 export const NotificationCategory = styled.span<{ $tone: 'primary' | 'accent' | 'success' }>`
@@ -186,18 +185,18 @@ export const LoadMore = styled.button`
 
 export const Detail = styled.section`
   width: min(100%, 860px);
-  min-height: 560px;
+  min-height: 0;
   box-sizing: border-box;
   border: 1px solid ${({ theme }) => theme.colors.border.subtle};
   border-radius: 16px;
-  padding: 20px;
+  padding: 32px;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   h2 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 24px; line-height: 29px; }
-  > p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 15px; line-height: 18px; }
+  > p:first-of-type { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 15px; line-height: 24px; }
   > div:last-child { margin-top: 0; }
   > div:last-child > button { width: 170px; height: 48px; }
 `
@@ -241,12 +240,13 @@ export const ReadState = styled.div`
 
 export const LoadingDetail = styled(Skeleton)`
   width: min(100%, 860px);
-  height: 560px;
+  height: 360px;
   border-radius: 16px;
 `
 
 export const ActionRow = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   margin-top: 0;
 `

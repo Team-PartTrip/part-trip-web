@@ -11,6 +11,19 @@ type CalendarMonth = {
   month: number
 }
 
+export function getMonthCalendarDays(year: number, monthIndex: number): Array<number | null> {
+  const leadingDays = new Date(year, monthIndex, 1).getDay()
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate()
+  return [
+    ...Array<null>(leadingDays).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
+  ]
+}
+
+export function formatCalendarDate(year: number, monthIndex: number, day: number) {
+  return `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
 // ponytail: cap festival fan-out at 14 months; add a range/pagination API if longer trips need support.
 export const MAX_FESTIVAL_QUERY_MONTHS = 14
 
@@ -26,7 +39,7 @@ function parseDateOnly(value: DateValue) {
 }
 
 function formatDateOnly(date: Date) {
-  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`
+  return formatCalendarDate(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
 }
 
 export function getDateRangeWithPadding(startDate: DateValue, endDate: DateValue, paddingDays = 7): DateOnlyRange | undefined {
@@ -129,6 +142,14 @@ export function formatDate(value: DateValue) {
   return value?.replaceAll('-', '.') ?? '-'
 }
 
+export function formatDateRange(startDate: DateValue, endDate: DateValue) {
+  const start = formatDate(startDate)
+  const end = formatDate(endDate)
+  return start.length >= 7 && end.length >= 7 && start.slice(0, 7) === end.slice(0, 7)
+    ? `${start} – ${end.slice(5)}`
+    : `${start} – ${end}`
+}
+
 export function formatTravelDateTime(value: DateValue, countryCode?: string, countryName?: string, cityName?: string) {
   if (!value) return '-'
   const normalized = value.trim()
@@ -156,6 +177,11 @@ export function getDateRangeDays(
   }
 
   return Math.round((end - start) / MILLISECONDS_PER_DAY) + 1
+}
+
+export function formatTripDuration(startDate: DateValue, endDate: DateValue) {
+  const days = getDateRangeDays(startDate, endDate)
+  return days == null ? '' : `${Math.max(0, days - 1)}박 ${days}일`
 }
 
 export function isInCurrentCalendarWeek(value: DateValue, today = new Date()) {

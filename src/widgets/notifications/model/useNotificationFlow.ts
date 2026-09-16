@@ -8,35 +8,13 @@ import {
   useUnreadNotificationCountQuery,
   type NotificationResponseDto,
 } from '@/entities/notification'
-import { paths } from '@/shared/config'
+import { ACTIVE_PLANNER_ID_KEY, ACTIVE_VOTE_ID_KEY, paths } from '@/shared/config'
+import { readSessionId, writeSessionValue } from '@/shared/libs/session-storage'
 import { isPositiveSafeInteger } from '@/shared/utils'
 
-const ACTIVE_PLANNER_ID_KEY = 'parttrip:active-planner-id'
-const ACTIVE_VOTE_ID_KEY = 'parttrip:active-vote-id'
-
-function readSessionId(key: string) {
-  if (typeof window === 'undefined') return 0
-  try {
-    const value = Number(window.sessionStorage.getItem(key))
-    return isPositiveSafeInteger(value) ? value : 0
-  } catch {
-    return 0
-  }
-}
+import { normalizeNotificationLinkType } from './notification-presentation'
 
 export type NotificationMode = 'list' | 'detail'
-
-export function notificationDate(value?: string) {
-  if (!value) return '방금 전'
-  const timestamp = Date.parse(value)
-  return Number.isNaN(timestamp) ? '방금 전' : new Date(timestamp).toLocaleString('ko-KR')
-}
-
-export function notificationTypeLabel(notification: NotificationResponseDto) {
-  if (notification.category === 'VOTE') return '투표'
-  if (notification.category === 'RECORD') return '기록'
-  return '알림'
-}
 
 export function useNotificationFlow(mode: NotificationMode) {
   const navigate = useNavigate()
@@ -48,12 +26,16 @@ export function useNotificationFlow(mode: NotificationMode) {
   const unreadCountQuery = useUnreadNotificationCountQuery()
   const markReadMutation = useMarkNotificationAsReadMutation()
   const markAllMutation = useMarkAllNotificationsAsReadMutation()
-  const notifications = notificationsQuery.data?.pages.flatMap((page) => page.items ?? []) ?? []
+  const fetchedNotifications = notificationsQuery.data?.pages.flatMap((page) => page.items ?? []) ?? []
+  const notifications = unreadCountQuery.data?.unreadCount === 0
+    ? fetchedNotifications.map((notification) => ({ ...notification, read: true }))
+    : fetchedNotifications
   const detail = notifications.find((item) => String(item.notificationId) === notificationId)
-  const canNavigateToVote = detail?.linkType?.trim().toUpperCase() === 'VOTE'
-    && isPositiveSafeInteger(detail.linkId)
+  const canNavigateToVote = normalizeNotificationLinkType(detail?.linkType) === 'VOTE'
+    && isPositiveSafeInteger(detail?.linkId)
     && isPositiveSafeInteger(readSessionId(ACTIVE_PLANNER_ID_KEY))
-  const hasUnread = (unreadCountQuery.data?.unreadCount ?? notifications.filter((item) => item.isRead !== true && item.notificationId != null).length) > 0
+  const hasUnread = (unreadCountQuery.data?.unreadCount ?? 0) > 0
+    || notifications.some((item) => item.read !== true && item.notificationId != null)
 
   const handleMarkRead = async (id?: number) => {
     if (id == null) return
@@ -67,14 +49,14 @@ export function useNotificationFlow(mode: NotificationMode) {
 
   const handleNotificationClick = async (notification: NotificationResponseDto) => {
     if (notification.notificationId == null) return
-    if (notification.isRead !== true) await handleMarkRead(notification.notificationId)
+    if (notification.read !== true) await handleMarkRead(notification.notificationId)
     navigate({ params: { notificationId: String(notification.notificationId) }, to: '/notifications/$notificationId' })
   }
 
   const handleNotificationAction = async () => {
     if (!detail) return
     await handleMarkRead(detail.notificationId)
-    const linkType = detail.linkType?.trim().toUpperCase()
+    const linkType = normalizeNotificationLinkType(detail.linkType)
     const linkId = detail.linkId
 
     if (linkType === 'TRIP_CARD' && linkId != null) {
@@ -83,7 +65,7 @@ export function useNotificationFlow(mode: NotificationMode) {
     }
 
     if ((linkType === 'GROUP' || linkType === 'GROUP_INVITATION') && linkId != null) {
-      sessionStorage.setItem(ACTIVE_PLANNER_ID_KEY, String(linkId))
+      writeSessionValue(ACTIVE_PLANNER_ID_KEY, String(linkId))
       navigate({ to: paths.plannerProgress })
       return
     }
@@ -96,7 +78,7 @@ export function useNotificationFlow(mode: NotificationMode) {
         return
       }
       try {
-        window.sessionStorage.setItem(ACTIVE_VOTE_ID_KEY, String(linkId))
+        writeSessionValue(ACTIVE_VOTE_ID_KEY, String(linkId))
       } catch {
         setActionError('투표 알림을 열 수 없습니다.')
         return
@@ -134,6 +116,7 @@ export function useNotificationFlow(mode: NotificationMode) {
     navigate,
     notifications,
     notificationsQuery,
+    unreadCount: unreadCountQuery.data?.unreadCount,
     paths,
     setActiveTab,
   }
