@@ -1,6 +1,6 @@
 import { type useNavigate } from '@tanstack/react-router'
 
-import { getActiveVote } from './selectors'
+import { canClosePlannerVotes, getActiveVote } from './selectors'
 import { type usePlannerData } from './usePlannerData'
 import { type usePlannerMutations } from './usePlannerMutations'
 import { type usePlannerState } from './usePlannerState'
@@ -44,14 +44,13 @@ export function usePlannerVoteFlow({ data, navigate, mutations, state, step }: P
     cancelPlaceVoteMutation,
     castBallotMutation,
     closeVoteMutation,
-    confirmVoteMutation,
     deleteVoteOptionMutation,
     remindPlannerMembersMutation,
   } = mutations
   const activeVote = getActiveVote(votes, voteDetail, voteCategory, activeVoteId)
   const isConfirmed = hasConfirmedLocally || normalizeStatus(plannerDetail?.status) === 'CONFIRMED'
   const openVotes = votes.filter((vote) => normalizeStatus(vote.status) === 'OPEN')
-  const canCloseVotes = openVotes.length > 0 && openVotes.every((vote) => isPositiveSafeInteger(vote.voteId) && vote.options.some((option) => option.selectedByMe))
+  const canCloseVotes = canClosePlannerVotes(votes)
   const canManagePlanner = isPositiveSafeInteger(activePlannerId) && isPlannerLeader(plannerDetail?.role)
   const isRemindAvailable = canManagePlanner && openVotes.length > 0
 
@@ -80,20 +79,6 @@ export function usePlannerVoteFlow({ data, navigate, mutations, state, step }: P
     } catch {
       setSelectedOptionId(selected ? optionId : undefined)
       setErrorMessage('투표 상태를 변경하지 못했습니다.')
-    }
-  }
-
-  const handleConfirmVote = async (voteId?: number, optionId?: number) => {
-    const vote = votes.find((item) => item.voteId === voteId)
-    if (!canManagePlanner || !isPositiveSafeInteger(activePlannerId) || !isPositiveSafeInteger(voteId) || !isPositiveSafeInteger(optionId) || normalizeStatus(vote?.status) !== 'CLOSED') {
-      setErrorMessage('확정할 마감 투표 정보를 확인할 수 없습니다.')
-      return
-    }
-    try {
-      setErrorMessage('')
-      await confirmVoteMutation.mutateAsync({ payload: { optionId }, plannerId: activePlannerId, voteId })
-    } catch {
-      setErrorMessage('투표 결과를 확정하지 못했습니다.')
     }
   }
 
@@ -146,11 +131,9 @@ export function usePlannerVoteFlow({ data, navigate, mutations, state, step }: P
     canManagePlanner,
     castBallotPending: castBallotMutation.isPending || cancelPlaceVoteMutation.isPending,
     closeVotePending: closeVoteMutation.isPending,
-    confirmVotePending: confirmVoteMutation.isPending,
     deleteVoteOptionPending: deleteVoteOptionMutation.isPending,
     handleCastBallot,
     handleCloseVote,
-    handleConfirmVote,
     handleDeleteVoteOption,
     handleRemindMembers,
     isConfirmed,

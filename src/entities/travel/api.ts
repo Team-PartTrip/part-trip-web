@@ -27,6 +27,11 @@ export type TourPlaceResponseDto = {
   rating?: number
 }
 
+export type MoreTourPlacesResponseDto = {
+  places?: TourPlaceResponseDto[]
+  cursor?: string | null
+}
+
 export type FestivalResponseDto = {
   festivalId?: number
   title?: string
@@ -55,6 +60,7 @@ export type PopularCityResponseDto = {
 const MAIN_API_PATHS = {
   dday: '/main/dday',
   tourPlace: '/main/tour-place',
+  tourPlaceMore: '/main/tour-place/more',
   festivals: '/main/festivals',
   countryInfo: '/main/country-info',
   countries: '/main/countries',
@@ -123,6 +129,18 @@ export async function getTourPlace(
     },
     () => mockTourPlaces,
   )
+}
+
+export async function getMoreTourPlaces(
+  countryName: string,
+  cityName: string,
+  category: string,
+  cursor?: string,
+): Promise<MoreTourPlacesResponseDto> {
+  const { data } = await apiClient.get<MoreTourPlacesResponseDto>(MAIN_API_PATHS.tourPlaceMore, {
+    params: { category, cityName, countryName, cursor },
+  })
+  return data
 }
 
 export async function getFestivals(

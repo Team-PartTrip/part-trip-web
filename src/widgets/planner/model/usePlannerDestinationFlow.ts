@@ -1,12 +1,14 @@
 import type { FormEvent } from 'react'
+import { useState } from 'react'
 import { type useNavigate } from '@tanstack/react-router'
 
-import { dedupeDestinations, findExactDestinationMatches } from './destination'
+import { dedupeDestinations, findExactDestinationMatches, getPlannerCityPlans, validatePlannerCityRanges } from './destination'
 import { isValidPlannerMemberCount } from './member-count'
 import { type usePlannerData } from './usePlannerData'
 import { type usePlannerMutations } from './usePlannerMutations'
 import { type usePlannerState } from './usePlannerState'
 import type { CountryInfoResponseDto } from '@/entities/travel'
+import type { PlannerCityRequestDto } from '@/entities/planner'
 import { ACTIVE_VOTE_CATEGORY_KEY, paths } from '@/shared/config'
 import { writeSessionValue } from '@/shared/libs/session-storage'
 import { isPositiveSafeInteger } from '@/shared/utils'
@@ -24,6 +26,7 @@ type Props = {
 }
 
 export function usePlannerDestinationFlow({ data, navigate, state, updatePlannerMutation }: Props) {
+  const [cityEdits, setCityEdits] = useState<{ plannerId: number; cities: PlannerCityRequestDto[] }>()
   const {
     activePlannerId,
     cityName,
@@ -43,16 +46,58 @@ export function usePlannerDestinationFlow({ data, navigate, state, updatePlanner
     setHeadcount,
     setSelectedDestination,
     setStartDate,
+    setPlannerPlaceCityName,
+    setPlannerPlaceCountryName,
     startDate,
-    clearSelected,
     voteCategory,
   } = state
   const { countries, plannerDetail, popularCities, setPlan } = data
-  const selectedCountryName = countryName ?? plannerDetail?.countryName ?? ''
-  const selectedCityName = cityName ?? plannerDetail?.cityName ?? ''
-  const selectedStartDate = startDate ?? plannerDetail?.startDate ?? ''
-  const selectedEndDate = endDate ?? plannerDetail?.endDate ?? ''
+  const plannerCities = cityEdits?.plannerId === activePlannerId
+    ? cityEdits.cities
+    : getPlannerCityPlans(plannerDetail)
+  const setEditedCities = (cities: PlannerCityRequestDto[]) => setCityEdits({ plannerId: activePlannerId, cities })
+  const selectedCountryName = countryName ?? ''
+  const selectedCityName = cityName ?? ''
+  const selectedStartDate = startDate ?? ''
+  const selectedEndDate = endDate ?? ''
   const selectedHeadcount = headcount.trim() || String(plannerDetail?.memberCount ?? savedGroupSettings.memberCount)
+
+  const findSelectedCountry = () => {
+    const destinationCandidates = dedupeDestinations([
+      ...countries,
+      ...popularCities.map(({ cityName, countryName }) => ({ cityName, countryName })),
+    ])
+    const matchingDestinations = findExactDestinationMatches(
+      destinationCandidates,
+      selectedCityName,
+      selectedCountryName,
+    )
+    return countryInfoId
+      ? countries.find((item) => String(item.countryInfoId) === countryInfoId) ?? selectedDestination
+      : selectedDestination ?? (matchingDestinations.length === 1 ? matchingDestinations[0] : undefined)
+  }
+
+  const addCurrentCity = () => {
+    const selectedCountry = findSelectedCountry()
+    const nextCity = selectedCountry?.cityName || selectedCityName.trim()
+    const nextCountry = selectedCountry?.countryName || selectedCountryName.trim()
+    if (!selectedCountry || !nextCountry || !nextCity || !selectedStartDate || !selectedEndDate) {
+      setErrorMessage('국가와 도시를 선택하고 체류 기간을 입력해주세요.')
+      return undefined
+    }
+    const nextCities = [...plannerCities, {
+      countryName: nextCountry,
+      cityName: nextCity,
+      startDate: selectedStartDate,
+      endDate: selectedEndDate,
+    }]
+    const error = validatePlannerCityRanges(nextCities)
+    if (error) {
+      setErrorMessage(error)
+      return undefined
+    }
+    return nextCities
+  }
 
   const handleDestinationSelect = (country: CountryInfoResponseDto) => {
     setSelectedDestination(country)
@@ -68,30 +113,37 @@ export function usePlannerDestinationFlow({ data, navigate, state, updatePlanner
     setCityName(value)
   }
 
+  const handleAddCity = () => {
+    const nextCities = addCurrentCity()
+    if (!nextCities) return
+    setEditedCities(nextCities)
+    setErrorMessage('')
+    setSelectedDestination(undefined)
+    setCountryInfoId('')
+    setCountryName('')
+    setCityName('')
+    setStartDate('')
+    setEndDate('')
+  }
+
+  const handleRemoveCity = (index: number) => {
+    setEditedCities(plannerCities.filter((_, cityIndex) => cityIndex !== index))
+  }
+
   const saveDestination = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const destinationCandidates = dedupeDestinations([
-      ...countries,
-      ...popularCities.map(({ cityName, countryName }) => ({ cityName, countryName })),
-    ])
-    const matchingDestinations = findExactDestinationMatches(
-      destinationCandidates,
-      selectedCityName,
-      selectedCountryName,
-    )
-    const selectedCountry = countryInfoId
-      ? countries.find((item) => String(item.countryInfoId) === countryInfoId) ?? selectedDestination
-      : selectedDestination ?? (matchingDestinations.length === 1 ? matchingDestinations[0] : undefined)
-    const nextCountry = selectedCountry?.countryName || selectedCountryName.trim()
-    const nextCity = selectedCountry?.cityName || selectedCityName.trim()
     const nextHeadcount = Number(selectedHeadcount)
     const nextMemberCount = isSolo ? 1 : nextHeadcount
-    if (!nextCountry || !nextCity || !selectedStartDate || !selectedEndDate || selectedStartDate > selectedEndDate) {
-      setErrorMessage('여행지와 올바른 여행 기간을 입력해주세요.')
-      return
+    const hasCityDraft = Boolean(selectedCityName || selectedCountryName || selectedStartDate || selectedEndDate)
+    let nextCities = plannerCities
+    if (hasCityDraft) {
+      const addedCities = addCurrentCity()
+      if (!addedCities) return
+      nextCities = addedCities
     }
-    if (!selectedCountry) {
-      setErrorMessage('국가와 도시가 일치하는 여행지를 선택해주세요.')
+    const cityError = validatePlannerCityRanges(nextCities)
+    if (cityError) {
+      setErrorMessage(cityError)
       return
     }
     if (!isValidPlannerMemberCount(nextMemberCount, isSolo)) {
@@ -103,27 +155,41 @@ export function usePlannerDestinationFlow({ data, navigate, state, updatePlanner
         setErrorMessage('먼저 여행 그룹을 저장해주세요.')
         return
       }
+      const orderedCities = [...nextCities].sort((left, right) => left.startDate.localeCompare(right.startDate))
+      const primaryCity = orderedCities[0]
+      const overallStartDate = orderedCities[0].startDate
+      const overallEndDate = orderedCities[orderedCities.length - 1].endDate
       const savedPlan = await updatePlannerMutation.mutateAsync({
         plannerId: activePlannerId,
         payload: {
-          cityName: nextCity,
-          countryName: nextCountry,
-          endDate: selectedEndDate,
+          cities: orderedCities,
+          cityName: primaryCity.cityName,
+          countryName: primaryCity.countryName,
+          endDate: overallEndDate,
           isSolo,
           memberCount: nextMemberCount,
-          startDate: selectedStartDate,
+          startDate: overallStartDate,
         },
       })
+      const returnedCities = savedPlan.cities?.flatMap((city) =>
+        city.countryName && city.cityName && city.startDate && city.endDate
+          ? [{ countryName: city.countryName, cityName: city.cityName, startDate: city.startDate, endDate: city.endDate }]
+          : [],
+      ) ?? []
+      const persistedCities = returnedCities.length ? returnedCities : orderedCities
       setPlan({
-        cityName: savedPlan.cityName ?? nextCity,
-        countryName: savedPlan.countryName ?? nextCountry,
-        endDate: savedPlan.endDate ?? selectedEndDate,
+        cityName: savedPlan.cityName ?? primaryCity.cityName,
+        countryName: savedPlan.countryName ?? primaryCity.countryName,
+        cities: persistedCities,
+        endDate: savedPlan.endDate ?? overallEndDate,
         headcount: nextMemberCount,
-        startDate: savedPlan.startDate ?? selectedStartDate,
+        startDate: savedPlan.startDate ?? overallStartDate,
       })
+      setEditedCities(persistedCities)
+      setPlannerPlaceCityName(primaryCity.cityName)
+      setPlannerPlaceCountryName(primaryCity.countryName)
       resetVoteSession()
       writeSessionValue(ACTIVE_VOTE_CATEGORY_KEY, voteCategory)
-      clearSelected()
       navigate({ to: paths.plannerExplore })
     } catch {
       setErrorMessage('여행 정보를 저장하지 못했습니다.')
@@ -132,8 +198,11 @@ export function usePlannerDestinationFlow({ data, navigate, state, updatePlanner
 
   return {
     countries,
+    handleAddCity,
     handleDestinationSelect,
+    handleRemoveCity,
     popularCities,
+    plannerCities,
     saveDestination,
     selectedCityName,
     selectedCountryInfoId: countryInfoId,

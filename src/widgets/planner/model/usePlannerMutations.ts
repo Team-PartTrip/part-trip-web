@@ -1,10 +1,9 @@
 import {
   useAcceptPlannerInvitationMutation,
-  useAddPlannerPlacesMutation,
   useCancelPlaceVoteMutation,
   useCastBallotMutation,
+  useCastPlaceVoteMutation,
   useCloseVoteMutation,
-  useConfirmVoteMutation,
   useConfirmPlannerMutation,
   useCreatePlannerMutation,
   useDeletePlannerMutation,
@@ -14,7 +13,6 @@ import {
   useRemovePlannerMemberMutation,
   useRejectPlannerInvitationMutation,
   useRemindPlannerMembersMutation,
-  useSelectRandomPlannerPlaceMutation,
   useUpdatePlannerMutation,
 } from '@/entities/planner'
 
@@ -26,26 +24,23 @@ export function usePlannerMutations() {
   const rejectPlannerInvitationMutation = useRejectPlannerInvitationMutation()
   const cancelPlannerInvitationMutation = useCancelPlannerInvitationMutation()
   const removePlannerMemberMutation = useRemovePlannerMemberMutation()
-  const addPlannerPlacesMutation = useAddPlannerPlacesMutation()
   const deletePlannerMutation = useDeletePlannerMutation()
   const remindPlannerMembersMutation = useRemindPlannerMembersMutation()
-  const selectRandomPlannerPlaceMutation = useSelectRandomPlannerPlaceMutation()
   const confirmPlannerMutation = useConfirmPlannerMutation()
   const cancelPlaceVoteMutation = useCancelPlaceVoteMutation()
   const castBallotMutation = useCastBallotMutation()
+  const castPlaceVoteMutation = useCastPlaceVoteMutation()
   const closeVoteMutation = useCloseVoteMutation()
-  const confirmVoteMutation = useConfirmVoteMutation()
   const deleteVoteOptionMutation = useDeleteVoteOptionMutation()
 
   return {
     acceptPlannerInvitationMutation,
-    addPlannerPlacesMutation,
     cancelPlannerInvitationMutation,
     cancelPlaceVoteMutation,
     castBallotMutation,
+    castPlaceVoteMutation,
     closeVoteMutation,
     confirmPlannerMutation,
-    confirmVoteMutation,
     createPlannerMutation,
     deletePlannerMutation,
     deleteVoteOptionMutation,
@@ -53,7 +48,6 @@ export function usePlannerMutations() {
     remindPlannerMembersMutation,
     rejectPlannerInvitationMutation,
     removePlannerMemberMutation,
-    selectRandomPlannerPlaceMutation,
     updatePlannerMutation,
     isSaving: createPlannerMutation.isPending || updatePlannerMutation.isPending,
   }

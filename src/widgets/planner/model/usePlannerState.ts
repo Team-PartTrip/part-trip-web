@@ -1,18 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { CountryInfoResponseDto, TourPlaceResponseDto } from '@/entities/travel'
+import type { CountryInfoResponseDto } from '@/entities/travel'
 import {
   ACTIVE_PLANNER_ID_KEY,
   ACTIVE_VOTE_CATEGORY_KEY,
   ACTIVE_VOTE_ID_KEY,
   PLANNER_CONFIRMED_KEY,
   PLANNER_GROUP_SETTINGS_KEY,
-  PLANNER_SELECTED_KEY,
 } from '@/shared/config'
 import { readSessionId, readSessionValue, writeSessionValue } from '@/shared/libs/session-storage'
 
 import { activatePlannerSession, clearPlannerVoteSession } from './planner-session'
-import { parsePlannerGroupSettings, parsePlannerSelectedPlacesByCategory } from './storage'
+import { parsePlannerGroupSettings } from './storage'
 import { plannerCategories, type PlannerCategory } from './types'
 
 export function usePlannerState() {
@@ -27,13 +26,12 @@ export function usePlannerState() {
   const [endDate, setEndDate] = useState<string>()
   const [countryName, setCountryName] = useState<string>()
   const [cityName, setCityName] = useState<string>()
+  const [plannerPlaceCountryName, setPlannerPlaceCountryName] = useState('')
+  const [plannerPlaceCityName, setPlannerPlaceCityName] = useState('')
   const [voteCategory, setVoteCategory] = useState<PlannerCategory>(() => {
     const stored = readSessionValue(ACTIVE_VOTE_CATEGORY_KEY)
     return plannerCategories.includes(stored as PlannerCategory) ? stored as PlannerCategory : '명소'
   })
-  const [selectedPlacesByCategory, setSelectedPlacesByCategory] = useState<Record<string, TourPlaceResponseDto[]>>(() =>
-    parsePlannerSelectedPlacesByCategory(readSessionValue(PLANNER_SELECTED_KEY)),
-  )
   const [headcount, setHeadcount] = useState(String(savedGroupSettings.memberCount))
   const [memberCount, setMemberCount] = useState(() => String(savedGroupSettings.memberCount))
   const [isSolo, setIsSolo] = useState(() => savedGroupSettings.isSolo)
@@ -42,8 +40,6 @@ export function usePlannerState() {
   )
   const inviteCodeFromUrlRef = useRef(inviteCode)
   const [selectedOptionId, setSelectedOptionId] = useState<number>()
-  const [lineupChoice, setLineupChoice] = useState<number | null>(null)
-  const [lineupMode, setLineupMode] = useState<'direct' | 'random'>('direct')
   const autoJoinInviteCodeRef = useRef('')
   const plannerConfirmationKey = `${PLANNER_CONFIRMED_KEY}:${activePlannerId}`
   const [confirmedPlannerId, setConfirmedPlannerId] = useState(() => readSessionValue(plannerConfirmationKey) === 'true' ? activePlannerId : 0)
@@ -51,7 +47,6 @@ export function usePlannerState() {
   const [errorMessage, setErrorMessage] = useState('')
   const [remindFeedback, setRemindFeedback] = useState('')
 
-  const clearSelected = useCallback(() => setSelectedPlacesByCategory({}), [])
   const resetVoteSession = useCallback(() => {
     clearPlannerVoteSession()
     setStoredActiveVoteId(0)
@@ -60,14 +55,11 @@ export function usePlannerState() {
   const activatePlanner = useCallback((plannerId: number) => {
     activatePlannerSession(plannerId)
     setStoredActivePlannerId(plannerId)
+    setPlannerPlaceCountryName('')
+    setPlannerPlaceCityName('')
     resetVoteSession()
-    clearSelected()
     setConfirmedPlannerId(readSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`) === 'true' ? plannerId : 0)
-  }, [clearSelected, resetVoteSession])
-
-  useEffect(() => {
-    writeSessionValue(PLANNER_SELECTED_KEY, JSON.stringify(selectedPlacesByCategory))
-  }, [selectedPlacesByCategory])
+  }, [resetVoteSession])
 
   useEffect(() => {
     writeSessionValue(ACTIVE_VOTE_CATEGORY_KEY, voteCategory)
@@ -79,7 +71,6 @@ export function usePlannerState() {
     activatePlanner,
     autoJoinInviteCodeRef,
     cityName,
-    clearSelected,
     countryInfoId,
     countryName,
     endDate,
@@ -89,16 +80,15 @@ export function usePlannerState() {
     inviteCode,
     inviteCodeFromUrlRef,
     isSolo,
-    lineupChoice,
-    lineupMode,
     memberCount,
     plannerConfirmationKey,
+    plannerPlaceCityName,
+    plannerPlaceCountryName,
     remindFeedback,
     resetVoteSession,
     savedGroupSettings,
     selectedDestination,
     selectedOptionId,
-    selectedPlacesByCategory,
     setCityName,
     setConfirmedPlannerId,
     setCountryInfoId,
@@ -108,14 +98,13 @@ export function usePlannerState() {
     setHeadcount,
     setInviteCode,
     setIsSolo,
-    setLineupChoice,
-    setLineupMode,
     setMemberCount,
+    setPlannerPlaceCityName,
+    setPlannerPlaceCountryName,
     setRemindFeedback,
     setSavedGroupSettings,
     setSelectedDestination,
     setSelectedOptionId,
-    setSelectedPlacesByCategory,
     setStartDate,
     setStoredActivePlannerId,
     setVoteCategory,

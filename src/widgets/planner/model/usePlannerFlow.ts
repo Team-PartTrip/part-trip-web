@@ -25,6 +25,9 @@ export function usePlannerFlow(step: PlannerStep) {
     state.activePlannerId,
     state.activeVoteId,
     searchKeyword,
+    state.plannerPlaceCountryName,
+    state.plannerPlaceCityName,
+    state.hasConfirmedLocally,
   )
   const mutations = usePlannerMutations()
   const vote = usePlannerVoteFlow({ data, navigate, mutations, state, step })
@@ -41,7 +44,7 @@ export function usePlannerFlow(step: PlannerStep) {
     state,
     updatePlannerMutation: mutations.updatePlannerMutation,
   })
-  const candidate = usePlannerCandidateFlow({ canManagePlanner: vote.canManagePlanner, data, navigate, mutations, placeId, state })
+  const candidate = usePlannerCandidateFlow({ data, mutations, placeId, state })
   const planner = usePlannerLifecycleFlow({
     canManagePlanner: vote.canManagePlanner,
     data,
@@ -57,11 +60,7 @@ export function usePlannerFlow(step: PlannerStep) {
   return {
     candidate: {
       ...candidate,
-      lineupChoice: state.lineupChoice,
-      lineupMode: state.lineupMode,
       plannerCategories,
-      setLineupChoice: state.setLineupChoice,
-      setLineupMode: state.setLineupMode,
       setVoteCategory,
       voteCategory: state.voteCategory,
     },
@@ -75,6 +74,10 @@ export function usePlannerFlow(step: PlannerStep) {
       plan: data.plan,
       plannerDetail: data.plannerDetail,
       plannerInviteLink: data.plannerDetail?.inviteLink ?? '',
+      plannerPlaceCountryName: state.plannerPlaceCountryName,
+      plannerPlaceCityName: state.plannerPlaceCityName,
+      setPlannerPlaceCountryName: state.setPlannerPlaceCountryName,
+      setPlannerPlaceCityName: state.setPlannerPlaceCityName,
     },
     destination,
     group: {

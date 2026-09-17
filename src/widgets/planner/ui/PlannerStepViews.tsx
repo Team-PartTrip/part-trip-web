@@ -1,5 +1,4 @@
 export { PlannerDestinationStep } from './PlannerDestinationStep'
 export { PlannerExploreStep } from './PlannerExploreStep'
-export { PlannerLineupStep } from './PlannerLineupStep'
 export { PlannerProgressStep } from './PlannerProgressStep'
 export { PlannerVoteStep } from './PlannerVoteStep'

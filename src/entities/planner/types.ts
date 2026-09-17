@@ -41,6 +41,7 @@ export type PlannerDetailResponseDto = {
   memberCount?: number
   joinedMemberCount?: number
   inviteLink?: string
+  cities?: PlannerCityResponseDto[]
 }
 
 export type PlannerMemberResponseDto = {
@@ -86,6 +87,15 @@ export type PlannerJoinResponseDto = {
   joinedMemberCount?: number
 }
 
+export type PlannerCityRequestDto = {
+  countryName: string
+  cityName: string
+  startDate: string
+  endDate: string
+}
+
+export type PlannerCityResponseDto = Partial<PlannerCityRequestDto>
+
 export type CreateVoteRequestDto = {
   category: string
   placeId?: number
@@ -111,6 +121,7 @@ export type SavePlannerTravelPlanRequestDto = {
   cityName: string
   startDate: string
   endDate: string
+  cities?: PlannerCityRequestDto[]
 }
 
 export type PlannerTravelPlanResponseDto = {
@@ -123,6 +134,7 @@ export type PlannerTravelPlanResponseDto = {
   cityName?: string
   startDate?: string
   endDate?: string
+  cities?: PlannerCityResponseDto[]
 }
 
 export type ConfirmedPlaceResponseDto = {
@@ -138,7 +150,7 @@ export type ConfirmedPlaceResponseDto = {
   voteCount?: number
 }
 
-export type PlannerFinalResponseDto = {
+export type PlannerConfirmedPlacesResponseDto = {
   plannerId?: number
   title?: string
   countryName?: string
@@ -189,20 +201,6 @@ export type VoteBallotResponseDto = {
   votedAt?: string
 }
 
-export type VoteConfirmRequestDto = {
-  optionId?: number
-}
-
-export type VoteConfirmResponseDto = {
-  voteId?: number
-  voteStatus?: string
-  confirmedOptionId?: number
-  tourPlaceId?: number
-  placeName?: string
-  voteCount?: number
-  plannerStatus?: string
-}
-
 export type VoteCloseResponseDto = {
   voteId?: number
   status?: string
@@ -215,10 +213,6 @@ export type VoteCloseResponseDto = {
 export type VoteReminderResponseDto = {
   message?: string
   notifiedCount?: number
-}
-
-export type PlannerCartRequestDto = {
-  placeIds: number[]
 }
 
 export type VoteOptionCreateRequestDto = {
@@ -235,19 +229,16 @@ export type VoteOptionCreateResponseDto = {
   createdAt?: string
 }
 
-export type RandomPlaceResponseDto = {
-  placeId?: number
-  placeName?: string
-}
-
 export type PlannerConfirmResponseDto = {
   confirmedSchedule?: ConfirmedPlaceResponseDto[]
   plannerId?: number
 }
 
+export type PlannerVoteSelection = {
+  voteId: number
+  optionId: number
+}
+
 export type PlannerConfirmRequestDto = {
-  selections?: Array<{
-    voteId: number
-    optionId: number
-  }>
+  selections?: PlannerVoteSelection[]
 }

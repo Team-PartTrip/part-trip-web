@@ -1,18 +1,10 @@
 import { usePlannerMembersQuery } from '@/entities/planner'
 import { Button as PartTripButton } from '@/shared/ui/parttrip'
-import { formatDate, formatDateRange, formatTripDuration } from '@/shared/utils'
+import { formatTripDuration } from '@/shared/utils'
 
 import { getPlannerMemberDisplayName } from '../model/member'
 import type { PlannerStep } from '../model/types'
 import * as S from './PlannerPage.styles'
-
-function shortDateRange(startDate?: string, endDate?: string) {
-  const start = formatDate(startDate)
-  const end = formatDate(endDate)
-  return start.length >= 10 && end.length >= 10
-    ? `${start.slice(5)} – ${end.slice(5)}`
-    : formatDateRange(startDate, endDate)
-}
 
 function deadlineTime(deadline?: string) {
   const time = deadline?.slice(11, 16)
@@ -45,6 +37,7 @@ type PlannerHeaderProps = {
     countryName?: string
     startDate?: string
     endDate?: string
+    cities?: Array<{ cityName?: string; countryName?: string }>
   }
   showNewTrip?: boolean
   wide?: boolean
@@ -70,61 +63,55 @@ export function PlannerHeader({
   memberCount,
   isLoading,
 }: PlannerHeaderProps) {
-  const destination = plan?.cityName || plan?.countryName || '여행지'
+  const destinations = plan?.cities?.map((city) => city.cityName).filter(Boolean).join(' · ')
+  const destination = destinations || plan?.cityName || plan?.countryName || '여행지'
   const duration = formatTripDuration(plan?.startDate, plan?.endDate)
   const voteMembers = vote
     ? `${vote.votedMemberCount ?? 0} / ${vote.eligibleMemberCount ?? memberCount ?? 0}명 참여`
     : ''
   const voteDeadline = deadlineTime(vote?.deadline)
-  const isFinal = step === 'final'
   const copy: Record<PlannerStep, [string, string]> = {
     list: ['플래너', ''],
-    group: ['여행 그룹 정하기', '1 / 4 단계 · 여행 방식과 인원'],
-    destination: ['여행지 & 기간', '2 / 4 단계 · 여행지와 날짜를 정해요'],
-    explore: ['장소 후보 선택', `${destination} · ${shortDateRange(plan?.startDate, plan?.endDate)} · 그룹장이 투표 후보를 골라요`],
+    group: ['여행 그룹 정하기', '여행 방식과 인원을 설정하고 동행자를 초대해요'],
+    destination: ['여행지 & 기간', '1 / 3 단계 · 도시별 일정과 인원을 정해요'],
+    explore: ['장소·투표', `2 / 3 단계 · ${destination} · 목록에서 바로 여러 장소에 투표해요`],
     vote: [
       `${voteCategory} 투표`,
       voteMembers
-        ? `${voteMembers} · 카테고리별 1곳 선택${voteDeadline ? ` · ${voteDeadline}` : ''}`
-        : '카테고리별 후보 중 1곳을 선택하세요.',
+        ? `2 / 3 단계 · ${voteMembers}${voteDeadline ? ` · ${voteDeadline}` : ''}`
+        : '2 / 3 단계 · 여러 장소에 투표할 수 있어요.',
     ],
-    lineup: ['장소 후보 선택', '그룹장이 투표 후보를 골라요'],
     progress: [
-      duration ? `${destination} ${duration}` : `${destination} 여행`,
-      `${shortDateRange(plan?.startDate, plan?.endDate)}${memberCount ? ` · ${memberCount}명` : ''}`,
+      '진행·확정 계획',
+      `3 / 3 단계 · ${destination}${duration ? ` · ${duration}` : ''}${memberCount ? ` · ${memberCount}명` : ''}`,
     ],
-    final: ['', ''],
-    place: ['장소 상세', '후보 장소의 정보와 설명을 확인하세요.'],
+    place: ['장소 상세', '장소 정보와 설명을 확인하세요.'],
   }
   const [title, subtitle] = copy[step]
-  const activeStep = step === 'group'
+  const activeStep = step === 'destination'
     ? 1
-    : step === 'destination'
+    : ['explore', 'vote', 'place'].includes(step)
       ? 2
-      : ['explore', 'vote'].includes(step)
+      : step === 'progress'
         ? 3
-        : step === 'final'
-          ? 4
-          : 0
+        : 0
 
   return (
-    <S.Header $final={isFinal} $hasSubtitle={Boolean(subtitle)} $wide={wide}>
+    <S.Header $hasSubtitle={Boolean(subtitle)} $wide={wide}>
       {isLoading ? (
         <S.LoadingHeader />
       ) : (
         <>
-          {!isFinal ? (
-            <div>
-              <S.Title>{title}</S.Title>
-              {subtitle ? <S.Subtitle>{subtitle}</S.Subtitle> : null}
-            </div>
-          ) : null}
+          <div>
+            <S.Title>{title}</S.Title>
+            {subtitle ? <S.Subtitle>{subtitle}</S.Subtitle> : null}
+          </div>
           {showNewTrip ? (
             <PartTripButton type="button" onClick={onNewTrip}>+ 생성</PartTripButton>
           ) : null}
           {activeStep > 0 ? (
-            <S.FlowStepper $final={isFinal} aria-label="여행 플래너 진행 단계">
-              {['그룹', '여행지·기간', '장소·투표', '확정'].map((label, index) => (
+            <S.FlowStepper aria-label="여행 플래너 진행 단계">
+              {['여행지·기간', '장소·투표', '진행·확정'].map((label, index) => (
                 <S.FlowStep
                   key={label}
                   $active={index + 1 === activeStep}

@@ -6,14 +6,13 @@ import {
 
 import {
   castBallot,
+  castPlaceVote,
   cancelPlaceVote,
   acceptPlannerInvitation,
-  addPlannerPlaces,
   addVoteOption,
   cancelPlannerInvitation,
   closeVote,
   confirmPlanner,
-  confirmVote,
   createPlanner,
   createVote,
   deletePlanner,
@@ -22,15 +21,13 @@ import {
   remindPlannerMembers,
   rejectPlannerInvitation,
   removePlannerMember,
-  selectRandomPlannerPlace,
   updatePlanner,
   type CreatePlannerRequestDto,
   type CreateVoteRequestDto,
+  type PlannerConfirmRequestDto,
   type JoinPlannerRequestDto,
-  type PlannerCartRequestDto,
   type SavePlannerTravelPlanRequestDto,
   type VoteBallotRequestDto,
-  type VoteConfirmRequestDto,
   type VoteOptionCreateRequestDto,
 } from './api'
 import { plannerQueryKeys } from './query-keys'
@@ -85,6 +82,17 @@ export function useCancelPlaceVoteMutation() {
   })
 }
 
+export function useCastPlaceVoteMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ plannerId, tourPlaceId }: { plannerId: number; tourPlaceId: number }) =>
+      castPlaceVote(plannerId, tourPlaceId),
+    onSuccess: (_data, { plannerId }) => {
+      void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.votes(plannerId) })
+    },
+  })
+}
+
 export function useCloseVoteMutation() {
   return usePlannerMutation(
     ({ plannerId, voteId }: { plannerId: number; voteId: number }) =>
@@ -92,26 +100,10 @@ export function useCloseVoteMutation() {
   )
 }
 
-export function useConfirmVoteMutation() {
-  return usePlannerMutation(
-    ({ plannerId, voteId, payload }: { plannerId: number; voteId: number; payload: VoteConfirmRequestDto }) =>
-      confirmVote(plannerId, voteId, payload),
-  )
-}
-
-export function useAddPlannerPlacesMutation() {
-  return usePlannerMutation(
-    ({ plannerId, payload }: { plannerId: number; payload: PlannerCartRequestDto }) =>
-      addPlannerPlaces(plannerId, payload),
-  )
-}
-
-export function useSelectRandomPlannerPlaceMutation() {
-  return usePlannerMutation((plannerId: number) => selectRandomPlannerPlace(plannerId))
-}
-
 export function useConfirmPlannerMutation() {
-  return usePlannerMutation((plannerId: number) => confirmPlanner(plannerId))
+  return usePlannerMutation(({ plannerId, payload }: { plannerId: number; payload: PlannerConfirmRequestDto }) =>
+    confirmPlanner(plannerId, payload),
+  )
 }
 
 export function useRemindPlannerMembersMutation() {

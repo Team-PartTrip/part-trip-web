@@ -2,13 +2,13 @@ import { Button as PartTripButton } from '@/shared/ui/parttrip'
 
 import { type usePlannerFlow } from '../model/usePlannerFlow'
 import { getPlannerMemberDisplayName } from '../model/member'
+import { getTopVoteOptions } from '../model/selectors'
 import { normalizeStatus } from '../model/status'
 import { PlannerProgressManagementPanel } from './PlannerProgressManagementPanel'
 import * as S from './PlannerPage.styles'
 
 type Flow = ReturnType<typeof usePlannerFlow>
 type CommonFlow = Flow['common']
-type CandidateFlow = Flow['candidate']
 type GroupFlow = Flow['group']
 type PlannerFlow = Flow['planner']
 type VoteFlow = Flow['vote']
@@ -17,18 +17,16 @@ type Props = Pick<
   VoteFlow,
   | 'canCloseVotes'
   | 'handleCloseVote'
-  | 'handleConfirmVote'
   | 'handleRemindMembers'
   | 'isRemindAvailable'
   | 'votes'
-> & Pick<CandidateFlow, 'canManageCandidates' | 'plannerCategories'>
+> & Pick<Flow['candidate'], 'plannerCategories'>
   & Pick<CommonFlow, 'plannerDetail' | 'plannerInviteLink'>
   & Pick<VoteFlow, 'canManagePlanner'>
   & Pick<GroupFlow, 'members'>
-  & Pick<PlannerFlow, 'handleConfirmPlan' | 'handleDeletePlanner'> & {
+  & Pick<PlannerFlow, 'canConfirmPlan' | 'confirmedPlaces' | 'handleConfirmPlan' | 'handleDeletePlanner'> & {
   closeVotePending: boolean
   confirmPlannerPending: boolean
-  confirmVotePending: boolean
   currentUserInitial: string
   currentUserName: string
   deletePlannerPending: boolean
@@ -38,7 +36,6 @@ type Props = Pick<
   isConfirmed: boolean
   onCopyInviteLink: () => void
   onOpenExplore: () => void
-  onOpenFinal: () => void
   onOpenGroupManagement: () => void
   remindFeedback: string
   remindPending: boolean
@@ -48,17 +45,15 @@ type Props = Pick<
 
 export function PlannerProgressStep({
   canCloseVotes,
-  canManageCandidates,
   canManagePlanner,
   closeVotePending,
   confirmPlannerPending,
-  confirmVotePending,
+  canConfirmPlan,
   currentUserInitial,
   currentUserName,
   deletePlannerPending,
   handleCloseVote,
   handleConfirmPlan,
-  handleConfirmVote,
   handleDeletePlanner,
   handleRemindMembers,
   hasOpenVote,
@@ -69,7 +64,6 @@ export function PlannerProgressStep({
   members,
   onCopyInviteLink,
   onOpenExplore,
-  onOpenFinal,
   onOpenGroupManagement,
   plannerDetail,
   plannerInviteLink,
@@ -77,6 +71,7 @@ export function PlannerProgressStep({
   remindFeedback,
   remindPending,
   votes,
+  confirmedPlaces,
   confirmedCount,
   votingCount,
 }: Props) {
@@ -93,13 +88,29 @@ export function PlannerProgressStep({
           {categories.map((category) => {
             const vote = votes.find((item) => item.categoryLabel === category || item.category === category)
             const status = normalizeStatus(vote?.status)
-            const confirmed = vote?.confirmedOptionId != null || status === 'CONFIRMED'
             const closed = status === 'CLOSED'
-            const confirmedPlace = vote?.options?.find((option) => option.optionId === vote.confirmedOptionId || option.confirmed)?.placeName
+            const confirmedOptions = vote?.options.filter((option) =>
+              option.confirmed === true || option.optionId === vote.confirmedOptionId,
+            ) ?? []
+            const finalOptions = confirmedOptions.length
+              ? confirmedOptions
+              : closed && vote
+                ? getTopVoteOptions(vote)
+                : []
+            const confirmed = confirmedOptions.length > 0 || status === 'CONFIRMED'
+            const finalPlaceNames = finalOptions.map((option) => option.placeName).filter(Boolean).join(', ')
             return (
               <S.StatusLine key={category}>
                 <span>{category}</span>
-                <strong>{confirmed ? confirmedPlace || '확정' : closed ? '마감됨' : vote ? `진행 중 · ${vote.votedMemberCount ?? 0}/${vote.eligibleMemberCount ?? 0}` : '후보 없음'}</strong>
+                <strong>
+                  {confirmed
+                    ? `확정 ${confirmedOptions.length || 1}곳${finalPlaceNames ? ` · ${finalPlaceNames}` : ''}`
+                    : closed
+                      ? `최다 득표 ${finalOptions.length}곳 확정 예정${finalPlaceNames ? ` · ${finalPlaceNames}` : ''}`
+                      : vote
+                        ? `진행 중 · ${vote.votedMemberCount ?? 0}/${vote.eligibleMemberCount ?? 0}`
+                        : '후보 없음'}
+                </strong>
               </S.StatusLine>
             )
           })}
@@ -115,9 +126,9 @@ export function PlannerProgressStep({
           ))}
           <S.ProgressActions>
             <S.ProgressActionGroup>
-              {!isConfirmed && canManageCandidates ? (
+              {!isConfirmed ? (
                 <PartTripButton type="button" $variant="secondary" onClick={onOpenExplore}>
-                  {votes.length ? '후보 장소 관리' : '장소 후보 추가'}
+                  장소·투표 보기
                 </PartTripButton>
               ) : null}
               {hasOpenVote && canManagePlanner ? (
@@ -133,8 +144,8 @@ export function PlannerProgressStep({
                 <PartTripButton
                   type="button"
                   $variant="secondary"
-                  disabled={confirmPlannerPending}
-                  onClick={() => void handleConfirmPlan().then((confirmed) => { if (confirmed) onOpenFinal() })}
+                  disabled={confirmPlannerPending || !canConfirmPlan}
+                  onClick={() => void handleConfirmPlan()}
                 >
                   일정 확정하기
                 </PartTripButton>
@@ -170,11 +181,21 @@ export function PlannerProgressStep({
       </S.ProgressBody>
       <PlannerProgressManagementPanel
         closedVotes={votes.filter((vote) => normalizeStatus(vote.status) === 'CLOSED')}
-        canManagePlanner={canManagePlanner}
-        confirmVotePending={confirmVotePending}
-        onConfirmVote={handleConfirmVote}
         onOpenGroupManagement={onOpenGroupManagement}
       />
+      {isConfirmed ? (
+        <S.InvitePanel>
+          <S.SectionTitle>확정된 여행 일정</S.SectionTitle>
+          {confirmedPlaces.map((place, index) => (
+            <S.StatusLine key={`${place.voteId ?? 'place'}-${place.optionId ?? index}`}>
+              <span>{place.categoryLabel || place.category || '장소'}</span>
+              <strong>{place.placeName || '확정 장소'}</strong>
+              <small>{place.address || ''}</small>
+            </S.StatusLine>
+          ))}
+          {confirmedPlaces.length === 0 ? <S.Empty>확정 일정을 불러오는 중입니다.</S.Empty> : null}
+        </S.InvitePanel>
+      ) : null}
     </>
   )
 }

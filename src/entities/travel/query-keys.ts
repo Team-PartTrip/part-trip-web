@@ -8,4 +8,6 @@ export const travelQueryKeys = {
     [...travelQueryKeys.all, 'festivals', countryName, year ?? null, month ?? null] as const,
   tourPlaces: (countryName: string, cityName?: string, category?: string) =>
     [...travelQueryKeys.all, 'tour-places', countryName, cityName ?? null, category ?? null] as const,
+  moreTourPlaces: (countryName: string, cityName: string, category: string) =>
+    [...travelQueryKeys.all, 'more-tour-places', countryName, cityName, category] as const,
 }
