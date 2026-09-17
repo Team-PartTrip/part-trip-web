@@ -5,6 +5,7 @@ import {
   dedupeDestinations,
   findExactDestinationMatches,
   getDestinationResults,
+  getPersistedPlannerCities,
   matchesDestinationKeyword,
 } from '../src/widgets/planner/model/destination.ts'
 
@@ -39,4 +40,23 @@ test('destination 저장 검증은 도시명 또는 국가명의 exact match를 
     [],
   )
   assert.deepEqual(findExactDestinationMatches([incompleteDestination], '', ''), [])
+})
+
+test('부분 도시 응답이 있으면 저장 요청의 전체 도시 목록을 보존한다', () => {
+  const requested = [
+    { countryName: '일본', cityName: '오사카', startDate: '2026-10-01', endDate: '2026-10-03' },
+    { countryName: '일본', cityName: '교토', startDate: '2026-10-04', endDate: '2026-10-05' },
+  ]
+
+  assert.deepEqual(getPersistedPlannerCities(requested, [
+    { countryName: '일본', cityName: '오사카', startDate: '2026-10-01', endDate: '2026-10-03' },
+    { cityName: '교토' },
+  ]), requested)
+})
+
+test('완전한 도시 응답은 서버가 반환한 목록을 사용한다', () => {
+  const requested = [{ countryName: '일본', cityName: '오사카', startDate: '2026-10-01', endDate: '2026-10-03' }]
+  const returned = [{ countryName: '일본', cityName: '나라', startDate: '2026-10-01', endDate: '2026-10-03' }]
+
+  assert.deepEqual(getPersistedPlannerCities(requested, returned), returned)
 })

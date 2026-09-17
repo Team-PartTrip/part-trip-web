@@ -30,7 +30,7 @@ export const LoadingBody = styled(Skeleton)`
   border-radius: 16px;
 `
 
-export const Header = styled.header<{ $final?: boolean; $hasSubtitle?: boolean; $wide?: boolean }>`
+export const Header = styled.header<{ $hasSubtitle?: boolean; $wide?: boolean }>`
   display: flex;
   min-height: ${({ $hasSubtitle, $wide }) => ($hasSubtitle ? ($wide ? '68px' : '70px') : '0')};
   flex-wrap: wrap;
@@ -40,15 +40,6 @@ export const Header = styled.header<{ $final?: boolean; $hasSubtitle?: boolean; 
   padding-inline: 24px;
   margin-top: ${({ $wide }) => ($wide ? '24px' : '0')};
   margin-bottom: 24px;
-
-  ${({ $final }) => $final && `
-    position: relative;
-    z-index: 1;
-    height: 0;
-    min-height: 0;
-    margin-bottom: 0;
-    padding: 0;
-  `}
 
   > button {
     width: 112px;
@@ -275,7 +266,7 @@ export const StepCard = styled.section`
   p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; line-height: 20px; }
 `
 
-export const FlowStepper = styled.nav<{ $final?: boolean }>`
+export const FlowStepper = styled.nav`
   display: flex;
   width: 440px;
   max-width: 100%;
@@ -285,10 +276,8 @@ export const FlowStepper = styled.nav<{ $final?: boolean }>`
   margin-left: auto;
   align-self: center;
   overflow-x: hidden;
-  position: ${({ $final }) => ($final ? 'absolute' : 'relative')};
-  top: ${({ $final }) => ($final ? '-16px' : 'auto')};
-  right: ${({ $final }) => ($final ? '-8px' : 'auto')};
-  transform: ${({ $final }) => ($final ? 'none' : 'translateX(-4px)')};
+  position: relative;
+  transform: translateX(-4px);
 `
 
 export const FlowStep = styled.span<{ $active: boolean; $complete: boolean }>`
@@ -306,8 +295,7 @@ export const FlowStep = styled.span<{ $active: boolean; $complete: boolean }>`
   font-weight: ${({ $active }) => ($active ? 600 : 400)};
   white-space: nowrap;
 
-  &:nth-child(1),
-  &:nth-child(4) { width: 64px; }
+  &:nth-child(1) { width: 64px; }
   &:nth-child(2),
   &:nth-child(3) { width: 112px; }
 
@@ -468,42 +456,6 @@ export const TwoColumn = styled.div`
   @media (max-width: 860px) { grid-template-columns: 1fr; }
 `
 
-export const LineupModeRow = styled.nav`
-  display: flex;
-  min-height: 44px;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 24px;
-
-  button {
-    min-width: 110px;
-    height: 36px;
-    box-sizing: border-box;
-    border: 0;
-    border-radius: 12px;
-    padding: 10px;
-    background: ${({ theme }) => theme.colors.background.muted};
-    color: ${({ theme }) => theme.colors.brand.primary};
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  button[data-active="true"] {
-    background: ${({ theme }) => theme.colors.brand.primary};
-    color: ${({ theme }) => theme.colors.text.inverse};
-    box-shadow: 0 4px 5px rgb(26 110 191 / 16%);
-  }
-`
-
-export const CartBody = styled.div`
-  display: grid;
-  gap: 24px;
-  grid-template-columns: minmax(0, 760px) minmax(0, 352px);
-
-  @media (max-width: 1180px) { grid-template-columns: minmax(0, 1fr) minmax(280px, 352px); }
-  @media (max-width: 860px) { grid-template-columns: 1fr; }
-`
-
 export const SettingsLayout = styled.div`
   display: grid;
   align-items: start;
@@ -533,6 +485,34 @@ export const StepField = styled.div`
 
   > label { color: ${({ theme }) => theme.colors.text.strong}; font-size: 12px; font-weight: 600; }
   input[readonly] { color: ${({ theme }) => theme.colors.text.muted}; }
+`
+
+export const PlannerCityList = styled.div`
+  display: grid;
+  gap: 8px;
+`
+
+export const PlannerCityRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 12px;
+  > div { display: grid; gap: 4px; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; }
+`
+
+export const PlannerCityRemoveButton = styled.button`
+  border: 0;
+  padding: 4px;
+  background: transparent;
+  color: ${({ theme }) => theme.colors.brand.primary};
+  cursor: pointer;
+  font-size: 12px;
 `
 
 export const FieldHint = styled.span`
@@ -1046,45 +1026,6 @@ export const PlaceAction = styled.span<{ $active: boolean }>`
   }
 `
 
-export const SelectedPanel = styled.section`
-  display: flex;
-  min-height: 560px;
-  flex-direction: column;
-  gap: 14px;
-  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  border-radius: 16px;
-  padding: 20px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-  h2 { margin: 0; font-size: 18px; line-height: 22px; }
-`
-
-export const SelectionGuidance = styled.div`
-  display: flex;
-  min-height: 196px;
-  flex-direction: column;
-  justify-content: center;
-  gap: 8px;
-  border-radius: 12px;
-  padding: 16px;
-  background: ${({ theme }) => theme.colors.background.muted};
-
-  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 13px; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
-`
-
-export const SelectedRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  padding: 10px 0;
-  color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 13px;
-  button { border: 0; background: transparent; color: ${({ theme }) => theme.colors.text.muted}; cursor: pointer; font-size: 16px; }
-`
-
 export const PanelActions = styled.div`
   display: flex;
   flex-direction: column;
@@ -1176,61 +1117,6 @@ export const ActionFeedback = styled.p`
   color: ${({ theme }) => theme.colors.brand.successStrong};
   font-size: 12px;
   line-height: 18px;
-`
-
-export const SelectedPlaces = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-`
-
-export const SelectedPlaceRow = styled.div`
-  display: flex;
-  min-height: 72px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  border-radius: 12px;
-  padding: 12px;
-  background: ${({ theme }) => theme.colors.background.subtle};
-  ${PlaceDetails} { gap: 4px; strong { font-size: 15px; } span { font-size: 12px; } }
-  button {
-    width: 28px;
-    height: 28px;
-    flex: 0 0 28px;
-    border: 0;
-    border-radius: 50%;
-    background: transparent;
-    color: ${({ theme }) => theme.colors.text.muted};
-    cursor: pointer;
-    font-size: 15px;
-    line-height: 1;
-  }
-`
-
-export const PlaceMarker = styled.span`
-  width: 8px;
-  height: 8px;
-  flex: 0 0 8px;
-  border-radius: 50%;
-  background: ${({ theme }) => theme.colors.brand.primary};
-`
-
-export const NextPanel = styled.section`
-  display: flex;
-  height: 300px;
-  flex-direction: column;
-  gap: 12px;
-  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  border-radius: 16px;
-  padding: 20px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-  h2 { font-size: 18px; line-height: 22px; }
-  p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 14px; line-height: 17px; }
-  > label { color: ${({ theme }) => theme.colors.text.strong}; font-size: 12px; font-weight: 600; }
-  > ${ActionRow} { margin-top: 0; }
-  > ${ActionRow} > button { width: 200px; height: 48px; }
 `
 
 export const ProgressStats = styled.div`
@@ -1326,115 +1212,6 @@ export const ResponseRow = styled.div`
   font-size: 12px;
   strong { flex: 1; }
   span { color: ${({ theme }) => theme.colors.brand.successStrong}; font-size: 11px; }
-`
-
-export const FinalPlaceList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-`
-
-export const FinalPlaceRow = styled.div`
-  display: grid;
-  align-items: center;
-  gap: 8px;
-  grid-template-columns: 72px minmax(0, 1fr) auto;
-  min-height: 44px;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  font-size: 13px;
-  &:last-child { border-bottom: 0; }
-  small { display: inline-flex; width: 72px; height: 36px; align-items: center; justify-content: center; border-radius: 12px; padding: 0 8px; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.brand.strong}; font-size: 11px; text-align: center; }
-  span { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 13px; font-weight: 600; }
-`
-
-export const FinalConfirmBody = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
-  min-height: 758px;
-  text-align: center;
-`
-
-export const SuccessMark = styled.span`
-  display: grid;
-  width: 64px;
-  height: 64px;
-  place-items: center;
-  border-radius: 12px;
-  background: ${({ theme }) => theme.colors.brand.primary};
-  box-shadow: 0 4px 5px rgb(26 110 191 / 16%);
-  color: ${({ theme }) => theme.colors.text.inverse};
-  font-size: 28px;
-  font-weight: 700;
-`
-
-export const FinalTitle = styled.h1`
-  margin: 0;
-  color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 30px;
-  line-height: 38px;
-`
-
-export const FinalTripTitle = styled.h2`
-  margin: 0;
-  color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 20px;
-  line-height: 26px;
-`
-
-export const FinalDate = styled.p`
-  margin: 0;
-  color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 13px;
-`
-
-export const FinalMembers = styled.div`
-  display: flex;
-  gap: 8px;
-  min-height: 40px;
-
-  ${Avatar} { width: 36px; height: 36px; flex-basis: 36px; font-size: 12px; }
-`
-
-export const FinalMemberSummary = styled.p`
-  margin: 0;
-  color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 13px;
-`
-
-export const FinalSchedulePanel = styled.section`
-  display: flex;
-  width: min(700px, 100%);
-  min-height: 292px;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 16px;
-  box-sizing: border-box;
-  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  border-radius: 16px;
-  padding: 24px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-`
-
-export const FinalActions = styled.div`
-  display: flex;
-  gap: 12px;
-
-  > button { width: 244px; height: 48px; }
-
-  @media (max-width: 560px) {
-    width: 100%;
-    flex-direction: column;
-    > button { width: 100%; }
-  }
-`
-
-export const FinalHint = styled.p`
-  margin: 0;
-  color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 12px;
 `
 
 export const Badge = styled.span`

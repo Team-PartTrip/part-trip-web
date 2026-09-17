@@ -11,16 +11,20 @@ import {
 } from '@/entities/planner'
 import {
   useCountriesQuery,
+  useMoreTourPlacesQuery,
   usePopularCitiesQuery,
   useTourPlacesQuery,
 } from '@/entities/travel'
 import { isPositiveSafeInteger } from '@/shared/utils'
+import type { PlannerCityResponseDto } from '@/entities/planner'
 
 import type { PlannerStep } from './types'
+import { isPlannerConfirmedStatus } from './status'
 
 type PlannerPlan = {
   cityName?: string
   countryName?: string
+  cities?: PlannerCityResponseDto[]
   endDate?: string
   headcount?: number
   startDate?: string
@@ -32,25 +36,25 @@ export function usePlannerData(
   activePlannerId: number,
   activeVoteId: number,
   countryKeyword = '',
+  selectedPlaceCountryName = '',
+  selectedPlaceCityName = '',
+  confirmedLocally = false,
 ) {
   const needsPlaces =
     step === 'explore' ||
     step === 'vote' ||
-    step === 'lineup' ||
-    step === 'final' ||
     step === 'place'
   const hasActivePlanner = isPositiveSafeInteger(activePlannerId)
   const needsPlannerDetail = hasActivePlanner && step !== 'list'
-  const needsMembers = step === 'group' || step === 'progress' || step === 'final'
+  const needsMembers = step === 'group' || step === 'progress'
   const requiresMembers = step === 'group' || step === 'progress'
   const needsInvitations = step === 'group'
-  const needsVotes = step === 'explore' || step === 'vote' || step === 'lineup' || step === 'progress' || step === 'final' || step === 'place'
+  const needsVotes = step === 'explore' || step === 'vote' || step === 'progress' || step === 'place'
   const requiresVotes = step === 'vote' || step === 'progress' || step === 'place'
   const needsVoteDetail = step === 'vote' &&
     hasActivePlanner &&
     isPositiveSafeInteger(activeVoteId)
   const requiresVoteList = requiresVotes && !needsVoteDetail
-  const needsConfirmedPlaces = step === 'final'
   const [overriddenPlan, setOverriddenPlan] = useState<PlannerPlan>()
   const countriesQuery = useCountriesQuery(countryKeyword, step === 'destination')
   const popularCitiesQuery = usePopularCitiesQuery(8, step === 'destination')
@@ -59,6 +63,8 @@ export function usePlannerData(
     activePlannerId,
     needsPlannerDetail,
   )
+  const needsConfirmedPlaces = step === 'progress' &&
+    (confirmedLocally || isPlannerConfirmedStatus(plannerDetailQuery.data?.status))
   const plannerMembersQuery = usePlannerMembersQuery(activePlannerId, needsMembers)
   const plannerInvitationsQuery = usePlannerInvitationsQuery(needsInvitations)
   const votesQuery = usePlannerVotesQuery(activePlannerId, needsVotes)
@@ -68,18 +74,30 @@ export function usePlannerData(
     ? {
         cityName: plannerDetailQuery.data.cityName,
         countryName: plannerDetailQuery.data.countryName,
+        cities: plannerDetailQuery.data.cities,
         endDate: plannerDetailQuery.data.endDate,
         headcount: plannerDetailQuery.data.memberCount,
         startDate: plannerDetailQuery.data.startDate,
       }
     : undefined
   const plan = overriddenPlan ?? plannerPlan
+  const placeCountryName = selectedPlaceCountryName || plan?.countryName || ''
+  const placeCityName = selectedPlaceCityName || plan?.cityName || ''
   const placesQuery = useTourPlacesQuery(
-    plan?.countryName,
-    plan?.cityName,
+    placeCountryName,
+    placeCityName,
     category,
     needsPlaces,
   )
+  const morePlacesQuery = useMoreTourPlacesQuery(placeCountryName, placeCityName, category)
+  const additionalPlaces = morePlacesQuery.data?.pages.flatMap((page) => page.places ?? []) ?? []
+  const seenPlaceIds = new Set<number>()
+  const places = [...(placesQuery.data ?? []), ...additionalPlaces].filter((place) => {
+    if (place.tourPlaceId == null) return true
+    if (seenPlaceIds.has(place.tourPlaceId)) return false
+    seenPlaceIds.add(place.tourPlaceId)
+    return true
+  })
   const canUseVoteDetail = step === 'vote' && Boolean(voteDetailQuery.data)
 
   return {
@@ -103,7 +121,11 @@ export function usePlannerData(
       confirmedPlacesQuery.isLoading ||
       (requiresVoteList && votesQuery.isLoading) ||
       (needsVoteDetail && voteDetailQuery.isLoading),
-    places: placesQuery.data ?? [],
+    places,
+    fetchMorePlaces: () => morePlacesQuery.fetchNextPage({ throwOnError: true }),
+    hasMorePlaces: Boolean(placeCountryName && placeCityName && category) && (!morePlacesQuery.data || morePlacesQuery.hasNextPage),
+    isLoadingMorePlaces: morePlacesQuery.isFetchingNextPage,
+    morePlacesError: morePlacesQuery.isError,
     plan,
     plannerDetail: plannerDetailQuery.data,
     planners: plannersQuery.data ?? [],

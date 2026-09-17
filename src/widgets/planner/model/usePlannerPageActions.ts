@@ -1,30 +1,8 @@
 import { useState } from 'react'
 
-type Props = {
-  handleConfirmPlan: () => Promise<boolean>
-  isConfirmed: boolean
-  plannerInviteLink: string
-}
-
-export function usePlannerPageActions({
-  handleConfirmPlan,
-  isConfirmed,
-  plannerInviteLink,
-}: Props) {
+export function usePlannerPageActions(plannerInviteLink: string) {
   const [inviteLinkFeedback, setInviteLinkFeedback] = useState('')
   const [inviteLinkError, setInviteLinkError] = useState('')
-  const [shareError, setShareError] = useState('')
-
-  const handleSharePlan = async () => {
-    if (!isConfirmed && !(await handleConfirmPlan())) return
-    try {
-      if (!navigator.clipboard) throw new Error('clipboard is unavailable')
-      await navigator.clipboard.writeText(window.location.href)
-      setShareError('')
-    } catch {
-      setShareError('일정 공유 링크를 복사하지 못했습니다.')
-    }
-  }
 
   const handleCopyInviteLink = async () => {
     setInviteLinkFeedback('')
@@ -44,9 +22,7 @@ export function usePlannerPageActions({
 
   return {
     handleCopyInviteLink,
-    handleSharePlan,
     inviteLinkError,
     inviteLinkFeedback,
-    shareError,
   }
 }

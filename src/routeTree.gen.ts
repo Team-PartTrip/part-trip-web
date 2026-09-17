@@ -22,9 +22,7 @@ import { Route as appAuthenticatedTripCardsIndexRouteImport } from './routes/(ap
 import { Route as appAuthenticatedNotificationsNotificationIdIndexRouteImport } from './routes/(app)/_authenticated/notifications/$notificationId/index'
 import { Route as appAuthenticatedPlannerDestinationIndexRouteImport } from './routes/(app)/_authenticated/planner/destination/index'
 import { Route as appAuthenticatedPlannerExploreIndexRouteImport } from './routes/(app)/_authenticated/planner/explore/index'
-import { Route as appAuthenticatedPlannerFinalIndexRouteImport } from './routes/(app)/_authenticated/planner/final/index'
 import { Route as appAuthenticatedPlannerGroupIndexRouteImport } from './routes/(app)/_authenticated/planner/group/index'
-import { Route as appAuthenticatedPlannerLineupIndexRouteImport } from './routes/(app)/_authenticated/planner/lineup/index'
 import { Route as appAuthenticatedPlannerProgressIndexRouteImport } from './routes/(app)/_authenticated/planner/progress/index'
 import { Route as appAuthenticatedPlannerVoteIndexRouteImport } from './routes/(app)/_authenticated/planner/vote/index'
 import { Route as appAuthenticatedProfileAchievementsIndexRouteImport } from './routes/(app)/_authenticated/profile/achievements/index'
@@ -120,22 +118,10 @@ const appAuthenticatedPlannerExploreIndexRoute =
     path: '/planner/explore/',
     getParentRoute: () => appAuthenticatedRouteRoute,
   } as any)
-const appAuthenticatedPlannerFinalIndexRoute =
-  appAuthenticatedPlannerFinalIndexRouteImport.update({
-    id: '/planner/final/',
-    path: '/planner/final/',
-    getParentRoute: () => appAuthenticatedRouteRoute,
-  } as any)
 const appAuthenticatedPlannerGroupIndexRoute =
   appAuthenticatedPlannerGroupIndexRouteImport.update({
     id: '/planner/group/',
     path: '/planner/group/',
-    getParentRoute: () => appAuthenticatedRouteRoute,
-  } as any)
-const appAuthenticatedPlannerLineupIndexRoute =
-  appAuthenticatedPlannerLineupIndexRouteImport.update({
-    id: '/planner/lineup/',
-    path: '/planner/lineup/',
     getParentRoute: () => appAuthenticatedRouteRoute,
   } as any)
 const appAuthenticatedPlannerProgressIndexRoute =
@@ -278,9 +264,7 @@ export interface FileRoutesByFullPath {
   '/notifications/$notificationId/': typeof appAuthenticatedNotificationsNotificationIdIndexRoute
   '/planner/destination/': typeof appAuthenticatedPlannerDestinationIndexRoute
   '/planner/explore/': typeof appAuthenticatedPlannerExploreIndexRoute
-  '/planner/final/': typeof appAuthenticatedPlannerFinalIndexRoute
   '/planner/group/': typeof appAuthenticatedPlannerGroupIndexRoute
-  '/planner/lineup/': typeof appAuthenticatedPlannerLineupIndexRoute
   '/planner/progress/': typeof appAuthenticatedPlannerProgressIndexRoute
   '/planner/vote/': typeof appAuthenticatedPlannerVoteIndexRoute
   '/profile/achievements/': typeof appAuthenticatedProfileAchievementsIndexRoute
@@ -316,9 +300,7 @@ export interface FileRoutesByTo {
   '/notifications/$notificationId': typeof appAuthenticatedNotificationsNotificationIdIndexRoute
   '/planner/destination': typeof appAuthenticatedPlannerDestinationIndexRoute
   '/planner/explore': typeof appAuthenticatedPlannerExploreIndexRoute
-  '/planner/final': typeof appAuthenticatedPlannerFinalIndexRoute
   '/planner/group': typeof appAuthenticatedPlannerGroupIndexRoute
-  '/planner/lineup': typeof appAuthenticatedPlannerLineupIndexRoute
   '/planner/progress': typeof appAuthenticatedPlannerProgressIndexRoute
   '/planner/vote': typeof appAuthenticatedPlannerVoteIndexRoute
   '/profile/achievements': typeof appAuthenticatedProfileAchievementsIndexRoute
@@ -356,9 +338,7 @@ export interface FileRoutesById {
   '/(app)/_authenticated/notifications/$notificationId/': typeof appAuthenticatedNotificationsNotificationIdIndexRoute
   '/(app)/_authenticated/planner/destination/': typeof appAuthenticatedPlannerDestinationIndexRoute
   '/(app)/_authenticated/planner/explore/': typeof appAuthenticatedPlannerExploreIndexRoute
-  '/(app)/_authenticated/planner/final/': typeof appAuthenticatedPlannerFinalIndexRoute
   '/(app)/_authenticated/planner/group/': typeof appAuthenticatedPlannerGroupIndexRoute
-  '/(app)/_authenticated/planner/lineup/': typeof appAuthenticatedPlannerLineupIndexRoute
   '/(app)/_authenticated/planner/progress/': typeof appAuthenticatedPlannerProgressIndexRoute
   '/(app)/_authenticated/planner/vote/': typeof appAuthenticatedPlannerVoteIndexRoute
   '/(app)/_authenticated/profile/achievements/': typeof appAuthenticatedProfileAchievementsIndexRoute
@@ -396,9 +376,7 @@ export interface FileRouteTypes {
     | '/notifications/$notificationId/'
     | '/planner/destination/'
     | '/planner/explore/'
-    | '/planner/final/'
     | '/planner/group/'
-    | '/planner/lineup/'
     | '/planner/progress/'
     | '/planner/vote/'
     | '/profile/achievements/'
@@ -434,9 +412,7 @@ export interface FileRouteTypes {
     | '/notifications/$notificationId'
     | '/planner/destination'
     | '/planner/explore'
-    | '/planner/final'
     | '/planner/group'
-    | '/planner/lineup'
     | '/planner/progress'
     | '/planner/vote'
     | '/profile/achievements'
@@ -473,9 +449,7 @@ export interface FileRouteTypes {
     | '/(app)/_authenticated/notifications/$notificationId/'
     | '/(app)/_authenticated/planner/destination/'
     | '/(app)/_authenticated/planner/explore/'
-    | '/(app)/_authenticated/planner/final/'
     | '/(app)/_authenticated/planner/group/'
-    | '/(app)/_authenticated/planner/lineup/'
     | '/(app)/_authenticated/planner/progress/'
     | '/(app)/_authenticated/planner/vote/'
     | '/(app)/_authenticated/profile/achievements/'
@@ -600,25 +574,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAuthenticatedPlannerExploreIndexRouteImport
       parentRoute: typeof appAuthenticatedRouteRoute
     }
-    '/(app)/_authenticated/planner/final/': {
-      id: '/(app)/_authenticated/planner/final/'
-      path: '/planner/final'
-      fullPath: '/planner/final/'
-      preLoaderRoute: typeof appAuthenticatedPlannerFinalIndexRouteImport
-      parentRoute: typeof appAuthenticatedRouteRoute
-    }
     '/(app)/_authenticated/planner/group/': {
       id: '/(app)/_authenticated/planner/group/'
       path: '/planner/group'
       fullPath: '/planner/group/'
       preLoaderRoute: typeof appAuthenticatedPlannerGroupIndexRouteImport
-      parentRoute: typeof appAuthenticatedRouteRoute
-    }
-    '/(app)/_authenticated/planner/lineup/': {
-      id: '/(app)/_authenticated/planner/lineup/'
-      path: '/planner/lineup'
-      fullPath: '/planner/lineup/'
-      preLoaderRoute: typeof appAuthenticatedPlannerLineupIndexRouteImport
       parentRoute: typeof appAuthenticatedRouteRoute
     }
     '/(app)/_authenticated/planner/progress/': {
@@ -781,9 +741,7 @@ interface appAuthenticatedRouteRouteChildren {
   appAuthenticatedNotificationsNotificationIdIndexRoute: typeof appAuthenticatedNotificationsNotificationIdIndexRoute
   appAuthenticatedPlannerDestinationIndexRoute: typeof appAuthenticatedPlannerDestinationIndexRoute
   appAuthenticatedPlannerExploreIndexRoute: typeof appAuthenticatedPlannerExploreIndexRoute
-  appAuthenticatedPlannerFinalIndexRoute: typeof appAuthenticatedPlannerFinalIndexRoute
   appAuthenticatedPlannerGroupIndexRoute: typeof appAuthenticatedPlannerGroupIndexRoute
-  appAuthenticatedPlannerLineupIndexRoute: typeof appAuthenticatedPlannerLineupIndexRoute
   appAuthenticatedPlannerProgressIndexRoute: typeof appAuthenticatedPlannerProgressIndexRoute
   appAuthenticatedPlannerVoteIndexRoute: typeof appAuthenticatedPlannerVoteIndexRoute
   appAuthenticatedProfileAchievementsIndexRoute: typeof appAuthenticatedProfileAchievementsIndexRoute
@@ -820,12 +778,8 @@ const appAuthenticatedRouteRouteChildren: appAuthenticatedRouteRouteChildren = {
     appAuthenticatedPlannerDestinationIndexRoute,
   appAuthenticatedPlannerExploreIndexRoute:
     appAuthenticatedPlannerExploreIndexRoute,
-  appAuthenticatedPlannerFinalIndexRoute:
-    appAuthenticatedPlannerFinalIndexRoute,
   appAuthenticatedPlannerGroupIndexRoute:
     appAuthenticatedPlannerGroupIndexRoute,
-  appAuthenticatedPlannerLineupIndexRoute:
-    appAuthenticatedPlannerLineupIndexRoute,
   appAuthenticatedPlannerProgressIndexRoute:
     appAuthenticatedPlannerProgressIndexRoute,
   appAuthenticatedPlannerVoteIndexRoute: appAuthenticatedPlannerVoteIndexRoute,

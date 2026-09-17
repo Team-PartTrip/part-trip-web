@@ -8,7 +8,5 @@ export type PlannerStep =
   | 'destination'
   | 'explore'
   | 'vote'
-  | 'lineup'
   | 'progress'
-  | 'final'
   | 'place'

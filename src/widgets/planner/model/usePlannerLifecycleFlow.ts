@@ -7,6 +7,8 @@ import { type usePlannerState } from './usePlannerState'
 import { paths, ACTIVE_VOTE_CATEGORY_KEY } from '@/shared/config'
 import { removeSessionValue, writeSessionValue } from '@/shared/libs/session-storage'
 import { getErrorMessage, isPositiveSafeInteger } from '@/shared/utils'
+import { getPlannerConfirmationSelections } from './selectors'
+import { normalizeStatus } from './status'
 
 type Data = ReturnType<typeof usePlannerData>
 type Mutations = ReturnType<typeof usePlannerMutations>
@@ -24,7 +26,6 @@ type Props = {
 export function usePlannerLifecycleFlow({ canManagePlanner, data, navigate, mutations, state }: Props) {
   const {
     activePlannerId,
-    clearSelected,
     plannerConfirmationKey,
     resetVoteSession,
     setCityName,
@@ -36,9 +37,15 @@ export function usePlannerLifecycleFlow({ canManagePlanner, data, navigate, muta
     setSelectedDestination,
     setStartDate,
     setStoredActivePlannerId,
+    setPlannerPlaceCityName,
+    setPlannerPlaceCountryName,
   } = state
   const { votes } = data
   const { confirmPlannerMutation, deletePlannerMutation } = mutations
+  const selections = getPlannerConfirmationSelections(votes)
+  const canConfirmPlan = votes.length > 0 &&
+    votes.every((vote) => ['CLOSED', 'CONFIRMED'].includes(normalizeStatus(vote.status))) &&
+    selections.length > 0
 
   const handleConfirmPlan = async () => {
     if (!canManagePlanner) {
@@ -51,7 +58,11 @@ export function usePlannerLifecycleFlow({ canManagePlanner, data, navigate, muta
         setErrorMessage('확정할 투표 결과를 확인할 수 없습니다.')
         return false
       }
-      await confirmPlannerMutation.mutateAsync(activePlannerId)
+      if (!canConfirmPlan) {
+        setErrorMessage('모든 카테고리 투표를 마감한 뒤 최다 득표 장소를 확정해주세요.')
+        return false
+      }
+      await confirmPlannerMutation.mutateAsync({ plannerId: activePlannerId, payload: { selections } })
       writeSessionValue(plannerConfirmationKey, 'true')
       setConfirmedPlannerId(activePlannerId)
       return true
@@ -72,7 +83,6 @@ export function usePlannerLifecycleFlow({ canManagePlanner, data, navigate, muta
       if (plannerId === activePlannerId) {
         clearPlannerSession(plannerId)
         setStoredActivePlannerId(0)
-        clearSelected()
         resetVoteSession()
         setConfirmedPlannerId(0)
       }
@@ -100,13 +110,15 @@ export function usePlannerLifecycleFlow({ canManagePlanner, data, navigate, muta
     setCityName(undefined)
     setStartDate(undefined)
     setEndDate(undefined)
-    clearSelected()
+    setPlannerPlaceCityName('')
+    setPlannerPlaceCountryName('')
     resetVoteSession()
     setConfirmedPlannerId(0)
     navigate({ to: paths.plannerGroup })
   }
 
   return {
+    canConfirmPlan,
     confirmPlannerPending: confirmPlannerMutation.isPending,
     deletePlannerPending: deletePlannerMutation.isPending,
     handleConfirmPlan,

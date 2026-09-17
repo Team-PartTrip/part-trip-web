@@ -13,7 +13,6 @@ import { usePlannerFlow } from "../model/usePlannerFlow";
 import { usePlannerPageActions } from "../model/usePlannerPageActions";
 import type { PlannerStep } from "../model/types";
 import { PlannerHeader } from "./PlannerHeader";
-import { PlannerFinalStep } from "./PlannerFinalStep";
 import { PlannerGroupManagementPanel } from "./PlannerGroupManagementPanel";
 import { PlannerGroupStep } from "./PlannerGroupStep";
 import { PlannerListStep, type PlannerTab } from "./PlannerListStep";
@@ -22,7 +21,6 @@ import { PlannerPlaceStep } from "./PlannerPlaceStep";
 import {
   PlannerDestinationStep,
   PlannerExploreStep,
-  PlannerLineupStep,
   PlannerProgressStep,
   PlannerVoteStep,
 } from "./PlannerStepViews";
@@ -46,14 +44,8 @@ export function PlannerExplorePage() {
 export function PlannerVotePage() {
   return <PlannerFlowPage step="vote" />;
 }
-export function PlannerLineupPage() {
-  return <PlannerFlowPage step="explore" />;
-}
 export function PlannerProgressPage() {
   return <PlannerFlowPage step="progress" />;
-}
-export function PlannerFinalPage() {
-  return <PlannerFlowPage step="final" />;
 }
 export function PlannerPlacePage() {
   return <PlannerFlowPage step="place" />;
@@ -76,6 +68,10 @@ function PlannerFlowPage({ step }: Props) {
     isSaving,
     navigate,
     plan,
+    plannerPlaceCityName,
+    plannerPlaceCountryName,
+    setPlannerPlaceCityName,
+    setPlannerPlaceCountryName,
     plannerDetail,
     plannerInviteLink,
   } = common;
@@ -100,31 +96,25 @@ function PlannerFlowPage({ step }: Props) {
     setMemberCount,
   } = group;
   const {
-    canManageCandidates,
-    candidateManagementError,
-    handleAddPlaceCandidate,
-    handleRandomLineup,
-    handleRemoveFromLineup,
-    handleSaveCandidates,
-    isSavingCandidates,
-    isSavingPlace,
-    lineupChoice,
-    lineupMode,
+    canVotePlaces,
+    handleLoadMorePlaces,
+    handleTogglePlaceVote,
+    hasMorePlaces,
+    isLoadingMorePlaces,
+    isSavingPlaceVote,
     place,
     places,
     plannerCategories: categories,
-    selected,
-    selectedPlaceCount,
-    selectedPlaces,
-    setLineupChoice,
-    setLineupMode,
-    setSelected,
     setVoteCategory,
     voteCategory,
+    voteOptions,
   } = candidate;
   const {
     countries,
+    handleAddCity,
     handleDestinationSelect,
+    handleRemoveCity,
+    plannerCities,
     popularCities,
     saveDestination,
     selectedCityName,
@@ -143,11 +133,9 @@ function PlannerFlowPage({ step }: Props) {
     canCloseVotes,
     castBallotPending,
     closeVotePending,
-    confirmVotePending,
     deleteVoteOptionPending,
     handleCastBallot,
     handleCloseVote,
-    handleConfirmVote,
     handleDeleteVoteOption,
     handleRemindMembers,
     canManagePlanner,
@@ -160,6 +148,7 @@ function PlannerFlowPage({ step }: Props) {
     votesError,
   } = vote;
   const {
+    canConfirmPlan,
     confirmPlannerPending,
     confirmedPlaces,
     deletePlannerPending,
@@ -177,11 +166,9 @@ function PlannerFlowPage({ step }: Props) {
   );
   const {
     handleCopyInviteLink,
-    handleSharePlan,
     inviteLinkError,
     inviteLinkFeedback,
-    shareError,
-  } = usePlannerPageActions({ handleConfirmPlan, isConfirmed, plannerInviteLink });
+  } = usePlannerPageActions(plannerInviteLink);
 
   const { destinationResults, isDestinationSearch } = getDestinationResults(
     countries,
@@ -189,25 +176,27 @@ function PlannerFlowPage({ step }: Props) {
     selectedCityName,
     plannerDetail?.cityName,
   );
+  const savedPlannerCities = plannerCities;
+  const activePlaceCityName = plannerPlaceCityName || savedPlannerCities[0]?.cityName || plan?.cityName || '';
+  const activePlaceCountryName = plannerPlaceCountryName || savedPlannerCities[0]?.countryName || plan?.countryName || '';
   const currentUserName = profile?.name || "사용자";
   const currentUserInitial = currentUserName.slice(0, 2).toUpperCase() || "MS";
   const {
     confirmedCount,
-    finalPlaces,
     hasOpenVote,
     otherMembers,
     pendingInvitations,
     votingCount,
   } = getPlannerPageModel({
-    confirmedPlaces,
     currentUserName,
     invitations,
     members,
     profileId: profile?.id,
-    selectedPlaces,
     votes,
-    voteCategory,
   });
+  const placeIsSelected = place != null && voteOptions.some((option) =>
+    option.tourPlaceId === place.tourPlaceId && option.selectedByMe === true,
+  );
 
   const requiresActivePlanner = !["list", "group"].includes(step);
 
@@ -254,7 +243,7 @@ function PlannerFlowPage({ step }: Props) {
         />
         {errorMessage || hasError || votesError ? (
           <S.Error role="alert">
-            {errorMessage || (votesError ? candidateManagementError : "플래너 정보를 불러오지 못했습니다.")}
+            {errorMessage || (votesError ? "투표 정보를 불러오지 못했습니다." : "플래너 정보를 불러오지 못했습니다.")}
           </S.Error>
         ) : null}
 
@@ -320,9 +309,12 @@ function PlannerFlowPage({ step }: Props) {
                 calendarMonth={calendarMonth}
                 destinationResults={destinationResults}
                 handleCalendarDay={handleCalendarDay}
+                handleAddCity={handleAddCity}
                 handleDestinationSelect={handleDestinationSelect}
+                handleRemoveCity={handleRemoveCity}
                 isDestinationSearch={isDestinationSearch}
                 isSaving={isSaving}
+                plannerCities={plannerCities}
                 saveDestination={saveDestination}
                 selectedCityName={selectedCityName}
                 selectedCountryInfoId={selectedCountryInfoId}
@@ -342,16 +334,25 @@ function PlannerFlowPage({ step }: Props) {
 
             {step === "explore" ? (
               <PlannerExploreStep
-                canManageCandidates={canManageCandidates}
-                handleSaveCandidates={handleSaveCandidates}
-                isSavingCandidates={isSavingCandidates}
+                canVotePlaces={canVotePlaces}
+                handleLoadMorePlaces={handleLoadMorePlaces}
+                handleTogglePlaceVote={handleTogglePlaceVote}
+                hasMorePlaces={hasMorePlaces}
+                isLoadingMorePlaces={isLoadingMorePlaces}
+                isSavingPlaceVote={isSavingPlaceVote}
+                onOpenProgress={() => navigate({ to: paths.plannerProgress })}
+                onSelectCity={(countryName, cityName) => {
+                  setPlannerPlaceCountryName(countryName)
+                  setPlannerPlaceCityName(cityName)
+                }}
+                placeCountryName={activePlaceCountryName}
+                placeCityName={activePlaceCityName}
+                plannerCities={savedPlannerCities}
                 places={places}
                 plannerCategories={categories}
-                selected={selected}
-                selectedPlaceCount={selectedPlaceCount}
-                setSelected={setSelected}
                 setVoteCategory={setVoteCategory}
                 voteCategory={voteCategory}
+                voteOptions={voteOptions}
               />
             ) : null}
 
@@ -377,36 +378,18 @@ function PlannerFlowPage({ step }: Props) {
               />
             ) : null}
 
-            {step === "lineup" ? (
-              <PlannerLineupStep
-                handleRandomLineup={handleRandomLineup}
-                handleRemoveFromLineup={handleRemoveFromLineup}
-                handleSaveCandidates={handleSaveCandidates}
-                isSavingCandidates={isSavingCandidates}
-                lineupChoice={lineupChoice}
-                lineupMode={lineupMode}
-                selectedPlaces={selectedPlaces}
-                setLineupChoice={setLineupChoice}
-                setLineupMode={setLineupMode}
-                setSelected={setSelected}
-                voteCategory={voteCategory}
-              />
-            ) : null}
-
             {step === "progress" ? (
               <PlannerProgressStep
+                canConfirmPlan={canConfirmPlan}
                 canCloseVotes={canCloseVotes}
-                canManageCandidates={canManageCandidates}
                 canManagePlanner={canManagePlanner}
                 closeVotePending={closeVotePending}
                 confirmPlannerPending={confirmPlannerPending}
-                confirmVotePending={confirmVotePending}
                 currentUserInitial={currentUserInitial}
                 currentUserName={currentUserName}
                 deletePlannerPending={deletePlannerPending}
                 handleCloseVote={handleCloseVote}
                 handleConfirmPlan={handleConfirmPlan}
-                handleConfirmVote={handleConfirmVote}
                 handleDeletePlanner={handleDeletePlanner}
                 handleRemindMembers={handleRemindMembers}
                 hasOpenVote={hasOpenVote}
@@ -417,7 +400,6 @@ function PlannerFlowPage({ step }: Props) {
                 members={members}
                 onCopyInviteLink={() => void handleCopyInviteLink()}
                 onOpenExplore={() => navigate({ to: paths.plannerExplore })}
-                onOpenFinal={() => navigate({ to: paths.plannerFinal })}
                 onOpenGroupManagement={() => navigate({ to: paths.plannerGroup })}
                 plannerDetail={plannerDetail}
                 plannerInviteLink={plannerInviteLink}
@@ -425,32 +407,18 @@ function PlannerFlowPage({ step }: Props) {
                 remindFeedback={remindFeedback}
                 remindPending={remindPending}
                 votes={votes}
+                confirmedPlaces={confirmedPlaces}
                 confirmedCount={confirmedCount}
                 votingCount={votingCount}
               />
             ) : null}
 
-            {step === "final" ? (
-              <PlannerFinalStep
-                cityName={plannerDetail?.cityName || plan?.cityName}
-                endDate={plannerDetail?.endDate || plan?.endDate}
-                finalPlaces={finalPlaces}
-                isConfirmed={isConfirmed}
-                members={members}
-                onShare={() => void handleSharePlan()}
-                onStart={() => navigate({ to: paths.main })}
-                shareError={shareError}
-                startDate={plannerDetail?.startDate || plan?.startDate}
-                userInitial={currentUserInitial}
-                userName={currentUserName}
-              />
-            ) : null}
-
             {step === "place" ? (
               <PlannerPlaceStep
-                canManageCandidates={canManageCandidates}
-                isSaving={isSavingPlace}
-                onAdd={() => void handleAddPlaceCandidate()}
+                canVotePlaces={canVotePlaces}
+                isSavingPlaceVote={isSavingPlaceVote}
+                isSelected={placeIsSelected}
+                onToggle={() => void handleTogglePlaceVote(place?.tourPlaceId, placeIsSelected)}
                 place={place}
               />
             ) : null}

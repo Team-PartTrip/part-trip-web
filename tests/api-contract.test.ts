@@ -24,7 +24,6 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
     '/src/widgets/planner/model/usePlannerLifecycleFlow.ts',
     '/src/widgets/planner/model/usePlannerVoteFlow.ts',
   ])
-  const candidateFlow = read('/src/widgets/planner/model/usePlannerCandidateFlow.ts')
   const plannerMutations = read('/src/widgets/planner/model/usePlannerMutations.ts')
   const plannerPage = readSources([
     '/src/widgets/planner/ui/PlannerPage.tsx',
@@ -33,10 +32,10 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
     '/src/widgets/planner/ui/PlannerStepViews.tsx',
     '/src/widgets/planner/ui/PlannerDestinationStep.tsx',
     '/src/widgets/planner/ui/PlannerExploreStep.tsx',
-    '/src/widgets/planner/ui/PlannerLineupStep.tsx',
     '/src/widgets/planner/ui/PlannerProgressStep.tsx',
     '/src/widgets/planner/ui/PlannerVoteStep.tsx',
   ])
+  const plannerPlaceStep = read('/src/widgets/planner/ui/PlannerPlaceStep.tsx')
   const profile = read('/src/widgets/profile/ui/ProfilePage.tsx')
   const session = read('/src/entities/session/api.ts')
   const googleControl = read('/src/shared/ui/auth-form/GoogleLoginControl.tsx')
@@ -78,29 +77,26 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
   assert.match(planner, /update: \(plannerId: number\) => `\/planners\/\$\{plannerId\}\/travel-plan`/)
   assert.match(planner, /apiClient\.put<PlannerTravelPlanResponseDto>/)
   assert.match(planner, /export async function deletePlanner\(plannerId: number\)/)
-  assert.match(planner, /apiClient\.post<string>\(PLANNER_API_PATHS\.cart\(plannerId\), payload\)/)
+  assert.doesNotMatch(planner, /PLANNER_API_PATHS\.(?:cart|random|confirmVote)|PlannerCartRequestDto|RandomPlaceResponseDto|VoteConfirmRequestDto/)
+  assert.doesNotMatch(plannerMutations, /useAddPlannerPlacesMutation|useSelectRandomPlannerPlaceMutation|useConfirmVoteMutation/)
+  assert.equal(existsSync(`${projectRoot}/src/routes/(app)/_authenticated/planner/lineup/index.tsx`), false)
+  assert.equal(existsSync(`${projectRoot}/src/routes/(app)/_authenticated/planner/final/index.tsx`), false)
+  assert.equal(existsSync(`${projectRoot}/src/widgets/planner/ui/PlannerLineupStep.tsx`), false)
+  assert.equal(existsSync(`${projectRoot}/src/widgets/planner/ui/PlannerFinalStep.tsx`), false)
   assert.match(planner, /placeId\?: number\s+deadline\?: string/)
   assert.match(planner, /options: \(plannerId: number, voteId: number\) => `\/planners\/\$\{plannerId\}\/votes\/\$\{voteId\}\/options`/)
-  assert.match(plannerMutations, /useAddPlannerPlacesMutation/)
-  assert.match(plannerFlow, /addPlannerPlacesMutation\.mutateAsync\(\{ plannerId, payload: \{ placeIds \} \}\)/)
-  assert.equal((plannerFlow.match(/if \(candidateManagementError\)/g) ?? []).length, 3)
-  const randomLineupStart = candidateFlow.indexOf('const handleRandomLineup = async () => {')
-  const randomLineupEnd = candidateFlow.indexOf('\n  return {', randomLineupStart)
-  const randomLineup = candidateFlow.slice(randomLineupStart, randomLineupEnd)
-  const addCandidateIndex = randomLineup.indexOf('addPlannerPlacesMutation.mutateAsync')
-  assert.ok(addCandidateIndex >= 0)
-  for (const guard of ['if (!canManagePlanner)', 'if (candidateManagementError)']) {
-    const guardIndex = randomLineup.indexOf(guard)
-    assert.ok(guardIndex >= 0 && guardIndex < addCandidateIndex)
-  }
-  assert.match(plannerPage, /disabled=\{!canManageCandidates\}/)
-  assert.match(plannerPage, /votesError \? candidateManagementError/)
+  assert.match(planner, /apiClient\.put<VoteBallotResponseDto>\(PLANNER_API_PATHS\.placeBallot\(plannerId, tourPlaceId\)\)/)
+  assert.match(plannerPage, /disabled=\{!canVotePlaces \|\| isSavingPlaceVote/)
+  assert.match(plannerPage, /onToggle=\{\(\) => void handleTogglePlaceVote/)
+  assert.match(plannerPlaceStep, /isSelected \? "투표 취소" : "투표"/)
+  assert.match(planner, /confirmedPlaces: \(plannerId: number\) => `\/planners\/\$\{plannerId\}\/confirmed-places`/)
   assert.match(plannerPage, /onClick=\{\(\) => void handleCopyInviteLink\(\)\}/)
-  assert.match(plannerFlow, /const placeIds = \[\.\.\.new Set\(selectedPlaces/)
-  assert.match(plannerFlow, /placeIds\.length !== selectedPlaces\.length/)
   assert.match(plannerMutations, /useDeletePlannerMutation/)
   assert.match(plannerPage, /삭제할까요\?/)
   assert.match(travel, /tourPlaceId\?: number/)
+  assert.match(travel, /tourPlaceMore: '\/main\/tour-place\/more'/)
+  assert.match(travel, /export async function getTourPlace\(/)
+  assert.match(travel, /params: \{ category, cityName, countryName, cursor \}/)
   assert.match(session, /export type KakaoLoginRequestDto/)
   assert.match(session, /accessToken\?: string\s+code\?: string\s+redirectUri\?: string/)
   assert.match(session, /AUTH_API_PATHS\.session\.kakao/)

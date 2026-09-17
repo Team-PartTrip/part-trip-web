@@ -1,4 +1,5 @@
 import { Button as PartTripButton } from '@/shared/ui/parttrip'
+import type { PlannerCityResponseDto } from '@/entities/planner'
 
 import { type usePlannerFlow } from '../model/usePlannerFlow'
 import * as S from './PlannerPage.styles'
@@ -7,40 +8,69 @@ type CandidateFlow = ReturnType<typeof usePlannerFlow>['candidate']
 
 type Props = Pick<
   CandidateFlow,
-  | 'canManageCandidates'
-  | 'handleSaveCandidates'
+  | 'canVotePlaces'
+  | 'handleLoadMorePlaces'
+  | 'handleTogglePlaceVote'
+  | 'hasMorePlaces'
+  | 'isLoadingMorePlaces'
+  | 'isSavingPlaceVote'
   | 'places'
-  | 'selected'
-  | 'selectedPlaceCount'
-  | 'setSelected'
   | 'setVoteCategory'
   | 'voteCategory'
   | 'plannerCategories'
+  | 'voteOptions'
 > & {
-  isSavingCandidates: boolean
+  onOpenProgress: () => void
+  onSelectCity: (countryName: string, cityName: string) => void
+  placeCountryName: string
+  placeCityName: string
+  plannerCities: PlannerCityResponseDto[]
 }
 
 export function PlannerExploreStep({
-  canManageCandidates,
-  handleSaveCandidates,
-  isSavingCandidates,
+  canVotePlaces,
+  handleLoadMorePlaces,
+  handleTogglePlaceVote,
+  hasMorePlaces,
+  isLoadingMorePlaces,
+  isSavingPlaceVote,
+  onOpenProgress,
+  onSelectCity,
+  placeCountryName,
+  placeCityName,
+  plannerCities,
   places,
   plannerCategories: categories,
-  selected,
-  selectedPlaceCount,
-  setSelected,
   setVoteCategory,
   voteCategory,
+  voteOptions,
 }: Props) {
-  const allSelected = places.length > 0 && selected.length === places.length
-  const toggleSelection = (index: number) => {
-    setSelected((current) => current.includes(index)
-      ? current.filter((value) => value !== index)
-      : [...current, index])
-  }
+  const voteOptionByPlaceId = new Map(voteOptions.flatMap((option) =>
+    option.tourPlaceId == null ? [] : [[option.tourPlaceId, option] as const],
+  ))
 
   return (
     <>
+      {plannerCities.length > 1 ? (
+        <S.VoteCategoryChips aria-label="여행 도시">
+          {plannerCities.map((city, index) => {
+            const countryName = city.countryName ?? ''
+            const cityName = city.cityName ?? ''
+            const selected = countryName === placeCountryName && cityName === placeCityName
+            return (
+              <S.CategoryChip
+                key={`${countryName}-${cityName}-${index}`}
+                type="button"
+                className={selected ? 'active' : ''}
+                $active={selected}
+                onClick={() => onSelectCity(countryName, cityName)}
+              >
+                {cityName}
+              </S.CategoryChip>
+            )
+          })}
+        </S.VoteCategoryChips>
+      ) : null}
       <S.CategoryChips aria-label="장소 카테고리">
         {categories.map((category) => (
           <S.CategoryChip
@@ -57,26 +87,19 @@ export function PlannerExploreStep({
       <S.PlaceBody>
         <S.PlaceListPanel>
           <S.PlaceListHeader>
-            <span>선택한 장소 {selectedPlaceCount}</span>
-            <button
-              type="button"
-              aria-pressed={allSelected}
-              disabled={!canManageCandidates || places.length === 0}
-              onClick={() => setSelected(allSelected ? [] : places.map((_, index) => index))}
-            >
-              {allSelected ? '전체 취소' : '전체 선택'}
-            </button>
+            <span>{placeCityName || '여행지'} 장소 {places.length}곳 · 내 투표 {voteOptions.filter((option) => option.selectedByMe).length}곳</span>
           </S.PlaceListHeader>
           {places.map((item, index) => {
-            const isSelected = selected.includes(index)
+            const voteOption = item.tourPlaceId == null ? undefined : voteOptionByPlaceId.get(item.tourPlaceId)
+            const isSelected = voteOption?.selectedByMe === true
             return (
               <S.PlaceRow
-                key={index}
+                key={item.tourPlaceId ?? `${item.placeName}-${item.address}-${index}`}
                 type="button"
                 $active={isSelected}
                 aria-pressed={isSelected}
-                disabled={!canManageCandidates}
-                onClick={() => toggleSelection(index)}
+                disabled={!canVotePlaces || isSavingPlaceVote || item.tourPlaceId == null}
+                onClick={() => void handleTogglePlaceVote(item.tourPlaceId, isSelected)}
               >
                 <S.PlaceThumb $imageUrl={item.imageUrl}>{!item.imageUrl ? '이미지 없음' : null}</S.PlaceThumb>
                 <S.PlaceDetails>
@@ -84,22 +107,27 @@ export function PlannerExploreStep({
                   <span>{item.category || voteCategory} · {item.address || '장소 정보'}</span>
                 </S.PlaceDetails>
                 <S.PlaceAction $active={isSelected} aria-hidden="true">
-                  <span>{isSelected ? '후보 담김' : '담기'}</span>
-                  <b aria-hidden="true">{isSelected ? '✓' : '+'}</b>
+                  <span>{isSelected ? '투표 취소' : '투표'}</span>
+                  <b aria-hidden="true">{voteOption?.voteCount ?? 0}표</b>
                 </S.PlaceAction>
               </S.PlaceRow>
             )
           })}
-          {places.length === 0 ? <S.Empty>연동된 장소 후보가 없습니다.</S.Empty> : null}
+          {places.length === 0 ? <S.Empty>표시할 장소가 없습니다.</S.Empty> : null}
         </S.PlaceListPanel>
         <S.PanelActions>
           <PartTripButton
             type="button"
-            disabled={isSavingCandidates || !canManageCandidates || selectedPlaceCount === 0}
-            onClick={() => void handleSaveCandidates()}
+            $variant="secondary"
+            onClick={onOpenProgress}
           >
-            {isSavingCandidates ? '후보 저장 중' : '투표 시작하기'}
+            진행·확정 현황
           </PartTripButton>
+          {hasMorePlaces ? (
+            <PartTripButton type="button" $variant="secondary" disabled={isLoadingMorePlaces} onClick={() => void handleLoadMorePlaces()}>
+              {isLoadingMorePlaces ? '추가 장소 조회 중' : '장소 더 보기'}
+            </PartTripButton>
+          ) : null}
         </S.PanelActions>
       </S.PlaceBody>
     </>

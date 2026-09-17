@@ -1,6 +1,6 @@
 import type { CountryInfoResponseDto } from '@/entities/travel'
-import { Input as PartTripInput } from '@/shared/ui/parttrip'
-import { formatCalendarDate, formatDate, formatTripDuration } from '@/shared/utils'
+import { Button as PartTripButton, Input as PartTripInput } from '@/shared/ui/parttrip'
+import { formatCalendarDate, formatDate, formatDateRange, formatTripDuration } from '@/shared/utils'
 
 import { type usePlannerFlow } from '../model/usePlannerFlow'
 import * as S from './PlannerPage.styles'
@@ -10,7 +10,10 @@ type Destination = CountryInfoResponseDto
 
 type Props = Pick<
   DestinationFlow,
+  | 'handleAddCity'
   | 'handleDestinationSelect'
+  | 'handleRemoveCity'
+  | 'plannerCities'
   | 'saveDestination'
   | 'selectedCityName'
   | 'selectedCountryInfoId'
@@ -39,9 +42,12 @@ export function PlannerDestinationStep({
   calendarMonth,
   destinationResults,
   handleCalendarDay,
+  handleAddCity,
   handleDestinationSelect,
+  handleRemoveCity,
   isDestinationSearch,
   isSaving,
+  plannerCities,
   saveDestination,
   selectedCityName,
   selectedCountryInfoId,
@@ -128,6 +134,29 @@ export function PlannerDestinationStep({
                 onChange={(event) => setEndDate(event.target.value)}
               />
             </S.DateRange>
+          </S.StepField>
+          <S.StepField>
+            <span>도시별 일정</span>
+            <S.PlannerCityList>
+              {plannerCities.map((city, index) => (
+                <S.PlannerCityRow key={`${city.countryName}-${city.cityName}-${index}`}>
+                  <div>
+                    <strong>{city.countryName} · {city.cityName}</strong>
+                    <span>{formatDateRange(city.startDate, city.endDate)}</span>
+                  </div>
+                  <S.PlannerCityRemoveButton
+                    type="button"
+                    aria-label={`${city.cityName} 일정 제거`}
+                    onClick={() => handleRemoveCity(index)}
+                  >
+                    삭제
+                  </S.PlannerCityRemoveButton>
+                </S.PlannerCityRow>
+              ))}
+            </S.PlannerCityList>
+            <PartTripButton type="button" $variant="secondary" disabled={isSaving} onClick={handleAddCity}>
+              현재 도시 추가
+            </PartTripButton>
           </S.StepField>
           <S.StepField>
             <label htmlFor="planner-headcount">인원</label>

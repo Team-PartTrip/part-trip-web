@@ -1,20 +1,14 @@
-import type { VoteStatusResponseDto } from '@/entities/planner'
-import type { TourPlaceResponseDto } from '@/entities/travel'
+import type { PlannerVoteSelection, VoteStatusResponseDto } from '@/entities/planner'
 import { isPositiveSafeInteger } from '../../../shared/utils/number.ts'
 
 import { normalizeStatus } from './status.ts'
 
-function isSamePlace(left: TourPlaceResponseDto, right: TourPlaceResponseDto) {
-  if (isPositiveSafeInteger(left.tourPlaceId) && isPositiveSafeInteger(right.tourPlaceId)) {
-    return left.tourPlaceId === right.tourPlaceId
-  }
-  const leftKey = [left.placeName, left.address, left.imageUrl].filter(Boolean).join('|')
-  const rightKey = [right.placeName, right.address, right.imageUrl].filter(Boolean).join('|')
-  return Boolean(leftKey) && leftKey === rightKey
-}
-
-export function getSelectedPlaceIndexes(places: TourPlaceResponseDto[], selectedPlaces: TourPlaceResponseDto[]) {
-  return places.flatMap((place, index) => selectedPlaces.some((selected) => isSamePlace(place, selected)) ? [index] : [])
+export function isConfirmedPlannerOption(
+  vote: Pick<VoteStatusResponseDto, 'confirmedOptionId'>,
+  option: VoteStatusResponseDto['options'][number],
+) {
+  return option.confirmed === true ||
+    (vote.confirmedOptionId != null && option.optionId === vote.confirmedOptionId)
 }
 
 export function getActiveVote(
@@ -30,20 +24,38 @@ export function getActiveVote(
     votes.find((vote) => vote.voteId === activeVoteId)
 }
 
-export function getCandidateManagementState(
-  votes: VoteStatusResponseDto[],
-  votesLoading: boolean,
-  votesError: boolean,
-) {
-  const allVotesOpen = votes.every((vote) => normalizeStatus(vote.status) === 'OPEN')
-  const hasNonOpenVote = !votesLoading && !votesError && votes.length > 0 && !allVotesOpen
-  const canManageCandidates = !votesLoading && !votesError && allVotesOpen
-  const candidateManagementError = votesLoading
-    ? '투표 상태를 확인하는 중입니다.'
-    : votesError
-      ? '투표 상태를 불러오지 못했습니다. 새로고침 후 다시 시도해주세요.'
-      : hasNonOpenVote
-        ? '투표가 시작되거나 마감된 뒤에는 후보를 변경할 수 없습니다.'
-        : ''
-  return { canManageCandidates, candidateManagementError }
+export function getTopVoteOptions(vote: Pick<VoteStatusResponseDto, 'options'>) {
+  const options = vote.options ?? []
+  const highestVoteCount = Math.max(...options.map((option) => option.voteCount ?? 0), 0)
+  return highestVoteCount > 0
+    ? options.filter((option) => (option.voteCount ?? 0) === highestVoteCount)
+    : []
+}
+
+export function canClosePlannerVotes(votes: VoteStatusResponseDto[]) {
+  const openVotes = votes.filter((vote) => normalizeStatus(vote.status) === 'OPEN')
+  return openVotes.length > 0 && openVotes.every((vote) =>
+    isPositiveSafeInteger(vote.voteId) &&
+    isPositiveSafeInteger(vote.eligibleMemberCount) &&
+    Number.isSafeInteger(vote.votedMemberCount) &&
+    (vote.votedMemberCount ?? 0) >= vote.eligibleMemberCount!,
+  )
+}
+
+export function getPlannerConfirmationSelections(votes: VoteStatusResponseDto[]): PlannerVoteSelection[] {
+  const selections = votes.flatMap((vote) => {
+    const status = normalizeStatus(vote.status)
+    const confirmedOptions = vote.options.filter((option) => isConfirmedPlannerOption(vote, option))
+    const options = confirmedOptions.length
+      ? confirmedOptions
+      : status === 'CLOSED'
+        ? getTopVoteOptions(vote)
+        : []
+    return options.flatMap((option) =>
+      isPositiveSafeInteger(vote.voteId) && isPositiveSafeInteger(option.optionId)
+        ? [{ voteId: vote.voteId, optionId: option.optionId }]
+        : [],
+    )
+  })
+  return [...new Map(selections.map((selection) => [`${selection.voteId}:${selection.optionId}`, selection])).values()]
 }

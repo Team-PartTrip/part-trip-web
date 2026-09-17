@@ -1,37 +1,26 @@
 import type {
-  ConfirmedPlaceResponseDto,
   PlannerInvitationResponseDto,
   PlannerMemberResponseDto,
   VoteStatusResponseDto,
 } from '@/entities/planner'
-import type { TourPlaceResponseDto } from '@/entities/travel'
 
 import { normalizeStatus } from './status.ts'
-
-type SelectedPlace = {
-  item: Pick<TourPlaceResponseDto, 'placeName'>
-}
+import { isConfirmedPlannerOption } from './selectors.ts'
 
 type PlannerPageModelProps = {
-  confirmedPlaces: ConfirmedPlaceResponseDto[]
   currentUserName: string
   invitations: PlannerInvitationResponseDto[]
   members: PlannerMemberResponseDto[]
   profileId?: string
-  selectedPlaces: SelectedPlace[]
   votes: VoteStatusResponseDto[]
-  voteCategory: string
 }
 
 export function getPlannerPageModel({
-  confirmedPlaces,
   currentUserName,
   invitations,
   members,
   profileId,
-  selectedPlaces,
   votes,
-  voteCategory,
 }: PlannerPageModelProps) {
   const otherMembers = members.filter((member) =>
     profileId
@@ -44,20 +33,11 @@ export function getPlannerPageModel({
         normalizeStatus(invitation.status),
       ),
   )
-  const finalPlaces: ConfirmedPlaceResponseDto[] = confirmedPlaces.length
-    ? confirmedPlaces
-    : selectedPlaces.map(({ item }) => ({
-        category: voteCategory,
-        categoryLabel: voteCategory,
-        placeName: item.placeName,
-        voteCount: undefined,
-      }))
-
   return {
-    confirmedCount: votes.filter(
-      (vote) => vote.confirmedOptionId != null || normalizeStatus(vote.status) === 'CONFIRMED',
-    ).length,
-    finalPlaces,
+    confirmedCount: votes.reduce((count, vote) => {
+      const confirmedOptions = vote.options.filter((option) => isConfirmedPlannerOption(vote, option))
+      return count + (confirmedOptions.length || (vote.confirmedOptionId != null || normalizeStatus(vote.status) === 'CONFIRMED' ? 1 : 0))
+    }, 0),
     hasOpenVote: votes.some(
       (vote) => normalizeStatus(vote.status) === 'OPEN' && vote.voteId != null,
     ),

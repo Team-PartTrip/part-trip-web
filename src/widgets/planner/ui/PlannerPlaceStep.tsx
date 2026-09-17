@@ -7,19 +7,22 @@ type PlannerPlace = {
   description?: string;
   imageUrl?: string;
   placeName?: string;
+  tourPlaceId?: number;
 };
 
 type PlannerPlaceStepProps = {
-  canManageCandidates: boolean;
-  isSaving: boolean;
-  onAdd: () => void;
+  canVotePlaces: boolean;
+  isSavingPlaceVote: boolean;
+  isSelected: boolean;
+  onToggle: () => void;
   place?: PlannerPlace;
 };
 
 export function PlannerPlaceStep({
-  canManageCandidates,
-  isSaving,
-  onAdd,
+  canVotePlaces,
+  isSavingPlaceVote,
+  isSelected,
+  onToggle,
   place,
 }: PlannerPlaceStepProps) {
   return (
@@ -33,10 +36,11 @@ export function PlannerPlaceStep({
             <p>{place.description || "장소 설명이 없습니다."}</p>
             <PartTripButton
               type="button"
-              disabled={!canManageCandidates || isSaving}
-              onClick={onAdd}
+              disabled={!canVotePlaces || isSavingPlaceVote || place.tourPlaceId == null}
+              aria-pressed={isSelected}
+              onClick={onToggle}
             >
-              {isSaving ? "후보 저장 중" : "투표 후보에 추가"}
+              {isSavingPlaceVote ? "투표 처리 중" : isSelected ? "투표 취소" : "투표"}
             </PartTripButton>
           </S.StepCard>
         </>

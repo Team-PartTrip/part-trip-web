@@ -1,9 +1,10 @@
-import { queryOptions, useQueries, useQuery } from '@tanstack/react-query'
+import { infiniteQueryOptions, queryOptions, useInfiniteQuery, useQueries, useQuery } from '@tanstack/react-query'
 import {
   getCountries,
   getCountryInfo,
   getDday,
   getFestivals,
+  getMoreTourPlaces,
   getPopularCities,
   getTourPlace,
   type CountryInfoResponseDto,
@@ -96,6 +97,27 @@ export function useTourPlacesQuery(
   enabled = true,
 ) {
   return useQuery(tourPlacesQueryOptions(countryName ?? '', cityName, category, enabled))
+}
+
+export const moreTourPlacesQueryOptions = (
+  countryName: string,
+  cityName: string,
+  category: string,
+) =>
+  infiniteQueryOptions({
+    queryKey: travelQueryKeys.moreTourPlaces(countryName, cityName, category),
+    queryFn: ({ pageParam }) => getMoreTourPlaces(countryName, cityName, category, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.cursor ?? undefined,
+    enabled: false,
+  })
+
+export function useMoreTourPlacesQuery(
+  countryName?: string,
+  cityName?: string,
+  category?: string,
+) {
+  return useInfiniteQuery(moreTourPlacesQueryOptions(countryName ?? '', cityName ?? '', category ?? ''))
 }
 
 export type MainTravelQueryData = {

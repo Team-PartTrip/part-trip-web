@@ -5,7 +5,6 @@ import { getPlannerPageModel } from '../src/widgets/planner/model/planner-page-m
 
 test('planner page model은 멤버·초대·확정 장소·투표 파생 상태를 유지한다', () => {
   const model = getPlannerPageModel({
-    confirmedPlaces: [],
     currentUserName: '사용자',
     invitations: [{ status: 'ACCEPTED' }, { status: 'PENDING' }],
     members: [
@@ -13,8 +12,6 @@ test('planner page model은 멤버·초대·확정 장소·투표 파생 상태�
       { nickName: '동행자', userId: 'friend' },
     ],
     profileId: 'me',
-    selectedPlaces: [{ item: { placeName: '오사카성' } }],
-    voteCategory: '명소',
     votes: [
       { options: [], status: 'OPEN', voteId: 1 },
       { confirmedOptionId: 2, options: [], status: 'CLOSED', voteId: 2 },
@@ -24,38 +21,47 @@ test('planner page model은 멤버·초대·확정 장소·투표 파생 상태�
 
   assert.deepEqual(model.otherMembers, [{ nickName: '동행자', userId: 'friend' }])
   assert.deepEqual(model.pendingInvitations, [{ status: 'PENDING' }])
-  assert.deepEqual(model.finalPlaces, [{ category: '명소', categoryLabel: '명소', placeName: '오사카성', voteCount: undefined }])
   assert.equal(model.hasOpenVote, true)
   assert.equal(model.confirmedCount, 1)
   assert.equal(model.votingCount, 2)
 })
 
-test('확정 장소가 있으면 selected place fallback을 사용하지 않는다', () => {
-  const confirmedPlaces = [{ placeName: '확정 장소' }]
+test('동점으로 확정된 장소는 각각 확정 수로 집계한다', () => {
   const model = getPlannerPageModel({
-    confirmedPlaces,
     currentUserName: '사용자',
     invitations: [],
     members: [],
-    selectedPlaces: [{ item: { placeName: '임시 장소' } }],
-    voteCategory: '명소',
-    votes: [],
+    votes: [{
+      options: [
+        { optionId: 1, confirmed: true },
+        { optionId: 2, confirmed: true },
+      ],
+      status: 'CONFIRMED',
+    }],
   })
 
-  assert.equal(model.finalPlaces, confirmedPlaces)
+  assert.equal(model.confirmedCount, 2)
+})
+
+test('확정 옵션 ID가 없는 응답은 미확정 장소를 확정 수로 세지 않는다', () => {
+  const model = getPlannerPageModel({
+    currentUserName: '사용자',
+    invitations: [],
+    members: [],
+    votes: [{ options: [{ selectedByMe: false }], status: 'CLOSED' }],
+  })
+
+  assert.equal(model.confirmedCount, 0)
 })
 
 test('profile id가 없으면 nickname fallback과 투표 상태별 집계를 유지한다', () => {
   const model = getPlannerPageModel({
-    confirmedPlaces: [],
     currentUserName: '사용자',
     invitations: [],
     members: [
       { nickName: '사용자', userId: 'legacy-me' },
       { nickName: '동행자', userId: 'friend' },
     ],
-    selectedPlaces: [],
-    voteCategory: '명소',
     votes: [
       { options: [], status: 'CONFIRMED' },
       { options: [], status: 'OPEN' },
