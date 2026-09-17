@@ -14,6 +14,11 @@ test('planner city date ranges reject overlapping or reversed stays', () => {
   assert.notEqual(validatePlannerCityRanges([osaka, { ...kyoto, startDate: '2026-10-03' }]), '')
   assert.notEqual(validatePlannerCityRanges([{ ...osaka, endDate: '2026-09-30' }]), '')
   assert.notEqual(validatePlannerCityRanges([{ ...osaka, startDate: '2026-02-30' }]), '')
+  assert.notEqual(validatePlannerCityRanges([
+    { ...osaka, startDate: '2026-01-01', endDate: '2026-01-10' },
+    { ...kyoto, startDate: '2026-01-02', endDate: '2026-01-03' },
+    { ...kyoto, startDate: '2026-01-04', endDate: '2026-01-05' },
+  ]), '')
 })
 
 test('planner city date ranges require at least one complete destination', () => {

@@ -2,7 +2,7 @@ import type { FormEvent } from 'react'
 import { useState } from 'react'
 import { type useNavigate } from '@tanstack/react-router'
 
-import { dedupeDestinations, findExactDestinationMatches, getPlannerCityPlans, validatePlannerCityRanges } from './destination'
+import { dedupeDestinations, findExactDestinationMatches, getPersistedPlannerCities, getPlannerCityPlans, validatePlannerCityRanges } from './destination'
 import { isValidPlannerMemberCount } from './member-count'
 import { type usePlannerData } from './usePlannerData'
 import { type usePlannerMutations } from './usePlannerMutations'
@@ -171,12 +171,7 @@ export function usePlannerDestinationFlow({ data, navigate, state, updatePlanner
           startDate: overallStartDate,
         },
       })
-      const returnedCities = savedPlan.cities?.flatMap((city) =>
-        city.countryName && city.cityName && city.startDate && city.endDate
-          ? [{ countryName: city.countryName, cityName: city.cityName, startDate: city.startDate, endDate: city.endDate }]
-          : [],
-      ) ?? []
-      const persistedCities = returnedCities.length ? returnedCities : orderedCities
+      const persistedCities = getPersistedPlannerCities(orderedCities, savedPlan.cities)
       setPlan({
         cityName: savedPlan.cityName ?? primaryCity.cityName,
         countryName: savedPlan.countryName ?? primaryCity.countryName,

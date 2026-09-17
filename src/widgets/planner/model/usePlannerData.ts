@@ -19,6 +19,7 @@ import { isPositiveSafeInteger } from '@/shared/utils'
 import type { PlannerCityResponseDto } from '@/entities/planner'
 
 import type { PlannerStep } from './types'
+import { isPlannerConfirmedStatus } from './status'
 
 type PlannerPlan = {
   cityName?: string
@@ -63,7 +64,7 @@ export function usePlannerData(
     needsPlannerDetail,
   )
   const needsConfirmedPlaces = step === 'progress' &&
-    (confirmedLocally || plannerDetailQuery.data?.status?.toUpperCase() === 'CONFIRMED')
+    (confirmedLocally || isPlannerConfirmedStatus(plannerDetailQuery.data?.status))
   const plannerMembersQuery = usePlannerMembersQuery(activePlannerId, needsMembers)
   const plannerInvitationsQuery = usePlannerInvitationsQuery(needsInvitations)
   const votesQuery = usePlannerVotesQuery(activePlannerId, needsVotes)

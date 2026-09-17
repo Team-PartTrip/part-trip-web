@@ -5,6 +5,7 @@ import type {
 } from '@/entities/planner'
 
 import { normalizeStatus } from './status.ts'
+import { isConfirmedPlannerOption } from './selectors.ts'
 
 type PlannerPageModelProps = {
   currentUserName: string
@@ -34,9 +35,7 @@ export function getPlannerPageModel({
   )
   return {
     confirmedCount: votes.reduce((count, vote) => {
-      const confirmedOptions = vote.options.filter((option) =>
-        option.confirmed === true || option.optionId === vote.confirmedOptionId,
-      )
+      const confirmedOptions = vote.options.filter((option) => isConfirmedPlannerOption(vote, option))
       return count + (confirmedOptions.length || (vote.confirmedOptionId != null || normalizeStatus(vote.status) === 'CONFIRMED' ? 1 : 0))
     }, 0),
     hasOpenVote: votes.some(

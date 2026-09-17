@@ -3,6 +3,14 @@ import { isPositiveSafeInteger } from '../../../shared/utils/number.ts'
 
 import { normalizeStatus } from './status.ts'
 
+export function isConfirmedPlannerOption(
+  vote: Pick<VoteStatusResponseDto, 'confirmedOptionId'>,
+  option: VoteStatusResponseDto['options'][number],
+) {
+  return option.confirmed === true ||
+    (vote.confirmedOptionId != null && option.optionId === vote.confirmedOptionId)
+}
+
 export function getActiveVote(
   votes: VoteStatusResponseDto[],
   voteDetail: VoteStatusResponseDto | undefined,
@@ -37,9 +45,7 @@ export function canClosePlannerVotes(votes: VoteStatusResponseDto[]) {
 export function getPlannerConfirmationSelections(votes: VoteStatusResponseDto[]): PlannerVoteSelection[] {
   const selections = votes.flatMap((vote) => {
     const status = normalizeStatus(vote.status)
-    const confirmedOptions = vote.options.filter((option) =>
-      option.confirmed === true || option.optionId === vote.confirmedOptionId,
-    )
+    const confirmedOptions = vote.options.filter((option) => isConfirmedPlannerOption(vote, option))
     const options = confirmedOptions.length
       ? confirmedOptions
       : status === 'CLOSED'

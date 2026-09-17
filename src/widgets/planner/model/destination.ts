@@ -4,6 +4,7 @@ import type {
 } from '@/entities/travel'
 import type {
   PlannerCityRequestDto,
+  PlannerCityResponseDto,
   PlannerDetailResponseDto,
 } from '@/entities/planner'
 
@@ -32,6 +33,24 @@ export function getPlannerCityPlans(detail?: PlannerDetailResponseDto): PlannerC
     }]
   }
   return []
+}
+
+export function getPersistedPlannerCities(
+  requestedCities: PlannerCityRequestDto[],
+  returnedCities?: PlannerCityResponseDto[],
+): PlannerCityRequestDto[] {
+  const completeCities = returnedCities?.flatMap((city) => {
+    if (!city.countryName || !city.cityName || !city.startDate || !city.endDate) return []
+    return [{
+      countryName: city.countryName,
+      cityName: city.cityName,
+      startDate: city.startDate,
+      endDate: city.endDate,
+    }]
+  }) ?? []
+  return returnedCities?.length && completeCities.length === returnedCities.length
+    ? completeCities
+    : requestedCities
 }
 
 type PlannerCityRange = Pick<PlannerCityRequestDto, 'countryName' | 'cityName' | 'startDate' | 'endDate'>

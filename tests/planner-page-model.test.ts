@@ -43,6 +43,17 @@ test('동점으로 확정된 장소는 각각 확정 수로 집계한다', () =>
   assert.equal(model.confirmedCount, 2)
 })
 
+test('확정 옵션 ID가 없는 응답은 미확정 장소를 확정 수로 세지 않는다', () => {
+  const model = getPlannerPageModel({
+    currentUserName: '사용자',
+    invitations: [],
+    members: [],
+    votes: [{ options: [{ selectedByMe: false }], status: 'CLOSED' }],
+  })
+
+  assert.equal(model.confirmedCount, 0)
+})
+
 test('profile id가 없으면 nickname fallback과 투표 상태별 집계를 유지한다', () => {
   const model = getPlannerPageModel({
     currentUserName: '사용자',

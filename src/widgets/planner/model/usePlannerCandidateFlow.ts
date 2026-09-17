@@ -3,7 +3,7 @@ import { type usePlannerData } from './usePlannerData'
 import { type usePlannerMutations } from './usePlannerMutations'
 import { type usePlannerState } from './usePlannerState'
 import { getErrorMessage, isPositiveSafeInteger } from '@/shared/utils'
-import { normalizeStatus } from './status'
+import { isPlannerConfirmedStatus, normalizeStatus } from './status'
 
 type Data = ReturnType<typeof usePlannerData>
 type Mutations = ReturnType<typeof usePlannerMutations>
@@ -21,7 +21,7 @@ export function usePlannerCandidateFlow({ data, mutations, placeId, state }: Pro
   const { places, votes, votesError, votesLoading } = data
   const { cancelPlaceVoteMutation, castPlaceVoteMutation } = mutations
   const activeVote = getActiveVote(votes, data.voteDetail, voteCategory, state.activeVoteId)
-  const plannerIsConfirmed = state.hasConfirmedLocally || normalizeStatus(data.plannerDetail?.status) === 'CONFIRMED'
+  const plannerIsConfirmed = state.hasConfirmedLocally || isPlannerConfirmedStatus(data.plannerDetail?.status)
   const canVotePlaces = isPositiveSafeInteger(activePlannerId) &&
     !plannerIsConfirmed &&
     !votesLoading &&

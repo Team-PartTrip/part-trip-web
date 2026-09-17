@@ -2,7 +2,7 @@ import { Button as PartTripButton } from '@/shared/ui/parttrip'
 
 import { type usePlannerFlow } from '../model/usePlannerFlow'
 import { getPlannerMemberDisplayName } from '../model/member'
-import { getTopVoteOptions } from '../model/selectors'
+import { getTopVoteOptions, isConfirmedPlannerOption } from '../model/selectors'
 import { normalizeStatus } from '../model/status'
 import { PlannerProgressManagementPanel } from './PlannerProgressManagementPanel'
 import * as S from './PlannerPage.styles'
@@ -89,9 +89,7 @@ export function PlannerProgressStep({
             const vote = votes.find((item) => item.categoryLabel === category || item.category === category)
             const status = normalizeStatus(vote?.status)
             const closed = status === 'CLOSED'
-            const confirmedOptions = vote?.options.filter((option) =>
-              option.confirmed === true || option.optionId === vote.confirmedOptionId,
-            ) ?? []
+            const confirmedOptions = vote?.options.filter((option) => isConfirmedPlannerOption(vote, option)) ?? []
             const finalOptions = confirmedOptions.length
               ? confirmedOptions
               : closed && vote

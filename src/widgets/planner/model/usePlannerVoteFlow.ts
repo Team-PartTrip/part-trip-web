@@ -7,7 +7,7 @@ import { type usePlannerState } from './usePlannerState'
 import type { PlannerStep } from './types'
 import { paths } from '@/shared/config'
 import { isPositiveSafeInteger } from '@/shared/utils'
-import { normalizeStatus } from './status'
+import { isPlannerConfirmedStatus, normalizeStatus } from './status'
 
 type Data = ReturnType<typeof usePlannerData>
 type Mutations = ReturnType<typeof usePlannerMutations>
@@ -48,7 +48,7 @@ export function usePlannerVoteFlow({ data, navigate, mutations, state, step }: P
     remindPlannerMembersMutation,
   } = mutations
   const activeVote = getActiveVote(votes, voteDetail, voteCategory, activeVoteId)
-  const isConfirmed = hasConfirmedLocally || normalizeStatus(plannerDetail?.status) === 'CONFIRMED'
+  const isConfirmed = hasConfirmedLocally || isPlannerConfirmedStatus(plannerDetail?.status)
   const openVotes = votes.filter((vote) => normalizeStatus(vote.status) === 'OPEN')
   const canCloseVotes = canClosePlannerVotes(votes)
   const canManagePlanner = isPositiveSafeInteger(activePlannerId) && isPlannerLeader(plannerDetail?.role)
