@@ -5,7 +5,7 @@ import { paths } from '@/shared/config'
 import { formatDateRange, formatTripDuration } from '@/shared/utils'
 import { AppShell } from '@/widgets/app-shell'
 
-import { formatDday, hasTravelPlan } from '../model/dday'
+import { formatDday, getTravelStatusCopy, hasTravelPlan } from '../model/dday'
 import * as S from './MainPage.styles'
 
 export function MainPage() {
@@ -21,34 +21,36 @@ export function MainPage() {
     <AppShell>
       <S.Page>
         {isError ? <S.Error role="alert">여행 정보를 불러오지 못했습니다.</S.Error> : null}
-        {isLoading ? <S.LoadingLayout aria-busy="true" aria-label="여행 정보 로딩 중"><S.LoadingHero /><S.LoadingCalendar /><S.LoadingRecommendations><S.LoadingHeading /><div><S.LoadingRecommendation /><S.LoadingRecommendation /><S.LoadingRecommendation /></div></S.LoadingRecommendations></S.LoadingLayout> : isError ? null : !hasPlan ? <S.State>등록된 여행 정보가 없습니다.</S.State> : <>
+        {isLoading ? <S.LoadingLayout aria-busy="true" aria-label="여행 정보 로딩 중"><S.LoadingHero /><S.LoadingCalendar /><S.LoadingRecommendations><S.LoadingHeading /><div><S.LoadingRecommendation /><S.LoadingRecommendation /><S.LoadingRecommendation /></div></S.LoadingRecommendations></S.LoadingLayout> : isError ? null : !hasPlan ? <S.State>{getTravelStatusCopy(plan?.status)}</S.State> : <>
           <S.Hero>
-            <S.HeroLabel>다가오는 여행</S.HeroLabel>
-            <S.Dday>{formatDday(plan?.dday)}</S.Dday>
+            <S.HeroLabel>{getTravelStatusCopy(plan?.status)}</S.HeroLabel>
+            {plan?.status === 'BEFORE' || plan?.dday === 'D-Day' ? <S.Dday>{formatDday(plan.dday)}</S.Dday> : null}
             <S.Destination>{destination} · {formatTripDuration(plan?.startDate, plan?.endDate) || '여행 기간 미설정'}</S.Destination>
             <S.HeroMeta>{dateRange} · {plan?.headcount ?? '-'}명</S.HeroMeta>
           </S.Hero>
 
-          <S.CalendarCard type="button" onClick={() => navigate({ to: paths.recordCalendar })}>
-            <S.CalendarIcon><img src={figmaPlannerIcon} alt="" /></S.CalendarIcon>
-            <S.CalendarCopy>
-              <strong>축제 · 이벤트 캘린더</strong>
-              <span>{data.country?.countryName || plan?.countryName || '여행지'}의 여행 기간 전후 일정</span>
-            </S.CalendarCopy>
-            <S.CalendarArrow aria-hidden="true">›</S.CalendarArrow>
-          </S.CalendarCard>
+          {plan?.status !== 'ENDED' ? <>
+            <S.CalendarCard type="button" onClick={() => navigate({ to: paths.recordCalendar })}>
+              <S.CalendarIcon><img src={figmaPlannerIcon} alt="" /></S.CalendarIcon>
+              <S.CalendarCopy>
+                <strong>축제 · 이벤트 캘린더</strong>
+                <span>{data.country?.countryName || plan?.countryName || '여행지'}의 여행 기간 전후 일정</span>
+              </S.CalendarCopy>
+              <S.CalendarArrow aria-hidden="true">›</S.CalendarArrow>
+            </S.CalendarCard>
 
-          <S.Recommendations>
-            <S.SectionTitle>이번 주 추천</S.SectionTitle>
-            <S.RecommendationGrid>
-              {recommendations.length ? recommendations.map((place, index) => (
-                <S.Recommendation key={`${place.placeName || '추천 장소'}-${index}`}>
-                  <S.RecommendationImage $imageUrl={place.imageUrl}>{!place.imageUrl ? '이미지 없음' : null}</S.RecommendationImage>
-                  <span>{place.placeName || '추천 장소'}</span>
-                </S.Recommendation>
-              )) : <S.State>표시할 추천 장소가 없습니다.</S.State>}
-            </S.RecommendationGrid>
-          </S.Recommendations>
+            <S.Recommendations>
+              <S.SectionTitle>이번 주 추천</S.SectionTitle>
+              <S.RecommendationGrid>
+                {recommendations.length ? recommendations.map((place, index) => (
+                  <S.Recommendation key={`${place.placeName || '추천 장소'}-${index}`}>
+                    <S.RecommendationImage $imageUrl={place.imageUrl}>{!place.imageUrl ? '이미지 없음' : null}</S.RecommendationImage>
+                    <span>{place.placeName || '추천 장소'}</span>
+                  </S.Recommendation>
+                )) : <S.State>표시할 추천 장소가 없습니다.</S.State>}
+              </S.RecommendationGrid>
+            </S.Recommendations>
+          </> : null}
         </>}
       </S.Page>
     </AppShell>

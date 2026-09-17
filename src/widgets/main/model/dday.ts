@@ -1,14 +1,26 @@
+import type { TripPhase } from '../../../entities/travel/api.ts'
+
 export type DdayPlan = {
   cityName?: string | null
   dday?: string | null
   countryName?: string | null
   endDate?: string | null
   startDate?: string | null
+  status?: TripPhase
 }
 
 export function hasTravelPlan(plan?: DdayPlan) {
-  if (!plan || plan.dday?.trim() === '쉬는 중' || plan.dday?.trim() === '여행 종료') return false
-  return Boolean(plan.countryName || plan.cityName || plan.startDate || plan.endDate)
+  return Boolean(plan?.status && plan.status !== 'NO_TRIP')
+}
+
+export function getTravelStatusCopy(status?: TripPhase) {
+  switch (status) {
+    case 'NO_TRIP': return '다음 여행이 아직 없어요'
+    case 'BEFORE': return '다가오는 여행'
+    case 'DURING': return '여행 중'
+    case 'ENDED': return '여행 종료'
+    default: return '여행 상태를 확인할 수 없습니다.'
+  }
 }
 
 export function formatDday(value?: string | null) {

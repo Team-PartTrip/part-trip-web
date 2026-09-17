@@ -109,6 +109,7 @@ export function useMainTravelQuery() {
   const ddayQuery = useDdayQuery()
   const countryName = ddayQuery.data?.countryName ?? ''
   const hasCountry = Boolean(countryName)
+    && (ddayQuery.data?.status === 'BEFORE' || ddayQuery.data?.status === 'DURING')
   const results = useQueries({
     queries: [
       { queryKey: travelQueryKeys.country(countryName), queryFn: () => getCountryInfo(countryName), enabled: hasCountry },
