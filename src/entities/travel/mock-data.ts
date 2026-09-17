@@ -37,10 +37,9 @@ export const mockFestivals: FestivalResponseDto[] = [
   { festivalId: 3, title: '구로몬 야시장', category: '마켓', startDate: '2026-08-27', startTime: '17:00', location: '구로몬 시장' },
 ]
 
-export const mockDday: DdayResponseDto = {
+export const mockDday: Omit<DdayResponseDto, 'dday' | 'status'> = {
   cityName: '오사카',
   countryName: '일본',
-  dday: 'D-3',
   endDate: '2026-08-27',
   headcount: 4,
   startDate: '2026-08-23',

@@ -80,6 +80,7 @@ const PLANNER_API_PATHS = {
   votes: (plannerId: number) => `/planners/${plannerId}/votes`,
   vote: (plannerId: number, voteId: number) => `/planners/${plannerId}/votes/${voteId}`,
   ballot: (plannerId: number, voteId: number) => `/planners/${plannerId}/votes/${voteId}/ballot`,
+  placeBallot: (plannerId: number, tourPlaceId: number) => `/planners/${plannerId}/places/${tourPlaceId}/ballot`,
   closeVote: (plannerId: number, voteId: number) => `/planners/${plannerId}/votes/${voteId}/close`,
   confirmVote: (plannerId: number, voteId: number) => `/planners/${plannerId}/votes/${voteId}/confirm`,
   option: (plannerId: number, voteId: number, optionId: number) => `/planners/${plannerId}/votes/${voteId}/options/${optionId}`,
@@ -207,6 +208,10 @@ export async function castBallot(
     payload,
   )
   return data
+}
+
+export async function cancelPlaceVote(plannerId: number, tourPlaceId: number): Promise<void> {
+  await apiClient.delete(PLANNER_API_PATHS.placeBallot(plannerId, tourPlaceId))
 }
 
 export async function closeVote(plannerId: number, voteId: number): Promise<VoteCloseResponseDto> {

@@ -3,6 +3,8 @@ import { apiClient } from '@/shared/libs/api-client'
 import { requestWithMockFallback } from '@/shared/libs/api-fallback'
 import { isMissingTravelPlanResponse } from './main-error'
 
+export type TripPhase = 'NO_TRIP' | 'BEFORE' | 'DURING' | 'ENDED'
+
 export type DdayResponseDto = {
   countryName?: string | null
   cityName?: string | null
@@ -10,6 +12,7 @@ export type DdayResponseDto = {
   startDate?: string | null
   endDate?: string | null
   dday?: string | null
+  status: TripPhase
 }
 
 export type TourPlaceResponseDto = {
@@ -65,33 +68,44 @@ import {
   mockFestivals,
   mockTourPlaces,
 } from './mock-data'
-function getMockDday(startDate?: string, endDate?: string) {
-  if (!startDate || !endDate) return '쉬는 중'
+function getMockDday(startDate?: string, endDate?: string): Pick<DdayResponseDto, 'dday' | 'status'> {
+  if (!startDate || !endDate) return { dday: '쉬는 중', status: 'NO_TRIP' }
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const start = new Date(`${startDate}T00:00:00`)
   const end = new Date(`${endDate}T00:00:00`)
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return '쉬는 중'
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return { dday: '쉬는 중', status: 'NO_TRIP' }
   const days = Math.round((start.getTime() - today.getTime()) / 86_400_000)
-  if (days > 0) return `D-${days}`
-  if (days === 0) return 'D-Day'
-  return today <= end ? '여행 중' : '여행 종료'
+  if (days > 0) return { dday: `D-${days}`, status: 'BEFORE' }
+  if (today <= end) return { dday: days === 0 ? 'D-Day' : '여행 중', status: 'DURING' }
+  return { dday: '여행 종료', status: 'ENDED' }
+}
+
+function isTripPhase(value: unknown): value is TripPhase {
+  return value === 'NO_TRIP' || value === 'BEFORE' || value === 'DURING' || value === 'ENDED'
+}
+
+type DdayResponseInput = Omit<DdayResponseDto, 'status'> & { status?: unknown }
+
+export function normalizeDdayResponse(data: DdayResponseInput): DdayResponseDto {
+  if (isTripPhase(data.status)) return { ...data, status: data.status }
+  return { ...data, ...getMockDday(data.startDate ?? undefined, data.endDate ?? undefined) }
 }
 
 export async function getDday(): Promise<DdayResponseDto> {
   return requestWithMockFallback(
     async () => {
       try {
-        const { data } = await apiClient.get<DdayResponseDto>(MAIN_API_PATHS.dday)
-        return data
+        const { data } = await apiClient.get<DdayResponseInput>(MAIN_API_PATHS.dday)
+        return normalizeDdayResponse(data)
       } catch (error) {
         if (isAxiosError(error) && isMissingTravelPlanResponse(error.response?.status, error.response?.data)) {
-          return { cityName: null, countryName: null, dday: '쉬는 중', endDate: null, headcount: null, startDate: null }
+          return { cityName: null, countryName: null, dday: '쉬는 중', endDate: null, headcount: null, startDate: null, status: 'NO_TRIP' }
         }
         throw error
       }
     },
-    () => ({ ...mockDday, dday: getMockDday(mockDday.startDate ?? undefined, mockDday.endDate ?? undefined) }),
+    () => ({ ...mockDday, ...getMockDday(mockDday.startDate ?? undefined, mockDday.endDate ?? undefined) }),
   )
 }
 

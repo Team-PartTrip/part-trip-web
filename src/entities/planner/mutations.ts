@@ -6,6 +6,7 @@ import {
 
 import {
   castBallot,
+  cancelPlaceVote,
   acceptPlannerInvitation,
   addPlannerPlaces,
   addVoteOption,
@@ -63,10 +64,25 @@ export function useUpdatePlannerMutation() {
 }
 
 export function useCastBallotMutation() {
-  return usePlannerMutation(
-    ({ plannerId, voteId, payload }: { plannerId: number; voteId: number; payload: VoteBallotRequestDto }) =>
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ plannerId, voteId, payload }: { plannerId: number; voteId: number; payload: VoteBallotRequestDto }) =>
       castBallot(plannerId, voteId, payload),
-  )
+    onSuccess: (_data, { plannerId }) => {
+      void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.votes(plannerId) })
+    },
+  })
+}
+
+export function useCancelPlaceVoteMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ plannerId, tourPlaceId }: { plannerId: number; tourPlaceId: number }) =>
+      cancelPlaceVote(plannerId, tourPlaceId),
+    onSuccess: (_data, { plannerId }) => {
+      void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.votes(plannerId) })
+    },
+  })
 }
 
 export function useCloseVoteMutation() {
@@ -103,10 +119,14 @@ export function useRemindPlannerMembersMutation() {
 }
 
 export function useDeleteVoteOptionMutation() {
-  return usePlannerMutation(
-    ({ plannerId, voteId, optionId }: { plannerId: number; voteId: number; optionId: number }) =>
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ plannerId, voteId, optionId }: { plannerId: number; voteId: number; optionId: number }) =>
       deleteVoteOption(plannerId, voteId, optionId),
-  )
+    onSuccess: (_data, { plannerId }) => {
+      void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.votes(plannerId) })
+    },
+  })
 }
 
 export function useAddVoteOptionMutation() {

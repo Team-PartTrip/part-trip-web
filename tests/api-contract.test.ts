@@ -24,6 +24,7 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
     '/src/widgets/planner/model/usePlannerLifecycleFlow.ts',
     '/src/widgets/planner/model/usePlannerVoteFlow.ts',
   ])
+  const candidateFlow = read('/src/widgets/planner/model/usePlannerCandidateFlow.ts')
   const plannerMutations = read('/src/widgets/planner/model/usePlannerMutations.ts')
   const plannerPage = readSources([
     '/src/widgets/planner/ui/PlannerPage.tsx',
@@ -82,7 +83,16 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
   assert.match(planner, /options: \(plannerId: number, voteId: number\) => `\/planners\/\$\{plannerId\}\/votes\/\$\{voteId\}\/options`/)
   assert.match(plannerMutations, /useAddPlannerPlacesMutation/)
   assert.match(plannerFlow, /addPlannerPlacesMutation\.mutateAsync\(\{ plannerId, payload: \{ placeIds \} \}\)/)
-  assert.equal((plannerFlow.match(/if \(candidateManagementError\)/g) ?? []).length, 2)
+  assert.equal((plannerFlow.match(/if \(candidateManagementError\)/g) ?? []).length, 3)
+  const randomLineupStart = candidateFlow.indexOf('const handleRandomLineup = async () => {')
+  const randomLineupEnd = candidateFlow.indexOf('\n  return {', randomLineupStart)
+  const randomLineup = candidateFlow.slice(randomLineupStart, randomLineupEnd)
+  const addCandidateIndex = randomLineup.indexOf('addPlannerPlacesMutation.mutateAsync')
+  assert.ok(addCandidateIndex >= 0)
+  for (const guard of ['if (!canManagePlanner)', 'if (candidateManagementError)']) {
+    const guardIndex = randomLineup.indexOf(guard)
+    assert.ok(guardIndex >= 0 && guardIndex < addCandidateIndex)
+  }
   assert.match(plannerPage, /disabled=\{!canManageCandidates\}/)
   assert.match(plannerPage, /votesError \? candidateManagementError/)
   assert.match(plannerPage, /onClick=\{\(\) => void handleCopyInviteLink\(\)\}/)
