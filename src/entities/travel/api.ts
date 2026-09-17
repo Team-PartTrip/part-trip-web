@@ -81,12 +81,23 @@ function getMockDday(startDate?: string, endDate?: string): Pick<DdayResponseDto
   return { dday: '여행 종료', status: 'ENDED' }
 }
 
+function isTripPhase(value: unknown): value is TripPhase {
+  return value === 'NO_TRIP' || value === 'BEFORE' || value === 'DURING' || value === 'ENDED'
+}
+
+type DdayResponseInput = Omit<DdayResponseDto, 'status'> & { status?: unknown }
+
+export function normalizeDdayResponse(data: DdayResponseInput): DdayResponseDto {
+  if (isTripPhase(data.status)) return { ...data, status: data.status }
+  return { ...data, ...getMockDday(data.startDate ?? undefined, data.endDate ?? undefined) }
+}
+
 export async function getDday(): Promise<DdayResponseDto> {
   return requestWithMockFallback(
     async () => {
       try {
-        const { data } = await apiClient.get<DdayResponseDto>(MAIN_API_PATHS.dday)
-        return data
+        const { data } = await apiClient.get<DdayResponseInput>(MAIN_API_PATHS.dday)
+        return normalizeDdayResponse(data)
       } catch (error) {
         if (isAxiosError(error) && isMissingTravelPlanResponse(error.response?.status, error.response?.data)) {
           return { cityName: null, countryName: null, dday: '쉬는 중', endDate: null, headcount: null, startDate: null, status: 'NO_TRIP' }

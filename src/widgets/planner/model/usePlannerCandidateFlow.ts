@@ -137,6 +137,14 @@ export function usePlannerCandidateFlow({ canManagePlanner, data, navigate, muta
   }
 
   const handleRandomLineup = async () => {
+    if (!canManagePlanner) {
+      setErrorMessage('플래너 소유자만 투표 후보를 선택할 수 있습니다.')
+      return
+    }
+    if (candidateManagementError) {
+      setErrorMessage(candidateManagementError)
+      return
+    }
     if (selectedPlaces.length === 0) {
       setErrorMessage('먼저 장소를 선택해주세요.')
       return
