@@ -19,7 +19,6 @@ type DateRange = {
 
 export function CalendarSection({
   cells,
-  dateRange,
   eventByDay,
   hasFestivals,
   isLoading,
@@ -30,8 +29,7 @@ export function CalendarSection({
   viewMonth,
 }: {
   cells: Array<number | null>
-  dateRange?: DateRange
-  eventByDay: Map<string, FestivalResponseDto>
+  eventByDay: Map<string, FestivalResponseDto[]>
   hasFestivals: boolean
   isLoading: boolean
   onChangeMonth: (offset: number) => void
@@ -46,11 +44,11 @@ export function CalendarSection({
       <S.Weekdays>{weekdays.map((day) => <span key={day}>{day}</span>)}</S.Weekdays>
       <S.CalendarGrid>{cells.map((day, index) => {
         const date = day ? formatCalendarDate(viewMonth.getFullYear(), viewMonth.getMonth(), day) : ''
-        const event = day ? eventByDay.get(date) : undefined
+        const events = day ? eventByDay.get(date) ?? [] : []
         const inTrip = day != null && plan?.startDate != null && plan?.endDate != null && date >= plan.startDate && date <= plan.endDate
-        return <S.Cell key={`${day}-${index}`} type="button" disabled={day === null} $empty={day === null} $inTrip={Boolean(inTrip)} $selected={date === selectedDate} aria-pressed={day === null ? undefined : date === selectedDate} onClick={() => { if (date) onSelectDate(date) }}>{day ? <><strong>{day}</strong>{event ? <S.EventLabel>{event.category || '행사'}</S.EventLabel> : null}</> : null}</S.Cell>
+        return <S.Cell key={`${day}-${index}`} type="button" disabled={day === null} $empty={day === null} $inTrip={Boolean(inTrip)} $selected={date === selectedDate} aria-pressed={day === null ? undefined : date === selectedDate} onClick={() => { if (date) onSelectDate(date) }}>{day ? <><strong>{day}</strong>{events.length ? <S.EventLabel>{events.length > 1 ? `${events.length}건` : events[0].category || '행사'}</S.EventLabel> : null}</> : null}</S.Cell>
       })}</S.CalendarGrid>
-      {!isLoading && !hasFestivals ? <S.Note>{dateRange ? '여행 기간 전후 1주일에 등록된 행사가 없습니다.' : '여행 기간을 설정하면 전후 1주일의 행사를 볼 수 있습니다.'}</S.Note> : null}
+      {!isLoading && !hasFestivals ? <S.Note>{plan?.countryName ? '선택한 달에 등록된 축제 및 이벤트가 없습니다.' : '여행지를 설정하면 해당 지역의 월별 축제를 볼 수 있습니다.'}</S.Note> : null}
     </S.CalendarCard>
   )
 }
@@ -66,6 +64,10 @@ export function FestivalSection({
   onClearDate,
   selectedDate,
   visibleFestivals,
+  categories,
+  categoryFilter,
+  onCategoryChange,
+  viewMonth,
 }: {
   dateRange?: DateRange
   isLoading: boolean
@@ -73,13 +75,21 @@ export function FestivalSection({
   onClearDate: () => void
   selectedDate?: string
   visibleFestivals: FestivalResponseDto[]
+  categories: string[]
+  categoryFilter: string
+  onCategoryChange: (category: string) => void
+  viewMonth: Date
 }) {
   return (
     <S.FestivalList>
-      <h2>{selectedDate ? `${formatDate(selectedDate)} 축제 ${visibleFestivals.length}건` : `여행 전후 축제 ${visibleFestivals.length}건`}</h2>
+      <h2>{selectedDate ? `${formatDate(selectedDate)} 축제 ${visibleFestivals.length}건` : `${viewMonth.getFullYear()}년 ${viewMonth.getMonth() + 1}월 축제 ${visibleFestivals.length}건`}</h2>
+      {categories.length ? <S.CategoryFilter aria-label="축제 종류 필터" value={categoryFilter} onChange={(event) => onCategoryChange(event.target.value)}>
+        <option value="ALL">모든 축제 종류</option>{categories.map((category) => <option key={category} value={category}>{category}</option>)}
+      </S.CategoryFilter> : null}
+      <S.Note>현재 축제 정보에는 걷기 부담 데이터가 없어 걷기 조건으로 필터링할 수 없습니다.</S.Note>
       {selectedDate ? <S.FilterButton type="button" onClick={onClearDate}>전체 기간 보기</S.FilterButton> : null}
       {visibleFestivals.map((event) => <S.FestivalRow key={`${event.festivalId ?? event.title}-${event.startDate}`}><div><strong>{event.title || '이름 없는 이벤트'}</strong><span>{eventDateLabel(event)}{event.location ? ` · ${event.location}` : ''}</span></div><small>{event.category || '행사'}</small></S.FestivalRow>)}
-      {!isLoading && visibleFestivals.length === 0 ? <S.Note>{selectedDate ? '선택한 날짜에 등록된 행사가 없습니다.' : dateRange ? '표시할 행사가 없습니다.' : '여행 기간을 설정하면 행사를 볼 수 있습니다.'}</S.Note> : null}
+      {!isLoading && visibleFestivals.length === 0 ? <S.Note>{selectedDate ? '선택한 날짜에 등록된 행사가 없습니다.' : dateRange ? '이 달에 표시할 행사가 없습니다.' : '여행지를 설정하면 해당 지역의 월별 행사를 볼 수 있습니다.'}</S.Note> : null}
       <button type="button" onClick={onBack}>여행 기록으로 돌아가기</button>
     </S.FestivalList>
   )

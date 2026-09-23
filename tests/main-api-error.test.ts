@@ -13,7 +13,7 @@ test('다른 400 응답과 서버 오류는 빈 상태로 처리하지 않는다
   assert.equal(isMissingTravelPlanResponse(500, '등록된 여행 일정이 없습니다.'), false)
 })
 
-test('D-day 응답은 누락되거나 잘못된 여행 상태를 날짜 기준으로 보정한다', async () => {
+test('D-day 응답 상태는 서버 값만 사용하고 잘못된 값은 오류로 처리한다', async () => {
   const jiti = createJiti(process.cwd(), { alias: { '@': `${process.cwd()}/src` } })
   const api = await jiti.import('./src/entities/travel/api.ts')
   const normalizeDdayResponse = (api as {
@@ -25,17 +25,7 @@ test('D-day 응답은 누락되거나 잘못된 여행 상태를 날짜 기준�
     }) => { status: string; dday?: string | null }
   }).normalizeDdayResponse
 
-  assert.deepEqual(normalizeDdayResponse({ status: undefined, startDate: null, endDate: null, dday: 'old' }), {
-    status: 'NO_TRIP',
-    startDate: null,
-    endDate: null,
-    dday: '쉬는 중',
-  })
-  assert.deepEqual(normalizeDdayResponse({ status: 'UNKNOWN', startDate: '2000-01-01', endDate: '2000-01-02', dday: 'old' }), {
-    status: 'ENDED',
-    startDate: '2000-01-01',
-    endDate: '2000-01-02',
-    dday: '여행 종료',
-  })
+  assert.throws(() => normalizeDdayResponse({ status: undefined, startDate: null, endDate: null, dday: 'old' }), /여행 상태 응답이 올바르지 않습니다/)
+  assert.throws(() => normalizeDdayResponse({ status: 'UNKNOWN', startDate: '2000-01-01', endDate: '2000-01-02', dday: 'old' }), /여행 상태 응답이 올바르지 않습니다/)
   assert.equal(normalizeDdayResponse({ status: 'DURING' }).status, 'DURING')
 })

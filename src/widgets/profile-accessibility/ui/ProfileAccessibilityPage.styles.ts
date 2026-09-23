@@ -21,3 +21,42 @@ export const Card = styled.section`
   p { margin: 6px 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 14px; line-height: 22px; }
   > p { padding: 8px 0 16px; }
 `
+
+export const Options = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  button {
+    min-height: 48px;
+    border: 1px solid ${({ theme }) => theme.colors.border.default};
+    border-radius: 12px;
+    padding: 0 16px;
+    background: ${({ theme }) => theme.colors.background.default};
+    color: ${({ theme }) => theme.colors.text.strong};
+    cursor: pointer;
+  }
+  button[aria-pressed='true'] {
+    border-color: ${({ theme }) => theme.colors.brand.primary};
+    background: ${({ theme }) => theme.colors.background.info};
+    color: ${({ theme }) => theme.colors.brand.strong};
+    font-weight: 700;
+  }
+`
+
+export const Toggle = styled.button`
+  min-height: 48px;
+  margin-top: 14px;
+  border: 1px solid ${({ theme }) => theme.colors.border.default};
+  border-radius: 12px;
+  padding: 0 16px;
+  background: ${({ theme }) => theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.text.strong};
+  cursor: pointer;
+  &[aria-pressed='true'] {
+    border-color: ${({ theme }) => theme.colors.brand.primary};
+    background: ${({ theme }) => theme.colors.brand.primary};
+    color: ${({ theme }) => theme.colors.text.inverse};
+    font-weight: 700;
+  }
+`

@@ -1,9 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { acceptGuardianInvite, createGuardianInvite, unlinkGuardian } from './api'
+import { acceptGuardianInvite, createGuardianInvite, unlinkGuardian, updateCurrentLocation } from './api'
 import { guardianQueryKeys } from './queries'
 
 export function useCreateGuardianInviteMutation() {
   return useMutation({ mutationFn: createGuardianInvite })
+}
+
+export function useUpdateCurrentLocationMutation() {
+  return useMutation({ mutationFn: updateCurrentLocation })
 }
 
 export function useAcceptGuardianInviteMutation() {

@@ -38,7 +38,7 @@ export const appTheme = {
       default: '#1a3d5c',
       inverse: '#ffffff',
       muted: '#63788c',
-      placeholder: '#9aa7b4',
+      placeholder: '#63788c',
       strong: '#17334d',
     },
   },
@@ -60,4 +60,53 @@ export const appTheme = {
   },
 } as const
 
-export type AppTheme = typeof appTheme
+type ColorTokens = {
+  [Group in keyof typeof appTheme.colors]: {
+    [Token in keyof (typeof appTheme.colors)[Group]]: string
+  }
+}
+
+export type AppTheme = Omit<typeof appTheme, 'colors'> & { colors: ColorTokens }
+
+export const highContrastTheme: AppTheme = {
+  ...appTheme,
+  colors: {
+    ...appTheme.colors,
+    background: {
+      default: '#ffffff',
+      error: '#ffffff',
+      info: '#ffffff',
+      muted: '#f2f2f2',
+      soft: '#ffffff',
+      subtle: '#ffffff',
+      warning: '#ffffff',
+    },
+    border: {
+      default: '#555555',
+      interactive: '#003d80',
+      soft: '#555555',
+      subtle: '#555555',
+    },
+    brand: {
+      primary: '#0056b3',
+      primaryHover: '#003d80',
+      accent: '#8a2f00',
+      strong: '#003366',
+      secondary: '#333333',
+      success: '#005c43',
+      successStrong: '#006b4f',
+    },
+    status: {
+      error: '#a40000',
+      success: '#005c43',
+      warning: '#744200',
+    },
+    text: {
+      default: '#111111',
+      inverse: '#ffffff',
+      muted: '#333333',
+      placeholder: '#333333',
+      strong: '#000000',
+    },
+  },
+}

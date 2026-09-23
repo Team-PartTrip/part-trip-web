@@ -10,6 +10,7 @@ import {
   useUnlinkGuardianMutation,
 } from '@/entities/guardian'
 import type { GuardianInviteDto, GuardianLinkDto } from '@/entities/guardian/api'
+import { sanitizeGuardianInviteCode } from '@/entities/guardian/invite-code'
 import { Button, Input } from '@/shared/ui/parttrip'
 import { AppShell } from '@/widgets/app-shell'
 import * as S from './GuardiansPage.styles'
@@ -52,6 +53,18 @@ export function GuardiansPage() {
     } catch {
       setHasError(true)
       setMessage('초대 코드를 만들지 못했어요. 잠시 후 다시 시도해주세요.')
+    }
+  }
+
+  const copyInviteCode = async () => {
+    if (!invite?.code) return
+    try {
+      await navigator.clipboard.writeText(invite.code)
+      setHasError(false)
+      setMessage('초대 코드를 복사했어요. 가족에게 보내주세요.')
+    } catch {
+      setHasError(true)
+      setMessage('초대 코드를 직접 선택해 복사해주세요.')
     }
   }
 
@@ -101,7 +114,7 @@ export function GuardiansPage() {
           <S.Card>
             <h2>가족에게 연결 코드 보내기</h2>
             <p>코드는 한 번만 사용할 수 있고 24시간 후 만료돼요.</p>
-            {invite ? <><S.Code aria-label={`초대 코드 ${invite.code}`}>{invite.code}</S.Code><S.Message>만료 시간: {expiryLabel}</S.Message></> : null}
+            {invite ? <><S.Code aria-label={`초대 코드 ${invite.code}`}>{invite.code}</S.Code><Button type="button" $variant="secondary" onClick={() => void copyInviteCode()}>초대 코드 복사</Button><S.Message>만료 시간: {expiryLabel}</S.Message></> : null}
             <Button type="button" disabled={inviteMutation.isPending} onClick={() => void createInvite()}>
               {inviteMutation.isPending ? '코드 만드는 중…' : invite ? '새 코드 만들기' : '초대 코드 만들기'}
             </Button>
@@ -110,8 +123,8 @@ export function GuardiansPage() {
             <h2>받은 코드 입력하기</h2>
             <p>가족이 보낸 6자리 코드를 입력하면 계정이 연결돼요.</p>
             <S.Form onSubmit={(event) => void acceptInvite(event)}>
-              <Input aria-label="보호자 연결 코드" autoComplete="one-time-code" inputMode="text" maxLength={6}
-                value={code} onChange={(event) => setCode(event.target.value.replace(/[^0-9a-z]/gi, '').slice(0, 6))} />
+              <Input aria-label="보호자 연결 코드" autoComplete="one-time-code" autoCapitalize="characters" inputMode="text" maxLength={6} spellCheck={false}
+                value={code} onChange={(event) => setCode(sanitizeGuardianInviteCode(event.target.value))} />
               <Button type="submit" disabled={acceptMutation.isPending || code.length !== 6}>
                 {acceptMutation.isPending ? '연결 중…' : '연결하기'}
               </Button>
@@ -139,7 +152,7 @@ export function GuardiansPage() {
             <S.GuardianDetails>
               <section>
                 <h3>현재 위치</h3>
-                {seniorLocation.isLoading ? <S.Message role="status">위치를 확인하고 있어요.</S.Message> : seniorLocation.isError || !seniorLocation.data ? <S.Message>여행 중 앱을 열면 현재 위치가 여기에 표시돼요.</S.Message> : <>
+                {seniorLocation.isLoading ? <S.Message role="status">위치를 확인하고 있어요.</S.Message> : seniorLocation.isError ? <><S.Message $error role="alert">현재 위치를 불러오지 못했어요.</S.Message><Button type="button" $variant="secondary" onClick={() => void seniorLocation.refetch()}>다시 시도</Button></> : !seniorLocation.data ? <S.Message>여행 중 앱을 열면 현재 위치가 여기에 표시돼요.</S.Message> : <>
                   <S.Message>마지막 확인 {dateTimeFormatter.format(new Date(seniorLocation.data.recordedAt))}</S.Message>
                   <S.MapLink href={`https://maps.google.com/?q=${seniorLocation.data.latitude},${seniorLocation.data.longitude}`} target="_blank" rel="noreferrer">지도에서 위치 보기</S.MapLink>
                 </>}

@@ -43,8 +43,8 @@ export function LoginForm({ redirect }: LoginFormProps) {
     <S.Container>
       <S.Header>
         <S.Brand><img src={partTripLogoUrl} alt="PartTrip" /></S.Brand>
-        <S.Title>로그인</S.Title>
-        <S.Subtitle>카카오 또는 Google 계정으로 로그인하세요.</S.Subtitle>
+        <S.Title>PartTrip 시작하기</S.Title>
+        <S.Subtitle>카카오톡 또는 Google 계정으로 바로 시작하세요.</S.Subtitle>
       </S.Header>
 
       <S.Body>
@@ -71,12 +71,6 @@ export function LoginForm({ redirect }: LoginFormProps) {
               onError={() => setMessage({ text: 'Google 로그인에 실패했습니다.', tone: 'error' })}
               onLogin={handleGoogleLogin}
             />
-            <S.SecondaryButton
-              search={safeRedirect ? { redirect: safeRedirect } : undefined}
-              to={paths.signUp}
-            >
-              회원가입
-            </S.SecondaryButton>
           </S.Actions>
         </S.Form>
       </S.Body>

@@ -1,61 +1,49 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { createJiti } from 'jiti'
 
-import { getProfileInsightModel } from '../src/widgets/profile-insights/model/profile-insight.ts'
+const jiti = createJiti(process.cwd(), { alias: { '@': `${process.cwd()}/src` } })
+const { getDomesticTravelModel, getAnnualTravelSummary, getProfileInsightModel } = await jiti.import('./src/widgets/profile-insights/model/profile-insight.ts') as {
+  getDomesticTravelModel: (trips: Array<{ cityName?: string; countryName?: string; startDate?: string; endDate?: string; tripId?: number }>) => { regions: Array<{ code: string; name: string; trips: unknown[] }>; unknownCities: string[]; domesticTrips: unknown[] }
+  getAnnualTravelSummary: (trips: Array<{ cityName?: string; countryName?: string; startDate?: string; endDate?: string }>, year: number) => { placesVisited: number; tripCount: number; mostVisitedName?: string; longestStayName?: string; longestStayDays: number }
+  getProfileInsightModel: (input: { kind: 'countries'; selectedCountry: string; trips: Array<{ cityName?: string; countryName?: string }> }) => { activeRegion?: { name: string; trips: unknown[] } }
+}
 
-test('국가별 insight model은 방문 국가와 여행 기록을 분리해 파생한다', () => {
-  const model = getProfileInsightModel({
-    kind: 'countries',
-    selectedCountry: '일본',
-    trips: [
-      { cityName: '오사카', countryName: '일본', startDate: '2026-05-02', title: '오사카 여행', tripId: 7 },
-      { cityName: '서울', countryName: '한국', startDate: '2025-01-01', tripId: 8 },
-    ],
-    worldMap: {
-      totalCountries: 200,
-      visited: [
-        { countryCode: 'JP', countryName: '일본' },
-        { countryCode: 'JP', countryName: '일본' },
-        { countryCode: 'KR', countryName: '한국' },
-      ],
-    },
-  })
+test('국내 여행 지도는 시·도별 기록을 중복 없이 집계하고 연결 못한 도시를 표시한다', () => {
+  const model = getDomesticTravelModel([
+    { cityName: '서울', countryName: '대한민국', tripId: 1 },
+    { cityName: '서울', countryName: '한국', tripId: 2 },
+    { cityName: '오사카', countryName: '일본', tripId: 3 },
+    { cityName: '새 도시', countryName: '대한민국', tripId: 4 },
+  ])
 
-  assert.deepEqual(model.visitedCountries, ['일본', '한국'])
-  assert.deepEqual(model.claimCountries, ['일본', '한국'])
-  assert.equal(model.activeCountry, '일본')
-  assert.deepEqual(model.countryCities, ['오사카'])
-  assert.equal(model.countryCode, 'JP')
-  assert.equal(model.firstVisit, '2026.05.02')
-  assert.equal(model.selectedTrip?.tripId, 7)
-  assert.equal(model.totalCountries, 200)
-  assert.equal(model.acquiredCount, 2)
-  assert.equal(model.achievementPercentage, 1)
-  assert.equal(model.pageTitle, '일본')
-  assert.equal(model.pageSubtitle, '첫 방문 2026.05.02')
+  assert.equal(model.domesticTrips.length, 3)
+  assert.deepEqual(model.regions.map((region) => [region.code, region.name, region.trips.length]), [['11', '서울', 2]])
+  assert.deepEqual(model.unknownCities, ['새 도시'])
 })
 
-test('claim mode는 여행 기록 국가를 사용하고 stats fallback을 유지한다', () => {
+test('올해 회고는 방문 도시 수, 최다 방문, 최장 체류를 요약한다', () => {
+  const summary = getAnnualTravelSummary([
+    { cityName: '서울', countryName: '대한민국', startDate: '2026-05-01', endDate: '2026-05-02' },
+    { cityName: '서울', countryName: '대한민국', startDate: '2026-06-01', endDate: '2026-06-01' },
+    { cityName: '부산', countryName: '한국', startDate: '2026-07-01', endDate: '2026-07-04' },
+    { cityName: '오사카', countryName: '일본', startDate: '2026-08-01', endDate: '2026-08-10' },
+    { cityName: '제주', countryName: '대한민국', startDate: '2025-12-30', endDate: '2026-01-02' },
+  ], 2026)
+
+  assert.equal(summary.tripCount, 3)
+  assert.equal(summary.placesVisited, 2)
+  assert.equal(summary.mostVisitedName, '서울')
+  assert.equal(summary.longestStayName, '부산')
+  assert.equal(summary.longestStayDays, 4)
+})
+
+test('방문하지 않은 지도 지역을 선택하면 다른 방문 지역으로 잘못 대체하지 않는다', () => {
   const model = getProfileInsightModel({
-    kind: 'claim',
-    selectedCountry: '한국',
-    trips: [{ countryName: '태국', tripId: 12 }],
-    worldMap: { visited: [{ countryCode: 'KR', countryName: '한국' }] },
-    worldMapStats: {
-      acquiredCount: 3,
-      byContinent: [{ acquiredCount: 2, continent: '아시아', totalCount: 10 }],
-      percentage: 30,
-      totalCount: 10,
-    },
+    kind: 'countries',
+    selectedCountry: '부산광역시',
+    trips: [{ cityName: '서울', countryName: '대한민국' }],
   })
 
-  assert.deepEqual(model.visitedCountries, ['한국'])
-  assert.deepEqual(model.claimCountries, ['태국'])
-  assert.equal(model.activeCountry, '태국')
-  assert.equal(model.countryCode, '--')
-  assert.equal(model.selectedTrip?.tripId, 12)
-  assert.equal(model.totalCountries, 10)
-  assert.equal(model.acquiredCount, 3)
-  assert.equal(model.achievementPercentage, 30)
-  assert.deepEqual(model.continentProgress, [['아시아', 2, 10]])
+  assert.deepEqual(model.activeRegion, { code: '26', mapName: '부산광역시', name: '부산', trips: [] })
 })

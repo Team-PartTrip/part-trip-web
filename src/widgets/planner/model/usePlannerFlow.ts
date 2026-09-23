@@ -5,6 +5,7 @@ import { usePlannerGroupFlow } from './usePlannerGroupFlow'
 import { usePlannerLifecycleFlow } from './usePlannerLifecycleFlow'
 import { usePlannerMutations } from './usePlannerMutations'
 import { usePlannerState } from './usePlannerState'
+import { canManagePlanner as hasPlannerManagementRole } from './planner-role'
 import type { PlannerStep } from './types'
 import { isPositiveSafeInteger } from '@/shared/utils'
 
@@ -14,7 +15,7 @@ export function usePlannerFlow(step: PlannerStep) {
   const data = usePlannerData(step, state.activePlannerId)
   const mutations = usePlannerMutations()
   const canManagePlanner = isPositiveSafeInteger(state.activePlannerId) &&
-    data.plannerDetail?.role?.trim().toUpperCase() === 'OWNER'
+    hasPlannerManagementRole(data.plannerDetail?.role)
   const group = usePlannerGroupFlow({
     canManagePlanner,
     mutations,

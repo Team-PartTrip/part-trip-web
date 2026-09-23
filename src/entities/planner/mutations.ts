@@ -13,9 +13,11 @@ import {
   joinPlanner,
   rejectPlannerInvitation,
   removePlannerMember,
+  savePlannerSchedule,
   type CreatePlannerRequestDto,
   type GeneratePlannerRequestDto,
   type JoinPlannerRequestDto,
+  type SavePlannerScheduleRequestDto,
 } from './api'
 import { plannerQueryKeys } from './query-keys'
 
@@ -46,6 +48,12 @@ export function useJoinPlannerMutation() {
 
 export function useConfirmPlannerMutation() {
   return usePlannerMutation((plannerId: number) => confirmPlanner(plannerId))
+}
+
+export function useSavePlannerScheduleMutation() {
+  return usePlannerMutation(({ plannerId, payload }: { plannerId: number; payload: SavePlannerScheduleRequestDto }) =>
+    savePlannerSchedule(plannerId, payload),
+  )
 }
 
 export function useAcceptPlannerInvitationMutation() {

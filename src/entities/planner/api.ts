@@ -13,6 +13,8 @@ import type {
   PlannerListResponseDto,
   PlannerMemberResponseDto,
   PlannerScheduleResponseDto,
+  PlannerScheduleCandidateDto,
+  SavePlannerScheduleRequestDto,
 } from './types'
 
 export type {
@@ -29,6 +31,11 @@ export type {
   PlannerListResponseDto,
   PlannerMemberResponseDto,
   PlannerScheduleResponseDto,
+  PlannerScheduleDayDto,
+  PlannerSchedulePlaceDto,
+  PlannerScheduleSlotDto,
+  PlannerScheduleCandidateDto,
+  SavePlannerScheduleRequestDto,
 } from './types'
 
 const PLANNER_API_PATHS = {
@@ -43,6 +50,7 @@ const PLANNER_API_PATHS = {
   member: (plannerId: number, memberUserId: string) => `/planners/${plannerId}/members/${memberUserId}`,
   confirm: (plannerId: number) => `/planners/${plannerId}/confirm`,
   schedule: (plannerId: number) => `/planners/${plannerId}/schedule`,
+  scheduleCandidates: (plannerId: number) => `/planners/${plannerId}/schedule/candidates`,
   join: '/planners/join',
 } as const
 
@@ -101,6 +109,25 @@ export async function removePlannerMember(plannerId: number, memberUserId: strin
 
 export async function getPlannerSchedule(plannerId: number): Promise<PlannerScheduleResponseDto> {
   const { data } = await apiClient.get<PlannerScheduleResponseDto>(PLANNER_API_PATHS.schedule(plannerId))
+  return data
+}
+
+export async function getPlannerScheduleCandidates(
+  plannerId: number,
+  date: string,
+  query: string,
+): Promise<PlannerScheduleCandidateDto[]> {
+  const { data } = await apiClient.get<PlannerScheduleCandidateDto[]>(PLANNER_API_PATHS.scheduleCandidates(plannerId), {
+    params: { date, q: query || undefined },
+  })
+  return data
+}
+
+export async function savePlannerSchedule(
+  plannerId: number,
+  payload: SavePlannerScheduleRequestDto,
+): Promise<PlannerScheduleResponseDto> {
+  const { data } = await apiClient.put<PlannerScheduleResponseDto>(PLANNER_API_PATHS.schedule(plannerId), payload)
   return data
 }
 

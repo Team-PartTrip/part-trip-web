@@ -77,6 +77,8 @@ export const Field = styled.div`
 
 export const CityGrid = styled.div`
   display: grid;
+  max-height: 240px;
+  overflow: auto;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   max-width: 420px;
@@ -202,6 +204,94 @@ export const SchedulePlace = styled.div`
   span { min-width: 0; }
   strong { display: block; font-size: 15px; line-height: 21px; }
   small { display: block; margin-top: 2px; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; }
+`
+
+export const EditorHeading = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  p { margin: 4px 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 14px; line-height: 20px; }
+  @media (max-width: 560px) { align-items: flex-start; flex-direction: column; }
+`
+
+export const SlotTools = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
+  button { min-width: 48px; min-height: 48px; padding-inline: 12px; }
+`
+
+export const SwapButton = styled.button<{ $active?: boolean }>`
+  min-height: 48px;
+  border: 1px solid ${({ $active, theme }) => $active ? theme.colors.brand.primary : theme.colors.border.default};
+  border-radius: 12px;
+  padding: 0 12px;
+  background: ${({ $active, theme }) => $active ? theme.colors.background.info : theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.text.strong};
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+`
+
+export const Picker = styled.section`
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+  border: 1px solid ${({ theme }) => theme.colors.border.default};
+  border-radius: 14px;
+  padding: 16px;
+  background: ${({ theme }) => theme.colors.background.subtle};
+  h3 { margin: 0; font-size: 16px; line-height: 24px; }
+`
+
+export const PickerForm = styled.form`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  input, button { min-height: 48px; }
+  @media (max-width: 560px) { grid-template-columns: 1fr 1fr; input { grid-column: 1 / -1; } }
+`
+
+export const CandidateList = styled.div`
+  display: grid;
+  gap: 8px;
+  max-height: 340px;
+  overflow: auto;
+`
+
+export const CandidateButton = styled.button`
+  display: grid;
+  min-height: 56px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: ${({ theme }) => theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.text.strong};
+  cursor: pointer;
+  text-align: left;
+  strong { display: block; font-size: 14px; }
+  small { display: block; margin-top: 3px; color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
+`
+
+export const PickerActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  select, button { min-height: 48px; }
+`
+
+export const EditorFeedback = styled.p<{ $error?: boolean }>`
+  margin: 12px 0 0;
+  color: ${({ $error, theme }) => $error ? theme.colors.status.error : theme.colors.brand.strong};
+  font-size: 14px;
+  line-height: 21px;
 `
 
 export const LinkBox = styled.div`

@@ -63,4 +63,63 @@ export const GlobalStyle = createGlobalStyle`
   .page {
     min-height: 100vh;
   }
+
+  [data-accessibility-root] {
+    min-height: 100vh;
+    background: #fff;
+  }
+
+  [data-accessibility-root][data-text-size='large'] { zoom: 1.125; }
+  [data-accessibility-root][data-text-size='larger'] { zoom: 1.25; }
+
+  @media (pointer: coarse) {
+    [data-accessibility-root] :is(button, [role='button'], [role='tab'], input, select, textarea) {
+      min-height: 48px;
+      min-width: 48px;
+    }
+  }
+
+  [data-accessibility-root][data-high-contrast='true'] {
+    --pt-bg-default: #ffffff;
+    --pt-bg-error: #ffffff;
+    --pt-bg-info: #ffffff;
+    --pt-bg-muted: #f2f2f2;
+    --pt-bg-soft: #ffffff;
+    --pt-bg-subtle: #ffffff;
+    --pt-bg-warning: #ffffff;
+    --pt-brand-primary: #0056b3;
+    --pt-brand-strong: #003366;
+    --pt-border-default: #555555;
+    --pt-border-soft: #555555;
+    --pt-border-subtle: #555555;
+    --pt-status-error: #a40000;
+    --pt-status-warning: #744200;
+    --pt-text-inverse: #ffffff;
+    --pt-text-muted: #333333;
+    --pt-text-placeholder: #333333;
+    --pt-text-strong: #000000;
+    color: #000;
+    background: #fff;
+  }
+
+  [data-accessibility-root][data-high-contrast='true'] :is(p, span, small, label, li, dt, dd, h1, h2, h3, h4, strong, b):not(button *):not(a *) {
+    color: #111 !important;
+  }
+
+  [data-accessibility-root][data-high-contrast='true'] :is(button, input, select, textarea) {
+    border-color: #555 !important;
+  }
+
+  [data-accessibility-root][data-high-contrast='true'] input::placeholder {
+    color: #333 !important;
+    opacity: 1;
+  }
+
+  [data-accessibility-root][data-high-contrast='true'] a {
+    text-decoration: underline;
+  }
+
+  [data-accessibility-root][data-high-contrast='true'] :is(button, a, input, select, textarea):focus-visible {
+    outline-color: #000 !important;
+  }
 `

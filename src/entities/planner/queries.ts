@@ -7,6 +7,7 @@ import {
   getPlannerDetail,
   getPlannerMembers,
   getPlannerSchedule,
+  getPlannerScheduleCandidates,
 } from './api'
 import { plannerQueryKeys } from './query-keys'
 
@@ -64,4 +65,12 @@ export const plannerScheduleQueryOptions = (plannerId: number, enabled = true) =
 
 export function usePlannerScheduleQuery(plannerId: number, enabled = true) {
   return useQuery(plannerScheduleQueryOptions(plannerId, enabled))
+}
+
+export function usePlannerScheduleCandidatesQuery(plannerId: number, date: string, query: string, enabled = true) {
+  return useQuery({
+    queryKey: plannerQueryKeys.scheduleCandidates(plannerId, date, query),
+    queryFn: () => getPlannerScheduleCandidates(plannerId, date, query),
+    enabled: enabled && isPositiveInteger(plannerId) && Boolean(date),
+  })
 }

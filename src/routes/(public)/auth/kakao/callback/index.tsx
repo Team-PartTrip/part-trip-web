@@ -68,27 +68,29 @@ function KakaoCallbackRoute() {
   }, [callback, hasCallbackError, hasInvalidState, navigate, redirect])
 
   return (
-    <S.Container>
-      <S.Header>
-        <S.Brand><img src={partTripLogoUrl} alt="PartTrip" /></S.Brand>
-        <S.Title>카카오 로그인</S.Title>
-      </S.Header>
-      <S.Body>
-        <S.Form $spacious aria-label="카카오 로그인 처리">
-          {hasError ? (
-            <S.Message role="alert" $tone="error">{message}</S.Message>
-          ) : (
-            <S.Subtitle aria-live="polite">{message}</S.Subtitle>
-          )}
-          {hasError ? (
-            <S.Actions>
-              <S.SecondaryButton to={paths.login}>
-                로그인으로 돌아가기
-              </S.SecondaryButton>
-            </S.Actions>
-          ) : null}
-        </S.Form>
-      </S.Body>
-    </S.Container>
+    <S.AuthPage className="page">
+      <S.Container>
+        <S.Header>
+          <S.Brand><img src={partTripLogoUrl} alt="PartTrip" /></S.Brand>
+          <S.Title>카카오 로그인</S.Title>
+        </S.Header>
+        <S.Body>
+          <S.Form $spacious aria-label="카카오 로그인 처리">
+            {hasError ? (
+              <S.Message role="alert" $tone="error">{message}</S.Message>
+            ) : (
+              <S.Subtitle aria-live="polite">{message}</S.Subtitle>
+            )}
+            {hasError ? (
+              <S.Actions>
+                <S.SecondaryButton to={paths.login}>
+                  로그인으로 돌아가기
+                </S.SecondaryButton>
+              </S.Actions>
+            ) : null}
+          </S.Form>
+        </S.Body>
+      </S.Container>
+    </S.AuthPage>
   )
 }

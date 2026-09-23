@@ -43,7 +43,7 @@ export function SignUpForm({ redirect }: SignUpFormProps) {
       <S.Header>
         <S.Brand><img src={partTripLogoUrl} alt="PartTrip" /></S.Brand>
         <S.Title>회원가입</S.Title>
-        <S.Subtitle>카카오 또는 Google 계정으로 가입하세요.</S.Subtitle>
+        <S.Subtitle>카카오톡 또는 Google 계정으로 바로 가입하세요.</S.Subtitle>
       </S.Header>
       <S.Body>
         <S.Form aria-label="회원가입" onSubmit={(event) => event.preventDefault()}>
@@ -63,12 +63,12 @@ export function SignUpForm({ redirect }: SignUpFormProps) {
               onError={() => setMessage({ text: 'Google 회원가입에 실패했습니다.', tone: 'error' })}
               onLogin={handleGoogleSignup}
             />
-            <S.SecondaryButton
+            <S.AuthSwitch
               search={safeRedirect ? { redirect: safeRedirect } : undefined}
               to={paths.login}
             >
-              로그인
-            </S.SecondaryButton>
+              이미 계정이 있나요? 로그인
+            </S.AuthSwitch>
           </S.Actions>
         </S.Form>
       </S.Body>

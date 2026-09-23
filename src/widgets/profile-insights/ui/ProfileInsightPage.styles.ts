@@ -134,6 +134,8 @@ export const KoreaMap = styled.div`
   height: 100%;
   place-items: center;
   svg { display: block; width: auto; max-width: 100%; height: 100%; }
+  svg [data-region] { cursor: pointer; }
+  svg [data-region]:focus-visible path { stroke: #003366; stroke-width: 1.5; }
 `
 
 export const CountryStats = styled.aside`

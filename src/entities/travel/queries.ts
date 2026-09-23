@@ -44,6 +44,10 @@ export function useDdayQuery(enabled = true) {
   return useQuery(ddayQueryOptions(enabled))
 }
 
+export function useFestivalMonthQuery(countryName: string | null | undefined, year: number, month: number) {
+  return useQuery(festivalsQueryOptions(countryName ?? '', year, month))
+}
+
 export function useTripFestivalsQuery(countryName?: string | null, startDate?: string | null, endDate?: string | null) {
   const dateRange = getDateRangeWithPadding(startDate, endDate)
   const months = getCalendarMonthsInRange(dateRange?.startDate, dateRange?.endDate)
@@ -87,21 +91,23 @@ export const moreTourPlacesQueryOptions = (
   countryName: string,
   cityName: string,
   category: string,
+  enabled = true,
 ) =>
   infiniteQueryOptions({
     queryKey: travelQueryKeys.moreTourPlaces(countryName, cityName, category),
     queryFn: ({ pageParam }) => getMoreTourPlaces(countryName, cityName, category, pageParam),
     initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => lastPage.cursor ?? undefined,
-    enabled: false,
+    getNextPageParam: (lastPage) => lastPage.cursor || undefined,
+    enabled: enabled && Boolean(countryName && cityName && category),
   })
 
 export function useMoreTourPlacesQuery(
   countryName?: string,
   cityName?: string,
   category?: string,
+  enabled = true,
 ) {
-  return useInfiniteQuery(moreTourPlacesQueryOptions(countryName ?? '', cityName ?? '', category ?? ''))
+  return useInfiniteQuery(moreTourPlacesQueryOptions(countryName ?? '', cityName ?? '', category ?? '', enabled))
 }
 
 type MainTravelQueryData = {

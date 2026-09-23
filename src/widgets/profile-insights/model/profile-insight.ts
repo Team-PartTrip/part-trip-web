@@ -117,7 +117,15 @@ export function getProfileInsightModel({
   const activeCountry = countryChoices.includes(selectedCountry) ? selectedCountry : countryChoices[0]
   const countryTrips = trips.filter((trip) => trip.countryName === activeCountry)
   const domestic = getDomesticTravelModel(trips)
-  const activeRegion = domestic.regions.find((region) => region.name === selectedCountry) ?? domestic.regions[0]
+  const selectedRegion = DOMESTIC_REGIONS.find((region) => region.name === selectedCountry || region.mapName === selectedCountry)
+  const activeRegion = selectedRegion
+    ? {
+        code: selectedRegion.code,
+        mapName: selectedRegion.mapName,
+        name: selectedRegion.name,
+        trips: domestic.domesticTrips.filter((trip) => regionForCity(trip.cityName)?.code === selectedRegion.code),
+      }
+    : domestic.regions[0]
   const activeRegionTrips = activeRegion?.trips ?? []
   const selectedTrip = countryTrips.find((trip) => isPositiveSafeInteger(trip.tripId))
   const countryCode = visited.find((country) => country.countryName === activeCountry)?.countryCode ?? '--'

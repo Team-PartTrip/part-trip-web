@@ -19,12 +19,15 @@ export type GuardianLocationDto = {
   recordedAt: string
 }
 
+export type CurrentLocationRequestDto = Pick<GuardianLocationDto, 'latitude' | 'longitude'>
+
 const paths = {
   links: '/guardians/me',
   seniors: '/guardians/seniors',
   seniorPlanners: (seniorUserId: string) => `/guardians/seniors/${encodeURIComponent(seniorUserId)}/planners`,
   seniorSchedule: (seniorUserId: string, plannerId: number) => `/guardians/seniors/${encodeURIComponent(seniorUserId)}/planners/${plannerId}/schedule`,
   seniorLocation: (seniorUserId: string) => `/guardians/seniors/${encodeURIComponent(seniorUserId)}/location`,
+  currentLocation: '/location',
   invite: '/guardians/invite',
   accept: '/guardians/accept',
   unlink: (linkId: number) => `/guardians/${linkId}`,
@@ -53,6 +56,10 @@ export async function getSeniorSchedule(seniorUserId: string, plannerId: number)
 export async function getSeniorLocation(seniorUserId: string): Promise<GuardianLocationDto> {
   const { data } = await apiClient.get<GuardianLocationDto>(paths.seniorLocation(seniorUserId))
   return data
+}
+
+export async function updateCurrentLocation(payload: CurrentLocationRequestDto): Promise<void> {
+  await apiClient.put(paths.currentLocation, payload)
 }
 
 export async function createGuardianInvite(): Promise<GuardianInviteDto> {

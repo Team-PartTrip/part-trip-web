@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, type KeyboardEvent, type MouseEvent } from 'react'
 import { Button as PartTripButton } from '@/shared/ui/parttrip'
 import koreaRegionsSvg from '@/shared/assets/figma/korea-regions.svg?raw'
 import { isPositiveSafeInteger } from '@/shared/utils'
@@ -36,18 +36,30 @@ export function ProfileMapView({
   const mapMarkup = useMemo(() => {
     const visited = new Set(regionKey.split('|'))
     return koreaRegionsSvg.replace(
-      /<g data-region="([^"]+)" data-visited="false"/g,
-      (group, name: string) => visited.has(name)
-        ? group.replace('data-visited="false"', 'data-visited="true"')
-        : group,
+      /<g id="([^"]+)" data-region="([^"]+)" data-visited="false"/g,
+      (_group, id: string, name: string) => {
+        const hasVisited = visited.has(name)
+        return `<g id="${id}" data-region="${name}" data-visited="${hasVisited}" tabindex="0" role="button" aria-label="${name} ${hasVisited ? '방문 기록 보기' : '여행 기록 없음'}">`
+      },
     )
   }, [regionKey])
+  const selectMapRegion = (event: MouseEvent<HTMLDivElement> | KeyboardEvent<HTMLDivElement>) => {
+    if ('key' in event && event.key !== 'Enter' && event.key !== ' ') return
+    const target = event.target
+    if (!(target instanceof Element)) return
+    const region = target.closest<SVGGElement>('[data-region][role="button"]')
+    const name = region?.dataset.region
+    if (!name) return
+    event.preventDefault()
+    onSelectRegion(name)
+    onOpenCountries()
+  }
 
   return (
     <S.MapBody>
       <S.MapCard>
         <S.SectionTitle>방문한 시·도</S.SectionTitle>
-        <S.MapCanvas><S.KoreaMap role="img" aria-label={`방문한 지역 ${regions.map((region) => region.name).join(', ') || '없음'}`} dangerouslySetInnerHTML={{ __html: mapMarkup }} /></S.MapCanvas>
+        <S.MapCanvas><S.KoreaMap role="group" aria-label="대한민국 시·도 지도. 지역을 선택하면 여행 기록을 볼 수 있어요." onClick={selectMapRegion} onKeyDown={selectMapRegion} dangerouslySetInnerHTML={{ __html: mapMarkup }} /></S.MapCanvas>
         <S.MapLegend><span><S.LegendDot aria-hidden="true" />미방문</span><span><S.LegendDot $visited aria-hidden="true" />방문 완료</span></S.MapLegend>
       </S.MapCard>
       <S.CountryStats>

@@ -93,30 +93,49 @@ export type PlannerConfirmResponseDto = {
   plannerId?: number
 }
 
+export type PlannerSchedulePlaceDto = {
+  tourPlaceId?: number
+  name?: string
+  category?: string
+  categoryLabel?: string
+  imageUrl?: string
+  address?: string
+  rating?: number
+  latitude?: number
+  longitude?: number
+}
+
+export type PlannerScheduleSlotDto = {
+  slotId?: number
+  order?: number
+  tourPlaceId?: number
+  place?: PlannerSchedulePlaceDto
+}
+
+export type PlannerScheduleDayDto = {
+  date?: string
+  slots?: PlannerScheduleSlotDto[]
+}
+
 export type PlannerScheduleResponseDto = {
   plannerId?: number
   title?: string
   cityName?: string
   startDate?: string
   endDate?: string
-  days?: Array<{
-    date?: string
-    slots?: Array<{
-      slotId?: number
-      order?: number
-      place?: {
-        tourPlaceId?: number
-        name?: string
-        category?: string
-        categoryLabel?: string
-        imageUrl?: string
-        address?: string
-        rating?: number
-        latitude?: number
-        longitude?: number
-      }
-    }>
+  days?: PlannerScheduleDayDto[]
+}
+
+export type SavePlannerScheduleRequestDto = {
+  days: Array<{
+    date: string
+    slots: Array<{ slotId?: number; tourPlaceId?: number }>
   }>
+}
+
+export type PlannerScheduleCandidateDto = PlannerSchedulePlaceDto & {
+  tourPlaceId: number
+  name: string
 }
 
 export type PlannerBlockResponseDto = {
