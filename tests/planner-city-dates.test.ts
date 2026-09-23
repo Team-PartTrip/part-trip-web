@@ -1,27 +1,24 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { createJiti } from 'jiti'
 
-import { validatePlannerCityRanges } from '../src/widgets/planner/model/destination.ts'
+const jiti = createJiti(process.cwd(), { alias: { '@': `${process.cwd()}/src` } })
+const { isValidPlannerDateRange, overlapsExistingTrip } = await jiti.import('./src/widgets/planner/model/planner-date.ts') as {
+  isValidPlannerDateRange: (start: string, end: string) => boolean
+  overlapsExistingTrip: (trips: Array<{ startDate?: string; endDate?: string; status?: string }>, start: string, end: string) => boolean
+}
 
-const osaka = { countryName: '일본', cityName: '오사카', startDate: '2026-10-01', endDate: '2026-10-03' }
-const kyoto = { countryName: '일본', cityName: '교토', startDate: '2026-10-04', endDate: '2026-10-05' }
-
-test('planner city date ranges allow consecutive non-overlapping stays', () => {
-  assert.equal(validatePlannerCityRanges([osaka, kyoto]), '')
+test('planner date range requires real dates and allows at most 14 inclusive days', () => {
+  assert.equal(isValidPlannerDateRange('2026-10-01', '2026-10-14'), true)
+  assert.equal(isValidPlannerDateRange('2026-10-01', '2026-10-15'), false)
+  assert.equal(isValidPlannerDateRange('2026-02-30', '2026-03-02'), false)
+  assert.equal(isValidPlannerDateRange('2026-10-03', '2026-10-02'), false)
+  assert.equal(isValidPlannerDateRange('', '2026-10-02'), false)
 })
 
-test('planner city date ranges reject overlapping or reversed stays', () => {
-  assert.notEqual(validatePlannerCityRanges([osaka, { ...kyoto, startDate: '2026-10-03' }]), '')
-  assert.notEqual(validatePlannerCityRanges([{ ...osaka, endDate: '2026-09-30' }]), '')
-  assert.notEqual(validatePlannerCityRanges([{ ...osaka, startDate: '2026-02-30' }]), '')
-  assert.notEqual(validatePlannerCityRanges([
-    { ...osaka, startDate: '2026-01-01', endDate: '2026-01-10' },
-    { ...kyoto, startDate: '2026-01-02', endDate: '2026-01-03' },
-    { ...kyoto, startDate: '2026-01-04', endDate: '2026-01-05' },
-  ]), '')
-})
-
-test('planner city date ranges require at least one complete destination', () => {
-  assert.notEqual(validatePlannerCityRanges([]), '')
-  assert.notEqual(validatePlannerCityRanges([{ ...osaka, cityName: '' }]), '')
+test('planner date range blocks overlapping active trips but permits adjacent and ended trips', () => {
+  const trip = { startDate: '2026-10-01', endDate: '2026-10-03', status: 'BEFORE' }
+  assert.equal(overlapsExistingTrip([trip], '2026-10-03', '2026-10-04'), true)
+  assert.equal(overlapsExistingTrip([trip], '2026-10-04', '2026-10-05'), false)
+  assert.equal(overlapsExistingTrip([{ ...trip, status: 'ENDED' }], '2026-10-02', '2026-10-02'), false)
 })

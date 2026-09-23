@@ -1,27 +1,30 @@
 import { queryOptions, useQuery } from '@tanstack/react-query'
 
 import {
-  getConfirmedPlaces,
+  getMyPlannerInvitations,
   getMyPlanners,
+  getPlannerBlocks,
   getPlannerDetail,
   getPlannerMembers,
-  getMyPlannerInvitations,
-  getVote,
-  getVotes,
+  getPlannerSchedule,
+  getPlannerScheduleCandidates,
 } from './api'
 import { plannerQueryKeys } from './query-keys'
 
 const isPositiveInteger = (value: number) => Number.isInteger(value) && value > 0
 
 export const myPlannersQueryOptions = (enabled = true) =>
-  queryOptions({
-    queryKey: plannerQueryKeys.list(),
-    queryFn: getMyPlanners,
-    enabled,
-  })
+  queryOptions({ queryKey: plannerQueryKeys.list(), queryFn: getMyPlanners, enabled })
 
 export function useMyPlannersQuery(enabled = true) {
   return useQuery(myPlannersQueryOptions(enabled))
+}
+
+export const plannerBlocksQueryOptions = (enabled = true) =>
+  queryOptions({ queryKey: plannerQueryKeys.blocks(), queryFn: getPlannerBlocks, enabled })
+
+export function usePlannerBlocksQuery(enabled = true) {
+  return useQuery(plannerBlocksQueryOptions(enabled))
 }
 
 export const plannerInvitationsQueryOptions = (enabled = true) =>
@@ -53,35 +56,21 @@ export function usePlannerMembersQuery(plannerId: number, enabled = true) {
   return useQuery(plannerMembersQueryOptions(plannerId, enabled))
 }
 
-export const plannerConfirmedPlacesQueryOptions = (plannerId: number, enabled = true) =>
+export const plannerScheduleQueryOptions = (plannerId: number, enabled = true) =>
   queryOptions({
-    queryKey: plannerQueryKeys.confirmedPlaces(plannerId),
-    queryFn: () => getConfirmedPlaces(plannerId),
+    queryKey: plannerQueryKeys.schedule(plannerId),
+    queryFn: () => getPlannerSchedule(plannerId),
     enabled: enabled && isPositiveInteger(plannerId),
   })
 
-export function usePlannerConfirmedPlacesQuery(plannerId: number, enabled = true) {
-  return useQuery(plannerConfirmedPlacesQueryOptions(plannerId, enabled))
+export function usePlannerScheduleQuery(plannerId: number, enabled = true) {
+  return useQuery(plannerScheduleQueryOptions(plannerId, enabled))
 }
 
-export const plannerVotesQueryOptions = (plannerId: number, enabled = true) =>
-  queryOptions({
-    queryKey: plannerQueryKeys.votes(plannerId),
-    queryFn: () => getVotes(plannerId),
-    enabled: enabled && isPositiveInteger(plannerId),
+export function usePlannerScheduleCandidatesQuery(plannerId: number, date: string, query: string, enabled = true) {
+  return useQuery({
+    queryKey: plannerQueryKeys.scheduleCandidates(plannerId, date, query),
+    queryFn: () => getPlannerScheduleCandidates(plannerId, date, query),
+    enabled: enabled && isPositiveInteger(plannerId) && Boolean(date),
   })
-
-export function usePlannerVotesQuery(plannerId: number, enabled = true) {
-  return useQuery(plannerVotesQueryOptions(plannerId, enabled))
-}
-
-export const plannerVoteQueryOptions = (plannerId: number, voteId: number, enabled = true) =>
-  queryOptions({
-    queryKey: plannerQueryKeys.vote(plannerId, voteId),
-    queryFn: () => getVote(plannerId, voteId),
-    enabled: enabled && isPositiveInteger(plannerId) && isPositiveInteger(voteId),
-  })
-
-export function usePlannerVoteQuery(plannerId: number, voteId: number, enabled = true) {
-  return useQuery(plannerVoteQueryOptions(plannerId, voteId, enabled))
 }

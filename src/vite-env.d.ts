@@ -17,10 +17,31 @@ interface KakaoAuthApi {
   authorize(options: { redirectUri: string; state?: string }): void
 }
 
+interface KakaoShareLink {
+  mobileWebUrl: string
+  webUrl: string
+}
+
+interface KakaoShareDefaultFeedOptions {
+  objectType: 'feed'
+  content: {
+    title: string
+    description: string
+    imageUrl: string
+    link: KakaoShareLink
+  }
+  buttons: Array<{ title: string; link: KakaoShareLink }>
+}
+
+interface KakaoShareApi {
+  sendDefault(options: KakaoShareDefaultFeedOptions): void
+}
+
 interface KakaoSdk {
   init(appKey: string): void
   isInitialized(): boolean
   Auth: KakaoAuthApi
+  Share: KakaoShareApi
 }
 
 interface Window {

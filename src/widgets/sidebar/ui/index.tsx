@@ -8,21 +8,20 @@ import * as S from './Sidebar.style'
 
 interface Props {
   menus: SidebarMenuType[]
+  notificationCount?: number
 }
 
 function activeHref(pathname: string, menus: SidebarMenuType[]) {
   if (pathname.startsWith(paths.planner)) return paths.planner
   if (pathname.startsWith(paths.tripCards)) return paths.record
+  if (pathname.startsWith(paths.profileMap)) return paths.profileMap
+  if (pathname.startsWith(paths.notifications) || pathname.startsWith(paths.notificationSettings)) return paths.notifications
   if (pathname.startsWith(paths.record)) return paths.record
-  if (
-    pathname.startsWith(paths.profile) ||
-    pathname.startsWith(paths.notifications) ||
-    pathname.startsWith('/settings')
-  ) return paths.profile
+  if (pathname.startsWith(paths.profile)) return paths.profile
   return menus.find((item) => pathname === item.href)?.href ?? paths.main
 }
 
-export default function Sidebar({ menus }: Props) {
+export default function Sidebar({ menus, notificationCount = 0 }: Props) {
   const { pathname } = useLocation()
 
   const selectedHref = activeHref(pathname, menus)
@@ -42,6 +41,7 @@ export default function Sidebar({ menus }: Props) {
               iconSrc={item.iconSrc}
               text={item.text}
               href={item.href}
+              badgeCount={item.href === paths.notifications ? notificationCount : undefined}
             />
           ))}
         </S.MenuList>

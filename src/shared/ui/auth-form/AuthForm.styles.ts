@@ -3,40 +3,28 @@ import styled, { css } from 'styled-components'
 
 export const AuthPage = styled.main`
   display: flex;
+  width: 100%;
   min-height: 100dvh;
-  align-items: flex-start;
+  box-sizing: border-box;
+  align-items: center;
   justify-content: center;
-  padding: 152px 20px 108px;
+  padding: 0 20px;
   background: ${({ theme }) => theme.colors.background.default};
-  border: 1px solid #d8dddd;
-  border-radius: 14px;
-  box-shadow: 0 4px 14px rgb(15 33 51 / 5%);
-
-  @media (max-width: 600px) {
-    padding: 40px 20px;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-  }
 `
 
 export const Container = styled.section`
   display: flex;
   width: min(100%, 560px);
-  height: 720px;
-  min-height: 720px;
+  min-height: 100dvh;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 28px;
   justify-content: center;
-  border: 1px solid #e6edf4;
-  border-radius: 16px;
-  padding: 32px;
+  padding: 48px 36px;
   background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: 0 4px 14px rgb(15 33 51 / 5%);
 
   @media (max-width: 600px) {
-    min-height: 0;
     padding: 28px 20px;
   }
 `
@@ -116,6 +104,23 @@ const SecondaryButtonBase = styled.a<{ $filled?: boolean }>`
 `
 
 export const SecondaryButton = createLink(SecondaryButtonBase)
+
+const AuthSwitchBase = styled.a`
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 14px;
+  line-height: 20px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+
+  &:hover { color: ${({ theme }) => theme.colors.brand.strong}; }
+  &:focus-visible { outline: 3px solid ${({ theme }) => theme.colors.brand.primary}; outline-offset: 2px; }
+`
+
+export const AuthSwitch = createLink(AuthSwitchBase)
 
 export const GoogleButton = styled.button`
   ${buttonStyles}

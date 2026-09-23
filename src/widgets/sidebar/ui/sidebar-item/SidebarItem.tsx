@@ -7,6 +7,7 @@ interface Props {
   iconSrc?: string
   text: string
   href: string
+  badgeCount?: number
   onClick?: () => void
 }
 
@@ -15,6 +16,7 @@ const SidebarItem = ({
   iconSrc,
   text,
   href,
+  badgeCount,
   onClick,
 }: Props) => {
   const { pathname } = useLocation()
@@ -25,10 +27,13 @@ const SidebarItem = ({
       to={href}
       onClick={onClick}
       $isParentActive={isParentActive}
+      aria-current={isParentActive ? 'page' : undefined}
+      aria-label={badgeCount && badgeCount > 0 ? `${text}, 읽지 않은 알림 ${badgeCount}개` : undefined}
     >
       {iconSrc && (
         <S.IconWrapper>
           <img src={iconSrc} alt="" />
+          {badgeCount && badgeCount > 0 ? <S.Badge aria-hidden="true">{badgeCount > 99 ? '99+' : badgeCount}</S.Badge> : null}
         </S.IconWrapper>
       )}
 

@@ -146,6 +146,18 @@ export const FilterButton = styled.button`
   font-weight: 600;
 `
 
+export const CategoryFilter = styled.select`
+  width: 100%;
+  min-height: 48px;
+  margin-bottom: 12px;
+  border: 1px solid ${({ theme }) => theme.colors.border.default};
+  border-radius: 10px;
+  padding: 0 12px;
+  background: ${({ theme }) => theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.text.strong};
+  font: inherit;
+`
+
 export const FestivalRow = styled.article`
   display: flex;
   min-height: 144px;

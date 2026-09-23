@@ -5,7 +5,6 @@ import {
   getDday,
   getFestivals,
   getMoreTourPlaces,
-  getPopularCities,
   getTourPlace,
   type CountryInfoResponseDto,
   type DdayResponseDto,
@@ -15,7 +14,7 @@ import {
 import { travelQueryKeys } from './query-keys'
 import { getCalendarMonthsInRange, getDateRangeWithPadding, isDateInRange } from '@/shared/utils'
 
-export const countriesQueryOptions = (keyword = '', enabled = true) =>
+const countriesQueryOptions = (keyword = '', enabled = true) =>
   queryOptions({
     queryKey: travelQueryKeys.countries(keyword),
     queryFn: () => getCountries(keyword),
@@ -23,14 +22,14 @@ export const countriesQueryOptions = (keyword = '', enabled = true) =>
     placeholderData: (previousData) => previousData,
   })
 
-export const ddayQueryOptions = (enabled = true) =>
+const ddayQueryOptions = (enabled = true) =>
   queryOptions({
     queryKey: travelQueryKeys.dday(),
     queryFn: getDday,
     enabled,
   })
 
-export const festivalsQueryOptions = (countryName: string, year?: number, month?: number) =>
+const festivalsQueryOptions = (countryName: string, year?: number, month?: number) =>
   queryOptions({
     queryKey: travelQueryKeys.festivals(countryName, year, month),
     queryFn: () => getFestivals(countryName, year, month),
@@ -41,22 +40,11 @@ export function useCountriesQuery(keyword = '', enabled = true) {
   return useQuery(countriesQueryOptions(keyword, enabled))
 }
 
-export const popularCitiesQueryOptions = (limit = 8, enabled = true) =>
-  queryOptions({
-    queryKey: travelQueryKeys.popularCities(limit),
-    queryFn: () => getPopularCities(limit),
-    enabled,
-  })
-
-export function usePopularCitiesQuery(limit = 8, enabled = true) {
-  return useQuery(popularCitiesQueryOptions(limit, enabled))
-}
-
 export function useDdayQuery(enabled = true) {
   return useQuery(ddayQueryOptions(enabled))
 }
 
-export function useFestivalsQuery(countryName?: string, year?: number, month?: number) {
+export function useFestivalMonthQuery(countryName: string | null | undefined, year: number, month: number) {
   return useQuery(festivalsQueryOptions(countryName ?? '', year, month))
 }
 
@@ -103,24 +91,26 @@ export const moreTourPlacesQueryOptions = (
   countryName: string,
   cityName: string,
   category: string,
+  enabled = true,
 ) =>
   infiniteQueryOptions({
     queryKey: travelQueryKeys.moreTourPlaces(countryName, cityName, category),
     queryFn: ({ pageParam }) => getMoreTourPlaces(countryName, cityName, category, pageParam),
     initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => lastPage.cursor ?? undefined,
-    enabled: false,
+    getNextPageParam: (lastPage) => lastPage.cursor || undefined,
+    enabled: enabled && Boolean(countryName && cityName && category),
   })
 
 export function useMoreTourPlacesQuery(
   countryName?: string,
   cityName?: string,
   category?: string,
+  enabled = true,
 ) {
-  return useInfiniteQuery(moreTourPlacesQueryOptions(countryName ?? '', cityName ?? '', category ?? ''))
+  return useInfiniteQuery(moreTourPlacesQueryOptions(countryName ?? '', cityName ?? '', category ?? '', enabled))
 }
 
-export type MainTravelQueryData = {
+type MainTravelQueryData = {
   country?: CountryInfoResponseDto
   festivals: FestivalResponseDto[]
   plan?: DdayResponseDto
@@ -136,7 +126,7 @@ export function useMainTravelQuery() {
     queries: [
       { queryKey: travelQueryKeys.country(countryName), queryFn: () => getCountryInfo(countryName), enabled: hasCountry },
       { queryKey: travelQueryKeys.tourPlaces(countryName), queryFn: () => getTourPlace(countryName), enabled: hasCountry },
-      { queryKey: travelQueryKeys.festivals(countryName), queryFn: () => getFestivals(countryName), enabled: hasCountry },
+      festivalsQueryOptions(countryName),
     ],
   })
   const [country, tourPlaces, festivals] = results

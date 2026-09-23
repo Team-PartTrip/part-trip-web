@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { figmaHomeHero } from '@/shared/assets'
 import { Skeleton } from '@/shared/ui/parttrip'
 
 export const LoadingLayout = styled.div`
@@ -62,17 +63,29 @@ export const State = styled.p`
 `
 
 export const Hero = styled.section`
+  position: relative;
   display: flex;
   min-height: 260px;
   flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
+  gap: 10px;
   box-sizing: border-box;
+  overflow: hidden;
   border: 1px solid rgb(13 74 132 / 12%);
-  border-radius: 22px;
-  padding: 32px;
-  background: ${({ theme }) => theme.colors.brand.primary};
+  border-radius: 20px;
+  padding: 36px;
+  background-color: ${({ theme }) => theme.colors.brand.strong};
+  background-image: linear-gradient(90deg, rgb(8 35 56 / 78%), rgb(8 35 56 / 58%) 48%, rgb(8 35 56 / 14%)), url(${figmaHomeHero});
+  background-position: center;
+  background-size: cover;
   color: ${({ theme }) => theme.colors.text.inverse};
+
+  @media (max-width: 767px) {
+    min-height: 300px;
+    border-radius: 16px;
+    padding: 24px 20px;
+    background-position: 58% center;
+  }
 `
 
 export const HeroLabel = styled.span`
@@ -83,6 +96,68 @@ export const HeroLabel = styled.span`
 export const Dday = styled.strong`
   font-size: 44px;
   line-height: 53px;
+`
+
+export const HeroTitle = styled.h1`
+  max-width: 680px;
+  margin: 0;
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 700;
+  line-height: 1.2;
+  text-wrap: balance;
+`
+
+export const HeroCopy = styled.p`
+  max-width: 520px;
+  margin: 0;
+  color: rgb(255 255 255 / 94%);
+  font-size: 16px;
+  line-height: 24px;
+`
+
+export const TodayRoute = styled.div`
+  display: flex;
+  max-width: 760px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+
+  span {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgb(255 255 255 / 50%);
+    border-radius: 999px;
+    padding: 0 14px;
+    background: rgb(13 40 58 / 38%);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  i { font-style: normal; opacity: .8; }
+`
+
+export const HeroAction = styled.button`
+  min-width: 176px;
+  min-height: 48px;
+  margin-top: auto;
+  border: 1px solid #fff;
+  border-radius: 12px;
+  padding: 12px 20px;
+  background: #fff;
+  color: ${({ theme }) => theme.colors.brand.strong};
+  cursor: pointer;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+
+  &:hover { background: #f2f7fc; }
+  &:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+  @media (max-width: 767px) { width: 100%; }
 `
 
 export const Destination = styled.strong`

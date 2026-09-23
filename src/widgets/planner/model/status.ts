@@ -4,10 +4,6 @@ export function normalizeStatus(status?: string) {
   return status?.trim().toUpperCase() ?? ''
 }
 
-export function isPlannerConfirmedStatus(status?: string) {
-  return normalizeStatus(status) === 'CONFIRMED'
-}
-
 export function plannerStatusKey(status?: string): PlannerStatusKey {
   const value = normalizeStatus(status)
 

@@ -16,7 +16,7 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <S.Root>
-      <Sidebar menus={MENUS} />
+      <Sidebar menus={MENUS} notificationCount={notificationCount?.unreadCount} />
       <S.Content>
         <S.Topbar>
           <S.MobileLogoLink to={paths.main} aria-label="PartTrip 홈"><img width={362} height={86} src={partTripLogoUrl} alt="" /></S.MobileLogoLink>

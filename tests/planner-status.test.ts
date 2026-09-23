@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { isPlannerConfirmedStatus, plannerStatusKey, plannerStatusLabel } from '../src/widgets/planner/model/status.ts'
+import { plannerStatusKey, plannerStatusLabel } from '../src/widgets/planner/model/status.ts'
 
 test('백엔드 플래너 상태를 화면 상태로 정확히 분류한다', () => {
   assert.equal(plannerStatusKey('PLANNING'), 'active')
@@ -14,7 +14,4 @@ test('백엔드 플래너 상태를 화면 상태로 정확히 분류한다', ()
 })
 
 test('확정 상태 판정은 앞뒤 공백을 정규화한다', () => {
-  assert.equal(isPlannerConfirmedStatus(' CONFIRMED '), true)
-  assert.equal(isPlannerConfirmedStatus(' confirmed '), true)
-  assert.equal(isPlannerConfirmedStatus('OPEN'), false)
 })

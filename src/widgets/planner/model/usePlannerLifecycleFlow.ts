@@ -1,99 +1,19 @@
 import { type useNavigate } from '@tanstack/react-router'
 
-import { type usePlannerData } from './usePlannerData'
-import { type usePlannerMutations } from './usePlannerMutations'
-import { clearPlannerSession } from './planner-session'
-import { type usePlannerState } from './usePlannerState'
-import { paths, ACTIVE_VOTE_CATEGORY_KEY } from '@/shared/config'
-import { removeSessionValue, writeSessionValue } from '@/shared/libs/session-storage'
-import { getErrorMessage, isPositiveSafeInteger } from '@/shared/utils'
-import { getPlannerConfirmationSelections } from './selectors'
-import { normalizeStatus } from './status'
+import { paths } from '@/shared/config'
+import { isPositiveSafeInteger } from '@/shared/utils'
 
-type Data = ReturnType<typeof usePlannerData>
-type Mutations = ReturnType<typeof usePlannerMutations>
+import { clearPlannerSession } from './planner-session'
+import { clearPlannerCreationDraft } from './planner-creation'
+import { type usePlannerState } from './usePlannerState'
+
 type State = ReturnType<typeof usePlannerState>
 type Navigate = ReturnType<typeof useNavigate>
 
-type Props = {
-  canManagePlanner: boolean
-  data: Data
-  navigate: Navigate
-  mutations: Mutations
-  state: State
-}
-
-export function usePlannerLifecycleFlow({ canManagePlanner, data, navigate, mutations, state }: Props) {
-  const {
-    activePlannerId,
-    plannerConfirmationKey,
-    resetVoteSession,
-    setCityName,
-    setConfirmedPlannerId,
-    setCountryInfoId,
-    setCountryName,
-    setEndDate,
-    setErrorMessage,
-    setSelectedDestination,
-    setStartDate,
-    setStoredActivePlannerId,
-    setPlannerPlaceCityName,
-    setPlannerPlaceCountryName,
-  } = state
-  const { votes } = data
-  const { confirmPlannerMutation, deletePlannerMutation } = mutations
-  const selections = getPlannerConfirmationSelections(votes)
-  const canConfirmPlan = votes.length > 0 &&
-    votes.every((vote) => ['CLOSED', 'CONFIRMED'].includes(normalizeStatus(vote.status))) &&
-    selections.length > 0
-
-  const handleConfirmPlan = async () => {
-    if (!canManagePlanner) {
-      setErrorMessage('먼저 여행 계획을 저장해주세요.')
-      return false
-    }
-    try {
-      setErrorMessage('')
-      if (!isPositiveSafeInteger(activePlannerId) || votes.length === 0) {
-        setErrorMessage('확정할 투표 결과를 확인할 수 없습니다.')
-        return false
-      }
-      if (!canConfirmPlan) {
-        setErrorMessage('모든 카테고리 투표를 마감한 뒤 최다 득표 장소를 확정해주세요.')
-        return false
-      }
-      await confirmPlannerMutation.mutateAsync({ plannerId: activePlannerId, payload: { selections } })
-      writeSessionValue(plannerConfirmationKey, 'true')
-      setConfirmedPlannerId(activePlannerId)
-      return true
-    } catch {
-      setErrorMessage('최종 계획을 확정하지 못했습니다.')
-      return false
-    }
-  }
-
-  const handleDeletePlanner = async (plannerId?: number) => {
-    if (!isPositiveSafeInteger(plannerId)) {
-      setErrorMessage('삭제할 플래너 정보를 확인할 수 없습니다.')
-      return
-    }
-    try {
-      setErrorMessage('')
-      await deletePlannerMutation.mutateAsync(plannerId)
-      if (plannerId === activePlannerId) {
-        clearPlannerSession(plannerId)
-        setStoredActivePlannerId(0)
-        resetVoteSession()
-        setConfirmedPlannerId(0)
-      }
-    } catch (error) {
-      setErrorMessage(getErrorMessage(error))
-    }
-  }
-
+export function usePlannerLifecycleFlow({ navigate, state }: { navigate: Navigate; state: State }) {
   const handleSelectPlanner = (plannerId?: number) => {
     if (!isPositiveSafeInteger(plannerId)) {
-      setErrorMessage('선택한 여행 계획을 확인할 수 없습니다.')
+      state.setErrorMessage('선택한 여행 계획을 확인할 수 없습니다.')
       return
     }
     state.activatePlanner(plannerId)
@@ -102,28 +22,11 @@ export function usePlannerLifecycleFlow({ canManagePlanner, data, navigate, muta
 
   const handleStartNewPlanner = () => {
     clearPlannerSession()
-    removeSessionValue(ACTIVE_VOTE_CATEGORY_KEY)
-    setStoredActivePlannerId(0)
-    setSelectedDestination(undefined)
-    setCountryInfoId('')
-    setCountryName(undefined)
-    setCityName(undefined)
-    setStartDate(undefined)
-    setEndDate(undefined)
-    setPlannerPlaceCityName('')
-    setPlannerPlaceCountryName('')
-    resetVoteSession()
-    setConfirmedPlannerId(0)
-    navigate({ to: paths.plannerGroup })
+    clearPlannerCreationDraft()
+    state.setStoredActivePlannerId(0)
+    state.setErrorMessage('')
+    navigate({ to: paths.plannerDestination })
   }
 
-  return {
-    canConfirmPlan,
-    confirmPlannerPending: confirmPlannerMutation.isPending,
-    deletePlannerPending: deletePlannerMutation.isPending,
-    handleConfirmPlan,
-    handleDeletePlanner,
-    handleSelectPlanner,
-    handleStartNewPlanner,
-  }
+  return { handleSelectPlanner, handleStartNewPlanner }
 }

@@ -1,10 +1,11 @@
 export const plannerQueryKeys = {
   all: ['planners'] as const,
+  blocks: () => [...plannerQueryKeys.all, 'blocks'] as const,
   invitations: () => [...plannerQueryKeys.all, 'invitations'] as const,
   list: () => [...plannerQueryKeys.all, 'list'] as const,
   detail: (plannerId: number) => [...plannerQueryKeys.all, 'detail', plannerId] as const,
   members: (plannerId: number) => [...plannerQueryKeys.all, 'members', plannerId] as const,
-  confirmedPlaces: (plannerId: number) => [...plannerQueryKeys.all, 'confirmed-places', plannerId] as const,
-  votes: (plannerId: number) => [...plannerQueryKeys.all, 'votes', plannerId] as const,
-  vote: (plannerId: number, voteId: number) => [...plannerQueryKeys.votes(plannerId), 'detail', voteId] as const,
+  schedule: (plannerId: number) => [...plannerQueryKeys.all, 'schedule', plannerId] as const,
+  scheduleCandidates: (plannerId: number, date: string, query: string) =>
+    [...plannerQueryKeys.all, 'schedule-candidates', plannerId, date, query] as const,
 }

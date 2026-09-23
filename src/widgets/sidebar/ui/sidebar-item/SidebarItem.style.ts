@@ -2,9 +2,10 @@ import { Link } from '@tanstack/react-router'
 import styled from 'styled-components'
 
 export const ItemLink = styled(Link)<{ $isParentActive: boolean }>`
+  position: relative;
   display: flex;
   width: 100%;
-  height: 44px;
+  min-height: 48px;
   align-items: center;
   gap: 10px;
   border-radius: 12px;
@@ -21,14 +22,17 @@ export const ItemLink = styled(Link)<{ $isParentActive: boolean }>`
   }
 
   @media (max-width: 47.9375rem) {
-    width: 25%;
+    width: auto;
+    min-width: 48px;
     height: 48px;
+    flex: 1;
     justify-content: center;
     padding: 0;
   }
 `
 
 export const IconWrapper = styled.span`
+  position: relative;
   display: flex;
   width: 25px;
   height: 25px;
@@ -41,6 +45,26 @@ export const IconWrapper = styled.span`
     width: 100%;
     height: 100%;
   }
+`
+
+export const Badge = styled.span`
+  position: absolute;
+  top: -5px;
+  right: -9px;
+  display: inline-flex;
+  min-width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid ${({ theme }) => theme.colors.background.default};
+  border-radius: 999px;
+  padding: 0 4px;
+  background: #d94545;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 14px;
 `
 
 export const Text = styled.span<{ $isParentActive: boolean }>`
