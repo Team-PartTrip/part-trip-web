@@ -5,6 +5,7 @@ import {
   type TravelCardDetailDto,
   type TravelCardListItemDto,
 } from '@/entities/trip-card/api'
+import { sortTripHistoryNewestFirst, sortTripTimelineChronologically } from './metrics'
 
 export type TripPlanPlaceResponseDto = {
   tripPlaceId?: number
@@ -45,10 +46,10 @@ function toTripPlan(
   card?: TravelCardListItemDto,
   detail?: TravelCardDetailDto,
 ): TripPlanResponseDto {
-  const timeline = (detail?.timeline ?? []).map((item) => ({
+  const timeline = sortTripTimelineChronologically((detail?.timeline ?? []).map((item) => ({
     ...item,
     imageUrl: resolveApiAssetUrl(item.imageUrl) ?? item.imageUrl,
-  }))
+  })))
   const destination = card?.cityName || card?.countryName
   const images = timeline.flatMap((item) => {
     const imageUrl = resolveApiAssetUrl(item.imageUrl)
@@ -103,5 +104,5 @@ export async function getMyTrips(): Promise<TripPlanResponseDto[]> {
 
 export async function getTripHistory(): Promise<TripPlanResponseDto[]> {
   const cards = await listTravelCards()
-  return cards.map((card) => toTripPlan(card))
+  return sortTripHistoryNewestFirst(cards.map((card) => toTripPlan(card)))
 }

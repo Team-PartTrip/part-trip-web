@@ -9,7 +9,6 @@ type GroupFlow = ReturnType<typeof usePlannerFlow>['group']
 type Props = {
   currentUserInitial: string
   currentUserName: string
-  handleCopyInviteLink: () => void
   handleJoinPlanner: GroupFlow['handleJoinPlanner']
   inviteCode: string
   isInviteOpen: boolean
@@ -18,7 +17,6 @@ type Props = {
   joinPlannerPending: boolean
   memberCount: string
   members: GroupFlow['members']
-  plannerInviteLink: string
   saveGroupSettings: GroupFlow['saveGroupSettings']
   setInviteCode: GroupFlow['setInviteCode']
   setIsInviteOpen: (value: (current: boolean) => boolean) => void
@@ -29,7 +27,6 @@ type Props = {
 export function PlannerGroupStep({
   currentUserInitial,
   currentUserName,
-  handleCopyInviteLink,
   handleJoinPlanner,
   inviteCode,
   isInviteOpen,
@@ -38,7 +35,6 @@ export function PlannerGroupStep({
   joinPlannerPending,
   memberCount,
   members,
-  plannerInviteLink,
   saveGroupSettings,
   setInviteCode,
   setIsInviteOpen,
@@ -79,20 +75,10 @@ export function PlannerGroupStep({
       </S.CountRow>
       {isInviteOpen ? (
         <S.InvitePanel>
-          <S.SectionTitle>초대하기</S.SectionTitle>
-          {plannerInviteLink ? (
-            <S.InviteLinkRow>
-              <PartTripInput aria-label="생성된 초대 링크" value={plannerInviteLink} readOnly />
-              <PartTripButton type="button" $variant="secondary" onClick={() => void handleCopyInviteLink()}>
-                링크 복사
-              </PartTripButton>
-            </S.InviteLinkRow>
-          ) : (
-            <S.Notice>플래너를 생성하면 멤버 초대 링크가 표시됩니다.</S.Notice>
-          )}
+          <S.SectionTitle>초대 코드로 참여</S.SectionTitle>
           <S.InviteCodeRow>
             <S.StepField>
-              <label htmlFor="planner-invite-code">초대 코드로 참여</label>
+              <label htmlFor="planner-invite-code">이미 받은 초대 코드가 있나요?</label>
               <PartTripInput
                 id="planner-invite-code"
                 value={inviteCode}
@@ -130,7 +116,7 @@ export function PlannerGroupStep({
       </S.MemberPanel>
       <S.GroupActions>
         <PartTripButton type="button" $variant="secondary" onClick={() => setIsInviteOpen((current) => !current)}>
-          {isInviteOpen ? '초대 닫기' : '+ 링크로 초대하기'}
+          {isInviteOpen ? '초대 코드 닫기' : '초대 코드로 참여'}
         </PartTripButton>
         <PartTripButton type="submit" disabled={isSaving}>{isSaving ? '저장 중' : '다음: 여행지'}</PartTripButton>
       </S.GroupActions>

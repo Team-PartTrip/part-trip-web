@@ -24,7 +24,6 @@ export type PlannerListResponseDto = {
   startDate?: string
   endDate?: string
   status?: string
-  role?: string
   memberCount?: number
   joinedMemberCount?: number
 }
@@ -41,7 +40,6 @@ export type PlannerDetailResponseDto = {
   memberCount?: number
   joinedMemberCount?: number
   inviteLink?: string
-  cities?: PlannerCityResponseDto[]
 }
 
 export type PlannerMemberResponseDto = {
@@ -53,10 +51,6 @@ export type PlannerMemberResponseDto = {
   joinedAt?: string
 }
 
-export type InvitePlannerMembersRequestDto = {
-  userIds: string[]
-}
-
 export type PlannerInvitationResponseDto = {
   createdAt?: string
   invitedByUserId?: string
@@ -66,12 +60,6 @@ export type PlannerInvitationResponseDto = {
   plannerTitle?: string
   respondedAt?: string
   status?: string
-}
-
-export type PlannerInviteResponseDto = {
-  inviteLink?: string
-  invitedCount?: number
-  invitations?: PlannerInvitationResponseDto[]
 }
 
 export type JoinPlannerRequestDto = {
@@ -87,56 +75,6 @@ export type PlannerJoinResponseDto = {
   joinedMemberCount?: number
 }
 
-export type PlannerCityRequestDto = {
-  countryName: string
-  cityName: string
-  startDate: string
-  endDate: string
-}
-
-export type PlannerCityResponseDto = Partial<PlannerCityRequestDto>
-
-export type CreateVoteRequestDto = {
-  category: string
-  placeId?: number
-  deadline?: string
-}
-
-export type VoteCreateResponseDto = {
-  voteId?: number
-  plannerId?: number
-  planId?: number
-  category?: string
-  categoryLabel?: string
-  status?: string
-  deadline?: string
-  createdAt?: string
-  count?: number
-}
-
-export type SavePlannerTravelPlanRequestDto = {
-  memberCount?: number
-  isSolo?: boolean
-  countryName: string
-  cityName: string
-  startDate: string
-  endDate: string
-  cities?: PlannerCityRequestDto[]
-}
-
-export type PlannerTravelPlanResponseDto = {
-  plannerId?: number
-  planId?: number
-  title?: string
-  memberCount?: number
-  isSolo?: boolean
-  countryName?: string
-  cityName?: string
-  startDate?: string
-  endDate?: string
-  cities?: PlannerCityResponseDto[]
-}
-
 export type ConfirmedPlaceResponseDto = {
   voteId?: number
   category?: string
@@ -150,95 +88,55 @@ export type ConfirmedPlaceResponseDto = {
   voteCount?: number
 }
 
-export type PlannerConfirmedPlacesResponseDto = {
-  plannerId?: number
-  title?: string
-  countryName?: string
-  cityName?: string
-  startDate?: string
-  endDate?: string
-  status?: string
-  places?: ConfirmedPlaceResponseDto[]
-}
-
-export type VoteOptionStatusResponseDto = {
-  optionId?: number
-  tourPlaceId?: number
-  placeName?: string
-  imageUrl?: string
-  address?: string
-  rating?: number
-  addedByUserId?: string
-  voteCount?: number
-  selectedByMe: boolean
-  confirmed?: boolean
-}
-
-export type VoteStatusResponseDto = {
-  voteId?: number
-  plannerId?: number
-  category?: string
-  categoryLabel?: string
-  status?: string
-  deadline?: string
-  deadlinePassed?: boolean
-  eligibleMemberCount?: number
-  votedMemberCount?: number
-  confirmedOptionId?: number
-  options: VoteOptionStatusResponseDto[]
-}
-
-export type VoteBallotRequestDto = {
-  optionId: number
-}
-
-export type VoteBallotResponseDto = {
-  voteRecordId?: number
-  voteId?: number
-  optionId?: number
-  placeName?: string
-  changed?: boolean
-  votedAt?: string
-}
-
-export type VoteCloseResponseDto = {
-  voteId?: number
-  status?: string
-  totalVoteCount?: number
-  highestVoteCount?: number
-  topOptionIds?: number[]
-  tied?: boolean
-}
-
-export type VoteReminderResponseDto = {
-  message?: string
-  notifiedCount?: number
-}
-
-export type VoteOptionCreateRequestDto = {
-  tourPlaceId?: number
-  placeName?: string
-}
-
-export type VoteOptionCreateResponseDto = {
-  optionId?: number
-  voteId?: number
-  tourPlaceId?: number
-  placeName?: string
-  addedByUserId?: string
-  createdAt?: string
-}
-
 export type PlannerConfirmResponseDto = {
   confirmedSchedule?: ConfirmedPlaceResponseDto[]
   plannerId?: number
 }
 
-export type PlannerVoteSelection = {
-  voteId: number
-  optionId: number
+export type PlannerScheduleResponseDto = {
+  plannerId?: number
+  title?: string
+  cityName?: string
+  startDate?: string
+  endDate?: string
+  days?: Array<{
+    date?: string
+    slots?: Array<{
+      slotId?: number
+      order?: number
+      place?: {
+        tourPlaceId?: number
+        name?: string
+        category?: string
+        categoryLabel?: string
+        imageUrl?: string
+        address?: string
+        rating?: number
+        latitude?: number
+        longitude?: number
+      }
+    }>
+  }>
 }
 
-export type PlannerConfirmRequestDto = {
-  selections?: PlannerVoteSelection[]
+export type PlannerBlockResponseDto = {
+  type?: string
+  label?: string
+  multiple?: boolean
+  options?: string[]
+}
+
+export type PlannerBlockDto = {
+  type: string
+  value: string
+}
+
+export type GeneratePlannerRequestDto = {
+  title: string
+  memberCount: number
+  isSolo: boolean
+  cityName: string
+  startDate: string
+  endDate: string
+  blocks: PlannerBlockDto[]
 }

@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { updateProfile, uploadProfileImage, type ProfileUpdateRequestDto } from './api'
+import { updateProfile, updateTravelPreferences, uploadProfileImage, type ProfileUpdateRequestDto, type TravelPreferenceRequestDto } from './api'
 import { userQueryKeys } from './queries'
 
 export function useUpdateProfileMutation() {
@@ -14,5 +14,13 @@ export function useUpdateProfileMutation() {
 export function useUploadProfileImageMutation() {
   return useMutation({
     mutationFn: (file: File) => uploadProfileImage(file),
+  })
+}
+
+export function useUpdateTravelPreferencesMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: TravelPreferenceRequestDto) => updateTravelPreferences(payload),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: userQueryKeys.travelPreferences() }),
   })
 }

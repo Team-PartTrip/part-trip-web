@@ -5,7 +5,7 @@ export type NotificationFilter = 'ALL' | 'VOTE' | 'RECORD'
 export type NotificationResponseDto = {
   notificationId?: number
   type?: NotificationType
-  category?: Exclude<NotificationFilter, 'ALL'>
+  category?: string
   title?: string
   body?: string
   linkType?: string

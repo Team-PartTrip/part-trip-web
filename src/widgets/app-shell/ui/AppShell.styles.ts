@@ -31,6 +31,10 @@ export const Topbar = styled.header`
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: 0 2px 8px rgb(16 42 66 / 4%);
 
+  @media (min-width: 768px) {
+    display: none;
+  }
+
   @media (max-width: 767px) {
     height: 64px;
     flex-basis: 64px;
@@ -72,6 +76,8 @@ export const NotificationLink = styled(Link)`
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
+
+  @media (max-width: 767px) { display: none; }
 `
 
 export const Main = styled.main`

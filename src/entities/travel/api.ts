@@ -51,12 +51,6 @@ export type CountryInfoResponseDto = {
   summary?: string
 }
 
-export type PopularCityResponseDto = {
-  cityName?: string
-  countryName?: string
-  planCount?: number
-}
-
 const MAIN_API_PATHS = {
   dday: '/main/dday',
   tourPlace: '/main/tour-place',
@@ -64,7 +58,6 @@ const MAIN_API_PATHS = {
   festivals: '/main/festivals',
   countryInfo: '/main/country-info',
   countries: '/main/countries',
-  popularCities: '/main/popular-cities',
 } as const
 
 import {
@@ -193,19 +186,5 @@ export async function getCountries(keyword?: string): Promise<CountryInfoRespons
           .some((value) => value.toLocaleLowerCase().includes(normalizedKeyword))
       })
     },
-  )
-}
-
-export async function getPopularCities(limit = 8): Promise<PopularCityResponseDto[]> {
-  const normalizedLimit = Math.min(50, Math.max(1, Math.trunc(limit)))
-  return requestWithMockFallback(
-    async () => {
-      const { data } = await apiClient.get<PopularCityResponseDto[]>(MAIN_API_PATHS.popularCities, { params: { limit: normalizedLimit } })
-      return data
-    },
-    () => mockCountries
-      .filter((country) => country.countryName && country.cityName)
-      .map(({ cityName, countryName }, index) => ({ cityName, countryName, planCount: mockCountries.length - index }))
-      .slice(0, normalizedLimit),
   )
 }

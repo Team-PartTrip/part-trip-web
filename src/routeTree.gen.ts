@@ -23,13 +23,16 @@ import { Route as appAuthenticatedNotificationsNotificationIdIndexRouteImport } 
 import { Route as appAuthenticatedPlannerDestinationIndexRouteImport } from './routes/(app)/_authenticated/planner/destination/index'
 import { Route as appAuthenticatedPlannerExploreIndexRouteImport } from './routes/(app)/_authenticated/planner/explore/index'
 import { Route as appAuthenticatedPlannerGroupIndexRouteImport } from './routes/(app)/_authenticated/planner/group/index'
+import { Route as appAuthenticatedPlannerInviteIndexRouteImport } from './routes/(app)/_authenticated/planner/invite/index'
 import { Route as appAuthenticatedPlannerProgressIndexRouteImport } from './routes/(app)/_authenticated/planner/progress/index'
-import { Route as appAuthenticatedPlannerVoteIndexRouteImport } from './routes/(app)/_authenticated/planner/vote/index'
+import { Route as appAuthenticatedProfileAccessibilityIndexRouteImport } from './routes/(app)/_authenticated/profile/accessibility/index'
 import { Route as appAuthenticatedProfileAchievementsIndexRouteImport } from './routes/(app)/_authenticated/profile/achievements/index'
 import { Route as appAuthenticatedProfileClaimIndexRouteImport } from './routes/(app)/_authenticated/profile/claim/index'
 import { Route as appAuthenticatedProfileCountriesIndexRouteImport } from './routes/(app)/_authenticated/profile/countries/index'
 import { Route as appAuthenticatedProfileEditIndexRouteImport } from './routes/(app)/_authenticated/profile/edit/index'
+import { Route as appAuthenticatedProfileGuardiansIndexRouteImport } from './routes/(app)/_authenticated/profile/guardians/index'
 import { Route as appAuthenticatedProfileMapIndexRouteImport } from './routes/(app)/_authenticated/profile/map/index'
+import { Route as appAuthenticatedProfileTravelPreferencesIndexRouteImport } from './routes/(app)/_authenticated/profile/travel-preferences/index'
 import { Route as appAuthenticatedRecordRecordIdIndexRouteImport } from './routes/(app)/_authenticated/record/$recordId/index'
 import { Route as appAuthenticatedRecordCalendarIndexRouteImport } from './routes/(app)/_authenticated/record/calendar/index'
 import { Route as appAuthenticatedRecordDeleteIndexRouteImport } from './routes/(app)/_authenticated/record/delete/index'
@@ -42,7 +45,6 @@ import { Route as appAuthenticatedTripCardsTripIdIndexRouteImport } from './rout
 import { Route as appAuthenticatedTripCardsDeleteIndexRouteImport } from './routes/(app)/_authenticated/trip-cards/delete/index'
 import { Route as appAuthenticatedTripCardsNewIndexRouteImport } from './routes/(app)/_authenticated/trip-cards/new/index'
 import { Route as publicAuthKakaoCallbackIndexRouteImport } from './routes/(public)/auth/kakao/callback/index'
-import { Route as appAuthenticatedPlannerPlacePlaceIdIndexRouteImport } from './routes/(app)/_authenticated/planner/place/$placeId/index'
 import { Route as appAuthenticatedRecordRecordIdEditIndexRouteImport } from './routes/(app)/_authenticated/record/$recordId/edit/index'
 
 const appAuthenticatedRouteRoute = appAuthenticatedRouteRouteImport.update({
@@ -124,16 +126,22 @@ const appAuthenticatedPlannerGroupIndexRoute =
     path: '/planner/group/',
     getParentRoute: () => appAuthenticatedRouteRoute,
   } as any)
+const appAuthenticatedPlannerInviteIndexRoute =
+  appAuthenticatedPlannerInviteIndexRouteImport.update({
+    id: '/planner/invite/',
+    path: '/planner/invite/',
+    getParentRoute: () => appAuthenticatedRouteRoute,
+  } as any)
 const appAuthenticatedPlannerProgressIndexRoute =
   appAuthenticatedPlannerProgressIndexRouteImport.update({
     id: '/planner/progress/',
     path: '/planner/progress/',
     getParentRoute: () => appAuthenticatedRouteRoute,
   } as any)
-const appAuthenticatedPlannerVoteIndexRoute =
-  appAuthenticatedPlannerVoteIndexRouteImport.update({
-    id: '/planner/vote/',
-    path: '/planner/vote/',
+const appAuthenticatedProfileAccessibilityIndexRoute =
+  appAuthenticatedProfileAccessibilityIndexRouteImport.update({
+    id: '/profile/accessibility/',
+    path: '/profile/accessibility/',
     getParentRoute: () => appAuthenticatedRouteRoute,
   } as any)
 const appAuthenticatedProfileAchievementsIndexRoute =
@@ -160,10 +168,22 @@ const appAuthenticatedProfileEditIndexRoute =
     path: '/profile/edit/',
     getParentRoute: () => appAuthenticatedRouteRoute,
   } as any)
+const appAuthenticatedProfileGuardiansIndexRoute =
+  appAuthenticatedProfileGuardiansIndexRouteImport.update({
+    id: '/profile/guardians/',
+    path: '/profile/guardians/',
+    getParentRoute: () => appAuthenticatedRouteRoute,
+  } as any)
 const appAuthenticatedProfileMapIndexRoute =
   appAuthenticatedProfileMapIndexRouteImport.update({
     id: '/profile/map/',
     path: '/profile/map/',
+    getParentRoute: () => appAuthenticatedRouteRoute,
+  } as any)
+const appAuthenticatedProfileTravelPreferencesIndexRoute =
+  appAuthenticatedProfileTravelPreferencesIndexRouteImport.update({
+    id: '/profile/travel-preferences/',
+    path: '/profile/travel-preferences/',
     getParentRoute: () => appAuthenticatedRouteRoute,
   } as any)
 const appAuthenticatedRecordRecordIdIndexRoute =
@@ -238,12 +258,6 @@ const publicAuthKakaoCallbackIndexRoute =
     path: '/auth/kakao/callback/',
     getParentRoute: () => rootRouteImport,
   } as any)
-const appAuthenticatedPlannerPlacePlaceIdIndexRoute =
-  appAuthenticatedPlannerPlacePlaceIdIndexRouteImport.update({
-    id: '/planner/place/$placeId/',
-    path: '/planner/place/$placeId/',
-    getParentRoute: () => appAuthenticatedRouteRoute,
-  } as any)
 const appAuthenticatedRecordRecordIdEditIndexRoute =
   appAuthenticatedRecordRecordIdEditIndexRouteImport.update({
     id: '/record/$recordId/edit/',
@@ -265,13 +279,16 @@ export interface FileRoutesByFullPath {
   '/planner/destination/': typeof appAuthenticatedPlannerDestinationIndexRoute
   '/planner/explore/': typeof appAuthenticatedPlannerExploreIndexRoute
   '/planner/group/': typeof appAuthenticatedPlannerGroupIndexRoute
+  '/planner/invite/': typeof appAuthenticatedPlannerInviteIndexRoute
   '/planner/progress/': typeof appAuthenticatedPlannerProgressIndexRoute
-  '/planner/vote/': typeof appAuthenticatedPlannerVoteIndexRoute
+  '/profile/accessibility/': typeof appAuthenticatedProfileAccessibilityIndexRoute
   '/profile/achievements/': typeof appAuthenticatedProfileAchievementsIndexRoute
   '/profile/claim/': typeof appAuthenticatedProfileClaimIndexRoute
   '/profile/countries/': typeof appAuthenticatedProfileCountriesIndexRoute
   '/profile/edit/': typeof appAuthenticatedProfileEditIndexRoute
+  '/profile/guardians/': typeof appAuthenticatedProfileGuardiansIndexRoute
   '/profile/map/': typeof appAuthenticatedProfileMapIndexRoute
+  '/profile/travel-preferences/': typeof appAuthenticatedProfileTravelPreferencesIndexRoute
   '/record/$recordId/': typeof appAuthenticatedRecordRecordIdIndexRoute
   '/record/calendar/': typeof appAuthenticatedRecordCalendarIndexRoute
   '/record/delete/': typeof appAuthenticatedRecordDeleteIndexRoute
@@ -284,7 +301,6 @@ export interface FileRoutesByFullPath {
   '/trip-cards/delete/': typeof appAuthenticatedTripCardsDeleteIndexRoute
   '/trip-cards/new/': typeof appAuthenticatedTripCardsNewIndexRoute
   '/auth/kakao/callback/': typeof publicAuthKakaoCallbackIndexRoute
-  '/planner/place/$placeId/': typeof appAuthenticatedPlannerPlacePlaceIdIndexRoute
   '/record/$recordId/edit/': typeof appAuthenticatedRecordRecordIdEditIndexRoute
 }
 export interface FileRoutesByTo {
@@ -301,13 +317,16 @@ export interface FileRoutesByTo {
   '/planner/destination': typeof appAuthenticatedPlannerDestinationIndexRoute
   '/planner/explore': typeof appAuthenticatedPlannerExploreIndexRoute
   '/planner/group': typeof appAuthenticatedPlannerGroupIndexRoute
+  '/planner/invite': typeof appAuthenticatedPlannerInviteIndexRoute
   '/planner/progress': typeof appAuthenticatedPlannerProgressIndexRoute
-  '/planner/vote': typeof appAuthenticatedPlannerVoteIndexRoute
+  '/profile/accessibility': typeof appAuthenticatedProfileAccessibilityIndexRoute
   '/profile/achievements': typeof appAuthenticatedProfileAchievementsIndexRoute
   '/profile/claim': typeof appAuthenticatedProfileClaimIndexRoute
   '/profile/countries': typeof appAuthenticatedProfileCountriesIndexRoute
   '/profile/edit': typeof appAuthenticatedProfileEditIndexRoute
+  '/profile/guardians': typeof appAuthenticatedProfileGuardiansIndexRoute
   '/profile/map': typeof appAuthenticatedProfileMapIndexRoute
+  '/profile/travel-preferences': typeof appAuthenticatedProfileTravelPreferencesIndexRoute
   '/record/$recordId': typeof appAuthenticatedRecordRecordIdIndexRoute
   '/record/calendar': typeof appAuthenticatedRecordCalendarIndexRoute
   '/record/delete': typeof appAuthenticatedRecordDeleteIndexRoute
@@ -320,7 +339,6 @@ export interface FileRoutesByTo {
   '/trip-cards/delete': typeof appAuthenticatedTripCardsDeleteIndexRoute
   '/trip-cards/new': typeof appAuthenticatedTripCardsNewIndexRoute
   '/auth/kakao/callback': typeof publicAuthKakaoCallbackIndexRoute
-  '/planner/place/$placeId': typeof appAuthenticatedPlannerPlacePlaceIdIndexRoute
   '/record/$recordId/edit': typeof appAuthenticatedRecordRecordIdEditIndexRoute
 }
 export interface FileRoutesById {
@@ -339,13 +357,16 @@ export interface FileRoutesById {
   '/(app)/_authenticated/planner/destination/': typeof appAuthenticatedPlannerDestinationIndexRoute
   '/(app)/_authenticated/planner/explore/': typeof appAuthenticatedPlannerExploreIndexRoute
   '/(app)/_authenticated/planner/group/': typeof appAuthenticatedPlannerGroupIndexRoute
+  '/(app)/_authenticated/planner/invite/': typeof appAuthenticatedPlannerInviteIndexRoute
   '/(app)/_authenticated/planner/progress/': typeof appAuthenticatedPlannerProgressIndexRoute
-  '/(app)/_authenticated/planner/vote/': typeof appAuthenticatedPlannerVoteIndexRoute
+  '/(app)/_authenticated/profile/accessibility/': typeof appAuthenticatedProfileAccessibilityIndexRoute
   '/(app)/_authenticated/profile/achievements/': typeof appAuthenticatedProfileAchievementsIndexRoute
   '/(app)/_authenticated/profile/claim/': typeof appAuthenticatedProfileClaimIndexRoute
   '/(app)/_authenticated/profile/countries/': typeof appAuthenticatedProfileCountriesIndexRoute
   '/(app)/_authenticated/profile/edit/': typeof appAuthenticatedProfileEditIndexRoute
+  '/(app)/_authenticated/profile/guardians/': typeof appAuthenticatedProfileGuardiansIndexRoute
   '/(app)/_authenticated/profile/map/': typeof appAuthenticatedProfileMapIndexRoute
+  '/(app)/_authenticated/profile/travel-preferences/': typeof appAuthenticatedProfileTravelPreferencesIndexRoute
   '/(app)/_authenticated/record/$recordId/': typeof appAuthenticatedRecordRecordIdIndexRoute
   '/(app)/_authenticated/record/calendar/': typeof appAuthenticatedRecordCalendarIndexRoute
   '/(app)/_authenticated/record/delete/': typeof appAuthenticatedRecordDeleteIndexRoute
@@ -358,7 +379,6 @@ export interface FileRoutesById {
   '/(app)/_authenticated/trip-cards/delete/': typeof appAuthenticatedTripCardsDeleteIndexRoute
   '/(app)/_authenticated/trip-cards/new/': typeof appAuthenticatedTripCardsNewIndexRoute
   '/(public)/auth/kakao/callback/': typeof publicAuthKakaoCallbackIndexRoute
-  '/(app)/_authenticated/planner/place/$placeId/': typeof appAuthenticatedPlannerPlacePlaceIdIndexRoute
   '/(app)/_authenticated/record/$recordId/edit/': typeof appAuthenticatedRecordRecordIdEditIndexRoute
 }
 export interface FileRouteTypes {
@@ -377,13 +397,16 @@ export interface FileRouteTypes {
     | '/planner/destination/'
     | '/planner/explore/'
     | '/planner/group/'
+    | '/planner/invite/'
     | '/planner/progress/'
-    | '/planner/vote/'
+    | '/profile/accessibility/'
     | '/profile/achievements/'
     | '/profile/claim/'
     | '/profile/countries/'
     | '/profile/edit/'
+    | '/profile/guardians/'
     | '/profile/map/'
+    | '/profile/travel-preferences/'
     | '/record/$recordId/'
     | '/record/calendar/'
     | '/record/delete/'
@@ -396,7 +419,6 @@ export interface FileRouteTypes {
     | '/trip-cards/delete/'
     | '/trip-cards/new/'
     | '/auth/kakao/callback/'
-    | '/planner/place/$placeId/'
     | '/record/$recordId/edit/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -413,13 +435,16 @@ export interface FileRouteTypes {
     | '/planner/destination'
     | '/planner/explore'
     | '/planner/group'
+    | '/planner/invite'
     | '/planner/progress'
-    | '/planner/vote'
+    | '/profile/accessibility'
     | '/profile/achievements'
     | '/profile/claim'
     | '/profile/countries'
     | '/profile/edit'
+    | '/profile/guardians'
     | '/profile/map'
+    | '/profile/travel-preferences'
     | '/record/$recordId'
     | '/record/calendar'
     | '/record/delete'
@@ -432,7 +457,6 @@ export interface FileRouteTypes {
     | '/trip-cards/delete'
     | '/trip-cards/new'
     | '/auth/kakao/callback'
-    | '/planner/place/$placeId'
     | '/record/$recordId/edit'
   id:
     | '__root__'
@@ -450,13 +474,16 @@ export interface FileRouteTypes {
     | '/(app)/_authenticated/planner/destination/'
     | '/(app)/_authenticated/planner/explore/'
     | '/(app)/_authenticated/planner/group/'
+    | '/(app)/_authenticated/planner/invite/'
     | '/(app)/_authenticated/planner/progress/'
-    | '/(app)/_authenticated/planner/vote/'
+    | '/(app)/_authenticated/profile/accessibility/'
     | '/(app)/_authenticated/profile/achievements/'
     | '/(app)/_authenticated/profile/claim/'
     | '/(app)/_authenticated/profile/countries/'
     | '/(app)/_authenticated/profile/edit/'
+    | '/(app)/_authenticated/profile/guardians/'
     | '/(app)/_authenticated/profile/map/'
+    | '/(app)/_authenticated/profile/travel-preferences/'
     | '/(app)/_authenticated/record/$recordId/'
     | '/(app)/_authenticated/record/calendar/'
     | '/(app)/_authenticated/record/delete/'
@@ -469,7 +496,6 @@ export interface FileRouteTypes {
     | '/(app)/_authenticated/trip-cards/delete/'
     | '/(app)/_authenticated/trip-cards/new/'
     | '/(public)/auth/kakao/callback/'
-    | '/(app)/_authenticated/planner/place/$placeId/'
     | '/(app)/_authenticated/record/$recordId/edit/'
   fileRoutesById: FileRoutesById
 }
@@ -581,6 +607,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAuthenticatedPlannerGroupIndexRouteImport
       parentRoute: typeof appAuthenticatedRouteRoute
     }
+    '/(app)/_authenticated/planner/invite/': {
+      id: '/(app)/_authenticated/planner/invite/'
+      path: '/planner/invite'
+      fullPath: '/planner/invite/'
+      preLoaderRoute: typeof appAuthenticatedPlannerInviteIndexRouteImport
+      parentRoute: typeof appAuthenticatedRouteRoute
+    }
     '/(app)/_authenticated/planner/progress/': {
       id: '/(app)/_authenticated/planner/progress/'
       path: '/planner/progress'
@@ -588,11 +621,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAuthenticatedPlannerProgressIndexRouteImport
       parentRoute: typeof appAuthenticatedRouteRoute
     }
-    '/(app)/_authenticated/planner/vote/': {
-      id: '/(app)/_authenticated/planner/vote/'
-      path: '/planner/vote'
-      fullPath: '/planner/vote/'
-      preLoaderRoute: typeof appAuthenticatedPlannerVoteIndexRouteImport
+    '/(app)/_authenticated/profile/accessibility/': {
+      id: '/(app)/_authenticated/profile/accessibility/'
+      path: '/profile/accessibility'
+      fullPath: '/profile/accessibility/'
+      preLoaderRoute: typeof appAuthenticatedProfileAccessibilityIndexRouteImport
       parentRoute: typeof appAuthenticatedRouteRoute
     }
     '/(app)/_authenticated/profile/achievements/': {
@@ -623,11 +656,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAuthenticatedProfileEditIndexRouteImport
       parentRoute: typeof appAuthenticatedRouteRoute
     }
+    '/(app)/_authenticated/profile/guardians/': {
+      id: '/(app)/_authenticated/profile/guardians/'
+      path: '/profile/guardians'
+      fullPath: '/profile/guardians/'
+      preLoaderRoute: typeof appAuthenticatedProfileGuardiansIndexRouteImport
+      parentRoute: typeof appAuthenticatedRouteRoute
+    }
     '/(app)/_authenticated/profile/map/': {
       id: '/(app)/_authenticated/profile/map/'
       path: '/profile/map'
       fullPath: '/profile/map/'
       preLoaderRoute: typeof appAuthenticatedProfileMapIndexRouteImport
+      parentRoute: typeof appAuthenticatedRouteRoute
+    }
+    '/(app)/_authenticated/profile/travel-preferences/': {
+      id: '/(app)/_authenticated/profile/travel-preferences/'
+      path: '/profile/travel-preferences'
+      fullPath: '/profile/travel-preferences/'
+      preLoaderRoute: typeof appAuthenticatedProfileTravelPreferencesIndexRouteImport
       parentRoute: typeof appAuthenticatedRouteRoute
     }
     '/(app)/_authenticated/record/$recordId/': {
@@ -714,13 +761,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof publicAuthKakaoCallbackIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(app)/_authenticated/planner/place/$placeId/': {
-      id: '/(app)/_authenticated/planner/place/$placeId/'
-      path: '/planner/place/$placeId'
-      fullPath: '/planner/place/$placeId/'
-      preLoaderRoute: typeof appAuthenticatedPlannerPlacePlaceIdIndexRouteImport
-      parentRoute: typeof appAuthenticatedRouteRoute
-    }
     '/(app)/_authenticated/record/$recordId/edit/': {
       id: '/(app)/_authenticated/record/$recordId/edit/'
       path: '/record/$recordId/edit'
@@ -742,13 +782,16 @@ interface appAuthenticatedRouteRouteChildren {
   appAuthenticatedPlannerDestinationIndexRoute: typeof appAuthenticatedPlannerDestinationIndexRoute
   appAuthenticatedPlannerExploreIndexRoute: typeof appAuthenticatedPlannerExploreIndexRoute
   appAuthenticatedPlannerGroupIndexRoute: typeof appAuthenticatedPlannerGroupIndexRoute
+  appAuthenticatedPlannerInviteIndexRoute: typeof appAuthenticatedPlannerInviteIndexRoute
   appAuthenticatedPlannerProgressIndexRoute: typeof appAuthenticatedPlannerProgressIndexRoute
-  appAuthenticatedPlannerVoteIndexRoute: typeof appAuthenticatedPlannerVoteIndexRoute
+  appAuthenticatedProfileAccessibilityIndexRoute: typeof appAuthenticatedProfileAccessibilityIndexRoute
   appAuthenticatedProfileAchievementsIndexRoute: typeof appAuthenticatedProfileAchievementsIndexRoute
   appAuthenticatedProfileClaimIndexRoute: typeof appAuthenticatedProfileClaimIndexRoute
   appAuthenticatedProfileCountriesIndexRoute: typeof appAuthenticatedProfileCountriesIndexRoute
   appAuthenticatedProfileEditIndexRoute: typeof appAuthenticatedProfileEditIndexRoute
+  appAuthenticatedProfileGuardiansIndexRoute: typeof appAuthenticatedProfileGuardiansIndexRoute
   appAuthenticatedProfileMapIndexRoute: typeof appAuthenticatedProfileMapIndexRoute
+  appAuthenticatedProfileTravelPreferencesIndexRoute: typeof appAuthenticatedProfileTravelPreferencesIndexRoute
   appAuthenticatedRecordRecordIdIndexRoute: typeof appAuthenticatedRecordRecordIdIndexRoute
   appAuthenticatedRecordCalendarIndexRoute: typeof appAuthenticatedRecordCalendarIndexRoute
   appAuthenticatedRecordDeleteIndexRoute: typeof appAuthenticatedRecordDeleteIndexRoute
@@ -760,7 +803,6 @@ interface appAuthenticatedRouteRouteChildren {
   appAuthenticatedTripCardsTripIdIndexRoute: typeof appAuthenticatedTripCardsTripIdIndexRoute
   appAuthenticatedTripCardsDeleteIndexRoute: typeof appAuthenticatedTripCardsDeleteIndexRoute
   appAuthenticatedTripCardsNewIndexRoute: typeof appAuthenticatedTripCardsNewIndexRoute
-  appAuthenticatedPlannerPlacePlaceIdIndexRoute: typeof appAuthenticatedPlannerPlacePlaceIdIndexRoute
   appAuthenticatedRecordRecordIdEditIndexRoute: typeof appAuthenticatedRecordRecordIdEditIndexRoute
 }
 
@@ -780,9 +822,12 @@ const appAuthenticatedRouteRouteChildren: appAuthenticatedRouteRouteChildren = {
     appAuthenticatedPlannerExploreIndexRoute,
   appAuthenticatedPlannerGroupIndexRoute:
     appAuthenticatedPlannerGroupIndexRoute,
+  appAuthenticatedPlannerInviteIndexRoute:
+    appAuthenticatedPlannerInviteIndexRoute,
   appAuthenticatedPlannerProgressIndexRoute:
     appAuthenticatedPlannerProgressIndexRoute,
-  appAuthenticatedPlannerVoteIndexRoute: appAuthenticatedPlannerVoteIndexRoute,
+  appAuthenticatedProfileAccessibilityIndexRoute:
+    appAuthenticatedProfileAccessibilityIndexRoute,
   appAuthenticatedProfileAchievementsIndexRoute:
     appAuthenticatedProfileAchievementsIndexRoute,
   appAuthenticatedProfileClaimIndexRoute:
@@ -790,7 +835,11 @@ const appAuthenticatedRouteRouteChildren: appAuthenticatedRouteRouteChildren = {
   appAuthenticatedProfileCountriesIndexRoute:
     appAuthenticatedProfileCountriesIndexRoute,
   appAuthenticatedProfileEditIndexRoute: appAuthenticatedProfileEditIndexRoute,
+  appAuthenticatedProfileGuardiansIndexRoute:
+    appAuthenticatedProfileGuardiansIndexRoute,
   appAuthenticatedProfileMapIndexRoute: appAuthenticatedProfileMapIndexRoute,
+  appAuthenticatedProfileTravelPreferencesIndexRoute:
+    appAuthenticatedProfileTravelPreferencesIndexRoute,
   appAuthenticatedRecordRecordIdIndexRoute:
     appAuthenticatedRecordRecordIdIndexRoute,
   appAuthenticatedRecordCalendarIndexRoute:
@@ -811,8 +860,6 @@ const appAuthenticatedRouteRouteChildren: appAuthenticatedRouteRouteChildren = {
     appAuthenticatedTripCardsDeleteIndexRoute,
   appAuthenticatedTripCardsNewIndexRoute:
     appAuthenticatedTripCardsNewIndexRoute,
-  appAuthenticatedPlannerPlacePlaceIdIndexRoute:
-    appAuthenticatedPlannerPlacePlaceIdIndexRoute,
   appAuthenticatedRecordRecordIdEditIndexRoute:
     appAuthenticatedRecordRecordIdEditIndexRoute,
 }

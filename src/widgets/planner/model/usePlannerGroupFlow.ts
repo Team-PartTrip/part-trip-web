@@ -31,7 +31,6 @@ export function usePlannerGroupFlow({ canManagePlanner, mutations, navigate, sta
     isSolo,
     memberCount,
     setErrorMessage,
-    setHeadcount,
     setInviteCode,
     setIsSolo,
     setMemberCount,
@@ -63,7 +62,6 @@ export function usePlannerGroupFlow({ canManagePlanner, mutations, navigate, sta
       const nextGroupSettings = { isSolo, memberCount: nextMemberCount }
       writeSessionValue(PLANNER_GROUP_SETTINGS_KEY, JSON.stringify(nextGroupSettings))
       setSavedGroupSettings(nextGroupSettings)
-      setHeadcount(String(nextMemberCount))
       if (!isPositiveSafeInteger(activePlannerId)) {
         const planner = await createPlannerMutation.mutateAsync({
           isSolo,

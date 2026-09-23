@@ -3,7 +3,9 @@ import { useNavigate, useParams } from '@tanstack/react-router'
 import { useTripQuery } from '@/entities/trip-plan'
 import { figmaRecordDetail } from '@/shared/assets'
 import { paths } from '@/shared/config'
+import { getErrorMessage } from '@/shared/utils'
 import { formatDate, formatTravelDateTime } from '@/shared/utils'
+import { shareKakaoCardNews } from '@/shared/libs/kakao-share'
 import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './RecordDetailPage.styles'
@@ -15,11 +17,32 @@ export function RecordDetailPage() {
   const placeTitle = record?.places?.[0]?.placeName || record?.title || '여행 기록'
   const recordImages = record?.images?.filter((image): image is string => Boolean(image)) ?? []
   const [photoIndex, setPhotoIndex] = useState(0)
+  const [shareError, setShareError] = useState('')
   const currentPhotoIndex = recordImages.length ? Math.min(photoIndex, recordImages.length - 1) : 0
   const selectedEntry = recordImages.length > 0
     ? record?.timeline?.find((item) => item.imageUrl === recordImages[currentPhotoIndex])
     : undefined
   const hasRecordPhotos = recordImages.length > 0 && record?.photoCount !== 0
+
+  const handleKakaoShare = () => {
+    const imageUrl = recordImages[currentPhotoIndex]
+    if (!record?.tripId || !imageUrl) {
+      setShareError('공유할 사진이 없습니다.')
+      return
+    }
+
+    try {
+      shareKakaoCardNews({
+        title: `${record.cityName || record.countryName || '여행'} 여행 기록`,
+        description: [formatDate(record.startDate), selectedEntry?.comment].filter(Boolean).join(' · ') || '여행의 순간을 확인해보세요.',
+        imageUrl,
+        linkUrl: `${window.location.origin}/record/${record.tripId}`,
+      })
+      setShareError('')
+    } catch (error) {
+      setShareError(getErrorMessage(error))
+    }
+  }
 
   useEffect(() => {
     // The route changes the record while this component stays mounted.
@@ -36,9 +59,10 @@ export function RecordDetailPage() {
               <h1>촬영 기록 상세</h1>
               {record && hasRecordPhotos ? <p>사진 {currentPhotoIndex + 1} / {recordImages.length}</p> : null}
             </div>
-            {record?.tripId != null ? <div><button type="button" onClick={() => navigate({ search: { cardId: String(record.tripId) }, to: paths.recordWrite })}>사진 추가</button></div> : null}
+            {record?.tripId != null ? <div><button type="button" disabled={!hasRecordPhotos} onClick={handleKakaoShare}>카카오로 공유</button><button type="button" onClick={() => navigate({ search: { cardId: String(record.tripId) }, to: paths.recordWrite })}>사진 추가</button></div> : null}
           </S.TopBar>
         ) : null}
+        {shareError ? <S.ErrorMessage role="alert">{shareError}</S.ErrorMessage> : null}
         {hasRecordError ? <S.ErrorMessage role="alert">여행 기록을 불러오지 못했습니다.</S.ErrorMessage> : null}
         {isLoading ? (
           <S.LoadingLayout aria-busy="true" aria-label="여행 기록 로딩 중">

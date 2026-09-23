@@ -16,12 +16,10 @@ const PROFILE_COUNTRY_KEY = 'parttrip:profile-selected-country'
 export function useProfileInsightFlow(kind: ProfileInsightKind) {
   const navigate = useNavigate()
   const { hasError: hasTripsError, isLoading: isTripsLoading, trips } = useMyTrips()
-  const needsWorldMap = kind === 'map' || kind === 'claim' || kind === 'countries'
-  const needsStats = kind === 'achievements'
+  const needsWorldMap = kind === 'claim'
   const worldMapQuery = useWorldMapQuery(needsWorldMap)
-  const worldMapStatsQuery = useWorldMapStatsQuery(needsStats)
+  const worldMapStatsQuery = useWorldMapStatsQuery(false)
   const acquireCountryMutation = useAcquireCountryMutation()
-  const [selectedCity, setSelectedCity] = useState('')
   const [selectedCountry, setSelectedCountry] = useState(() => readSessionValue(PROFILE_COUNTRY_KEY) ?? '')
   const [claimFeedback, setClaimFeedback] = useState('')
   const model = getProfileInsightModel({
@@ -31,13 +29,12 @@ export function useProfileInsightFlow(kind: ProfileInsightKind) {
     worldMap: worldMapQuery.data,
     worldMapStats: worldMapStatsQuery.data,
   })
-  const isLoading = isTripsLoading || (needsWorldMap && worldMapQuery.isLoading) || (needsStats && worldMapStatsQuery.isLoading)
-  const hasError = hasTripsError || (needsWorldMap && worldMapQuery.isError) || (needsStats && worldMapStatsQuery.isError)
+  const isLoading = isTripsLoading || (needsWorldMap && worldMapQuery.isLoading)
+  const hasError = hasTripsError || (needsWorldMap && worldMapQuery.isError)
 
   const selectCountry = (country: string) => {
     setSelectedCountry(country)
     writeSessionValue(PROFILE_COUNTRY_KEY, country)
-    setSelectedCity('')
     setClaimFeedback('')
   }
 
@@ -65,10 +62,10 @@ export function useProfileInsightFlow(kind: ProfileInsightKind) {
     isLoading,
     openCountries: () => navigate({ to: paths.profileCountries }),
     openMap: () => navigate({ to: paths.profileMap }),
+    openRecords: () => navigate({ to: paths.record }),
+    openYearReview: () => navigate({ to: paths.profileAchievements }),
     openRecord: (tripId: number) => navigate({ params: { recordId: String(tripId) }, to: '/record/$recordId' }),
-    selectedCity,
     selectCountry,
-    setSelectedCity,
     trips,
   }
 }

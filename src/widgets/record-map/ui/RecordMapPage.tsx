@@ -1,26 +1,26 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { useMyTrips } from '@/entities/trip-plan'
+import { useMyTrips, useTripQuery } from '@/entities/trip-plan'
 import { figmaRecordMap } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import { AppShell } from '@/widgets/app-shell'
 
-import { mapPosition, routeSegment } from '../model/record-map'
+import { getRecordLocations, mapPosition, routeSegment } from '../model/record-map'
 import * as S from './RecordMapPage.styles'
 
 // ponytail: the bundled raster map is Osaka-only; replace with a real map viewport for other cities.
 export function RecordMapPage() {
   const navigate = useNavigate()
-  const { hasError, isLoading, trips } = useMyTrips()
+  const tripsQuery = useMyTrips()
+  const { trips } = tripsQuery
   const [selectedTripId, setSelectedTripId] = useState<number>()
-  const trip = trips.find((item) => item.tripId === selectedTripId) ?? trips[0]
+  const tripSummary = trips.find((item) => item.tripId === selectedTripId) ?? trips[0]
+  const tripQuery = useTripQuery(Number(tripSummary?.tripId))
+  const trip = tripQuery.data ?? tripSummary
+  const isLoading = tripsQuery.isLoading || (tripSummary?.tripId != null && tripQuery.isLoading)
+  const hasError = tripsQuery.hasError || tripQuery.isError
   const title = trip ? [trip.countryName, trip.cityName].filter(Boolean).join(' · ') || '여행 기록' : '여행 기록'
-  const locations = trip?.places?.flatMap((place, index) => place.placeName ? [{
-    latitude: place.latitude,
-    longitude: place.longitude,
-    name: place.placeName,
-    photos: `Day ${place.dayNumber ?? index + 1}`,
-  }] : []) ?? []
+  const locations = getRecordLocations(tripQuery.data?.timeline)
   const mappedLocations = locations.flatMap((location) => {
     const position = mapPosition(location.latitude, location.longitude)
     return position ? [{ ...location, ...position }] : []

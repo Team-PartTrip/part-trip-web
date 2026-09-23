@@ -5,30 +5,17 @@ import {
 } from '@tanstack/react-query'
 
 import {
-  castBallot,
-  castPlaceVote,
-  cancelPlaceVote,
   acceptPlannerInvitation,
-  addVoteOption,
   cancelPlannerInvitation,
-  closeVote,
   confirmPlanner,
   createPlanner,
-  createVote,
-  deletePlanner,
-  deleteVoteOption,
+  generatePlanner,
   joinPlanner,
-  remindPlannerMembers,
   rejectPlannerInvitation,
   removePlannerMember,
-  updatePlanner,
   type CreatePlannerRequestDto,
-  type CreateVoteRequestDto,
-  type PlannerConfirmRequestDto,
+  type GeneratePlannerRequestDto,
   type JoinPlannerRequestDto,
-  type SavePlannerTravelPlanRequestDto,
-  type VoteBallotRequestDto,
-  type VoteOptionCreateRequestDto,
 } from './api'
 import { plannerQueryKeys } from './query-keys'
 
@@ -49,94 +36,16 @@ export function useCreatePlannerMutation() {
   return usePlannerMutation((payload: CreatePlannerRequestDto) => createPlanner(payload))
 }
 
+export function useGeneratePlannerMutation() {
+  return usePlannerMutation((payload: GeneratePlannerRequestDto) => generatePlanner(payload))
+}
+
 export function useJoinPlannerMutation() {
   return usePlannerMutation((payload: JoinPlannerRequestDto) => joinPlanner(payload))
 }
 
-export function useUpdatePlannerMutation() {
-  return usePlannerMutation(
-    ({ plannerId, payload }: { plannerId: number; payload: SavePlannerTravelPlanRequestDto }) =>
-      updatePlanner(plannerId, payload),
-  )
-}
-
-export function useCastBallotMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ plannerId, voteId, payload }: { plannerId: number; voteId: number; payload: VoteBallotRequestDto }) =>
-      castBallot(plannerId, voteId, payload),
-    onSuccess: (_data, { plannerId }) => {
-      void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.votes(plannerId) })
-    },
-  })
-}
-
-export function useCancelPlaceVoteMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ plannerId, tourPlaceId }: { plannerId: number; tourPlaceId: number }) =>
-      cancelPlaceVote(plannerId, tourPlaceId),
-    onSuccess: (_data, { plannerId }) => {
-      void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.votes(plannerId) })
-    },
-  })
-}
-
-export function useCastPlaceVoteMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ plannerId, tourPlaceId }: { plannerId: number; tourPlaceId: number }) =>
-      castPlaceVote(plannerId, tourPlaceId),
-    onSuccess: (_data, { plannerId }) => {
-      void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.votes(plannerId) })
-    },
-  })
-}
-
-export function useCloseVoteMutation() {
-  return usePlannerMutation(
-    ({ plannerId, voteId }: { plannerId: number; voteId: number }) =>
-      closeVote(plannerId, voteId),
-  )
-}
-
 export function useConfirmPlannerMutation() {
-  return usePlannerMutation(({ plannerId, payload }: { plannerId: number; payload: PlannerConfirmRequestDto }) =>
-    confirmPlanner(plannerId, payload),
-  )
-}
-
-export function useRemindPlannerMembersMutation() {
-  return useMutation({ mutationFn: (plannerId: number) => remindPlannerMembers(plannerId) })
-}
-
-export function useDeleteVoteOptionMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ plannerId, voteId, optionId }: { plannerId: number; voteId: number; optionId: number }) =>
-      deleteVoteOption(plannerId, voteId, optionId),
-    onSuccess: (_data, { plannerId }) => {
-      void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.votes(plannerId) })
-    },
-  })
-}
-
-export function useAddVoteOptionMutation() {
-  return usePlannerMutation(
-    ({ plannerId, voteId, payload }: { plannerId: number; voteId: number; payload: VoteOptionCreateRequestDto }) =>
-      addVoteOption(plannerId, voteId, payload),
-  )
-}
-
-export function useCreateVoteMutation() {
-  return usePlannerMutation(
-    ({ plannerId, payload }: { plannerId: number; payload: CreateVoteRequestDto }) =>
-      createVote(plannerId, payload),
-  )
-}
-
-export function useDeletePlannerMutation() {
-  return usePlannerMutation((plannerId: number) => deletePlanner(plannerId))
+  return usePlannerMutation((plannerId: number) => confirmPlanner(plannerId))
 }
 
 export function useAcceptPlannerInvitationMutation() {

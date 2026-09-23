@@ -1,17 +1,32 @@
 import type { NotificationType } from '@/entities/notification'
 import { isInCurrentCalendarWeek } from '@/shared/utils'
 
-export function settingCopy(type?: NotificationType) {
-  if (type === 'VOTE_PARTICIPATED' || type === 'VOTE_DEADLINE' || type === 'VOTE_REMINDER') return ['투표', '그룹원이 투표하거나 마감이 다가올 때']
-  if (type === 'PHOTO_ORGANIZED') return ['기록', '촬영한 사진 정리가 끝났을 때']
-  if (type === 'COUNTRY_ACQUIRED') return ['국가', '새로운 국가를 획득했을 때']
-  if (type === 'TRIP_CARD_CREATED') return ['여행카드', '여행카드가 만들어졌을 때']
-  return ['그룹', '초대가 수락되거나 새 멤버가 들어왔을 때']
+export type NotificationViewFilter = 'ALL' | 'SCHEDULE' | 'PHOTO' | 'GROUP'
+
+export function matchesNotificationFilter(notification: { type?: string; category?: string }, filter: NotificationViewFilter) {
+  if (filter === 'ALL') return true
+  const category = notification.category?.toUpperCase()
+  const type = notification.type?.toUpperCase() ?? ''
+  if (category === filter || type.includes(filter)) return true
+  if (filter === 'GROUP') return type === 'GROUP_INVITED' || type === 'GROUP_INVITE_ACCEPTED'
+  if (filter === 'PHOTO') return type === 'PHOTO_ORGANIZED'
+  return false
+}
+
+export function settingCopy(type?: NotificationType, category?: string) {
+  if (category === 'SCHEDULE') return ['일정', '여행 시작과 오늘 일정 알림']
+  if (category === 'PHOTO') return ['사진', '여행 사진 관련 알림']
+  if (category === 'GROUP') return ['그룹', '여행 그룹 초대와 연결 알림']
+  if (type === 'VOTE_PARTICIPATED' || type === 'VOTE_DEADLINE' || type === 'VOTE_REMINDER') return ['지난 알림', '기존 여행 투표 알림']
+  if (type === 'PHOTO_ORGANIZED') return ['사진', '여행 사진 관련 알림']
+  if (type === 'TRIP_CARD_CREATED') return ['기록', '여행 기록 알림']
+  if (type === 'GROUP_INVITED' || type === 'GROUP_INVITE_ACCEPTED') return ['그룹', '여행 그룹 초대와 연결 알림']
+  return ['알림', '여행 소식']
 }
 
 export function categoryTone(type?: NotificationType) {
   if (type === 'PHOTO_ORGANIZED') return 'accent' as const
-  if (type === 'COUNTRY_ACQUIRED') return 'success' as const
+  if (type === 'GROUP_INVITED' || type === 'GROUP_INVITE_ACCEPTED') return 'success' as const
   return 'primary' as const
 }
 
@@ -46,22 +61,16 @@ export function detailCopy(notification: { linkType?: string; title?: string; bo
   const linkType = normalizeNotificationLinkType(notification.linkType)
   const fallback = linkType === 'TRIP_CARD'
     ? ['여행카드가 만들어졌어요', '여행의 기록을 카드로 확인해보세요.']
-    : linkType === 'WORLD_MAP'
-      ? ['새로운 국가를 획득했어요', '세계지도에서 방문한 국가를 확인해보세요.']
-      : linkType === 'GROUP' || linkType === 'GROUP_INVITATION'
+    : linkType === 'GROUP' || linkType === 'GROUP_INVITATION'
         ? ['여행 그룹 소식이 있어요', '여행 그룹의 새로운 소식을 확인하세요.']
-        : linkType === 'VOTE'
-          ? ['투표에 참여해주세요', '그룹의 여행 후보를 확인하고 투표를 진행하세요.']
-          : ['새 알림', '새로운 소식이 있어요.']
+        : ['지난 알림', '이전에 받은 알림을 확인할 수 있어요.']
   return { body: notification.body || fallback[1], title: notification.title || fallback[0] }
 }
 
-export function detailActionLabel(notification: { linkType?: string; linkId?: number }, canNavigateToVote: boolean) {
+export function detailActionLabel(notification: { linkType?: string; linkId?: number }) {
   const linkType = normalizeNotificationLinkType(notification.linkType)
   if (linkType === 'TRIP_CARD' && notification.linkId != null) return '여행카드 보러가기'
   if ((linkType === 'GROUP' || linkType === 'GROUP_INVITATION') && notification.linkId != null) return linkType === 'GROUP_INVITATION' ? '초대 확인하기' : '그룹 보러가기'
-  if (linkType === 'VOTE' && canNavigateToVote) return '투표 보러가기'
-  if (linkType === 'WORLD_MAP') return '세계지도 보러가기'
   return undefined
 }
 

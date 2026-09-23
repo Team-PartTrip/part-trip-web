@@ -277,6 +277,13 @@ export const SettingRow = styled.div`
   span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
 `
 
+export const SettingsNote = styled.p`
+  margin: 8px 0 12px;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 12px;
+  line-height: 18px;
+`
+
 export const Toggle = styled.button<{ $active: boolean }>`
   position: relative;
   width: 52px;

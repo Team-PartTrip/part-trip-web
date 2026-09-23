@@ -1,5 +1,5 @@
 import { queryOptions, useQuery } from '@tanstack/react-query'
-import { getProfile, getProfileStats } from './api'
+import { getProfile, getProfileStats, getTravelPreferences } from './api'
 import { getUserProfile } from './profile-model'
 
 export const userQueryKeys = {
@@ -7,6 +7,7 @@ export const userQueryKeys = {
   profile: () => [...userQueryKeys.all, 'profile'] as const,
   source: () => [...userQueryKeys.all, 'source'] as const,
   stats: () => [...userQueryKeys.all, 'stats'] as const,
+  travelPreferences: () => [...userQueryKeys.all, 'travel-preferences'] as const,
 }
 
 export const userProfileQueryOptions = () =>
@@ -37,4 +38,11 @@ export const profileStatsQueryOptions = () =>
 
 export function useProfileStatsQuery() {
   return useQuery(profileStatsQueryOptions())
+}
+
+export const travelPreferencesQueryOptions = () =>
+  queryOptions({ queryKey: userQueryKeys.travelPreferences(), queryFn: getTravelPreferences })
+
+export function useTravelPreferencesQuery() {
+  return useQuery(travelPreferencesQueryOptions())
 }

@@ -61,10 +61,11 @@ export function useTripCardPhotoComposer({ cards }: Props) {
       setErrorMessage("이미지 파일을 하나 이상 선택해주세요.");
       return;
     }
+    const photoCount = photos.length;
+    let uploadedCount = 0;
     try {
       setErrorMessage("");
       setSuccessMessage("");
-      const photoCount = photos.length;
       for (const photo of photos) {
         await createEntryMutation.mutateAsync({
           cardId,
@@ -73,6 +74,7 @@ export function useTripCardPhotoComposer({ cards }: Props) {
             imageFile: photo.file,
           },
         });
+        uploadedCount += 1;
         URL.revokeObjectURL(photo.url);
         setPhotos((current) => current.filter((item) => item !== photo));
       }
@@ -81,7 +83,10 @@ export function useTripCardPhotoComposer({ cards }: Props) {
       setComment("");
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      const failureMessage = getErrorMessage(error);
+      setErrorMessage(uploadedCount > 0
+        ? `${uploadedCount}장 저장됐습니다. 남은 ${photoCount - uploadedCount}장은 선택 상태로 남아 있어 다시 시도할 수 있습니다. ${failureMessage}`
+        : failureMessage);
     }
   };
 

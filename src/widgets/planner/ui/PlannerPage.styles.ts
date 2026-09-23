@@ -42,8 +42,8 @@ export const Header = styled.header<{ $hasSubtitle?: boolean; $wide?: boolean }>
   margin-bottom: 24px;
 
   > button {
-    width: 112px;
-    height: 48px;
+    min-width: 164px;
+    min-height: 48px;
     padding: 14px;
     border-radius: 14px;
     font-size: 14px;
@@ -78,22 +78,25 @@ export const State = styled.p`
 
 export const PlannerTabs = styled.nav`
   display: flex;
-  min-height: 44px;
-  align-items: flex-start;
+  min-height: 48px;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 24px;
 
   button {
-    width: 96px;
-    height: 34px;
-    border: 1px solid ${({ theme }) => theme.colors.border.subtle};
-    border-radius: 17px;
-    padding: 0 10px;
+    min-width: 112px;
+    min-height: 48px;
+    border: 1px solid ${({ theme }) => theme.colors.brand.primary};
+    border-radius: 999px;
+    padding: 0 18px;
     background: ${({ theme }) => theme.colors.background.default};
-    color: ${({ theme }) => theme.colors.brand.primary};
+    color: ${({ theme }) => theme.colors.brand.strong};
     cursor: pointer;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
+
+    &:focus-visible { outline: 3px solid ${({ theme }) => theme.colors.brand.primary}; outline-offset: 2px; }
   }
 
   button.active {
@@ -181,6 +184,7 @@ export const PlanStatus = styled.span<{ $state: 'active' | 'planned' | 'complete
   box-sizing: border-box;
   align-items: center;
   justify-content: center;
+  border: 1px solid ${({ $state, theme }) => $state === 'completed' ? theme.colors.brand.successStrong : $state === 'active' ? theme.colors.brand.accent : theme.colors.brand.primary};
   border-radius: 999px;
   padding: 8px;
   background: ${({ theme }) => theme.colors.background.subtle};
@@ -218,96 +222,6 @@ export const RowArrow = styled.span`
   font-size: 20px;
   font-weight: 600;
   line-height: 24px;
-`
-
-export const DeletePlannerButton = styled.button`
-  min-width: 64px;
-  height: 44px;
-  border: 1px solid ${({ theme }) => theme.colors.status.error};
-  border-radius: 12px;
-  padding: 0 12px;
-  background: transparent;
-  color: ${({ theme }) => theme.colors.status.error};
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-`
-
-export const SelectedPlanPanel = styled.section`
-  height: 640px;
-  overflow: hidden;
-  border-radius: 20px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-
-  > img { display: block; width: 100%; height: 180px; object-fit: cover; }
-  > div { display: flex; min-height: 286px; flex-direction: column; align-items: flex-start; gap: 10px; padding: 20px 24px; }
-  h2 { margin: 0; font-size: 18px; }
-  p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; }
-  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
-`
-
-export const StepCard = styled.section`
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 16px;
-  border-radius: 20px;
-  padding: 24px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-
-  h2 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 24px; line-height: 32px; }
-  p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; line-height: 20px; }
-`
-
-export const FlowStepper = styled.nav`
-  display: flex;
-  width: 440px;
-  max-width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0;
-  margin-left: auto;
-  align-self: center;
-  overflow-x: hidden;
-  position: relative;
-  transform: translateX(-4px);
-`
-
-export const FlowStep = styled.span<{ $active: boolean; $complete: boolean }>`
-  position: relative;
-  flex: 0 0 auto;
-  display: inline-flex;
-  height: 32px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  padding: 0;
-  background: ${({ $active, $complete, theme }) => ($active ? theme.colors.brand.primary : $complete ? theme.colors.background.muted : theme.colors.background.soft)};
-  color: ${({ $active, $complete, theme }) => ($active ? theme.colors.text.inverse : $complete ? theme.colors.brand.primary : theme.colors.text.muted)};
-  font-size: 12px;
-  font-weight: ${({ $active }) => ($active ? 600 : 400)};
-  white-space: nowrap;
-
-  &:nth-child(1) { width: 64px; }
-  &:nth-child(2),
-  &:nth-child(3) { width: 112px; }
-
-  &:not(:last-child)::after {
-    position: absolute;
-    top: 50%;
-    left: calc(100% + 8px);
-    width: 16px;
-    height: 1px;
-    background: #b8d6f2;
-    content: '';
-  }
 `
 
 export const GroupForm = styled.form`
@@ -380,102 +294,11 @@ export const GroupActions = styled.div`
   > button:last-child { width: 140px; }
 `
 
-export const StepNumber = styled.span`
-  color: ${({ theme }) => theme.colors.brand.primary};
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-`
-
 export const SectionTitle = styled.h2`
   margin: 0;
   color: ${({ theme }) => theme.colors.text.strong};
   font-size: 15px;
   line-height: 20px;
-`
-
-export const ActionRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: auto;
-`
-
-export const ProgressActions = styled.div`
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 16px;
-  padding-top: 20px;
-  border-top: 1px solid ${({ theme }) => theme.colors.border.subtle};
-
-  @media (max-width: 700px) {
-    align-items: stretch;
-    flex-direction: column;
-  }
-`
-
-export const ProgressActionGroup = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-
-  &:last-child { justify-content: flex-end; }
-
-  @media (max-width: 700px) {
-    &:last-child { justify-content: flex-start; }
-    > button { flex: 1 1 auto; }
-  }
-`
-
-export const FullWidthAction = styled.button`
-  width: 100%;
-  height: 48px;
-  margin-top: 24px;
-  border: 0;
-  border-radius: 12px;
-  padding: 14px;
-  background: ${({ theme }) => theme.colors.brand.primary};
-  box-shadow: 0 4px 5px rgb(26 110 191 / 16%);
-  color: ${({ theme }) => theme.colors.text.inverse};
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-
-  &:disabled { cursor: not-allowed; opacity: .55; }
-`
-
-export const TwoColumn = styled.div`
-  display: grid;
-  gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 456px;
-
-  @media (max-width: 860px) { grid-template-columns: 1fr; }
-`
-
-export const SettingsLayout = styled.div`
-  display: grid;
-  align-items: start;
-  gap: 24px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-
-  @media (max-width: 860px) { grid-template-columns: 1fr; }
-
-  > ${StepCard} > div:first-of-type,
-  > ${StepCard} > div:nth-of-type(4),
-  > ${StepCard} > div:nth-of-type(5),
-  > ${StepCard} > div:nth-of-type(6) { display: none; }
-
-  > ${StepCard} {
-    border: 1px solid ${({ theme }) => theme.colors.border.subtle};
-    border-radius: 16px;
-    padding: 24px;
-  }
-  > ${StepCard} > h2 { font-size: 18px; line-height: 24px; }
-  > ${StepCard} input { height: 44px; }
 `
 
 export const StepField = styled.div`
@@ -485,67 +308,6 @@ export const StepField = styled.div`
 
   > label { color: ${({ theme }) => theme.colors.text.strong}; font-size: 12px; font-weight: 600; }
   input[readonly] { color: ${({ theme }) => theme.colors.text.muted}; }
-`
-
-export const PlannerCityList = styled.div`
-  display: grid;
-  gap: 8px;
-`
-
-export const PlannerCityRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  border-radius: 10px;
-  padding: 10px 12px;
-  color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 12px;
-  > div { display: grid; gap: 4px; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; }
-`
-
-export const PlannerCityRemoveButton = styled.button`
-  border: 0;
-  padding: 4px;
-  background: transparent;
-  color: ${({ theme }) => theme.colors.brand.primary};
-  cursor: pointer;
-  font-size: 12px;
-`
-
-export const FieldHint = styled.span`
-  color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 11px;
-  font-weight: 400;
-  line-height: 16px;
-`
-
-export const SearchEmpty = styled.p`
-  margin: 0;
-  color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 12px;
-  line-height: 18px;
-`
-
-export const SegmentRow = styled.div`
-  display: flex;
-  gap: 8px;
-`
-
-export const SegmentButton = styled.button<{ $active: boolean }>`
-  min-width: 120px;
-  height: 44px;
-  border: 1px solid ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.border.default)};
-  border-radius: 12px;
-  background: ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.background.default)};
-  color: ${({ $active, theme }) => ($active ? theme.colors.text.inverse : theme.colors.text.muted)};
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-
-  &:disabled { cursor: not-allowed; opacity: .55; }
 `
 
 export const Stepper = styled.div`
@@ -586,8 +348,8 @@ export const Avatar = styled.span`
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: ${({ theme }) => theme.colors.background.muted};
-  color: ${({ theme }) => theme.colors.brand.strong};
+  background: ${({ theme }) => theme.colors.brand.primary};
+  color: ${({ theme }) => theme.colors.text.inverse};
   font-size: 11px;
   font-weight: 600;
 `
@@ -676,24 +438,6 @@ export const SmallActionButton = styled.button`
   &:disabled { cursor: not-allowed; opacity: .5; }
 `
 
-export const InviteMemberRow = styled.div`
-  display: grid;
-  width: 100%;
-  align-items: end;
-  gap: 8px;
-  grid-template-columns: minmax(0, 1fr) auto;
-
-  @media (max-width: 620px) { grid-template-columns: 1fr; }
-`
-
-export const InviteLinkRow = styled.div`
-  display: grid;
-  width: 100%;
-  align-items: center;
-  gap: 8px;
-  grid-template-columns: minmax(0, 1fr) auto;
-`
-
 export const InviteCodeRow = styled.div`
   display: grid;
   width: 100%;
@@ -704,404 +448,6 @@ export const InviteCodeRow = styled.div`
   @media (max-width: 620px) { grid-template-columns: 1fr; }
 `
 
-export const PopularGrid = styled.div`
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-`
-
-export const PopularButton = styled.button<{ $active: boolean }>`
-  display: flex;
-  min-height: 56px;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 2px;
-  border: 1px solid ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.border.default)};
-  border-radius: 14px;
-  padding: 12px 16px;
-  background: ${({ $active, theme }) => ($active ? theme.colors.background.muted : theme.colors.background.default)};
-  color: ${({ theme }) => theme.colors.text.strong};
-  cursor: pointer;
-  text-align: left;
-  strong { font-size: 14px; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 11px; }
-
-  &:focus-visible {
-    outline: 3px solid ${({ theme }) => theme.colors.brand.primary};
-    outline-offset: 2px;
-  }
-`
-
-export const DateRange = styled.div`
-  display: grid;
-  align-items: center;
-  gap: 8px;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  span { color: ${({ theme }) => theme.colors.text.muted}; }
-`
-
-export const ChipRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-`
-
-export const StyleChip = styled.button<{ $active: boolean }>`
-  height: 32px;
-  border: 1px solid ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.border.default)};
-  border-radius: 999px;
-  padding: 0 12px;
-  background: ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.background.default)};
-  color: ${({ $active, theme }) => ($active ? theme.colors.text.inverse : theme.colors.text.muted)};
-  cursor: pointer;
-  font-size: 12px;
-`
-
-export const PreviewPanel = styled.section`
-  border-radius: 20px;
-  padding: 24px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-`
-
-export const CalendarPanel = styled.section`
-  min-height: 402px;
-  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  border-radius: 16px;
-  padding: 24px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-`
-
-export const CalendarHeader = styled.header`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 12px;
-  color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 16px;
-  span { display: flex; gap: 4px; color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
-  button { width: 18px; height: 20px; border: 0; border-radius: 0; background: transparent; color: ${({ theme }) => theme.colors.text.muted}; cursor: pointer; font-size: 14px; }
-`
-
-export const Weekdays = styled.div`
-  display: grid;
-  gap: 0;
-  grid-template-columns: repeat(7, 1fr);
-  height: 20px;
-  margin-top: 12px;
-  color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 11px;
-  text-align: center;
-`
-
-export const CalendarGrid = styled.div`
-  display: grid;
-  gap: 2px;
-  grid-template-columns: repeat(7, 1fr);
-  margin-top: 12px;
-
-  > span { min-height: 42px; }
-`
-
-export const CalendarDay = styled.button<{ $selected: boolean; $range: boolean }>`
-  min-height: 42px;
-  border: 0;
-  border-radius: 4px;
-  padding: 0;
-  background: ${({ $selected, $range, theme }) => ($selected ? theme.colors.brand.primary : $range ? theme.colors.background.info : 'transparent')};
-  color: ${({ $selected, theme }) => ($selected ? theme.colors.text.inverse : theme.colors.text.strong)};
-  cursor: pointer;
-  font-size: 13px;
-`
-
-export const CalendarSummary = styled.p`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin: 10px 0 0;
-  color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 14px;
-  font-weight: 600;
-  strong { font-size: inherit; }
-  span { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 13px; white-space: nowrap; }
-`
-
-export const PreviewCard = styled.article`
-  width: 100%;
-  max-width: 360px;
-  overflow: hidden;
-  margin: 12px auto 0;
-  border-radius: 28px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-  img { display: block; width: 100%; height: 170px; object-fit: cover; }
-  > div { display: flex; min-height: 148px; flex-direction: column; gap: 8px; padding: 20px 24px; }
-  h2, p { margin: 0; }
-  h2 { font-size: 18px; }
-  p { color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; }
-  small { color: ${({ theme }) => theme.colors.brand.strong}; font-size: 12px; font-weight: 600; }
-  small b { float: right; }
-`
-
-export const CategoryChips = styled.nav`
-  display: flex;
-  min-height: 44px;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-bottom: 24px;
-`
-
-export const CategoryChip = styled.button<{ $active: boolean }>`
-  width: 92px;
-  height: 34px;
-  border: 1px solid ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.border.default)};
-  border-radius: 999px;
-  padding: 0 10px;
-  background: ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.background.default)};
-  color: ${({ $active, theme }) => ($active ? theme.colors.text.inverse : theme.colors.text.muted)};
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
-`
-
-export const VoteCategoryChips = styled(CategoryChips)`
-  min-height: 44px;
-  gap: 14px;
-  margin-bottom: 24px;
-
-  ${CategoryChip} {
-    height: 36px;
-    border: 0;
-    border-radius: 12px;
-    background: ${({ theme }) => theme.colors.background.muted};
-
-    &:first-child { background: ${({ theme }) => theme.colors.background.muted}; }
-  }
-
-  ${CategoryChip}.active {
-    background: ${({ theme }) => theme.colors.brand.primary};
-    color: ${({ theme }) => theme.colors.text.inverse};
-  }
-`
-
-export const VoteStatusRow = styled.div`
-  display: flex;
-  gap: 12px;
-  margin-bottom: 24px;
-`
-
-export const VoteStatus = styled.span<{ $active?: boolean }>`
-  display: inline-flex;
-  width: ${({ $active }) => ($active ? '96px' : '112px')};
-  height: 36px;
-  box-sizing: border-box;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  padding: 10px;
-  background: ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.background.muted)};
-  color: ${({ $active, theme }) => ($active ? theme.colors.text.inverse : theme.colors.brand.primary)};
-  font-size: 12px;
-  font-weight: 600;
-`
-
-export const PlaceBody = styled.div`
-  display: block;
-`
-
-export const PlaceListPanel = styled.section`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  > header { margin-bottom: 12px; }
-`
-
-export const PlaceListHeader = styled.header`
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  span, button { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
-  button { border: 0; padding: 0; background: transparent; color: ${({ theme }) => theme.colors.brand.primary}; cursor: pointer; font-weight: 600; }
-`
-
-export const PlaceRow = styled.button<{ $active?: boolean }>`
-  display: flex;
-  width: 100%;
-  min-height: 102px;
-  align-items: center;
-  gap: 14px;
-  box-sizing: border-box;
-  border: ${({ $active, theme }) => ($active ? `1.5px solid ${theme.colors.brand.primary}` : `1px solid ${theme.colors.border.subtle}`)};
-  border-radius: 16px;
-  padding: 16px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-  text-align: left;
-
-  &:focus-visible {
-    outline: 3px solid ${({ theme }) => theme.colors.brand.primary};
-    outline-offset: 2px;
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.65;
-  }
-`
-
-export const PlaceThumb = styled.span<{ $imageUrl?: string }>`
-  display: grid;
-  width: 88px;
-  height: 70px;
-  flex: 0 0 88px;
-  place-items: center;
-  overflow: hidden;
-  border: 1px solid #dceaf7;
-  border-radius: 14px;
-  background-color: #ebf4fc;
-  background-image: ${({ $imageUrl }) => $imageUrl ? `url(${JSON.stringify($imageUrl)})` : 'none'};
-  background-position: center;
-  background-size: cover;
-  color: #29527a;
-  font-size: 12px;
-  font-weight: 600;
-`
-
-export const PlaceDetails = styled.span`
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-  gap: 6px;
-  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 16px; }
-  span { overflow: hidden; color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
-`
-
-export const PlaceAction = styled.span<{ $active: boolean }>`
-  display: flex;
-  width: 130px;
-  height: 48px;
-  flex: 0 0 130px;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 0;
-  background: transparent;
-  font-weight: 600;
-
-  span {
-    display: inline-flex;
-    width: ${({ $active }) => ($active ? '86px' : '72px')};
-    height: 30px;
-    box-sizing: border-box;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    padding: 8px;
-    background: ${({ $active, theme }) => ($active ? theme.colors.background.muted : theme.colors.background.subtle)};
-    color: ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.text.muted)};
-    font-size: 11px;
-  }
-
-  b {
-    display: inline-flex;
-    width: 36px;
-    height: 36px;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    border: 1px solid ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.border.default)};
-    border-radius: 50%;
-    background: ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.background.default)};
-    color: ${({ $active, theme }) => ($active ? theme.colors.text.inverse : theme.colors.text.muted)};
-    font-size: 13px;
-  }
-`
-
-export const PanelActions = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 16px;
-
-  > button { width: 100%; height: 48px; }
-`
-
-export const VoteBody = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-
-  > ${PanelActions} {
-    align-items: flex-start;
-    margin-top: 0;
-  }
-  > ${PanelActions} > button { width: 180px; height: 48px; }
-`
-
-export const CandidatePanel = styled.section`
-  display: flex;
-  min-height: 500px;
-  flex-direction: column;
-  gap: 12px;
-  ${PlaceThumb} { display: none; }
-  ${PlaceDetails} {
-    strong { font-size: 16px; }
-    span { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 13px; font-weight: 600; }
-  }
-`
-
-export const CandidateRow = styled.div<{ $selected?: boolean }>`
-  display: flex;
-  min-height: 108px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  box-sizing: border-box;
-  border: ${({ $selected, theme }) => ($selected ? `1.5px solid ${theme.colors.brand.primary}` : `1px solid ${theme.colors.border.subtle}`)};
-  border-radius: 16px;
-  padding: 16px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-`
-
-export const DeleteOptionButton = styled.button`
-  align-self: flex-start;
-  border: 0;
-  padding: 4px;
-  background: transparent;
-  color: ${({ theme }) => theme.colors.text.muted};
-  cursor: pointer;
-  font-size: 11px;
-  text-align: left;
-
-  &:disabled { cursor: not-allowed; opacity: .5; }
-`
-
-export const VoteMeta = styled.div<{ $selected?: boolean }>`
-  display: flex;
-  min-width: 120px;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  button { width: 120px; height: 48px; border: 1px solid ${({ $selected, theme }) => ($selected ? theme.colors.border.subtle : theme.colors.brand.primary)}; border-radius: 14px; padding: 14px; background: ${({ $selected, theme }) => ($selected ? theme.colors.background.default : theme.colors.brand.primary)}; color: ${({ $selected, theme }) => ($selected ? theme.colors.brand.primary : theme.colors.text.inverse)}; cursor: pointer; font-size: 14px; font-weight: 600; }
-  button:disabled { cursor: not-allowed; opacity: .6; }
-`
-
-export const MemberAvatars = styled.div`
-  display: flex;
-  gap: 4px;
-  ${Avatar} { width: 24px; height: 24px; flex-basis: 24px; font-size: 9px; }
-`
-
 export const Notice = styled.p`
   margin: 0;
   border-radius: 12px;
@@ -1110,147 +456,6 @@ export const Notice = styled.p`
   color: ${({ theme }) => theme.colors.text.muted};
   font-size: 12px;
   line-height: 18px;
-`
-
-export const ActionFeedback = styled.p`
-  margin: 0;
-  color: ${({ theme }) => theme.colors.brand.successStrong};
-  font-size: 12px;
-  line-height: 18px;
-`
-
-export const ProgressStats = styled.div`
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-bottom: 24px;
-`
-
-export const ProgressStat = styled.div`
-  display: flex;
-  min-height: 112px;
-  flex-direction: column;
-  justify-content: center;
-  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  border-radius: 16px;
-  padding: 24px;
-  strong { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 28px; line-height: 34px; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; }
-`
-
-export const ProgressBody = styled.div`
-  display: grid;
-  gap: 24px;
-  grid-template-columns: minmax(0, 1fr);
-`
-
-export const CategoryStatusPanel = styled.section`
-  height: 470px;
-  box-sizing: border-box;
-  border-radius: 16px;
-  padding: 20px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-  > h2 { margin-bottom: 14px; font-size: 15px; line-height: 22px; }
-  > div { grid-template-columns: 72px minmax(0, 1fr); min-height: 54px; }
-  > div + div { margin-top: 14px; }
-  > div > span { background: transparent; color: ${({ theme }) => theme.colors.text.strong}; padding: 0; text-align: left; }
-  > div > strong { text-align: right; }
-`
-
-export const StatusLine = styled.div`
-  display: grid;
-  align-items: center;
-  gap: 8px;
-  grid-template-columns: 72px minmax(0, 1fr) auto;
-  min-height: 54px;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  font-size: 12px;
-  &:last-child { border-bottom: 0; }
-  > span { border-radius: 8px; padding: 6px; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.brand.strong}; text-align: center; }
-  strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  small { color: ${({ theme }) => theme.colors.text.muted}; }
-`
-
-export const ConfirmOptions = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 4px 0 10px;
-`
-
-export const ConfirmOptionButton = styled.button<{ $confirmed?: boolean }>`
-  min-height: 30px;
-  border: 1px solid ${({ $confirmed, theme }) => ($confirmed ? theme.colors.brand.primary : theme.colors.border.default)};
-  border-radius: 8px;
-  padding: 0 9px;
-  background: ${({ $confirmed, theme }) => ($confirmed ? theme.colors.background.muted : theme.colors.background.default)};
-  color: ${({ $confirmed, theme }) => ($confirmed ? theme.colors.brand.primary : theme.colors.text.muted)};
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 600;
-
-  &:disabled { cursor: not-allowed; opacity: .55; }
-`
-
-export const MemberResponses = styled.section`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  border-radius: 20px;
-  padding: 24px;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-`
-
-export const ResponseRow = styled.div`
-  display: flex;
-  min-height: 44px;
-  align-items: center;
-  gap: 8px;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  font-size: 12px;
-  strong { flex: 1; }
-  span { color: ${({ theme }) => theme.colors.brand.successStrong}; font-size: 11px; }
-`
-
-export const Badge = styled.span`
-  border-radius: 999px;
-  padding: 5px 8px;
-  background: ${({ theme }) => theme.colors.background.muted};
-  color: ${({ theme }) => theme.colors.brand.strong};
-  font-size: 11px;
-`
-
-export const PlaceDetailLayout = styled.div`
-  display: grid;
-  gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 456px;
-  @media (max-width: 860px) { grid-template-columns: 1fr; }
-`
-
-export const PlaceImage = styled.img`
-  display: block;
-  width: 100%;
-  height: 480px;
-  border-radius: 20px;
-  object-fit: cover;
-`
-
-export const ProgressTrack = styled.div`
-  width: 100%;
-  height: 8px;
-  overflow: hidden;
-  border-radius: 4px;
-  background: ${({ theme }) => theme.colors.border.subtle};
-`
-
-export const ProgressBar = styled.span<{ $progress: number }>`
-  display: block;
-  width: ${({ $progress }) => `${Math.max(0, Math.min(100, $progress))}%`};
-  height: 100%;
-  border-radius: inherit;
-  background: ${({ theme }) => theme.colors.brand.primary};
 `
 
 export const Empty = styled.div`

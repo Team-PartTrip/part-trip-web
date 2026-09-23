@@ -1,23 +1,10 @@
-import {
-  ACTIVE_PLANNER_ID_KEY,
-  ACTIVE_VOTE_ID_KEY,
-  PLANNER_CONFIRMED_KEY,
-} from '@/shared/config'
+import { ACTIVE_PLANNER_ID_KEY } from '@/shared/config'
 import { removeSessionValue, writeSessionValue } from '@/shared/libs/session-storage'
 
 export function activatePlannerSession(plannerId: number) {
   writeSessionValue(ACTIVE_PLANNER_ID_KEY, String(plannerId))
-  removeSessionValue(ACTIVE_VOTE_ID_KEY)
 }
 
-export function clearPlannerVoteSession() {
-  removeSessionValue(ACTIVE_VOTE_ID_KEY)
-}
-
-export function clearPlannerSession(plannerId?: number) {
+export function clearPlannerSession() {
   removeSessionValue(ACTIVE_PLANNER_ID_KEY)
-  removeSessionValue(ACTIVE_VOTE_ID_KEY)
-  if (plannerId != null) {
-    removeSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`)
-  }
 }

@@ -234,3 +234,65 @@ export const WorldMapMore = styled.button`
   font-size: 13px;
   font-weight: 500;
 `
+
+export const AccountPanel = styled.section`
+  overflow: hidden;
+  border: 1px solid #e3ecf5;
+  border-radius: 16px;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: 0 4px 14px rgb(15 33 51 / 5%);
+`
+
+export const AccountHeader = styled.div`
+  display: flex;
+  min-height: 176px;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+
+  @media (max-width: 720px) { align-items: flex-start; flex-wrap: wrap; }
+`
+
+export const AccountCopy = styled.div`
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
+  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 20px; line-height: 28px; }
+  span, small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 14px; line-height: 20px; }
+  small { overflow-wrap: anywhere; }
+`
+
+export const SettingsList = styled.nav`
+  border-top: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  padding: 0 24px;
+`
+
+export const SettingsRow = styled.button`
+  display: flex;
+  width: 100%;
+  min-height: 76px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 0;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  padding: 12px 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+
+  &:last-child { border-bottom: 0; }
+  &:hover { background: ${({ theme }) => theme.colors.background.subtle}; }
+  > span { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+  strong { font-size: 15px; line-height: 22px; }
+  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; line-height: 18px; }
+  b { flex: 0 0 auto; color: ${({ theme }) => theme.colors.brand.strong}; font-size: 14px; font-weight: 600; }
+
+  @media (max-width: 560px) {
+    align-items: flex-start;
+    > b { align-self: center; max-width: 110px; font-size: 12px; text-align: right; }
+  }
+`
