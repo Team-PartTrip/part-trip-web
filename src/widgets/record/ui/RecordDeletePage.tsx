@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { useDeleteTravelCardEntryMutation } from '@/entities/trip-card'
-import { useMyTrips, useTripQuery } from '@/entities/trip-plan'
+import { useDeleteTravelCardEntryMutation, useMyTravelRecords, useTravelRecordQuery } from '@/entities/trip-card'
 import { paths } from '@/shared/config'
 import { Skeleton } from '@/shared/ui/parttrip'
 import { AppShell } from '@/widgets/app-shell'
@@ -10,12 +9,12 @@ import * as S from './RecordDeletePage.styles'
 
 export function RecordDeletePage() {
   const navigate = useNavigate()
-  const { hasError: hasTripsError, isLoading: isTripsLoading, trips } = useMyTrips()
+  const { hasError: hasTripsError, isLoading: isTripsLoading, trips } = useMyTravelRecords()
   const [selected, setSelected] = useState<number[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const trip = trips[0]
-  const detailQuery = useTripQuery(trip?.tripId ?? 0)
+  const detailQuery = useTravelRecordQuery(trip?.tripId ?? 0)
   const record = detailQuery.data ?? trip
   const photos = record?.timeline?.filter((item) => item.entryId != null && item.imageUrl) ?? []
   const deleteMutation = useDeleteTravelCardEntryMutation()

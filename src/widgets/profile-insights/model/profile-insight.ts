@@ -1,4 +1,4 @@
-import type { TripPlanResponseDto } from '@/entities/trip-plan'
+import type { TravelRecordDto } from '@/entities/trip-card'
 import type { WorldMapResponseDto, WorldMapStatsResponseDto } from '@/entities/world-map'
 import { getDateRangeDays, isPositiveSafeInteger } from '@/shared/utils'
 
@@ -8,7 +8,7 @@ export type DomesticRegionVisit = {
   code: string
   mapName: string
   name: string
-  trips: TripPlanResponseDto[]
+  trips: TravelRecordDto[]
 }
 
 const DOMESTIC_REGIONS = [
@@ -40,13 +40,13 @@ function regionForCity(cityName?: string | null) {
   return DOMESTIC_REGIONS.find((region) => region.aliases.some((alias) => normalizedName(alias) === city))
 }
 
-function isDomesticTrip(trip: TripPlanResponseDto) {
+function isDomesticTrip(trip: TravelRecordDto) {
   const country = normalizedName(trip.countryName)
   if (['대한민국', '한국', '국내', 'korea', 'southkorea', 'republicofkorea', 'kr'].includes(country)) return true
   return !country && Boolean(regionForCity(trip.cityName))
 }
 
-export function getDomesticTravelModel(trips: TripPlanResponseDto[]) {
+export function getDomesticTravelModel(trips: TravelRecordDto[]) {
   const domesticTrips = trips.filter(isDomesticTrip)
   const regions: DomesticRegionVisit[] = DOMESTIC_REGIONS.flatMap((region) => {
     const regionTrips = domesticTrips.filter((trip) => regionForCity(trip.cityName)?.code === region.code)
@@ -64,15 +64,15 @@ export function getDomesticTravelModel(trips: TripPlanResponseDto[]) {
   }
 }
 
-export function getAnnualTravelSummary(trips: TripPlanResponseDto[], year: number) {
+export function getAnnualTravelSummary(trips: TravelRecordDto[], year: number) {
   const domesticTrips = getDomesticTravelModel(trips).domesticTrips.filter((trip) => (trip.startDate ?? '').startsWith(String(year)))
-  const places = new Map<string, TripPlanResponseDto[]>()
+  const places = new Map<string, TravelRecordDto[]>()
   for (const trip of domesticTrips) {
     const place = trip.cityName?.trim()
     if (place) places.set(place, [...(places.get(place) ?? []), trip])
   }
-  const stayDays = (trip: TripPlanResponseDto) => getDateRangeDays(trip.startDate, trip.endDate) ?? 0
-  const longestStay = domesticTrips.filter((trip) => stayDays(trip) > 0).reduce<TripPlanResponseDto | undefined>((longest, trip) =>
+  const stayDays = (trip: TravelRecordDto) => getDateRangeDays(trip.startDate, trip.endDate) ?? 0
+  const longestStay = domesticTrips.filter((trip) => stayDays(trip) > 0).reduce<TravelRecordDto | undefined>((longest, trip) =>
     !longest || stayDays(trip) > stayDays(longest) ? trip : longest, undefined)
   const mostVisited = [...places.entries()].sort((left, right) => right[1].length - left[1].length || left[0].localeCompare(right[0], 'ko'))[0]
 
@@ -91,7 +91,7 @@ export function getAnnualTravelSummary(trips: TripPlanResponseDto[], year: numbe
 type ProfileInsightModelProps = {
   kind: ProfileInsightKind
   selectedCountry: string
-  trips: TripPlanResponseDto[]
+  trips: TravelRecordDto[]
   worldMap?: WorldMapResponseDto
   worldMapStats?: WorldMapStatsResponseDto
 }
@@ -129,8 +129,6 @@ export function getProfileInsightModel({
   const activeRegionTrips = activeRegion?.trips ?? []
   const selectedTrip = countryTrips.find((trip) => isPositiveSafeInteger(trip.tripId))
   const countryCode = visited.find((country) => country.countryName === activeCountry)?.countryCode ?? '--'
-  const countryCities = [...new Set(countryTrips.map((trip) => trip.cityName).filter((city): city is string => Boolean(city)))]
-  const firstVisit = countryTrips.map((trip) => trip.startDate).filter(Boolean).sort()[0]?.replaceAll('-', '.') || '-'
   const totalCountries = worldMap?.totalCountries ?? worldMapStats?.totalCount ?? 0
   const acquiredCount = worldMapStats?.acquiredCount ?? visitedCountries.length
   const achievementPercentage = worldMapStats?.percentage ?? (totalCountries ? acquiredCount / totalCountries * 100 : 0)
@@ -153,10 +151,8 @@ export function getProfileInsightModel({
     activeCountry,
     claimCountries,
     continentProgress,
-    countryCities,
     countryCode,
     countryTrips,
-    firstVisit,
     pageSubtitle,
     pageTitle,
     selectedTrip,

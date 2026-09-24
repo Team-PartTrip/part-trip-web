@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import {
-  plannerQueryKeys,
   usePlannerScheduleCandidatesQuery,
   useSavePlannerScheduleMutation,
   type PlannerScheduleCandidateDto,
@@ -85,7 +83,6 @@ export function PlannerScheduleEditor({
   canManage: boolean
   isConfirmed: boolean
 }) {
-  const queryClient = useQueryClient()
   const saveMutation = useSavePlannerScheduleMutation()
   const [draft, setDraft] = useState<EditableScheduleDay[]>()
   const [picker, setPicker] = useState<Position>()
@@ -210,7 +207,6 @@ export function PlannerScheduleEditor({
       setFeedback('')
       setFeedbackError(false)
       await saveMutation.mutateAsync({ plannerId, payload: toSaveScheduleRequest(draft) })
-      await queryClient.invalidateQueries({ queryKey: plannerQueryKeys.schedule(plannerId) })
       setDraft(undefined)
       setPicker(undefined)
       setSwapSource(undefined)

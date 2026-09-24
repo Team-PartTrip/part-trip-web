@@ -1,8 +1,8 @@
+import { normalizeStatus } from '@/shared/utils'
+
 export type PlannerStatusKey = 'active' | 'planned' | 'completed'
 
-export function normalizeStatus(status?: string) {
-  return status?.trim().toUpperCase() ?? ''
-}
+export { normalizeStatus }
 
 export function plannerStatusKey(status?: string): PlannerStatusKey {
   const value = normalizeStatus(status)

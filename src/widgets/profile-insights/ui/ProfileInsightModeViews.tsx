@@ -1,7 +1,7 @@
 import { useMemo, type KeyboardEvent, type MouseEvent } from 'react'
 import { Button as PartTripButton } from '@/shared/ui/parttrip'
 import koreaRegionsSvg from '@/shared/assets/figma/korea-regions.svg?raw'
-import { isPositiveSafeInteger } from '@/shared/utils'
+import { formatDate, isPositiveSafeInteger } from '@/shared/utils'
 import type { DomesticRegionVisit } from '../model/profile-insight'
 
 import * as S from './ProfileInsightPage.styles'
@@ -149,7 +149,7 @@ export function ProfileCountriesView({
   if (!activeRegion) return <S.State>지역으로 확인할 수 있는 국내 여행 기록이 없습니다.</S.State>
 
   const cities = [...new Set(activeRegion.trips.map((trip) => trip.cityName?.trim()).filter((city): city is string => Boolean(city)))]
-  const firstVisit = activeRegion.trips.map((trip) => trip.startDate).filter((date): date is string => Boolean(date)).sort()[0]?.replaceAll('-', '.') ?? '-'
+  const firstVisit = formatDate(activeRegion.trips.map((trip) => trip.startDate).filter((date): date is string => Boolean(date)).sort()[0])
   const photoCount = activeRegion.trips.reduce((count, trip) => count + (trip.photoCount ?? trip.images?.length ?? 0), 0)
 
   return (

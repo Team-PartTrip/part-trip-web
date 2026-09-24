@@ -31,9 +31,9 @@ export function categoryTone(type?: NotificationType) {
 }
 
 export function relativeTime(value?: string) {
-  if (!value) return '방금 전'
-  const timestamp = Date.parse(value)
-  if (Number.isNaN(timestamp)) return '방금 전'
+  const date = parsedDate(value)
+  if (!date) return '방금 전'
+  const timestamp = date.getTime()
   const minutes = Math.max(1, Math.floor((Date.now() - timestamp) / 60000))
   if (minutes < 60) return `${minutes}분 전`
   const hours = Math.floor(minutes / 60)
@@ -42,8 +42,8 @@ export function relativeTime(value?: string) {
 }
 
 function timestampLabel(value?: string) {
-  const date = value ? new Date(value) : undefined
-  if (!date || Number.isNaN(date.getTime())) return ''
+  const date = parsedDate(value)
+  if (!date) return ''
   return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
 }
 
@@ -89,9 +89,10 @@ export function isToday(value?: string) {
 export function sectionLabel(notifications: Array<{ createdAt?: string; read?: boolean }>, index: number, todayUnreadCount: number, firstUnreadTodayIndex = notifications.findIndex((item) => isToday(item.createdAt) && item.read !== true)) {
   const notification = notifications[index]
   const previous = notifications[index - 1]
-  const unreadToday = isToday(notification.createdAt) && notification.read !== true
+  const notificationIsToday = isToday(notification.createdAt)
+  const unreadToday = notificationIsToday && notification.read !== true
   if (unreadToday && index === firstUnreadTodayIndex) return `오늘 · 읽지 않음 ${todayUnreadCount}`
-  const thisWeek = isInCurrentCalendarWeek(notification.createdAt) && !isToday(notification.createdAt)
+  const thisWeek = isInCurrentCalendarWeek(notification.createdAt) && !notificationIsToday
   const previousThisWeek = previous && isInCurrentCalendarWeek(previous.createdAt) && !isToday(previous.createdAt)
   return thisWeek && !previousThisWeek ? '이번 주' : undefined
 }

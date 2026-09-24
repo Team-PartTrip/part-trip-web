@@ -9,9 +9,8 @@ import {
   getPlannerSchedule,
   getPlannerScheduleCandidates,
 } from './api'
+import { isPositiveSafeInteger } from '@/shared/utils'
 import { plannerQueryKeys } from './query-keys'
-
-const isPositiveInteger = (value: number) => Number.isInteger(value) && value > 0
 
 export const myPlannersQueryOptions = (enabled = true) =>
   queryOptions({ queryKey: plannerQueryKeys.list(), queryFn: getMyPlanners, enabled })
@@ -38,7 +37,7 @@ export const plannerDetailQueryOptions = (plannerId: number, enabled = true) =>
   queryOptions({
     queryKey: plannerQueryKeys.detail(plannerId),
     queryFn: () => getPlannerDetail(plannerId),
-    enabled: enabled && isPositiveInteger(plannerId),
+    enabled: enabled && isPositiveSafeInteger(plannerId),
   })
 
 export function usePlannerDetailQuery(plannerId: number, enabled = true) {
@@ -49,7 +48,7 @@ export const plannerMembersQueryOptions = (plannerId: number, enabled = true) =>
   queryOptions({
     queryKey: plannerQueryKeys.members(plannerId),
     queryFn: () => getPlannerMembers(plannerId),
-    enabled: enabled && isPositiveInteger(plannerId),
+    enabled: enabled && isPositiveSafeInteger(plannerId),
   })
 
 export function usePlannerMembersQuery(plannerId: number, enabled = true) {
@@ -60,7 +59,7 @@ export const plannerScheduleQueryOptions = (plannerId: number, enabled = true) =
   queryOptions({
     queryKey: plannerQueryKeys.schedule(plannerId),
     queryFn: () => getPlannerSchedule(plannerId),
-    enabled: enabled && isPositiveInteger(plannerId),
+    enabled: enabled && isPositiveSafeInteger(plannerId),
   })
 
 export function usePlannerScheduleQuery(plannerId: number, enabled = true) {
@@ -71,6 +70,6 @@ export function usePlannerScheduleCandidatesQuery(plannerId: number, date: strin
   return useQuery({
     queryKey: plannerQueryKeys.scheduleCandidates(plannerId, date, query),
     queryFn: () => getPlannerScheduleCandidates(plannerId, date, query),
-    enabled: enabled && isPositiveInteger(plannerId) && Boolean(date),
+    enabled: enabled && isPositiveSafeInteger(plannerId) && Boolean(date),
   })
 }

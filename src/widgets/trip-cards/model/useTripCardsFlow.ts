@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
 
-import { useDeleteTravelCardsMutation } from '@/entities/trip-card'
-import { useMyTrips, useTripQuery } from '@/entities/trip-plan'
+import { useDeleteTravelCardsMutation, useMyTravelRecords, useTravelRecordQuery } from '@/entities/trip-card'
 
 export type TripCardsMode = 'list' | 'detail' | 'create' | 'delete'
 
@@ -11,8 +10,8 @@ export function useTripCardsFlow(mode: TripCardsMode) {
   const { tripId } = useParams({ strict: false })
   const [selected, setSelected] = useState<number[]>([])
   const [message, setMessage] = useState('')
-  const tripQuery = useTripQuery(Number(tripId))
-  const myTripsQuery = useMyTrips(mode !== 'detail')
+  const tripQuery = useTravelRecordQuery(Number(tripId))
+  const myTripsQuery = useMyTravelRecords(mode !== 'detail')
   const deleteMutation = useDeleteTravelCardsMutation()
   const cards = myTripsQuery.trips
   const detail = tripQuery.data

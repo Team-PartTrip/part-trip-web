@@ -9,13 +9,11 @@ import {
   type TravelCardEntryCommentRequestDto,
   type TravelCardEntryRequestDto,
 } from './api'
-import { tripPlanQueryKeys } from '@/entities/trip-plan/query-keys'
 import { tripCardQueryKeys } from './query-keys'
 
 function invalidateTripCardQueries(queryClient: QueryClient) {
   return Promise.all([
     queryClient.invalidateQueries({ queryKey: tripCardQueryKeys.all }),
-    queryClient.invalidateQueries({ queryKey: tripPlanQueryKeys.all }),
   ])
 }
 

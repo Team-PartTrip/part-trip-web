@@ -1,4 +1,5 @@
 import { createGlobalStyle } from 'styled-components'
+import { highContrastTheme } from '@/shared/theme'
 
 export const GlobalStyle = createGlobalStyle`
   :root {
@@ -80,38 +81,38 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   [data-accessibility-root][data-high-contrast='true'] {
-    --pt-bg-default: #ffffff;
-    --pt-bg-error: #ffffff;
-    --pt-bg-info: #ffffff;
-    --pt-bg-muted: #f2f2f2;
-    --pt-bg-soft: #ffffff;
-    --pt-bg-subtle: #ffffff;
-    --pt-bg-warning: #ffffff;
-    --pt-brand-primary: #0056b3;
-    --pt-brand-strong: #003366;
-    --pt-border-default: #555555;
-    --pt-border-soft: #555555;
-    --pt-border-subtle: #555555;
-    --pt-status-error: #a40000;
-    --pt-status-warning: #744200;
-    --pt-text-inverse: #ffffff;
-    --pt-text-muted: #333333;
-    --pt-text-placeholder: #333333;
-    --pt-text-strong: #000000;
-    color: #000;
-    background: #fff;
+    --pt-bg-default: ${highContrastTheme.colors.background.default};
+    --pt-bg-error: ${highContrastTheme.colors.background.error};
+    --pt-bg-info: ${highContrastTheme.colors.background.info};
+    --pt-bg-muted: ${highContrastTheme.colors.background.muted};
+    --pt-bg-soft: ${highContrastTheme.colors.background.soft};
+    --pt-bg-subtle: ${highContrastTheme.colors.background.subtle};
+    --pt-bg-warning: ${highContrastTheme.colors.background.warning};
+    --pt-brand-primary: ${highContrastTheme.colors.brand.primary};
+    --pt-brand-strong: ${highContrastTheme.colors.brand.strong};
+    --pt-border-default: ${highContrastTheme.colors.border.default};
+    --pt-border-soft: ${highContrastTheme.colors.border.soft};
+    --pt-border-subtle: ${highContrastTheme.colors.border.subtle};
+    --pt-status-error: ${highContrastTheme.colors.status.error};
+    --pt-status-warning: ${highContrastTheme.colors.status.warning};
+    --pt-text-inverse: ${highContrastTheme.colors.text.inverse};
+    --pt-text-muted: ${highContrastTheme.colors.text.muted};
+    --pt-text-placeholder: ${highContrastTheme.colors.text.placeholder};
+    --pt-text-strong: ${highContrastTheme.colors.text.strong};
+    color: ${highContrastTheme.colors.text.default};
+    background: ${highContrastTheme.colors.background.default};
   }
 
   [data-accessibility-root][data-high-contrast='true'] :is(p, span, small, label, li, dt, dd, h1, h2, h3, h4, strong, b):not(button *):not(a *) {
-    color: #111 !important;
+    color: ${highContrastTheme.colors.text.default} !important;
   }
 
   [data-accessibility-root][data-high-contrast='true'] :is(button, input, select, textarea) {
-    border-color: #555 !important;
+    border-color: ${highContrastTheme.colors.border.default} !important;
   }
 
   [data-accessibility-root][data-high-contrast='true'] input::placeholder {
-    color: #333 !important;
+    color: ${highContrastTheme.colors.text.muted} !important;
     opacity: 1;
   }
 
@@ -120,6 +121,6 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   [data-accessibility-root][data-high-contrast='true'] :is(button, a, input, select, textarea):focus-visible {
-    outline-color: #000 !important;
+    outline-color: ${highContrastTheme.colors.text.strong} !important;
   }
 `

@@ -16,7 +16,7 @@ import { useCountriesQuery } from '@/entities/travel'
 import { ACTIVE_PLANNER_ID_KEY, PLANNER_CONFIRMED_KEY, paths } from '@/shared/config'
 import { readSessionId, readSessionValue, writeSessionValue } from '@/shared/libs/session-storage'
 import { Button, Input } from '@/shared/ui/parttrip'
-import { formatDateRange } from '@/shared/utils'
+import { formatCalendarDate, formatDateRange, normalizeStatus } from '@/shared/utils'
 import { isPositiveSafeInteger } from '@/shared/utils/number'
 import { AppShell } from '@/widgets/app-shell'
 import { activatePlannerSession } from '../model/planner-session'
@@ -33,6 +33,13 @@ type SelectionMap = Record<string, string[]>
 
 const suggestedBlockTypes = ['TRAVEL_TYPE', 'COMPANION', 'WALK_PREFERENCE', 'DAILY_DENSITY', 'FOOD_TYPE', 'LODGING_TYPE', 'MUST_INCLUDE', 'EXCLUDE']
 const stepIndex: Record<Step, number> = { destination: 1, criteria: 2, schedule: 3, invite: 4 }
+
+function maxEndDateFor(startDate?: string) {
+  if (!startDate) return undefined
+  const date = new Date(`${startDate}T00:00:00`)
+  date.setDate(date.getDate() + 13)
+  return formatCalendarDate(date.getFullYear(), date.getMonth(), date.getDate())
+}
 
 function toSelectionMap(blocks: PlannerBlockDto[] = []): SelectionMap {
   return blocks.reduce<SelectionMap>((result, block) => {
@@ -65,18 +72,14 @@ export function PlannerAiFlow({ step }: { step: Step }) {
   const [message, setMessage] = useState('')
   const [confirmed, setConfirmed] = useState(false)
   const [inviteFeedback, setInviteFeedback] = useState('')
-  const today = new Date().toLocaleDateString('sv-SE')
-  const maxEndDate = useMemo(() => {
-    if (!startDate) return undefined
-    const date = new Date(`${startDate}T00:00:00`)
-    date.setDate(date.getDate() + 13)
-    return date.toLocaleDateString('sv-SE')
-  }, [startDate])
+  const now = new Date()
+  const today = formatCalendarDate(now.getFullYear(), now.getMonth(), now.getDate())
+  const maxEndDate = maxEndDateFor(startDate)
   const blocks = useMemo(() => getBlockValues(selections), [selections])
   const existingTripConflict = plannersQuery.data
     ? overlapsExistingTrip(plannersQuery.data, startDate, endDate)
     : false
-  const serverConfirmed = ['CONFIRMED', 'TRAVELING', 'COMPLETED'].includes((detailQuery.data?.status ?? '').toUpperCase())
+  const serverConfirmed = ['CONFIRMED', 'TRAVELING', 'COMPLETED'].includes(normalizeStatus(detailQuery.data?.status))
   const isConfirmed = confirmed || serverConfirmed || readSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`) === 'true'
   const canManageCurrentPlanner = canManagePlanner(detailQuery.data?.role)
 
@@ -257,10 +260,9 @@ export function PlannerAiFlow({ step }: { step: Step }) {
                   <S.DateGrid>
                     <div><label htmlFor="planner-start-date">출발일</label><Input id="planner-start-date" type="date" min={today} max={maxEndDate} value={startDate} onChange={(event) => {
                       const nextStartDate = event.target.value
-                      const lastAllowedDate = new Date(`${nextStartDate}T00:00:00`)
-                      lastAllowedDate.setDate(lastAllowedDate.getDate() + 13)
+                      const lastAllowedDate = maxEndDateFor(nextStartDate)
                       setStartDate(nextStartDate)
-                      if (endDate && endDate > lastAllowedDate.toLocaleDateString('sv-SE')) setEndDate('')
+                      if (endDate && lastAllowedDate && endDate > lastAllowedDate) setEndDate('')
                     }} /></div>
                     <div><label htmlFor="planner-end-date">도착일</label><Input id="planner-end-date" type="date" min={startDate || today} max={maxEndDate} value={endDate} onChange={(event) => setEndDate(event.target.value)} /></div>
                   </S.DateGrid>

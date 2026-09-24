@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useSearch } from "@tanstack/react-router";
 import { useCreateTravelCardEntryMutation } from "@/entities/trip-card";
-import type { TripPlanResponseDto } from "@/entities/trip-plan";
-import { getErrorMessage } from "@/shared/utils";
+import type { TravelRecordDto } from "@/entities/trip-card";
+import { getErrorMessage, isPositiveSafeInteger } from "@/shared/utils";
 
 export const MAX_PHOTOS = 4;
 
 type PhotoDraft = { file: File; url: string };
-type Props = { cards: TripPlanResponseDto[] };
+type Props = { cards: TravelRecordDto[] };
 
 export function useTripCardPhotoComposer({ cards }: Props) {
   const search = useSearch({ strict: false }) as { cardId?: string };
@@ -53,7 +53,7 @@ export function useTripCardPhotoComposer({ cards }: Props) {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const cardId = Number(selectedCard?.tripId);
-    if (!Number.isSafeInteger(cardId) || cardId <= 0) {
+    if (!isPositiveSafeInteger(cardId)) {
       setErrorMessage("사진을 추가할 여행 카드를 선택해주세요.");
       return;
     }

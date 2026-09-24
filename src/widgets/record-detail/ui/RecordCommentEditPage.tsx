@@ -1,7 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router'
-import { useUpdateTravelCardEntryCommentMutation } from '@/entities/trip-card'
-import { useTripQuery } from '@/entities/trip-plan'
+import { useTravelRecordQuery, useUpdateTravelCardEntryCommentMutation } from '@/entities/trip-card'
 import { figmaRecordMapPhoto } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import { formatDate, getErrorMessage } from '@/shared/utils'
@@ -13,7 +12,7 @@ export function RecordCommentEditPage() {
   const navigate = useNavigate()
   const { recordId = '' } = useParams({ strict: false })
   const search = useSearch({ strict: false }) as { entryId?: string }
-  const { data: record, isError, isLoading } = useTripQuery(Number(recordId))
+  const { data: record, isError, isLoading } = useTravelRecordQuery(Number(recordId))
   const [content, setContent] = useState<string>()
   const [message, setMessage] = useState('')
   const updateMutation = useUpdateTravelCardEntryCommentMutation()

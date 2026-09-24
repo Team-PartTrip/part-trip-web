@@ -3,7 +3,7 @@ import { useMyPlannersQuery, usePlannerScheduleQuery } from '@/entities/planner'
 import { useMainTravelQuery } from '@/entities/travel'
 import { figmaPlannerIcon } from '@/shared/assets'
 import { paths } from '@/shared/config'
-import { formatDateRange, formatTripDuration } from '@/shared/utils'
+import { formatCalendarDate, formatDateRange, formatTripDuration, normalizeStatus } from '@/shared/utils'
 import { activatePlannerSession } from '@/widgets/planner'
 import { AppShell } from '@/widgets/app-shell'
 
@@ -16,12 +16,13 @@ export function MainPage() {
   const plan = data.plan
   const hasPlan = hasTravelPlan(plan)
   const isDuring = plan?.status === 'DURING'
-  const today = getLocalDateKey()
+  const date = new Date()
+  const today = formatCalendarDate(date.getFullYear(), date.getMonth(), date.getDate())
   const { data: planners = [], isError: plannerListError, isLoading: isPlannerListLoading } = useMyPlannersQuery(isDuring)
   const currentPlanner = planners.find((planner) =>
     isDuring
     && Boolean(planner.plannerId && plan?.startDate && plan.endDate)
-    && ['CONFIRMED', 'TRAVELING'].includes(planner.status?.trim().toUpperCase() ?? '')
+    && ['CONFIRMED', 'TRAVELING'].includes(normalizeStatus(planner.status))
     && planner.startDate === plan?.startDate
     && planner.endDate === plan?.endDate
     && (!plan?.cityName || !planner.cityName || planner.cityName.trim() === plan.cityName.trim()),
@@ -130,10 +131,3 @@ export function MainPage() {
 }
 
 export default MainPage
-
-function getLocalDateKey() {
-  const date = new Date()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${date.getFullYear()}-${month}-${day}`
-}

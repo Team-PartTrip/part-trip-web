@@ -1,4 +1,5 @@
 export { activatePlannerSession } from './model/planner-session'
+export { normalizeStatus } from './model/status'
 export {
   PlannerDestinationPage,
   PlannerExplorePage,

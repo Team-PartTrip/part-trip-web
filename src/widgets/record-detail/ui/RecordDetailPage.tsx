@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
-import { useTripQuery } from '@/entities/trip-plan'
+import { useTravelRecordQuery } from '@/entities/trip-card'
 import { figmaRecordDetail } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import { getErrorMessage } from '@/shared/utils'
@@ -13,7 +13,7 @@ import * as S from './RecordDetailPage.styles'
 export function RecordDetailPage() {
   const navigate = useNavigate()
   const { recordId = '' } = useParams({ strict: false })
-  const { data: record, isLoading, isError: hasRecordError } = useTripQuery(Number(recordId))
+  const { data: record, isLoading, isError: hasRecordError } = useTravelRecordQuery(Number(recordId))
   const placeTitle = record?.places?.[0]?.placeName || record?.title || '여행 기록'
   const recordImages = record?.images?.filter((image): image is string => Boolean(image)) ?? []
   const [photoIndex, setPhotoIndex] = useState(0)

@@ -1,13 +1,8 @@
-import { apiClient, resolveApiAssetUrl } from '@/shared/libs/api-client'
-import {
-  getTravelCard,
-  listTravelCards,
-  type TravelCardDetailDto,
-  type TravelCardListItemDto,
-} from '@/entities/trip-card/api'
-import { sortTripHistoryNewestFirst, sortTripTimelineChronologically } from './metrics'
+import { resolveApiAssetUrl } from '@/shared/libs/api-client'
+import { getTravelCard, listTravelCards, type TravelCardDetailDto, type TravelCardListItemDto } from './api'
+import { sortTravelRecordsNewestFirst, sortTravelTimelineChronologically } from './record-metrics'
 
-export type TripPlanPlaceResponseDto = {
+export type TravelRecordPlaceDto = {
   tripPlaceId?: number
   dayNumber?: number
   latitude?: number
@@ -16,7 +11,7 @@ export type TripPlanPlaceResponseDto = {
   placeSub?: string
 }
 
-export type TripPlanResponseDto = {
+export type TravelRecordDto = {
   tripId?: number
   userId?: string
   nickName?: string
@@ -34,19 +29,12 @@ export type TripPlanResponseDto = {
   commentCount?: number
   isPublic?: boolean
   createDate?: string
-  places?: TripPlanPlaceResponseDto[]
+  places?: TravelRecordPlaceDto[]
   timeline?: TravelCardDetailDto['timeline']
 }
 
-const TRIP_API_PATHS = {
-  cards: '/travel-cards',
-} as const
-
-function toTripPlan(
-  card?: TravelCardListItemDto,
-  detail?: TravelCardDetailDto,
-): TripPlanResponseDto {
-  const timeline = sortTripTimelineChronologically((detail?.timeline ?? []).map((item) => ({
+function toTravelRecord(card?: TravelCardListItemDto, detail?: TravelCardDetailDto): TravelRecordDto {
+  const timeline = sortTravelTimelineChronologically((detail?.timeline ?? []).map((item) => ({
     ...item,
     imageUrl: resolveApiAssetUrl(item.imageUrl) ?? item.imageUrl,
   })))
@@ -83,26 +71,12 @@ function toTripPlan(
   }
 }
 
-export async function getTrip(tripId: number): Promise<TripPlanResponseDto> {
-  const [cards, detail] = await Promise.all([
-    listTravelCards(),
-    getTravelCard(tripId),
-  ])
-  return toTripPlan(cards.find((card) => card.cardId === tripId), detail)
+export async function getTravelRecord(tripId: number): Promise<TravelRecordDto> {
+  const [cards, detail] = await Promise.all([listTravelCards(), getTravelCard(tripId)])
+  return toTravelRecord(cards.find((card) => card.cardId === tripId), detail)
 }
 
-export async function deleteTrip(tripId: number): Promise<string> {
-  const { data } = await apiClient.delete<string>(TRIP_API_PATHS.cards, {
-    data: { cardIds: [tripId] },
-  })
-  return data
-}
-
-export async function getMyTrips(): Promise<TripPlanResponseDto[]> {
-  return getTripHistory()
-}
-
-export async function getTripHistory(): Promise<TripPlanResponseDto[]> {
+export async function getTravelRecords(): Promise<TravelRecordDto[]> {
   const cards = await listTravelCards()
-  return sortTripHistoryNewestFirst(cards.map((card) => toTripPlan(card)))
+  return sortTravelRecordsNewestFirst(cards.map((card) => toTravelRecord(card)))
 }

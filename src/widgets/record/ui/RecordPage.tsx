@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { useMyTrips } from '@/entities/trip-plan'
+import { useMyTravelRecords } from '@/entities/trip-card'
 import { paths } from '@/shared/config'
 import { Button as PartTripButton } from '@/shared/ui/parttrip'
 import { formatCalendarDate, formatDate } from '@/shared/utils'
@@ -10,7 +10,7 @@ import * as S from './RecordPage.styles'
 
 export function RecordPage() {
   const navigate = useNavigate()
-  const { hasError, isLoading, trips } = useMyTrips()
+  const { hasError, isLoading, trips } = useMyTravelRecords()
   const [year, setYear] = useState('all')
   const now = new Date()
   const today = formatCalendarDate(now.getFullYear(), now.getMonth(), now.getDate())

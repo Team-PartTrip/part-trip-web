@@ -258,7 +258,7 @@ export const RecommendationImage = styled.div<{ $imageUrl?: string }>`
   place-items: center;
   border: 1px solid ${({ theme }) => theme.colors.border.subtle};
   border-radius: 16px;
-  background-color: #ebf4fc;
+  background-color: ${({ theme }) => theme.colors.background.muted};
   background-image: ${({ $imageUrl }) => ($imageUrl ? `url(${JSON.stringify($imageUrl)})` : 'none')};
   background-position: center;
   background-size: cover;

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { useMyTrips, useTripQuery } from '@/entities/trip-plan'
+import { useMyTravelRecords, useTravelRecordQuery } from '@/entities/trip-card'
 import { figmaRecordMap } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import { AppShell } from '@/widgets/app-shell'
@@ -11,11 +11,11 @@ import * as S from './RecordMapPage.styles'
 // ponytail: the bundled raster map is Osaka-only; replace with a real map viewport for other cities.
 export function RecordMapPage() {
   const navigate = useNavigate()
-  const tripsQuery = useMyTrips()
+  const tripsQuery = useMyTravelRecords()
   const { trips } = tripsQuery
   const [selectedTripId, setSelectedTripId] = useState<number>()
   const tripSummary = trips.find((item) => item.tripId === selectedTripId) ?? trips[0]
-  const tripQuery = useTripQuery(Number(tripSummary?.tripId))
+  const tripQuery = useTravelRecordQuery(Number(tripSummary?.tripId))
   const trip = tripQuery.data ?? tripSummary
   const isLoading = tripsQuery.isLoading || (tripSummary?.tripId != null && tripQuery.isLoading)
   const hasError = tripsQuery.hasError || tripQuery.isError

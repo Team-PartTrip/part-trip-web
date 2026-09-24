@@ -1,12 +1,9 @@
-import type { TripPlanResponseDto } from './api'
-import { getDateRangeDays } from '../../shared/utils/date.ts'
-
-type DatedTripCard = { startDate?: string | null }
+type DatedTravelCard = { startDate?: string | null }
 type DatedTimelineItem = { date?: string | null; takenAt?: string | null }
 
-export function sortTripHistoryNewestFirst<T extends DatedTripCard>(trips: readonly T[]) {
-  return trips
-    .map((trip, index) => ({ index, timestamp: trip.startDate ? Date.parse(trip.startDate) : Number.NaN, trip }))
+export function sortTravelRecordsNewestFirst<T extends DatedTravelCard>(records: readonly T[]) {
+  return records
+    .map((record, index) => ({ index, timestamp: record.startDate ? Date.parse(record.startDate) : Number.NaN, record }))
     .sort((left, right) => {
       const leftHasDate = Number.isFinite(left.timestamp)
       const rightHasDate = Number.isFinite(right.timestamp)
@@ -14,10 +11,10 @@ export function sortTripHistoryNewestFirst<T extends DatedTripCard>(trips: reado
       if (leftHasDate !== rightHasDate) return leftHasDate ? -1 : 1
       return left.index - right.index
     })
-    .map(({ trip }) => trip)
+    .map(({ record }) => record)
 }
 
-export function sortTripTimelineChronologically<T extends DatedTimelineItem>(items: readonly T[]) {
+export function sortTravelTimelineChronologically<T extends DatedTimelineItem>(items: readonly T[]) {
   const timestampOf = (item: T) => {
     const takenAt = item.takenAt ? Date.parse(item.takenAt) : Number.NaN
     if (Number.isFinite(takenAt)) return takenAt
@@ -33,11 +30,4 @@ export function sortTripTimelineChronologically<T extends DatedTimelineItem>(ite
       return left.index - right.index
     })
     .map(({ item }) => item)
-}
-
-export function getTripDurationDays(trips: TripPlanResponseDto[]) {
-  return trips.reduce((total, trip) => {
-    const days = getDateRangeDays(trip.startDate, trip.endDate)
-    return days == null ? total : total + days
-  }, 0)
 }

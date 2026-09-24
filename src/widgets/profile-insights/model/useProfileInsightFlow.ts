@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 
 import { useAcquireCountryMutation, useWorldMapQuery, useWorldMapStatsQuery } from '@/entities/world-map'
-import { useMyTrips } from '@/entities/trip-plan'
+import { useMyTravelRecords } from '@/entities/trip-card'
 import { paths } from '@/shared/config'
 import { readSessionValue, writeSessionValue } from '@/shared/libs/session-storage'
 import { isPositiveSafeInteger } from '@/shared/utils'
@@ -15,7 +15,7 @@ const PROFILE_COUNTRY_KEY = 'parttrip:profile-selected-country'
 
 export function useProfileInsightFlow(kind: ProfileInsightKind) {
   const navigate = useNavigate()
-  const { hasError: hasTripsError, isLoading: isTripsLoading, trips } = useMyTrips()
+  const { hasError: hasTripsError, isLoading: isTripsLoading, trips } = useMyTravelRecords()
   const needsWorldMap = kind === 'claim'
   const worldMapQuery = useWorldMapQuery(needsWorldMap)
   const worldMapStatsQuery = useWorldMapStatsQuery(false)

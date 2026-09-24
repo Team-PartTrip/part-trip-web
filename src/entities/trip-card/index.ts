@@ -1,3 +1,5 @@
 export * from './api'
 export * from './mutations'
+export * from './record-queries'
+export * from './records'
 export * from './query-keys'

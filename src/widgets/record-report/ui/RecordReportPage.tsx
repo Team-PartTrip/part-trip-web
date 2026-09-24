@@ -1,5 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
-import { useMyTrips } from '@/entities/trip-plan'
+import { useMyTravelRecords } from '@/entities/trip-card'
 import { paths } from '@/shared/config'
 import { Skeleton } from '@/shared/ui/parttrip'
 import { AppShell } from '@/widgets/app-shell'
@@ -8,7 +8,7 @@ import * as S from './RecordReportPage.styles'
 
 export function RecordReportPage() {
   const navigate = useNavigate()
-  const { hasError, isLoading, trips } = useMyTrips()
+  const { hasError, isLoading, trips } = useMyTravelRecords()
   const trip = trips[0]
   const photos = trip?.images?.slice(0, 3) ?? []
   const places = trip?.places ?? []

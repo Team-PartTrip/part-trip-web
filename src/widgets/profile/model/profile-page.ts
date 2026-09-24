@@ -1,11 +1,11 @@
-import type { TripPlanResponseDto } from '@/entities/trip-plan'
+import type { TravelRecordDto } from '@/entities/trip-card'
 import type { ProfileStatsResponseDto, UserProfile } from '@/entities/user'
 import type { WorldMapResponseDto } from '@/entities/world-map'
 
 type ProfilePageModelProps = {
   profile?: UserProfile
   profileStats?: ProfileStatsResponseDto
-  trips: TripPlanResponseDto[]
+  trips: TravelRecordDto[]
   worldMap?: WorldMapResponseDto
 }
 
