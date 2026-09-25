@@ -6,11 +6,12 @@ import { ThemeProvider } from 'styled-components'
 
 import { routeTree } from './routeTree.gen'
 import { AUTH_EXPIRED_EVENT } from '@/shared/libs/auth-expiration'
+import { shouldRetryQuery } from '@/shared/libs/query-retry'
 import { GlobalStyle } from '@/shared/ui/global-style'
 import { appTheme } from '@/shared/theme'
 
 const router = createRouter({ routeTree })
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({ defaultOptions: { queries: { retry: shouldRetryQuery } } })
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ''
 
 window.addEventListener(AUTH_EXPIRED_EVENT, () => {
