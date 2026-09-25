@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as appAuthenticatedRouteRouteImport } from './routes/(app)/_authenticated/route'
 import { Route as homeIndexRouteImport } from './routes/(home)/index'
 import { Route as publicLoginIndexRouteImport } from './routes/(public)/login/index'
+import { Route as publicPrivacyIndexRouteImport } from './routes/(public)/privacy/index'
 import { Route as publicSignUpIndexRouteImport } from './routes/(public)/sign-up/index'
 import { Route as appAuthenticatedMainIndexRouteImport } from './routes/(app)/_authenticated/main/index'
 import { Route as appAuthenticatedNotificationsIndexRouteImport } from './routes/(app)/_authenticated/notifications/index'
@@ -59,6 +60,11 @@ const homeIndexRoute = homeIndexRouteImport.update({
 const publicLoginIndexRoute = publicLoginIndexRouteImport.update({
   id: '/(public)/login/',
   path: '/login/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const publicPrivacyIndexRoute = publicPrivacyIndexRouteImport.update({
+  id: '/(public)/privacy/',
+  path: '/privacy/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const publicSignUpIndexRoute = publicSignUpIndexRouteImport.update({
@@ -268,6 +274,7 @@ const appAuthenticatedRecordRecordIdEditIndexRoute =
 export interface FileRoutesByFullPath {
   '/': typeof homeIndexRoute
   '/login/': typeof publicLoginIndexRoute
+  '/privacy/': typeof publicPrivacyIndexRoute
   '/sign-up/': typeof publicSignUpIndexRoute
   '/main/': typeof appAuthenticatedMainIndexRoute
   '/notifications/': typeof appAuthenticatedNotificationsIndexRoute
@@ -306,6 +313,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof homeIndexRoute
   '/login': typeof publicLoginIndexRoute
+  '/privacy': typeof publicPrivacyIndexRoute
   '/sign-up': typeof publicSignUpIndexRoute
   '/main': typeof appAuthenticatedMainIndexRoute
   '/notifications': typeof appAuthenticatedNotificationsIndexRoute
@@ -346,6 +354,7 @@ export interface FileRoutesById {
   '/(app)/_authenticated': typeof appAuthenticatedRouteRouteWithChildren
   '/(home)/': typeof homeIndexRoute
   '/(public)/login/': typeof publicLoginIndexRoute
+  '/(public)/privacy/': typeof publicPrivacyIndexRoute
   '/(public)/sign-up/': typeof publicSignUpIndexRoute
   '/(app)/_authenticated/main/': typeof appAuthenticatedMainIndexRoute
   '/(app)/_authenticated/notifications/': typeof appAuthenticatedNotificationsIndexRoute
@@ -386,6 +395,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login/'
+    | '/privacy/'
     | '/sign-up/'
     | '/main/'
     | '/notifications/'
@@ -424,6 +434,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/privacy'
     | '/sign-up'
     | '/main'
     | '/notifications'
@@ -463,6 +474,7 @@ export interface FileRouteTypes {
     | '/(app)/_authenticated'
     | '/(home)/'
     | '/(public)/login/'
+    | '/(public)/privacy/'
     | '/(public)/sign-up/'
     | '/(app)/_authenticated/main/'
     | '/(app)/_authenticated/notifications/'
@@ -503,6 +515,7 @@ export interface RootRouteChildren {
   appAuthenticatedRouteRoute: typeof appAuthenticatedRouteRouteWithChildren
   homeIndexRoute: typeof homeIndexRoute
   publicLoginIndexRoute: typeof publicLoginIndexRoute
+  publicPrivacyIndexRoute: typeof publicPrivacyIndexRoute
   publicSignUpIndexRoute: typeof publicSignUpIndexRoute
   publicAuthKakaoCallbackIndexRoute: typeof publicAuthKakaoCallbackIndexRoute
 }
@@ -528,6 +541,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login/'
       preLoaderRoute: typeof publicLoginIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(public)/privacy/': {
+      id: '/(public)/privacy/'
+      path: '/privacy'
+      fullPath: '/privacy/'
+      preLoaderRoute: typeof publicPrivacyIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(public)/sign-up/': {
@@ -873,6 +893,7 @@ const rootRouteChildren: RootRouteChildren = {
   appAuthenticatedRouteRoute: appAuthenticatedRouteRouteWithChildren,
   homeIndexRoute: homeIndexRoute,
   publicLoginIndexRoute: publicLoginIndexRoute,
+  publicPrivacyIndexRoute: publicPrivacyIndexRoute,
   publicSignUpIndexRoute: publicSignUpIndexRoute,
   publicAuthKakaoCallbackIndexRoute: publicAuthKakaoCallbackIndexRoute,
 }
