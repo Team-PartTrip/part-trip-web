@@ -6,6 +6,7 @@ test('국내 플래너는 서버가 대한민국으로 분류한 실제 도시�
   const cities = getDomesticCityNames([
     { countryName: '대한민국', cityName: ' 서울 ' },
     { countryName: '대한민국', cityName: '서울' },
+    { countryName: '대한민국', cityName: '대한민국' },
     { countryName: '일본', cityName: '오사카' },
     { countryName: '대한민국', cityName: ' ' },
   ])

@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict'
-import { existsSync, readFileSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
+import { existsSync } from 'node:fs'
 import test from 'node:test'
-
-const projectRoot = fileURLToPath(new URL('..', import.meta.url))
-const read = (path: string) => readFileSync(`${projectRoot}${path}`, 'utf8')
+import { projectRoot, readSource as read } from './helpers.ts'
 
 test('삭제된 기능의 라우트와 공유 여행 API가 남지 않는다', () => {
   const retiredDirectories = [

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createJiti } from 'jiti'
+import { createTestJiti } from './helpers.ts'
 
 import { isMissingTravelPlanResponse } from '../src/entities/travel/main-error.ts'
 
@@ -14,7 +14,7 @@ test('다른 400 응답과 서버 오류는 빈 상태로 처리하지 않는다
 })
 
 test('D-day 응답 상태는 서버 값만 사용하고 잘못된 값은 오류로 처리한다', async () => {
-  const jiti = createJiti(process.cwd(), { alias: { '@': `${process.cwd()}/src` } })
+  const jiti = createTestJiti()
   const api = await jiti.import('./src/entities/travel/api.ts')
   const normalizeDdayResponse = (api as {
     normalizeDdayResponse: (response: {

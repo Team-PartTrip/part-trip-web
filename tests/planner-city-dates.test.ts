@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createJiti } from 'jiti'
+import { createTestJiti } from './helpers.ts'
 
-const jiti = createJiti(process.cwd(), { alias: { '@': `${process.cwd()}/src` } })
+const jiti = createTestJiti()
 const { isValidPlannerDateRange, overlapsExistingTrip } = await jiti.import('./src/widgets/planner/model/planner-date.ts') as {
   isValidPlannerDateRange: (start: string, end: string) => boolean
   overlapsExistingTrip: (trips: Array<{ startDate?: string; endDate?: string; status?: string }>, start: string, end: string) => boolean

@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createJiti } from 'jiti'
+import { createTestJiti } from './helpers.ts'
 
-const jiti = createJiti(process.cwd(), { alias: { '@': `${process.cwd()}/src` } })
+const jiti = createTestJiti()
 const { getDomesticTravelModel, getAnnualTravelSummary, getProfileInsightModel } = await jiti.import('./src/widgets/profile-insights/model/profile-insight.ts') as {
   getDomesticTravelModel: (trips: Array<{ cityName?: string; countryName?: string; startDate?: string; endDate?: string; tripId?: number }>) => { regions: Array<{ code: string; name: string; trips: unknown[] }>; unknownCities: string[]; domesticTrips: unknown[] }
   getAnnualTravelSummary: (trips: Array<{ cityName?: string; countryName?: string; startDate?: string; endDate?: string }>, year: number) => { placesVisited: number; tripCount: number; mostVisitedName?: string; longestStayName?: string; longestStayDays: number }

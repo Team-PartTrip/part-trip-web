@@ -1,10 +1,6 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
 import test from 'node:test'
-
-const projectRoot = fileURLToPath(new URL('..', import.meta.url))
-const read = (path: string) => readFileSync(`${projectRoot}${path}`, 'utf8')
+import { readSource as read } from './helpers.ts'
 
 test('내 여행 지도는 대한민국 시·도 지도이며 국가 획득 경로는 닫혀 있다', () => {
   const page = read('/src/widgets/profile-insights/ui/ProfileInsightPage.tsx')

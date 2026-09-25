@@ -14,4 +14,6 @@ test('백엔드 플래너 상태를 화면 상태로 정확히 분류한다', ()
 })
 
 test('확정 상태 판정은 앞뒤 공백을 정규화한다', () => {
+  assert.equal(plannerStatusKey('  DONE  '), 'completed')
+  assert.equal(plannerStatusLabel('  VOTING  '), '투표 진행 중')
 })
