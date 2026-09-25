@@ -50,13 +50,26 @@ export type CountryInfoResponseDto = {
   summary?: string
 }
 
+export type CitySearchResponseDto = {
+  cityName?: string
+  countryName?: string
+  regionName?: string
+}
+
+export type PopularCityResponseDto = {
+  cityName?: string
+  countryName?: string
+  planCount?: number
+}
+
 const MAIN_API_PATHS = {
   dday: '/main/dday',
   tourPlace: '/main/tour-place',
   tourPlaceMore: '/main/tour-place/more',
   festivals: '/main/festivals',
-  countryInfo: '/main/country-info',
   countries: '/main/countries',
+  cities: '/main/cities',
+  popularCities: '/main/popular-cities',
 } as const
 
 function isTripPhase(value: unknown): value is TripPhase {
@@ -114,15 +127,22 @@ export async function getFestivals(
   return data
 }
 
-export async function getCountryInfo(countryName: string): Promise<CountryInfoResponseDto> {
-  const { data } = await apiClient.get<CountryInfoResponseDto>(MAIN_API_PATHS.countryInfo, { params: { countryName } })
-  return data
-}
-
 export async function getCountries(keyword?: string): Promise<CountryInfoResponseDto[]> {
   const normalizedKeyword = keyword?.trim()
   const { data } = await apiClient.get<CountryInfoResponseDto[]>(MAIN_API_PATHS.countries, {
     params: normalizedKeyword ? { keyword: normalizedKeyword } : undefined,
   })
+  return data
+}
+
+export async function searchCities(countryName: string, keyword: string): Promise<CitySearchResponseDto[]> {
+  const { data } = await apiClient.get<CitySearchResponseDto[]>(MAIN_API_PATHS.cities, {
+    params: { countryName, keyword: keyword.trim() },
+  })
+  return data
+}
+
+export async function getPopularCities(limit: number): Promise<PopularCityResponseDto[]> {
+  const { data } = await apiClient.get<PopularCityResponseDto[]>(MAIN_API_PATHS.popularCities, { params: { limit } })
   return data
 }

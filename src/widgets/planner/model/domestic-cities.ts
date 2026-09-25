@@ -1,8 +1,8 @@
-import type { CountryInfoResponseDto } from '@/entities/travel/api'
+type CityRecord = { countryName?: string; cityName?: string }
 
-export function getDomesticCityNames(countries: CountryInfoResponseDto[]) {
-  return [...new Set(countries
-    .filter((country) => country.countryName?.trim() === '대한민국')
-    .map((country) => country.cityName?.trim())
+export function getDomesticCityNames(cities: CityRecord[]) {
+  return [...new Set(cities
+    .filter((city) => city.countryName?.trim() === '대한민국' && city.cityName?.trim() !== '대한민국')
+    .map((city) => city.cityName?.trim())
     .filter((city): city is string => Boolean(city)))]
 }

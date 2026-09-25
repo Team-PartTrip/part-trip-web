@@ -1,18 +1,16 @@
-import { infiniteQueryOptions, queryOptions, useInfiniteQuery, useQueries, useQuery } from '@tanstack/react-query'
+import { infiniteQueryOptions, queryOptions, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import {
   getCountries,
-  getCountryInfo,
   getDday,
   getFestivals,
   getMoreTourPlaces,
+  getPopularCities,
+  searchCities,
   getTourPlace,
-  type CountryInfoResponseDto,
   type DdayResponseDto,
-  type FestivalResponseDto,
   type TourPlaceResponseDto,
 } from './api'
 import { travelQueryKeys } from './query-keys'
-import { getCalendarMonthsInRange, getDateRangeWithPadding, isDateInRange } from '@/shared/utils'
 
 const countriesQueryOptions = (keyword = '', enabled = true) =>
   queryOptions({
@@ -40,30 +38,28 @@ export function useCountriesQuery(keyword = '', enabled = true) {
   return useQuery(countriesQueryOptions(keyword, enabled))
 }
 
+export function useCitySearchQuery(countryName: string, keyword: string, enabled = true) {
+  return useQuery(queryOptions({
+    queryKey: travelQueryKeys.cities(countryName, keyword),
+    queryFn: () => searchCities(countryName, keyword),
+    enabled: enabled && Boolean(countryName && keyword.trim()),
+  }))
+}
+
+export function usePopularCitiesQuery(limit: number, enabled = true) {
+  return useQuery(queryOptions({
+    queryKey: travelQueryKeys.popularCities(limit),
+    queryFn: () => getPopularCities(limit),
+    enabled,
+  }))
+}
+
 export function useDdayQuery(enabled = true) {
   return useQuery(ddayQueryOptions(enabled))
 }
 
 export function useFestivalMonthQuery(countryName: string | null | undefined, year: number, month: number) {
   return useQuery(festivalsQueryOptions(countryName ?? '', year, month))
-}
-
-export function useTripFestivalsQuery(countryName?: string | null, startDate?: string | null, endDate?: string | null) {
-  const dateRange = getDateRangeWithPadding(startDate, endDate)
-  const months = getCalendarMonthsInRange(dateRange?.startDate, dateRange?.endDate)
-  const isRangeTooLong = Boolean(dateRange && months.length === 0)
-  const queries = useQueries({
-    queries: isRangeTooLong ? [] : months.map(({ year, month }) => festivalsQueryOptions(countryName ?? '', year, month)),
-  })
-  const festivals = queries.flatMap((query) => query.data ?? [])
-
-  return {
-    data: festivals.filter((festival) => isDateInRange(festival?.startDate, dateRange?.startDate, dateRange?.endDate)),
-    dateRange,
-    isError: isRangeTooLong || queries.some((query) => query.isError),
-    isRangeTooLong,
-    isLoading: queries.some((query) => query.isLoading),
-  }
 }
 
 export const tourPlacesQueryOptions = (
@@ -77,15 +73,6 @@ export const tourPlacesQueryOptions = (
     queryFn: () => getTourPlace(countryName, cityName, category),
     enabled: enabled && Boolean(countryName),
   })
-
-export function useTourPlacesQuery(
-  countryName?: string,
-  cityName?: string,
-  category?: string,
-  enabled = true,
-) {
-  return useQuery(tourPlacesQueryOptions(countryName ?? '', cityName, category, enabled))
-}
 
 export const moreTourPlacesQueryOptions = (
   countryName: string,
@@ -111,8 +98,6 @@ export function useMoreTourPlacesQuery(
 }
 
 type MainTravelQueryData = {
-  country?: CountryInfoResponseDto
-  festivals: FestivalResponseDto[]
   plan?: DdayResponseDto
   tourPlaces: TourPlaceResponseDto[]
 }
@@ -122,23 +107,16 @@ export function useMainTravelQuery() {
   const countryName = ddayQuery.data?.countryName ?? ''
   const hasCountry = Boolean(countryName)
     && (ddayQuery.data?.status === 'BEFORE' || ddayQuery.data?.status === 'DURING')
-  const results = useQueries({
-    queries: [
-      { queryKey: travelQueryKeys.country(countryName), queryFn: () => getCountryInfo(countryName), enabled: hasCountry },
-      { queryKey: travelQueryKeys.tourPlaces(countryName), queryFn: () => getTourPlace(countryName), enabled: hasCountry },
-      festivalsQueryOptions(countryName),
-    ],
-  })
-  const [country, tourPlaces, festivals] = results
+  const tourPlaces = useQuery(tourPlacesQueryOptions(countryName, undefined, undefined, hasCountry))
 
   return {
     data: {
-      country: country.data,
-      festivals: festivals.data ?? [],
       plan: ddayQuery.data,
       tourPlaces: tourPlaces.data ?? [],
     } satisfies MainTravelQueryData,
-    isError: ddayQuery.isError || results.some((query) => query.isError),
-    isLoading: ddayQuery.isLoading || results.some((query) => query.isLoading),
+    isError: ddayQuery.isError,
+    isRecommendationsError: tourPlaces.isError,
+    isLoading: ddayQuery.isLoading,
+    isRecommendationsLoading: tourPlaces.isLoading,
   }
 }

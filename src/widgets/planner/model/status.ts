@@ -1,4 +1,4 @@
-import { normalizeStatus } from '@/shared/utils'
+import { normalizeStatus } from '../../../shared/utils/status.ts'
 
 export type PlannerStatusKey = 'active' | 'planned' | 'completed'
 
