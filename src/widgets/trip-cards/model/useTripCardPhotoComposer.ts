@@ -3,10 +3,10 @@ import { useSearch } from "@tanstack/react-router";
 import { useCreateTravelCardEntryMutation } from "@/entities/trip-card";
 import type { TravelRecordDto } from "@/entities/trip-card";
 import { getErrorMessage, isPositiveSafeInteger } from "@/shared/utils";
+import { clearCommentIfUnchanged, removeUploadedPhoto, tryStartPhotoBatch, type PhotoDraft } from "./photo-composer-state";
 
 export const MAX_PHOTOS = 4;
 
-type PhotoDraft = { file: File; url: string };
 type Props = { cards: TravelRecordDto[] };
 
 export function useTripCardPhotoComposer({ cards }: Props) {
@@ -14,10 +14,12 @@ export function useTripCardPhotoComposer({ cards }: Props) {
   const [selectedCardId, setSelectedCardId] = useState(search.cardId ?? "");
   const [photos, setPhotos] = useState<PhotoDraft[]>([]);
   const [comment, setComment] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const photosRef = useRef<PhotoDraft[]>([]);
+  const isUploadingRef = useRef(false);
   const createEntryMutation = useCreateTravelCardEntryMutation();
   const selectedCard = cards.find((card) => String(card.tripId) === selectedCardId) ?? cards[0];
 
@@ -38,7 +40,8 @@ export function useTripCardPhotoComposer({ cards }: Props) {
       .sort((a, b) => a.file.lastModified - b.file.lastModified);
     const nextPhotos = incomingPhotos.slice(0, remaining);
     incomingPhotos.slice(remaining).forEach(({ url }) => URL.revokeObjectURL(url));
-    setPhotos((current) => [...current, ...nextPhotos]);
+    photosRef.current = [...photosRef.current, ...nextPhotos];
+    setPhotos(photosRef.current);
     setSuccessMessage("");
     setErrorMessage(
       nextPhotos.length === 0
@@ -61,32 +64,44 @@ export function useTripCardPhotoComposer({ cards }: Props) {
       setErrorMessage("이미지 파일을 하나 이상 선택해주세요.");
       return;
     }
+    if (!tryStartPhotoBatch(isUploadingRef)) return;
+    setIsUploading(true);
+    const batch = photos;
+    const commentAtSubmit = comment;
+    const submittedComment = comment.trim();
     const photoCount = photos.length;
     let uploadedCount = 0;
     try {
       setErrorMessage("");
       setSuccessMessage("");
-      for (const photo of photos) {
+      for (const photo of batch) {
         await createEntryMutation.mutateAsync({
           cardId,
           payload: {
-            ...(comment.trim() ? { comment: comment.trim() } : {}),
+            ...(submittedComment ? { comment: submittedComment } : {}),
             imageFile: photo.file,
           },
         });
         uploadedCount += 1;
         URL.revokeObjectURL(photo.url);
-        setPhotos((current) => current.filter((item) => item !== photo));
+        photosRef.current = removeUploadedPhoto(photosRef.current, photo);
+        setPhotos(photosRef.current);
       }
       setSuccessMessage(`${photoCount}장의 사진을 여행 카드에 추가했습니다.`);
-      setPhotos([]);
-      setComment("");
+      setComment((current) => clearCommentIfUnchanged(
+        current,
+        commentAtSubmit,
+        photosRef.current.length > 0,
+      ));
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       const failureMessage = getErrorMessage(error);
       setErrorMessage(uploadedCount > 0
         ? `${uploadedCount}장 저장됐습니다. 남은 ${photoCount - uploadedCount}장은 선택 상태로 남아 있어 다시 시도할 수 있습니다. ${failureMessage}`
         : failureMessage);
+    } finally {
+      isUploadingRef.current = false;
+      setIsUploading(false);
     }
   };
 
@@ -96,7 +111,7 @@ export function useTripCardPhotoComposer({ cards }: Props) {
     fileInputRef,
     handlePhotoChange,
     handleSubmit,
-    isPending: createEntryMutation.isPending,
+    isPending: isUploading || createEntryMutation.isPending,
     photos,
     selectedCard,
     setComment,

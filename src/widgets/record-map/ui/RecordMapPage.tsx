@@ -28,6 +28,9 @@ export function RecordMapPage() {
   const canRenderMap = trip?.cityName === '오사카' && mappedLocations.length > 0
   const supportsMap = trip?.cityName === '오사카'
   const locationCount = locations.length
+  let mapMessage = '현재 지역의 지도 배경을 지원하지 않습니다.'
+  if (mappedLocations.length === 0) mapMessage = '위치 좌표가 있는 기록이 없어 지도를 표시할 수 없습니다.'
+  if (!trip) mapMessage = '표시할 여행 기록이 없습니다.'
 
   return (
     <AppShell>
@@ -49,7 +52,7 @@ export function RecordMapPage() {
               <S.MapTitle>{title}</S.MapTitle>
               <S.MapSubtitle>촬영 위치 {locationCount}곳</S.MapSubtitle>
               <S.MapCanvas aria-label={`${title} 촬영 위치 지도`}>
-                {canRenderMap ? <><img src={figmaRecordMap} alt={`${title} 도심 지도`} />{mappedLocations.slice(1).map((location, index) => { const segment = routeSegment(mappedLocations[index], location); return <S.RouteSegment key={`${location.name}-${index}`} $left={segment.left} $top={segment.top} $length={segment.length} $angle={segment.angle} aria-hidden="true" /> })}{mappedLocations.map((location, index) => <S.MarkerGroup key={`${location.name}-${index}`} $left={location.left} $top={location.top}><S.MapMarker data-number={String(index + 1)} aria-label={`${location.name} 촬영 위치`} /><S.MapLabel>{location.name}</S.MapLabel></S.MarkerGroup>)}</> : <S.MapState>{!trip ? '표시할 여행 기록이 없습니다.' : mappedLocations.length === 0 ? '위치 좌표가 있는 기록이 없어 지도를 표시할 수 없습니다.' : '현재 지역의 지도 배경을 지원하지 않습니다.'}</S.MapState>}
+                {canRenderMap ? <><img src={figmaRecordMap} alt={`${title} 도심 지도`} />{mappedLocations.slice(1).map((location, index) => { const segment = routeSegment(mappedLocations[index], location); return <S.RouteSegment key={`${location.name}-${index}`} $left={segment.left} $top={segment.top} $length={segment.length} $angle={segment.angle} aria-hidden="true" /> })}{mappedLocations.map((location, index) => <S.MarkerGroup key={`${location.name}-${index}`} $left={location.left} $top={location.top}><S.MapMarker data-number={String(index + 1)} aria-label={`${location.name} 촬영 위치`} /><S.MapLabel>{location.name}</S.MapLabel></S.MarkerGroup>)}</> : <S.MapState>{mapMessage}</S.MapState>}
               </S.MapCanvas>
             </S.MapPanel>
             <S.LocationPanel>

@@ -46,7 +46,7 @@ export function TripCardListView({ card, imageUrl, navigate }: TripCardListViewP
             </S.TravelCardTitle>
             <S.MetricList>
               <span><small>함께한 사람</small><strong>정보 없음</strong></span>
-              <span><small>방문 장소</small><strong>{card.places?.length ?? 0}곳</strong></span>
+              <span><small>방문 장소</small><strong>{card.places ? `${card.places.length}곳` : '정보 없음'}</strong></span>
               <span><small>남긴 사진</small><strong>{card.photoCount ?? card.images?.length ?? 0}장</strong></span>
               <span><small>이동 거리</small><strong>정보 없음</strong></span>
             </S.MetricList>

@@ -22,6 +22,7 @@ export function RecordCommentEditPage() {
   const contentValue = content ?? editableEntry?.comment ?? ''
   const placeTitle = record?.places?.[0]?.placeName || record?.title || '여행 기록'
   const photoDate = editableEntry?.takenAt || editableEntry?.date || record?.startDate
+  const isSaveDisabled = updateMutation.isPending || editableEntry?.entryId == null
 
   useEffect(() => {
     // The route can change entries without unmounting this editor.
@@ -52,11 +53,49 @@ export function RecordCommentEditPage() {
   return (
     <AppShell>
       <S.Content>
-        <S.TopBar $comment><div><h1>코멘트 작성</h1></div><div><button type="submit" form="record-comment-form" disabled={updateMutation.isPending || editableEntry?.entryId == null}>저장</button></div></S.TopBar>
-        {isLoading ? <S.LoadingLayout aria-busy="true" aria-label="코멘트 기록 로딩 중"><S.LoadingHeader /><S.LoadingBody><S.LoadingPhoto /><S.LoadingDetail /></S.LoadingBody></S.LoadingLayout> : null}
+        <S.TopBar $comment>
+          <div><h1>코멘트 작성</h1></div>
+          <div>
+            <button type="submit" form="record-comment-form" disabled={isSaveDisabled}>저장</button>
+          </div>
+        </S.TopBar>
+        {isLoading ? (
+          <S.LoadingLayout aria-busy="true" aria-label="코멘트 기록 로딩 중">
+            <S.LoadingHeader />
+            <S.LoadingBody><S.LoadingPhoto /><S.LoadingDetail /></S.LoadingBody>
+          </S.LoadingLayout>
+        ) : null}
         {isError ? <S.ErrorMessage role="alert">기록을 불러오지 못했습니다.</S.ErrorMessage> : null}
-        {record ? <S.CommentEditLayout><S.CommentPhoto><img src={editableEntry?.imageUrl || record.images?.[0] || figmaRecordMapPhoto} alt="여행 사진" /><h2>{placeTitle}</h2><span>{photoDate ? formatDate(photoDate) : '촬영일 정보 없음'}</span></S.CommentPhoto><S.CommentForm id="record-comment-form" onSubmit={(event) => void handleSubmit(event)}><h2>코멘트</h2><textarea value={contentValue} onChange={(event) => setContent(event.target.value)} placeholder="이 사진에 대해 짧게 남겨보세요." maxLength={100} disabled={editableEntry?.entryId == null} /><p>{contentValue.length} / 100</p><button type="submit" disabled={updateMutation.isPending || editableEntry?.entryId == null}>{updateMutation.isPending ? '저장 중' : '코멘트 저장'}</button>{message ? <small role="alert">{message}</small> : null}</S.CommentForm></S.CommentEditLayout> : null}
-        {!isLoading && !isError && !record ? <S.StateCard><p>기록을 찾을 수 없습니다.</p><button type="button" onClick={() => navigate({ to: paths.record })}>목록으로</button></S.StateCard> : null}
+        {record ? (
+          <S.CommentEditLayout>
+            <S.CommentPhoto>
+              <img src={editableEntry?.imageUrl || record.images?.[0] || figmaRecordMapPhoto} alt="여행 사진" />
+              <h2>{placeTitle}</h2>
+              <span>{photoDate ? formatDate(photoDate) : '촬영일 정보 없음'}</span>
+            </S.CommentPhoto>
+            <S.CommentForm id="record-comment-form" onSubmit={(event) => void handleSubmit(event)}>
+              <h2>코멘트</h2>
+              <textarea
+                value={contentValue}
+                onChange={(event) => setContent(event.target.value)}
+                placeholder="이 사진에 대해 짧게 남겨보세요."
+                maxLength={100}
+                disabled={editableEntry?.entryId == null}
+              />
+              <p>{contentValue.length} / 100</p>
+              <button type="submit" disabled={isSaveDisabled}>
+                {updateMutation.isPending ? '저장 중' : '코멘트 저장'}
+              </button>
+              {message ? <small role="alert">{message}</small> : null}
+            </S.CommentForm>
+          </S.CommentEditLayout>
+        ) : null}
+        {!isLoading && !isError && !record ? (
+          <S.StateCard>
+            <p>기록을 찾을 수 없습니다.</p>
+            <button type="button" onClick={() => navigate({ to: paths.record })}>목록으로</button>
+          </S.StateCard>
+        ) : null}
       </S.Content>
     </AppShell>
   )

@@ -39,23 +39,19 @@ function toTravelRecord(card?: TravelCardListItemDto, detail?: TravelCardDetailD
     imageUrl: resolveApiAssetUrl(item.imageUrl) ?? item.imageUrl,
   })))
   const destination = card?.cityName || card?.countryName
-  const images = timeline.flatMap((item) => {
-    const imageUrl = resolveApiAssetUrl(item.imageUrl)
-    return imageUrl ? [imageUrl] : []
-  })
+  const images = timeline.map((item) => item.imageUrl).filter((url): url is string => Boolean(url))
+  const coverImage = resolveApiAssetUrl(card?.coverImageUrl) ?? card?.coverImageUrl
+  let recordImages = images
+  if (!recordImages.length) recordImages = coverImage ? [coverImage] : []
 
   return {
     cityName: card?.cityName,
     content: timeline.map((item) => item.comment).filter(Boolean).join('\n') || undefined,
     countryName: card?.countryName,
     endDate: detail?.endDate ?? card?.endDate,
-    images: images.length
-      ? images
-      : card?.coverImageUrl
-        ? [resolveApiAssetUrl(card.coverImageUrl) ?? card.coverImageUrl]
-        : [],
+    images: recordImages,
     photoCount: card?.photoCount ?? images.length,
-    places: timeline
+    places: detail ? timeline
       .filter((item) => item.type === 'PLACE')
       .map((item, index) => ({
         dayNumber: index + 1,
@@ -63,7 +59,7 @@ function toTravelRecord(card?: TravelCardListItemDto, detail?: TravelCardDetailD
         longitude: item.longitude,
         placeName: item.placeName,
         placeSub: item.address,
-      })),
+      })) : undefined,
     startDate: detail?.startDate ?? card?.startDate,
     title: destination ? `${destination} 여행` : undefined,
     tripId: card?.cardId ?? detail?.cardId,
@@ -71,9 +67,29 @@ function toTravelRecord(card?: TravelCardListItemDto, detail?: TravelCardDetailD
   }
 }
 
-export async function getTravelRecord(tripId: number): Promise<TravelRecordDto> {
-  const [cards, detail] = await Promise.all([listTravelCards(), getTravelCard(tripId)])
-  return toTravelRecord(cards.find((card) => card.cardId === tripId), detail)
+export async function getTravelRecord(tripId: number, summary?: TravelRecordDto): Promise<TravelRecordDto> {
+  const cachedCard: TravelCardListItemDto | undefined = summary ? {
+    cardId: summary.tripId,
+    cityName: summary.cityName,
+    countryName: summary.countryName,
+    coverImageUrl: summary.images?.[0],
+    endDate: summary.endDate,
+    photoCount: summary.photoCount,
+    startDate: summary.startDate,
+  } : undefined
+  const [cardsResult, detailResult] = await Promise.allSettled([
+    summary ? Promise.resolve([]) : listTravelCards(),
+    getTravelCard(tripId),
+  ])
+  if (detailResult.status === 'rejected') throw detailResult.reason
+
+  const card = cachedCard ?? (cardsResult.status === 'fulfilled'
+    ? cardsResult.value.find((item) => item.cardId === tripId)
+    : undefined)
+  const record = toTravelRecord(card, detailResult.value)
+  return summary
+    ? { ...summary, ...record, images: record.timeline?.some((item) => item.imageUrl) ? record.images : summary.images ?? record.images }
+    : record
 }
 
 export async function getTravelRecords(): Promise<TravelRecordDto[]> {

@@ -1,5 +1,7 @@
 import type { TravelRecordDto } from "@/entities/trip-card";
+import { useNavigate } from "@tanstack/react-router";
 import { formatDate } from "@/shared/utils";
+import { paths } from "@/shared/config";
 import {
   Button as PartTripButton,
   Textarea as PartTripTextarea,
@@ -11,6 +13,7 @@ import * as S from "./TripCardsPage.styles";
 type Props = { cards: TravelRecordDto[] };
 
 export function TripCardPhotoComposer({ cards }: Props) {
+  const navigate = useNavigate();
   const {
     comment,
     errorMessage,
@@ -24,6 +27,13 @@ export function TripCardPhotoComposer({ cards }: Props) {
     setSelectedCardId,
     successMessage,
   } = useTripCardPhotoComposer({ cards });
+
+  if (cards.length === 0) {
+    return <S.EmptyComposer>
+      <p role="status">여행 카드가 아직 없어요. 여행 계획을 확정하면 사진을 기록할 수 있어요.</p>
+      <PartTripButton type="button" onClick={() => navigate({ to: paths.planner })}>여행 계획 만들기</PartTripButton>
+    </S.EmptyComposer>;
+  }
 
   return (
     <S.Composer>
@@ -72,7 +82,6 @@ export function TripCardPhotoComposer({ cards }: Props) {
           </S.Form>
         </S.CreateFormPanel>
       </S.CreateCardLayout>
-      {cards.length === 0 ? <S.ErrorMessage role="status">추가할 여행 카드가 없습니다. 여행 계획을 확정하면 카드가 생성됩니다.</S.ErrorMessage> : null}
     </S.Composer>
   );
 }

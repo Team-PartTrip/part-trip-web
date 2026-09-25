@@ -1,12 +1,16 @@
 import { queryOptions, useQuery } from '@tanstack/react-query'
 import { isPositiveSafeInteger } from '@/shared/utils'
-import { getTravelRecord, getTravelRecords } from './records'
+import { getTravelRecord, getTravelRecords, type TravelRecordDto } from './records'
 import { tripCardQueryKeys } from './query-keys'
 
 export const travelRecordQueryOptions = (tripId: number) =>
   queryOptions({
     queryKey: tripCardQueryKeys.record(tripId),
-    queryFn: () => getTravelRecord(tripId),
+    queryFn: ({ client }) => {
+      const summary = client.getQueryData<TravelRecordDto[]>(tripCardQueryKeys.records())
+        ?.find((record) => record.tripId === tripId)
+      return getTravelRecord(tripId, summary)
+    },
     enabled: isPositiveSafeInteger(tripId),
   })
 

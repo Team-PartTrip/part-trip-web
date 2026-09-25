@@ -8,12 +8,18 @@ import { formatDate, formatTravelDateTime } from '@/shared/utils'
 import { shareKakaoCardNews } from '@/shared/libs/kakao-share'
 import { AppShell } from '@/widgets/app-shell'
 
+import { getRecordDetailState } from '../model/record-detail-state'
 import * as S from './RecordDetailPage.styles'
 
 export function RecordDetailPage() {
   const navigate = useNavigate()
   const { recordId = '' } = useParams({ strict: false })
   const { data: record, isLoading, isError: hasRecordError } = useTravelRecordQuery(Number(recordId))
+  const recordState = getRecordDetailState({
+    hasRecord: Boolean(record),
+    isError: hasRecordError,
+    isLoading,
+  })
   const placeTitle = record?.places?.[0]?.placeName || record?.title || '여행 기록'
   const recordImages = record?.images?.filter((image): image is string => Boolean(image)) ?? []
   const [photoIndex, setPhotoIndex] = useState(0)
@@ -22,6 +28,15 @@ export function RecordDetailPage() {
   const selectedEntry = recordImages.length > 0
     ? record?.timeline?.find((item) => item.imageUrl === recordImages[currentPhotoIndex])
     : undefined
+  let selectedEntryDate = formatDate(record?.startDate)
+  if (selectedEntry?.date) selectedEntryDate = formatDate(selectedEntry.date)
+  if (selectedEntry?.takenAt) {
+    selectedEntryDate = formatTravelDateTime(selectedEntry.takenAt, undefined, record?.countryName, record?.cityName)
+  }
+  const selectedEntrySummary = [
+    selectedEntryDate,
+    selectedEntry?.address || record?.cityName || record?.countryName,
+  ].filter(Boolean).join(' · ')
   const hasRecordPhotos = recordImages.length > 0 && record?.photoCount !== 0
 
   const handleKakaoShare = () => {
@@ -63,13 +78,20 @@ export function RecordDetailPage() {
           </S.TopBar>
         ) : null}
         {shareError ? <S.ErrorMessage role="alert">{shareError}</S.ErrorMessage> : null}
-        {hasRecordError ? <S.ErrorMessage role="alert">여행 기록을 불러오지 못했습니다.</S.ErrorMessage> : null}
-        {isLoading ? (
+        {recordState === 'error' ? (
+          <S.StateCard role="alert">
+            <h1>여행 기록을 불러오지 못했습니다.</h1>
+            <p>연결을 확인하고 다시 시도해주세요.</p>
+            <button type="button" onClick={() => navigate({ to: paths.record })}>목록으로 돌아가기</button>
+          </S.StateCard>
+        ) : null}
+        {recordState === 'loading' ? (
           <S.LoadingLayout aria-busy="true" aria-label="여행 기록 로딩 중">
             <S.LoadingHeader />
             <S.LoadingBody><S.LoadingPhoto /><S.LoadingDetail /></S.LoadingBody>
           </S.LoadingLayout>
-        ) : record ? (
+        ) : null}
+        {recordState === 'ready' && record ? (
           <S.DetailBody>
             <S.RecordPhoto>
               <img
@@ -87,20 +109,21 @@ export function RecordDetailPage() {
             </S.RecordPhoto>
             <S.RecordDetailCard>
               <h1>{placeTitle}</h1>
-              <p>{[selectedEntry?.takenAt ? formatTravelDateTime(selectedEntry.takenAt, undefined, record.countryName, record.cityName) : selectedEntry?.date ? formatDate(selectedEntry.date) : formatDate(record.startDate), selectedEntry?.address || record.cityName || record.countryName].filter(Boolean).join(' · ')}</p>
+              <p>{selectedEntrySummary}</p>
               <S.Badge>AI 해설</S.Badge>
               <S.CommentHeading>사진 코멘트</S.CommentHeading>
               <S.RecordDescription>{selectedEntry?.comment || '이 사진에 대한 메모를 남겨보세요'}</S.RecordDescription>
               <S.RecordAction type="button" disabled={selectedEntry?.entryId == null} onClick={() => navigate({ params: { recordId }, search: selectedEntry?.entryId != null ? { entryId: String(selectedEntry.entryId) } : undefined, to: '/record/$recordId/edit' })}>{selectedEntry?.comment ? '수정' : '작성'}</S.RecordAction>
             </S.RecordDetailCard>
           </S.DetailBody>
-        ) : (
+        ) : null}
+        {recordState === 'empty' ? (
           <S.StateCard>
             <h1>여행 기록을 찾을 수 없습니다.</h1>
             <p>목록에서 다른 기록을 선택해주세요.</p>
             <button type="button" onClick={() => navigate({ to: paths.record })}>목록으로 돌아가기</button>
           </S.StateCard>
-        )}
+        ) : null}
       </S.Content>
     </AppShell>
   )

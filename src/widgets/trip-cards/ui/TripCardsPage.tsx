@@ -42,30 +42,21 @@ function TripCardsFlow({ mode }: { mode: TripCardsMode }) {
   const firstPlace = detailTimeline.find((item) => item.type === "PLACE" && item.placeName) ?? detailTimeline.find((item) => item.placeName);
   const firstPhoto = detailTimeline.find((item) => item.type === "PHOTO" && item.imageUrl) ?? detailTimeline.find((item) => item.imageUrl);
   const featuredImage = featuredCard?.images?.[0];
+  const copy = ({
+    list: { title: "여행카드" },
+    detail: { title: detail?.title || "여행 카드", subtitle: "방문 장소와 촬영 기록을 앱과 동일한 순서로 확인하세요." },
+    create: { title: "사진 · 코멘트 추가", subtitle: "여행 계획을 확정하면 여행 카드가 만들어져요." },
+    delete: { title: "여행 카드 삭제", subtitle: "삭제할 여행 카드를 선택하세요. 여러 개를 한 번에 지울 수 있어요." },
+  } satisfies Record<TripCardsMode, { title: string; subtitle?: string }>)[mode];
+  const isWide = mode === "create" || mode === "delete";
 
   return (
     <AppShell>
-      <S.Page $wide={mode === "create" || mode === "delete"}>
-        <S.Header $wide={mode === "create" || mode === "delete"} $create={mode === "create"} $detail={mode === "detail"}>
+      <S.Page $wide={isWide}>
+        <S.Header $wide={isWide} $create={mode === "create"} $detail={mode === "detail"}>
           {isLoading ? <S.LoadingHeader /> : <div>
-            <S.Title>
-              {mode === "detail"
-                ? detail?.title || "여행 카드"
-                : mode === "create"
-                  ? "사진 · 코멘트 추가"
-                  : mode === "delete"
-                    ? "여행 카드 삭제"
-                : "여행카드"}
-            </S.Title>
-            {mode !== "list" ? <S.Subtitle>
-              {mode === "delete"
-                ? "삭제할 여행 카드를 선택하세요. 여러 개를 한 번에 지울 수 있어요."
-                : mode === "create"
-                  ? "여행 카드는 여행 시작과 함께 자동으로 만들어져요."
-                  : mode === "detail"
-                    ? "방문 장소와 촬영 기록을 앱과 동일한 순서로 확인하세요."
-                : "여행의 순간을 카드 한 장에 모아보세요."}
-            </S.Subtitle> : null}
+            <S.Title>{copy.title}</S.Title>
+            {copy.subtitle ? <S.Subtitle>{copy.subtitle}</S.Subtitle> : null}
           </div>}
         </S.Header>
         {message || hasQueryError ? (
