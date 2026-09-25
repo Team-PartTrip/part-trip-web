@@ -43,16 +43,16 @@ export const appTheme = {
     },
   },
   radii: {
-    button: '12px',
-    input: '12px',
-    md: '12px',
-    xl: '28px',
-    round: '999px',
+    button: '0.75rem',
+    input: '0.75rem',
+    md: '0.75rem',
+    xl: '1.75rem',
+    round: '62.4375rem',
   },
   shadows: {
     input: 'none',
-    inputFocus: '0 0 0 3px rgb(85 135 246 / 48%)',
-    subtle: '0 2px 12px rgb(16 42 66 / 8%)',
+    inputFocus: '0 0 0 0.1875rem rgb(85 135 246 / 48%)',
+    subtle: '0 0.125rem 0.75rem rgb(16 42 66 / 8%)',
   },
   typography: {
     fontFamily:

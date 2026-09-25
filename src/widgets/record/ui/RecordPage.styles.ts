@@ -4,11 +4,11 @@ import { Skeleton } from '@/shared/ui/parttrip'
 export const Page = styled.main`
   width: 100%;
   min-width: 0;
-  padding: 32px;
+  padding: 2rem;
   box-sizing: border-box;
   color: ${({ theme }) => theme.colors.text.strong};
 
-  @media (max-width: 767px) {
+  @media (max-width: 47.9375rem) {
     padding: 0;
   }
 `
@@ -17,45 +17,53 @@ export const Header = styled.header`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  min-height: 48px;
-  padding-inline: 24px;
-  margin-bottom: 24px;
+  gap: 1rem;
+  min-height: 3rem;
+  padding-inline: 1.5rem;
+  margin-bottom: 1.5rem;
 `
 
 export const Title = styled.h1`
   margin: 0;
   color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 30px;
-  line-height: 38px;
+  font-size: 1.875rem;
+  line-height: 2.375rem;
 `
 
 export const YearTabs = styled.nav`
   display: flex;
-  min-height: 44px;
+  max-width: 100%;
+  min-height: 2.75rem;
   align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
   button {
-    width: 88px;
-    height: 34px;
+    width: 5.5rem;
+    height: 2.125rem;
     border: 0;
-    border-radius: 12px;
-    padding: 0 10px;
+    border-radius: 0.75rem;
+    padding: 0 0.625rem;
     background: ${({ theme }) => theme.colors.background.muted};
     color: ${({ theme }) => theme.colors.brand.primary};
     cursor: pointer;
-    font-size: 11px;
+    font-size: 0.6875rem;
     font-weight: 600;
   }
   button.active {
     background: ${({ theme }) => theme.colors.brand.primary};
     color: ${({ theme }) => theme.colors.text.inverse};
   }
+
+  @media (max-width: 47.9375rem) {
+    overflow-x: auto;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+    button { flex: 0 0 5.5rem; height: 3rem; font-size: 0.875rem; }
+  }
 `
 
 export const State = styled.p`
-  padding: 64px 0;
+  padding: 4rem 0;
   color: ${({ theme }) => theme.colors.text.muted};
   text-align: center;
 `
@@ -63,29 +71,29 @@ export const State = styled.p`
 export const LoadingList = styled.section`
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 0.875rem;
 `
 
 export const LoadingRow = styled(Skeleton)`
-  height: 126px;
-  border-radius: 16px;
+  height: 7.875rem;
+  border-radius: 1rem;
 `
 
 export const RecordList = styled.section`
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 0.875rem;
 `
 
 export const RecordRow = styled.button`
   display: flex;
-  min-height: 126px;
+  min-height: 7.875rem;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  border-radius: 16px;
-  padding: 16px;
+  gap: 1rem;
+  border: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 1rem;
+  padding: 1rem;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
   color: ${({ theme }) => theme.colors.text.strong};
@@ -98,43 +106,43 @@ export const RecordCopy = styled.span`
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 6px;
-  strong { font-size: 17px; line-height: 20px; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 13px; line-height: 16px; }
-  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 12px; line-height: 15px; }
+  gap: 0.375rem;
+  strong { font-size: 1.0625rem; line-height: 1.25rem; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.8125rem; line-height: 1rem; }
+  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.75rem; line-height: 0.9375rem; }
 `
 
 export const RecordStatus = styled.span`
-  width: 92px;
-  height: 34px;
+  width: 5.75rem;
+  height: 2.125rem;
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  border-radius: 999px;
-  padding: 10px;
+  border-radius: 62.4375rem;
+  padding: 0.625rem;
   background: ${({ theme }) => theme.colors.brand.primary};
   color: ${({ theme }) => theme.colors.text.inverse};
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
 `
 
 export const RowArrow = styled.span`
   flex: 0 0 auto;
   color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 22px;
+  font-size: 1.375rem;
   font-weight: 400;
 `
 
 export const Empty = styled.div`
   display: flex;
-  min-height: 220px;
+  min-height: 13.75rem;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  border-radius: 20px;
+  gap: 0.5rem;
+  border-radius: 1.25rem;
   background: ${({ theme }) => theme.colors.background.default};
   color: ${({ theme }) => theme.colors.text.muted};
   text-align: center;

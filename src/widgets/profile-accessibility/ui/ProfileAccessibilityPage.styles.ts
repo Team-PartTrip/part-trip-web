@@ -1,37 +1,37 @@
 import styled from 'styled-components'
 
 export const Page = styled.main`
-  width: min(100%, 1200px);
-  margin: 24px auto 64px;
+  width: min(100%, 75rem);
+  margin: 1.5rem auto 4rem;
   color: ${({ theme }) => theme.colors.text.strong};
-  > header { margin: 0 24px 24px; }
-  h1 { margin: 0; font-size: 30px; line-height: 38px; }
-  header p { margin: 8px 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 15px; line-height: 22px; }
+  > header { margin: 0 1.5rem 1.5rem; }
+  h1 { margin: 0; font-size: 1.875rem; line-height: 2.375rem; }
+  header p { margin: 0.5rem 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.9375rem; line-height: 1.375rem; }
 `
 
 export const Card = styled.section`
   display: grid;
   gap: 0;
-  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  border-radius: 16px;
-  padding: 8px 24px;
+  border: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 1rem;
+  padding: 0.5rem 1.5rem;
   background: ${({ theme }) => theme.colors.background.default};
-  section { padding: 20px 0; border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle}; }
-  h2 { margin: 0; font-size: 18px; line-height: 26px; }
-  p { margin: 6px 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 14px; line-height: 22px; }
-  > p { padding: 8px 0 16px; }
+  section { padding: 1.25rem 0; border-bottom: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle}; }
+  h2 { margin: 0; font-size: 1.125rem; line-height: 1.625rem; }
+  p { margin: 0.375rem 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.375rem; }
+  > p { padding: 0.5rem 0 1rem; }
 `
 
 export const Options = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 14px;
+  gap: 0.5rem;
+  margin-top: 0.875rem;
   button {
-    min-height: 48px;
-    border: 1px solid ${({ theme }) => theme.colors.border.default};
-    border-radius: 12px;
-    padding: 0 16px;
+    min-height: 3rem;
+    border: 0.0625rem solid ${({ theme }) => theme.colors.border.default};
+    border-radius: 0.75rem;
+    padding: 0 1rem;
     background: ${({ theme }) => theme.colors.background.default};
     color: ${({ theme }) => theme.colors.text.strong};
     cursor: pointer;
@@ -45,11 +45,11 @@ export const Options = styled.div`
 `
 
 export const Toggle = styled.button`
-  min-height: 48px;
-  margin-top: 14px;
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
-  border-radius: 12px;
-  padding: 0 16px;
+  min-height: 3rem;
+  margin-top: 0.875rem;
+  border: 0.0625rem solid ${({ theme }) => theme.colors.border.default};
+  border-radius: 0.75rem;
+  padding: 0 1rem;
   background: ${({ theme }) => theme.colors.background.default};
   color: ${({ theme }) => theme.colors.text.strong};
   cursor: pointer;

@@ -4,21 +4,21 @@ export const SidebarWrapper = styled.aside`
   position: sticky;
   top: 0;
   z-index: 10;
-  width: 232px;
+  width: 14.5rem;
   height: 100dvh;
-  flex: 0 0 232px;
-  border-right: 1px solid ${({ theme }) => theme.colors.border.soft};
+  flex: 0 0 14.5rem;
+  border-right: 0.0625rem solid ${({ theme }) => theme.colors.border.soft};
   background: ${({ theme }) => theme.colors.background.default};
 
-  @media (max-width: 767px) {
+  @media (max-width: 47.9375rem) {
     position: fixed;
     right: 0;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 64px;
-    flex: 0 0 64px;
-    border-top: 1px solid ${({ theme }) => theme.colors.border.soft};
+    height: 4rem;
+    flex: 0 0 4rem;
+    border-top: 0.0625rem solid ${({ theme }) => theme.colors.border.soft};
     border-right: 0;
   }
 `
@@ -28,31 +28,31 @@ export const Aside = styled.div`
   width: 100%;
   height: 100%;
   flex-direction: column;
-  padding: 20px 24px 24px;
+  padding: 1.25rem 1.5rem 1.5rem;
 
-  @media (max-width: 767px) {
+  @media (max-width: 47.9375rem) {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 8px;
+    padding: 0.5rem;
   }
 `
 
 export const LogoSection = styled.div`
-  height: 34px;
-  margin-bottom: 26px;
+  height: 2.125rem;
+  margin-bottom: 1.625rem;
 
   a {
     text-decoration: none;
 
     img {
       display: block;
-      width: 136px;
+      width: 8.5rem;
       height: auto;
     }
   }
 
-  @media (max-width: 767px) {
+  @media (max-width: 47.9375rem) {
     display: none;
   }
 `
@@ -60,9 +60,9 @@ export const LogoSection = styled.div`
 export const MenuList = styled.nav`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.5rem;
 
-  @media (max-width: 767px) {
+  @media (max-width: 47.9375rem) {
     width: 100%;
     flex-direction: row;
     justify-content: space-around;

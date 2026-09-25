@@ -35,7 +35,7 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   body {
-    min-width: 320px;
+    min-width: min(20rem, 100%);
     min-height: 100vh;
     margin: 0;
     background: ${({ theme }) => theme.colors.background.subtle};
@@ -53,8 +53,8 @@ export const GlobalStyle = createGlobalStyle`
   input:focus-visible,
   textarea:focus-visible,
   select:focus-visible {
-    outline: 3px solid ${({ theme }) => theme.colors.shadow.focus};
-    outline-offset: 2px;
+    outline: 0.1875rem solid ${({ theme }) => theme.colors.shadow.focus};
+    outline-offset: 0.125rem;
   }
 
   #root {
@@ -75,8 +75,8 @@ export const GlobalStyle = createGlobalStyle`
 
   @media (pointer: coarse) {
     [data-accessibility-root] :is(button, [role='button'], [role='tab'], input, select, textarea) {
-      min-height: 48px;
-      min-width: 48px;
+      min-height: 3rem;
+      min-width: 3rem;
     }
   }
 

@@ -20,7 +20,7 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
   const initials = name.slice(0, 2).toUpperCase()
 
   return (
-    <AppShell>
+    <AppShell fillHeight>
       <S.Page>
         <S.Header>
           <S.Title>마이</S.Title>

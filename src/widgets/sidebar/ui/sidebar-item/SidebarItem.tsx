@@ -1,9 +1,7 @@
-import { useLocation } from '@tanstack/react-router'
-
 import * as S from './SidebarItem.style'
 
 interface Props {
-  active?: boolean
+  active: boolean
   iconSrc?: string
   text: string
   href: string
@@ -19,8 +17,7 @@ const SidebarItem = ({
   badgeCount,
   onClick,
 }: Props) => {
-  const { pathname } = useLocation()
-  const isParentActive = active ?? (pathname === href || (href !== '/' && pathname.startsWith(href)))
+  const isParentActive = active
 
   return (
     <S.ItemLink

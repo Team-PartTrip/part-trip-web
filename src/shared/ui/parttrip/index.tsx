@@ -11,8 +11,8 @@ const skeletonShimmer = keyframes`
 export const Skeleton = styled.span<{ $width?: string; $height?: string; $radius?: string }>`
   display: block;
   width: ${({ $width = '100%' }) => $width};
-  height: ${({ $height = '16px' }) => $height};
-  border-radius: ${({ $radius = '6px' }) => $radius};
+  height: ${({ $height = '1rem' }) => $height};
+  border-radius: ${({ $radius = '0.375rem' }) => $radius};
   background: linear-gradient(90deg, #edf3f8 25%, #f8fbfd 37%, #edf3f8 63%);
   background-size: 400% 100%;
   animation: ${skeletonShimmer} 1.4s ease-in-out infinite;
@@ -23,30 +23,30 @@ export const Skeleton = styled.span<{ $width?: string; $height?: string; $radius
 `
 
 export const Page = styled.div`
-  width: min(100%, 1200px);
+  width: min(100%, 75rem);
   margin: 0 auto;
 `
 
 export const PageHeader = styled.header`
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 24px;
+  gap: 0.375rem;
+  margin-bottom: 1.5rem;
 `
 
 export const Title = styled.h1`
   margin: 0;
   color: ${({ theme }) => theme.colors.text.strong};
-  font-size: clamp(26px, 3vw, 32px);
+  font-size: clamp(1.625rem, 3vw, 2rem);
   font-weight: 700;
-  line-height: 40px;
+  line-height: 2.5rem;
 `
 
 export const Subtitle = styled.p`
   margin: 0;
   color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 15px;
-  line-height: 22px;
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
 `
 
 export const Card = styled.section`
@@ -58,17 +58,17 @@ export const Card = styled.section`
 
 const buttonStyle = css<{ $variant?: ButtonVariant }>`
   display: inline-flex;
-  min-height: 46px;
+  min-height: 2.875rem;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  border: 1px solid transparent;
-  border-radius: 14px;
-  padding: 12px 24px;
+  gap: 0.5rem;
+  border: 0.0625rem solid transparent;
+  border-radius: 0.875rem;
+  padding: 0.75rem 1.5rem;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 600;
-  line-height: 22px;
+  line-height: 1.375rem;
   text-decoration: none;
   transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
 
@@ -90,7 +90,7 @@ const buttonStyle = css<{ $variant?: ButtonVariant }>`
       return css`
         background: transparent;
         color: ${theme.colors.brand.strong};
-        padding-inline: 8px;
+        padding-inline: 0.5rem;
 
         &:hover {
           background: ${theme.colors.background.muted};
@@ -127,32 +127,32 @@ export const Badge = styled.span`
   align-items: center;
   justify-content: center;
   border-radius: ${({ theme }) => theme.radii.round};
-  padding: 4px 8px;
+  padding: 0.25rem 0.5rem;
   background: var(--pt-bg-info);
   color: ${({ theme }) => theme.colors.brand.strong};
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 500;
-  line-height: 16px;
+  line-height: 1rem;
   white-space: nowrap;
 `
 
 export const Tabs = styled.nav`
   display: flex;
-  gap: 8px;
+  gap: 0.5rem;
   overflow-x: auto;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.soft};
+  border-bottom: 0.0625rem solid ${({ theme }) => theme.colors.border.soft};
 `
 
 export const Tab = styled.button<{ $active?: boolean }>`
-  min-width: 132px;
-  height: 44px;
+  min-width: 8.25rem;
+  height: 2.75rem;
   border: 0;
-  border-bottom: 2px solid ${({ $active, theme }) => ($active ? theme.colors.brand.primary : 'transparent')};
-  padding: 0 12px;
+  border-bottom: 0.125rem solid ${({ $active, theme }) => ($active ? theme.colors.brand.primary : 'transparent')};
+  padding: 0 0.75rem;
   background: transparent;
   color: ${({ $active, theme }) => ($active ? theme.colors.brand.strong : theme.colors.text.muted)};
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
   white-space: nowrap;
 `
@@ -160,10 +160,10 @@ export const Tab = styled.button<{ $active?: boolean }>`
 export const Input = styled.input`
   width: 100%;
   min-width: 0;
-  height: 46px;
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
+  height: 2.875rem;
+  border: 0.0625rem solid ${({ theme }) => theme.colors.border.default};
   border-radius: ${({ theme }) => theme.radii.md};
-  padding: 0 16px;
+  padding: 0 1rem;
   background: ${({ theme }) => theme.colors.background.soft};
   color: ${({ theme }) => theme.colors.text.strong};
   outline: none;
@@ -181,10 +181,10 @@ export const Input = styled.input`
 export const Select = styled.select`
   width: 100%;
   min-width: 0;
-  height: 46px;
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
+  height: 2.875rem;
+  border: 0.0625rem solid ${({ theme }) => theme.colors.border.default};
   border-radius: ${({ theme }) => theme.radii.md};
-  padding: 0 12px;
+  padding: 0 0.75rem;
   background: ${({ theme }) => theme.colors.background.soft};
   color: ${({ theme }) => theme.colors.text.strong};
   outline: none;
@@ -197,11 +197,11 @@ export const Select = styled.select`
 
 export const Textarea = styled.textarea`
   width: 100%;
-  min-height: 140px;
+  min-height: 8.75rem;
   resize: vertical;
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
+  border: 0.0625rem solid ${({ theme }) => theme.colors.border.default};
   border-radius: ${({ theme }) => theme.radii.md};
-  padding: 16px;
+  padding: 1rem;
   background: ${({ theme }) => theme.colors.background.soft};
   color: ${({ theme }) => theme.colors.text.strong};
   outline: none;
@@ -214,9 +214,9 @@ export const Textarea = styled.textarea`
 
 export const EmptyState = styled.div`
   display: grid;
-  min-height: 180px;
+  min-height: 11.25rem;
   place-items: center;
-  padding: 32px;
+  padding: 2rem;
   color: ${({ theme }) => theme.colors.text.muted};
   text-align: center;
 `
@@ -224,20 +224,20 @@ export const EmptyState = styled.div`
 export const ErrorState = styled.p`
   margin: 0;
   color: ${({ theme }) => theme.colors.status.error};
-  font-size: 14px;
+  font-size: 0.875rem;
 `
 
 export const FormField = styled.label`
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0.375rem;
   color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
 
   small {
     color: ${({ theme }) => theme.colors.text.muted};
-    font-size: 12px;
+    font-size: 0.75rem;
     font-weight: 400;
   }
 `
@@ -245,15 +245,15 @@ export const FormField = styled.label`
 export const Stack = styled.div<{ $gap?: number }>`
   display: flex;
   flex-direction: column;
-  gap: ${({ $gap = 16 }) => `${$gap}px`};
+  gap: ${({ $gap = 16 }) => `${$gap / 16}rem`};
 `
 
 export const Grid = styled.div<{ $columns?: string }>`
   display: grid;
-  gap: 24px;
+  gap: 1.5rem;
   grid-template-columns: ${({ $columns = 'repeat(2, minmax(0, 1fr))' }) => $columns};
 
-  @media (max-width: 760px) {
+  @media (max-width: 47.5rem) {
     grid-template-columns: 1fr;
   }
 `
