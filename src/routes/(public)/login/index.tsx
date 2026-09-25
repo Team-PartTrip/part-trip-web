@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { AuthForm } from '@/shared/ui'
-import { LoginForm } from '@/features/login'
+import { SocialAuthForm } from '@/features/social-auth'
 import { validateAuthSearch } from '@/shared/utils'
 
 export const Route = createFileRoute('/(public)/login/')({
@@ -10,5 +10,5 @@ export const Route = createFileRoute('/(public)/login/')({
 
 function LoginRoute() {
   const { redirect } = Route.useSearch()
-  return <AuthForm.AuthPage className="page"><LoginForm redirect={redirect} /></AuthForm.AuthPage>
+  return <AuthForm.AuthPage className="page"><SocialAuthForm mode="login" redirect={redirect} /></AuthForm.AuthPage>
 }
