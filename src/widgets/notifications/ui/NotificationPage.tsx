@@ -43,7 +43,7 @@ function NotificationFlow({ mode }: { mode: 'list' | 'detail' }) {
         </S.Header>
         {actionError ? <S.ErrorMessage role="alert">{actionError}</S.ErrorMessage> : null}
         {mode === 'list' ? <NotificationListView activeTab={activeTab} hasNextPage={Boolean(notificationsQuery.hasNextPage)} isError={notificationsQuery.isError} isFetchingNextPage={notificationsQuery.isFetchingNextPage} isLoading={notificationsQuery.isLoading} notifications={notifications} onLoadMore={() => void notificationsQuery.fetchNextPage()} onNotificationClick={(notification) => void handleNotificationClick(notification)} onTabChange={setActiveTab} todayUnreadCount={todayUnreadCount} /> : null}
-        {mode === 'detail' ? <NotificationDetailView actionLabel={actionLabel} content={content} detail={detail} isLoading={notificationsQuery.isLoading} isMarkReadPending={markReadMutation.isPending} isMarkReadSuccess={markReadMutation.isSuccess} onAction={() => void handleNotificationAction()} onBack={() => navigate({ to: paths.notifications })} /> : null}
+        {mode === 'detail' ? <NotificationDetailView actionLabel={actionLabel} content={content} detail={detail} isError={notificationsQuery.isError} isLoading={notificationsQuery.isLoading} isMarkReadPending={markReadMutation.isPending} isMarkReadSuccess={markReadMutation.isSuccess} onAction={() => void handleNotificationAction()} onBack={() => navigate({ to: paths.notifications })} /> : null}
       </S.Page>
     </AppShell>
   )

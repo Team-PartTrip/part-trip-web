@@ -3,6 +3,22 @@ import { isInCurrentCalendarWeek } from '@/shared/utils'
 
 export type NotificationViewFilter = 'ALL' | 'SCHEDULE' | 'PHOTO' | 'GROUP'
 
+export type NotificationDetailState = 'loading' | 'error' | 'empty' | 'ready'
+
+export function getNotificationDetailState({
+  hasNotification,
+  isError,
+  isLoading,
+}: {
+  hasNotification: boolean
+  isError: boolean
+  isLoading: boolean
+}): NotificationDetailState {
+  if (hasNotification) return 'ready'
+  if (isLoading) return 'loading'
+  return isError ? 'error' : 'empty'
+}
+
 export function matchesNotificationFilter(notification: { type?: string; category?: string }, filter: NotificationViewFilter) {
   if (filter === 'ALL') return true
   const category = notification.category?.toUpperCase()
@@ -59,18 +75,22 @@ export function normalizeNotificationLinkType(linkType?: string) {
 
 export function detailCopy(notification: { linkType?: string; title?: string; body?: string }) {
   const linkType = normalizeNotificationLinkType(notification.linkType)
-  const fallback = linkType === 'TRIP_CARD'
-    ? ['여행카드가 만들어졌어요', '여행의 기록을 카드로 확인해보세요.']
-    : linkType === 'GROUP' || linkType === 'GROUP_INVITATION'
-        ? ['여행 그룹 소식이 있어요', '여행 그룹의 새로운 소식을 확인하세요.']
-        : ['지난 알림', '이전에 받은 알림을 확인할 수 있어요.']
+  let fallback: [string, string]
+  if (linkType === 'TRIP_CARD') {
+    fallback = ['여행카드가 만들어졌어요', '여행의 기록을 카드로 확인해보세요.']
+  } else if (linkType === 'GROUP' || linkType === 'GROUP_INVITATION') {
+    fallback = ['여행 그룹 소식이 있어요', '여행 그룹의 새로운 소식을 확인하세요.']
+  } else {
+    fallback = ['지난 알림', '이전에 받은 알림을 확인할 수 있어요.']
+  }
   return { body: notification.body || fallback[1], title: notification.title || fallback[0] }
 }
 
 export function detailActionLabel(notification: { linkType?: string; linkId?: number }) {
   const linkType = normalizeNotificationLinkType(notification.linkType)
   if (linkType === 'TRIP_CARD' && notification.linkId != null) return '여행카드 보러가기'
-  if ((linkType === 'GROUP' || linkType === 'GROUP_INVITATION') && notification.linkId != null) return linkType === 'GROUP_INVITATION' ? '초대 확인하기' : '그룹 보러가기'
+  if (linkType === 'GROUP' && notification.linkId != null) return '그룹 보러가기'
+  if (linkType === 'GROUP_INVITATION' && notification.linkId != null) return '초대 확인하기'
   return undefined
 }
 
@@ -86,7 +106,12 @@ export function isToday(value?: string) {
   return Boolean(date && date.getFullYear() === today.getFullYear() && date.getMonth() === today.getMonth() && date.getDate() === today.getDate())
 }
 
-export function sectionLabel(notifications: Array<{ createdAt?: string; read?: boolean }>, index: number, todayUnreadCount: number, firstUnreadTodayIndex = notifications.findIndex((item) => isToday(item.createdAt) && item.read !== true)) {
+export function sectionLabel(
+  notifications: Array<{ createdAt?: string; read?: boolean }>,
+  index: number,
+  todayUnreadCount: number,
+  firstUnreadTodayIndex: number,
+) {
   const notification = notifications[index]
   const previous = notifications[index - 1]
   const notificationIsToday = isToday(notification.createdAt)
