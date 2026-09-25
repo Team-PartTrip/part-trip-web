@@ -11,12 +11,6 @@ export type ProfileResponseDto = {
   userId: string
 }
 
-export type ProfileStatsResponseDto = {
-  countryCount: number
-  recordCount: number
-  tripCount: number
-}
-
 export type TravelPreferenceRequestDto = {
   preferredTransport: 'WALKING' | 'PUBLIC_TRANSIT' | 'TAXI' | 'CAR'
   dailyScheduleCount: number
@@ -29,7 +23,6 @@ const PROFILE_API_PATHS = {
   base: '/profile',
   image: '/profile/image',
   mine: '/profile/myInfo',
-  stats: '/profile/stats',
   travelPreferences: '/profile/travel-preferences',
 } as const
 
@@ -45,11 +38,6 @@ export async function updateProfile(payload: ProfileUpdateRequestDto): Promise<P
 
 export async function uploadProfileImage(file: File): Promise<string> {
   const { data } = await apiClient.postForm<string>(PROFILE_API_PATHS.image, { file })
-  return data
-}
-
-export async function getProfileStats(): Promise<ProfileStatsResponseDto> {
-  const { data } = await apiClient.get<ProfileStatsResponseDto>(PROFILE_API_PATHS.stats)
   return data
 }
 

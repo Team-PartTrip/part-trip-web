@@ -28,6 +28,7 @@ export function ProfileInsightPage({ kind }: { kind: ProfileInsightKind }) {
     handleAcquireCountry,
     hasError,
     isLoading,
+    selectedTrip,
     openCountries,
     openMap,
     openRecords,
@@ -49,7 +50,7 @@ export function ProfileInsightPage({ kind }: { kind: ProfileInsightKind }) {
         {isLoading ? <S.LoadingLayout aria-busy="true" aria-label="여행 기록 로딩 중"><S.LoadingHeader />{kind === 'map' || kind === 'countries' ? <S.LoadingGrid><S.LoadingPanel /><S.LoadingPanel /></S.LoadingGrid> : <S.LoadingSingle />}</S.LoadingLayout> : null}
 
         {!isLoading && !hasError && kind === 'map' ? <ProfileMapView regions={domesticRegions} unknownCities={unknownCities} onOpenCountries={openCountries} onOpenRecords={openRecords} onOpenYearReview={openYearReview} onSelectRegion={selectCountry} /> : null}
-        {!isLoading && !hasError && kind === 'claim' ? <ProfileClaimView acquiredCount={acquiredCount} activeCountry={activeCountry} claimCountries={claimCountries} claimFeedback={claimFeedback} countryCode={countryCode} countryTrips={countryTrips} isPending={acquireCountryPending} onAcquire={() => void handleAcquireCountry()} onMap={openMap} onSelectCountry={selectCountry} totalCountries={totalCountries} achievementPercentage={achievementPercentage} /> : null}
+        {!isLoading && !hasError && kind === 'claim' ? <ProfileClaimView acquiredCount={acquiredCount} activeCountry={activeCountry} claimCountries={claimCountries} claimFeedback={claimFeedback} countryCode={countryCode} countryTrips={countryTrips} isPending={acquireCountryPending} onAcquire={() => void handleAcquireCountry()} onMap={openMap} onSelectCountry={selectCountry} selectedTrip={selectedTrip} totalCountries={totalCountries} achievementPercentage={achievementPercentage} /> : null}
         {!isLoading && !hasError && kind === 'countries' ? <ProfileCountriesView activeRegion={activeRegion ? { ...activeRegion, trips: activeRegionTrips } : undefined} regions={domesticRegions} onOpenRecord={openRecord} onSelectRegion={selectCountry} /> : null}
         {!isLoading && !hasError && kind === 'achievements' ? <ProfileAchievementsView summary={getAnnualTravelSummary(trips, new Date().getFullYear())} year={new Date().getFullYear()} /> : null}
       </S.Page>

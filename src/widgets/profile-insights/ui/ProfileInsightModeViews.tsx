@@ -1,10 +1,12 @@
 import { useMemo, type KeyboardEvent, type MouseEvent } from 'react'
 import { Button as PartTripButton } from '@/shared/ui/parttrip'
 import koreaRegionsSvg from '@/shared/assets/figma/korea-regions.svg?raw'
-import { formatDate, isPositiveSafeInteger } from '@/shared/utils'
+import { formatDate } from '@/shared/utils'
 import type { DomesticRegionVisit } from '../model/profile-insight'
 
 import * as S from './ProfileInsightPage.styles'
+
+const regionNames = Array.from(koreaRegionsSvg.matchAll(/data-region="([^"]+)"/g), (match) => match[1]).filter((name): name is string => Boolean(name))
 
 type TripRecord = {
   cityName?: string | null
@@ -43,6 +45,10 @@ export function ProfileMapView({
       },
     )
   }, [regionKey])
+  const openRegion = (name: string) => {
+    onSelectRegion(name)
+    onOpenCountries()
+  }
   const selectMapRegion = (event: MouseEvent<HTMLDivElement> | KeyboardEvent<HTMLDivElement>) => {
     if ('key' in event && event.key !== 'Enter' && event.key !== ' ') return
     const target = event.target
@@ -51,8 +57,7 @@ export function ProfileMapView({
     const name = region?.dataset.region
     if (!name) return
     event.preventDefault()
-    onSelectRegion(name)
-    onOpenCountries()
+    openRegion(name)
   }
 
   return (
@@ -61,6 +66,15 @@ export function ProfileMapView({
         <S.SectionTitle>방문한 시·도</S.SectionTitle>
         <S.MapCanvas><S.KoreaMap role="group" aria-label="대한민국 시·도 지도. 지역을 선택하면 여행 기록을 볼 수 있어요." onClick={selectMapRegion} onKeyDown={selectMapRegion} dangerouslySetInnerHTML={{ __html: mapMarkup }} /></S.MapCanvas>
         <S.MapLegend><span><S.LegendDot aria-hidden="true" />미방문</span><span><S.LegendDot $visited aria-hidden="true" />방문 완료</span></S.MapLegend>
+        <S.RegionPicker>
+          <summary>지역 목록에서 선택</summary>
+          <S.RegionPickerList>
+            {regionNames.map((name) => {
+              const visit = regions.find((region) => region.mapName === name)
+              return <button key={name} type="button" aria-label={`${name}, ${visit ? `${visit.trips.length}회 방문` : '미방문'}`} onClick={() => openRegion(name)}><span>{name}</span><small>{visit ? `${visit.trips.length}회 방문` : '미방문'}</small></button>
+            })}
+          </S.RegionPickerList>
+        </S.RegionPicker>
       </S.MapCard>
       <S.CountryStats>
         <S.SectionTitle>방문한 지역 {regions.length} / 17</S.SectionTitle>
@@ -93,6 +107,7 @@ export function ProfileClaimView({
   onAcquire,
   onMap,
   onSelectCountry,
+  selectedTrip,
   totalCountries,
   achievementPercentage,
 }: {
@@ -107,10 +122,10 @@ export function ProfileClaimView({
   onAcquire: () => void
   onMap: () => void
   onSelectCountry: (country: string) => void
+  selectedTrip?: TripRecord
   totalCountries: number
 }) {
   if (!activeCountry) return <S.State>획득할 여행 기록이 없습니다.</S.State>
-  const selectedTrip = countryTrips.find((trip) => isPositiveSafeInteger(trip.tripId ?? undefined))
 
   return (
     <S.ClaimBody>

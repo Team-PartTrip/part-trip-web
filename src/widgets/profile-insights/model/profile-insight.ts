@@ -65,26 +65,35 @@ export function getDomesticTravelModel(trips: TravelRecordDto[]) {
 }
 
 export function getAnnualTravelSummary(trips: TravelRecordDto[], year: number) {
-  const domesticTrips = getDomesticTravelModel(trips).domesticTrips.filter((trip) => (trip.startDate ?? '').startsWith(String(year)))
-  const places = new Map<string, TravelRecordDto[]>()
+  const domesticTrips = trips.filter((trip) =>
+    isDomesticTrip(trip) && (trip.startDate ?? '').startsWith(String(year)),
+  )
+  const places = new Map<string, { count: number; days: number }>()
+  let longestStay: TravelRecordDto | undefined
+  let longestStayDays = 0
+
   for (const trip of domesticTrips) {
     const place = trip.cityName?.trim()
-    if (place) places.set(place, [...(places.get(place) ?? []), trip])
+    const days = getDateRangeDays(trip.startDate, trip.endDate) ?? 0
+    if (days > longestStayDays) {
+      longestStay = trip
+      longestStayDays = days
+    }
+    if (!place) continue
+    const current = places.get(place)
+    places.set(place, { count: (current?.count ?? 0) + 1, days: Math.max(current?.days ?? 0, days) })
   }
-  const stayDays = (trip: TravelRecordDto) => getDateRangeDays(trip.startDate, trip.endDate) ?? 0
-  const longestStay = domesticTrips.filter((trip) => stayDays(trip) > 0).reduce<TravelRecordDto | undefined>((longest, trip) =>
-    !longest || stayDays(trip) > stayDays(longest) ? trip : longest, undefined)
-  const mostVisited = [...places.entries()].sort((left, right) => right[1].length - left[1].length || left[0].localeCompare(right[0], 'ko'))[0]
+  const placeVisits = [...places.entries()].sort((left, right) => right[1].count - left[1].count || left[0].localeCompare(right[0], 'ko'))
+  const mostVisited = placeVisits[0]
 
   return {
     placesVisited: places.size,
     tripCount: domesticTrips.length,
     mostVisitedName: mostVisited?.[0],
-    mostVisitedCount: mostVisited?.[1].length ?? 0,
+    mostVisitedCount: mostVisited?.[1].count ?? 0,
     longestStayName: longestStay?.cityName,
-    longestStayDays: longestStay ? stayDays(longestStay) : 0,
-    placeVisits: [...places.entries()].map(([name, visits]) => ({ name, count: visits.length, days: Math.max(...visits.map(stayDays)) }))
-      .sort((left, right) => right.count - left.count || left.name.localeCompare(right.name, 'ko')),
+    longestStayDays,
+    placeVisits: placeVisits.map(([name, summary]) => ({ name, ...summary })),
   }
 }
 
@@ -139,10 +148,6 @@ export function getProfileInsightModel({
     : kind === 'countries'
       ? `국내 여행 기록 ${activeRegionTrips.length}회`
       : subtitle
-  const continentProgress = worldMapStats?.byContinent?.length
-    ? worldMapStats.byContinent.map((item) => [item.continent || '대륙', item.acquiredCount || 0, item.totalCount || 0] as const)
-    : []
-
   return {
     acquiredCount,
     activeRegion,
@@ -150,7 +155,6 @@ export function getProfileInsightModel({
     achievementPercentage,
     activeCountry,
     claimCountries,
-    continentProgress,
     countryCode,
     countryTrips,
     pageSubtitle,

@@ -21,20 +21,6 @@ export type AcquireCountryResponseDto = {
   isNew?: boolean
 }
 
-export type WorldMapTripSummaryDto = {
-  cityName?: string
-  endDate?: string
-  startDate?: string
-  tripCardId?: number
-}
-
-export type WorldMapCountryResponseDto = {
-  cities?: string[]
-  countryName?: string
-  trips?: WorldMapTripSummaryDto[]
-  visitCount?: number
-}
-
 export type ContinentProgressDto = {
   continent?: string
   acquiredCount?: number
@@ -50,7 +36,6 @@ export type WorldMapStatsResponseDto = {
 
 const WORLD_MAP_API_PATHS = {
   base: '/world-map',
-  country: (countryCode: string) => `/world-map/countries/${countryCode}`,
   countries: '/world-map/countries',
   stats: '/world-map/stats',
 } as const
@@ -62,11 +47,6 @@ export async function getWorldMap(): Promise<WorldMapResponseDto> {
 
 export async function acquireCountry(payload: AcquireCountryRequestDto): Promise<AcquireCountryResponseDto> {
   const { data } = await apiClient.post<AcquireCountryResponseDto>(WORLD_MAP_API_PATHS.countries, payload)
-  return data
-}
-
-export async function getWorldMapCountry(countryCode: string): Promise<WorldMapCountryResponseDto> {
-  const { data } = await apiClient.get<WorldMapCountryResponseDto>(WORLD_MAP_API_PATHS.country(countryCode))
   return data
 }
 
