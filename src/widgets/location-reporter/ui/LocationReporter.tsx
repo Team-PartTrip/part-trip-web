@@ -7,17 +7,17 @@ import { startLocationReporting, type LocationReportState } from '../model'
 
 const Banner = styled.aside`
   display: flex;
-  min-height: 48px;
+  min-height: 3rem;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  padding: 8px 24px;
+  gap: 0.75rem;
+  border-bottom: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
+  padding: 0.5rem 1.5rem;
   background: ${({ theme }) => theme.colors.background.info};
   color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 14px;
-  line-height: 20px;
-  @media (max-width: 560px) { align-items: flex-start; flex-direction: column; }
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  @media (max-width: 35rem) { align-items: flex-start; flex-direction: column; }
 `
 
 function stateMessage(state: LocationReportState) {
