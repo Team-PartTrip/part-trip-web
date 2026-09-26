@@ -30,3 +30,5 @@ docs/*
 !docs/ARCHITECTURE.md
 .agents/
 .codex-plugins
+.vercel
+.env*
