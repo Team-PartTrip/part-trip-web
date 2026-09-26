@@ -63,43 +63,6 @@ export const Notice = styled.p`
   line-height: 1.125rem;
 `;
 
-export const State = styled.p`
-  padding: 4rem 0;
-  color: ${({ theme }) => theme.colors.text.muted};
-  text-align: center;
-`;
-
-;
-
-export const Card = styled.button`
-  overflow: hidden;
-  border: 0;
-  border-radius: 1.25rem;
-  padding: 0;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-  color: ${({ theme }) => theme.colors.text.strong};
-  cursor: pointer;
-  text-align: left;
-  img {
-    display: block;
-    width: 100%;
-    height: 10.625rem;
-    object-fit: cover;
-  }
-`;
-
-;
-
-;
-
-export const ActionRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
-`;
-
 export const Empty = styled.div`
   display: grid;
   min-height: 13.75rem;
@@ -312,20 +275,6 @@ export const DetailHeading = styled.header`
     font-size: 0.6875rem;
   }
 `;
-
-;
-
-;
-
-export const Badge = styled.span`
-  border-radius: 62.4375rem;
-  padding: 0.3125rem 0.5rem;
-  background: ${({ theme }) => theme.colors.background.muted};
-  color: ${({ theme }) => theme.colors.brand.strong};
-  font-size: 0.6875rem;
-`;
-
-;
 
 ;
 

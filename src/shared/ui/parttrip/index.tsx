@@ -1,4 +1,3 @@
-import { Link } from '@tanstack/react-router'
 import styled, { css, keyframes } from 'styled-components'
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost'
@@ -20,40 +19,6 @@ export const Skeleton = styled.span<{ $width?: string; $height?: string; $radius
   @media (prefers-reduced-motion: reduce) {
     animation: none;
   }
-`
-
-export const Page = styled.div`
-  width: min(100%, 75rem);
-  margin: 0 auto;
-`
-
-export const PageHeader = styled.header`
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-  margin-bottom: 1.5rem;
-`
-
-export const Title = styled.h1`
-  margin: 0;
-  color: ${({ theme }) => theme.colors.text.strong};
-  font-size: clamp(1.625rem, 3vw, 2rem);
-  font-weight: 700;
-  line-height: 2.5rem;
-`
-
-export const Subtitle = styled.p`
-  margin: 0;
-  color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 0.9375rem;
-  line-height: 1.375rem;
-`
-
-export const Card = styled.section`
-  overflow: hidden;
-  border-radius: ${({ theme }) => theme.radii.xl};
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
 `
 
 const buttonStyle = css<{ $variant?: ButtonVariant }>`
@@ -118,45 +83,6 @@ export const Button = styled.button<{ $variant?: ButtonVariant }>`
   ${buttonStyle}
 `
 
-export const LinkButton = styled(Link)<{ $variant?: ButtonVariant }>`
-  ${buttonStyle}
-`
-
-export const Badge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: ${({ theme }) => theme.radii.round};
-  padding: 0.25rem 0.5rem;
-  background: var(--pt-bg-info);
-  color: ${({ theme }) => theme.colors.brand.strong};
-  font-size: 0.75rem;
-  font-weight: 500;
-  line-height: 1rem;
-  white-space: nowrap;
-`
-
-export const Tabs = styled.nav`
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  border-bottom: 0.0625rem solid ${({ theme }) => theme.colors.border.soft};
-`
-
-export const Tab = styled.button<{ $active?: boolean }>`
-  min-width: 8.25rem;
-  height: 2.75rem;
-  border: 0;
-  border-bottom: 0.125rem solid ${({ $active, theme }) => ($active ? theme.colors.brand.primary : 'transparent')};
-  padding: 0 0.75rem;
-  background: transparent;
-  color: ${({ $active, theme }) => ($active ? theme.colors.brand.strong : theme.colors.text.muted)};
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 600;
-  white-space: nowrap;
-`
-
 export const Input = styled.input`
   width: 100%;
   min-width: 0;
@@ -209,51 +135,5 @@ export const Textarea = styled.textarea`
   &:focus {
     border-color: ${({ theme }) => theme.colors.brand.primary};
     box-shadow: ${({ theme }) => theme.shadows.inputFocus};
-  }
-`
-
-export const EmptyState = styled.div`
-  display: grid;
-  min-height: 11.25rem;
-  place-items: center;
-  padding: 2rem;
-  color: ${({ theme }) => theme.colors.text.muted};
-  text-align: center;
-`
-
-export const ErrorState = styled.p`
-  margin: 0;
-  color: ${({ theme }) => theme.colors.status.error};
-  font-size: 0.875rem;
-`
-
-export const FormField = styled.label`
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-  color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 0.8125rem;
-  font-weight: 600;
-
-  small {
-    color: ${({ theme }) => theme.colors.text.muted};
-    font-size: 0.75rem;
-    font-weight: 400;
-  }
-`
-
-export const Stack = styled.div<{ $gap?: number }>`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ $gap = 16 }) => `${$gap / 16}rem`};
-`
-
-export const Grid = styled.div<{ $columns?: string }>`
-  display: grid;
-  gap: 1.5rem;
-  grid-template-columns: ${({ $columns = 'repeat(2, minmax(0, 1fr))' }) => $columns};
-
-  @media (max-width: 47.5rem) {
-    grid-template-columns: 1fr;
   }
 `

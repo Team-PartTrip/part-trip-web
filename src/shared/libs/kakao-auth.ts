@@ -65,13 +65,3 @@ export function clearKakaoAuthRequest() {
   window.sessionStorage.removeItem(PENDING_REDIRECT_KEY)
   window.sessionStorage.removeItem(PENDING_STATE_KEY)
 }
-
-export function consumeKakaoAuthRequest(): KakaoAuthRequest {
-  const request = getKakaoAuthRequest()
-  clearKakaoAuthRequest()
-  return request
-}
-
-export function consumeKakaoRedirect() {
-  return consumeKakaoAuthRequest().redirect
-}

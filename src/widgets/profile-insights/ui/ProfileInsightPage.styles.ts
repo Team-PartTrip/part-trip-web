@@ -209,14 +209,6 @@ export const CountryStats = styled.aside`
   @media (max-width: 53.75rem) { min-height: 17.5rem; }
 `
 
-export const Badge = styled.span`
-  border-radius: 62.4375rem;
-  padding: 0.3125rem 0.5rem;
-  background: ${({ theme }) => theme.colors.background.muted};
-  color: ${({ theme }) => theme.colors.brand.strong};
-  font-size: 0.6875rem;
-`
-
 export const CountryRecordsLayout = styled.div`
   display: grid;
   gap: 1.5rem;

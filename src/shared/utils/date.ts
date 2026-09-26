@@ -6,11 +6,6 @@ export type DateOnlyRange = {
   endDate: string
 }
 
-type CalendarMonth = {
-  year: number
-  month: number
-}
-
 export function getMonthCalendarDays(year: number, monthIndex: number): Array<number | null> {
   const leadingDays = new Date(year, monthIndex, 1).getDay()
   const daysInMonth = new Date(year, monthIndex + 1, 0).getDate()
@@ -23,9 +18,6 @@ export function getMonthCalendarDays(year: number, monthIndex: number): Array<nu
 export function formatCalendarDate(year: number, monthIndex: number, day: number) {
   return `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
-
-// ponytail: cap festival fan-out at 14 months; add a range/pagination API if longer trips need support.
-export const MAX_FESTIVAL_QUERY_MONTHS = 14
 
 function parseDateOnly(value: DateValue) {
   const match = value?.match(/^(\d{4})-(\d{2})-(\d{2})$/)
@@ -56,31 +48,6 @@ export function getDateRangeWithPadding(startDate: DateValue, endDate: DateValue
   start.setUTCDate(start.getUTCDate() - paddingDays)
   end.setUTCDate(end.getUTCDate() + paddingDays)
   return { startDate: formatDateOnly(start), endDate: formatDateOnly(end) }
-}
-
-export function getCalendarMonthsInRange(startDate: DateValue, endDate: DateValue): CalendarMonth[] {
-  const start = parseDateOnly(startDate)
-  const end = parseDateOnly(endDate)
-  if (!start || !end || end < start) return []
-
-  const monthCount = (end.getUTCFullYear() - start.getUTCFullYear()) * 12 + end.getUTCMonth() - start.getUTCMonth() + 1
-  if (monthCount > MAX_FESTIVAL_QUERY_MONTHS) return []
-
-  const current = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1))
-  const lastMonth = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), 1))
-  const months: CalendarMonth[] = []
-  while (current <= lastMonth) {
-    months.push({ year: current.getUTCFullYear(), month: current.getUTCMonth() + 1 })
-    current.setUTCMonth(current.getUTCMonth() + 1)
-  }
-  return months
-}
-
-export function isDateInRange(value: DateValue, startDate: DateValue, endDate: DateValue) {
-  const date = parseDateOnly(value)
-  const start = parseDateOnly(startDate)
-  const end = parseDateOnly(endDate)
-  return Boolean(date && start && end && date >= start && date <= end)
 }
 
 const travelTimeZoneByCountryCode: Record<string, string> = {

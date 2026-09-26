@@ -2,10 +2,6 @@ import { apiClient } from '@/shared/libs/api-client'
 
 export * from '@/shared/libs/token-storage'
 
-export type RefreshRequestDto = {
-  refreshToken: string
-}
-
 export type TokenResponseDto = {
   accessToken: string
   refreshToken: string
@@ -32,7 +28,6 @@ const AUTH_API_PATHS = {
     google: '/auth/google',
     kakao: '/auth/kakao',
     logout: '/auth/logout',
-    refresh: '/auth/refresh',
   },
 } as const
 
@@ -53,8 +48,4 @@ export async function kakaoLogin(payload: KakaoLoginRequestDto): Promise<TokenRe
 export async function logout(payload: LogoutRequestDto): Promise<string> {
   const { data } = await apiClient.post<string>(AUTH_API_PATHS.session.logout, payload)
   return data
-}
-
-export async function refresh(payload: RefreshRequestDto): Promise<TokenResponseDto> {
-  return post<TokenResponseDto>(AUTH_API_PATHS.session.refresh, payload)
 }

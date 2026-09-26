@@ -271,12 +271,6 @@ export const SettingsCard = styled.section`
   box-shadow: ${({ theme }) => theme.shadows.subtle};
 `
 
-export const LoadingSettings = styled(Skeleton)`
-  width: 100%;
-  height: 22.5rem;
-  border-radius: 1rem;
-`
-
 export const SettingRow = styled.div`
   display: flex;
   min-height: 4.8125rem;
@@ -295,18 +289,4 @@ export const SettingsNote = styled.p`
   color: ${({ theme }) => theme.colors.text.muted};
   font-size: 0.75rem;
   line-height: 1.125rem;
-`
-
-export const Toggle = styled.button<{ $active: boolean }>`
-  position: relative;
-  width: 3.25rem;
-  height: 1.875rem;
-  flex: 0 0 3.25rem;
-  border: 0;
-  border-radius: 62.4375rem;
-  padding: 0;
-  background: ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.border.default)};
-  cursor: pointer;
-  &::after { position: absolute; top: 0.25rem; left: ${({ $active }) => ($active ? '1.625rem' : '0.25rem')}; width: 1.375rem; height: 1.375rem; border-radius: 50%; background: ${({ theme }) => theme.colors.background.default}; content: ''; transition: left 120ms ease; }
-  &:disabled { cursor: not-allowed; opacity: .6; }
 `

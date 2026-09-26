@@ -205,44 +205,6 @@ export const CommentForm = styled.form`
   @media (max-width: 53.75rem) { width: 100%; height: auto; min-height: 25rem; }
 `
 
-export const Body = styled.section`
-  display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
-  gap: 1.25rem;
-  grid-column: 1;
-  @media (max-width: 44rem) { grid-template-columns: 1fr; }
-`
-
-const Panel = styled.section`
-  border: 0.0625rem solid var(--pt-border-subtle);
-  border-radius: 1.25rem;
-  padding: 1.375rem;
-  background: var(--pt-bg-default);
-  h2 { margin: 0 0 0.875rem; font-size: 1.25rem; }
-`
-
-export const Schedule = styled(Panel)`
-  article { display: grid; grid-template-columns: 4.5rem 1fr; gap: 0.75rem; border-top: 0.0625rem solid var(--pt-border-subtle); padding: 0.875rem 0; }
-  article:first-of-type { border-top: 0; padding-top: 0; }
-  strong { color: var(--pt-brand-primary); font-size: 0.8125rem; }
-  ul { margin: 0; padding-left: 1.125rem; color: var(--pt-text-muted); font-size: 0.875rem; line-height: 1.7; }
-`
-
-export const MapPanel = styled.aside`
-  position: relative;
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  height: 100%;
-  min-height: 33.75rem;
-  overflow: hidden;
-  border: 0.0625rem solid var(--pt-border-subtle);
-  border-radius: 1.5rem;
-  background: var(--pt-bg-muted);
-  > div:last-child { position: absolute; right: 1.25rem; bottom: 1.25rem; left: 1.25rem; display: flex; flex-direction: column; border-radius: 0.875rem; padding: 0.875rem; background: rgb(255 255 255 / 92%); }
-  span { color: var(--pt-text-muted); font-size: 0.75rem; }
-  @media (max-width: 61.25rem) { grid-column: 1; grid-row: auto; min-height: 18.75rem; }
-`
-
 export const StateCard = styled.div`
   display: grid;
   min-height: 22.5rem;
