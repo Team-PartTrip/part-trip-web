@@ -3,10 +3,12 @@ import test from 'node:test'
 import { createTestJiti } from './helpers.ts'
 
 const jiti = createTestJiti()
-const { detailActionLabel, detailCopy, getNotificationDetailState, sectionLabel } = await jiti.import('./src/widgets/notifications/model/notification-presentation.ts') as {
+const { getDetailState } = await jiti.import('./src/shared/utils/status.ts') as {
+  getDetailState: (input: { hasData: boolean; isError: boolean; isLoading: boolean }) => string
+}
+const { detailActionLabel, detailCopy, sectionLabel } = await jiti.import('./src/widgets/notifications/model/notification-presentation.ts') as {
   detailActionLabel: (notification: { linkType?: string; linkId?: number }) => string | undefined
   detailCopy: (notification: { linkType?: string; title?: string; body?: string }) => { body: string; title: string }
-  getNotificationDetailState?: (input: { hasNotification: boolean; isError: boolean; isLoading: boolean }) => string
   sectionLabel: (
     notifications: Array<{ createdAt?: string; read?: boolean }>,
     index: number,
@@ -37,7 +39,7 @@ test('알림 링크 유형별 기본 내용과 이동 동작을 반환한다', (
 })
 
 test('알림 상세는 API 실패와 찾을 수 없는 알림을 구분한다', () => {
-  assert.equal(getNotificationDetailState?.({ hasNotification: false, isError: true, isLoading: false }), 'error')
-  assert.equal(getNotificationDetailState?.({ hasNotification: false, isError: false, isLoading: false }), 'empty')
-  assert.equal(getNotificationDetailState?.({ hasNotification: true, isError: true, isLoading: false }), 'ready')
+  assert.equal(getDetailState({ hasData: false, isError: true, isLoading: false }), 'error')
+  assert.equal(getDetailState({ hasData: false, isError: false, isLoading: false }), 'empty')
+  assert.equal(getDetailState({ hasData: true, isError: true, isLoading: false }), 'ready')
 })

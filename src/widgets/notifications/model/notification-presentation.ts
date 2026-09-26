@@ -3,22 +3,6 @@ import { isInCurrentCalendarWeek } from '@/shared/utils'
 
 export type NotificationViewFilter = 'ALL' | 'SCHEDULE' | 'PHOTO' | 'GROUP'
 
-export type NotificationDetailState = 'loading' | 'error' | 'empty' | 'ready'
-
-export function getNotificationDetailState({
-  hasNotification,
-  isError,
-  isLoading,
-}: {
-  hasNotification: boolean
-  isError: boolean
-  isLoading: boolean
-}): NotificationDetailState {
-  if (hasNotification) return 'ready'
-  if (isLoading) return 'loading'
-  return isError ? 'error' : 'empty'
-}
-
 export function matchesNotificationFilter(notification: { type?: string; category?: string }, filter: NotificationViewFilter) {
   if (filter === 'ALL') return true
   const category = notification.category?.toUpperCase()

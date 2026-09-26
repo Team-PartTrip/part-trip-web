@@ -1,5 +1,6 @@
 import type { NotificationResponseDto } from '@/entities/notification'
 import { Button as PartTripButton } from '@/shared/ui/parttrip'
+import { getDetailState } from '@/shared/utils'
 
 import {
   categoryTone,
@@ -8,7 +9,6 @@ import {
   relativeTime,
   sectionLabel,
   settingCopy,
-  getNotificationDetailState,
   type NotificationViewFilter,
 } from '../model/notification-presentation'
 import * as S from './NotificationPage.styles'
@@ -104,8 +104,8 @@ export function NotificationDetailView({
   onAction: () => void
   onBack: () => void
 }) {
-  const state = getNotificationDetailState({
-    hasNotification: Boolean(detail),
+  const state = getDetailState({
+    hasData: Boolean(detail),
     isError,
     isLoading,
   })

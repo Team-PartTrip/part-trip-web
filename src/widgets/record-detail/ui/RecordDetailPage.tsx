@@ -3,20 +3,18 @@ import { useNavigate, useParams } from '@tanstack/react-router'
 import { useTravelRecordQuery } from '@/entities/trip-card'
 import { figmaRecordDetail } from '@/shared/assets'
 import { paths } from '@/shared/config'
-import { getErrorMessage } from '@/shared/utils'
-import { formatDate, formatTravelDateTime } from '@/shared/utils'
+import { formatDate, formatTravelDateTime, getDetailState, getErrorMessage } from '@/shared/utils'
 import { shareKakaoCardNews } from '@/shared/libs/kakao-share'
 import { AppShell } from '@/widgets/app-shell'
 
-import { getRecordDetailState } from '../model/record-detail-state'
 import * as S from './RecordDetailPage.styles'
 
 export function RecordDetailPage() {
   const navigate = useNavigate()
   const { recordId = '' } = useParams({ strict: false })
   const { data: record, isLoading, isError: hasRecordError } = useTravelRecordQuery(Number(recordId))
-  const recordState = getRecordDetailState({
-    hasRecord: Boolean(record),
+  const recordState = getDetailState({
+    hasData: Boolean(record),
     isError: hasRecordError,
     isLoading,
   })
