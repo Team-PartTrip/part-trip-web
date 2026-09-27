@@ -266,27 +266,30 @@ export const ActionRow = styled.div`
 
 export const SettingsCard = styled.section`
   border-radius: 1.25rem;
-  padding: 0.5rem 1.5rem;
+  padding: 0.75rem 1.5rem 1rem;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
+
+  @media (max-width: 47.9375rem) {
+    border-radius: 0;
+    padding: 0.5rem 1rem 1rem;
+  }
 `
 
 export const SettingRow = styled.div`
   display: flex;
-  min-height: 4.8125rem;
+  min-height: 5.25rem;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
   border-bottom: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
-  &:last-child { border-bottom: 0; }
-  > div { display: flex; flex-direction: column; gap: 0.25rem; }
-  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 0.8125rem; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.6875rem; }
+
+  > div { display: flex; flex-direction: column; gap: 0.375rem; }
+  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 1rem; font-weight: 700; line-height: 1.5rem; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.375rem; }
 `
 
 export const SettingsNote = styled.p`
-  margin: 0.5rem 0 0.75rem;
+  margin: 0.875rem 0 0.25rem;
   color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 0.75rem;
-  line-height: 1.125rem;
+  font-size: 0.875rem;
+  line-height: 1.375rem;
 `
