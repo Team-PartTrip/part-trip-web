@@ -45,6 +45,18 @@ export const Brand = styled.span`
   }
 `
 
+export const BrandIcon = styled.img`
+  display: block;
+  width: 7rem;
+  height: 7rem;
+  border-radius: 1.375rem;
+
+  @media (max-width: 37.5rem) {
+    width: 6rem;
+    height: 6rem;
+  }
+`
+
 export const Title = styled.h1`
   margin: 0;
   color: ${({ theme }) => theme.colors.text.strong};

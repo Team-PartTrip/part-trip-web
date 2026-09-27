@@ -1,21 +1,17 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { googleLogin, saveAuthTokens } from '@/entities/session/api'
-import { dandiLogoUrl } from '@/shared/assets'
+import { dandiAppLogoUrl } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import { getErrorMessage, getSafeRedirect } from '@/shared/utils'
 import { AuthForm as S, GoogleLoginControl, KakaoLoginControl } from '@/shared/ui'
 
-type SocialAuthMode = 'login' | 'sign-up'
-
 type Props = {
-  mode: SocialAuthMode
   redirect?: string
 }
 
-export function SocialAuthForm({ mode, redirect }: Props) {
+export function SocialAuthForm({ redirect }: Props) {
   const navigate = useNavigate()
-  const isSignUp = mode === 'sign-up'
   const safeRedirect = getSafeRedirect(redirect)
   const [message, setMessage] = useState('')
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
@@ -35,20 +31,17 @@ export function SocialAuthForm({ mode, redirect }: Props) {
   return (
     <S.Container>
       <S.Header>
-        <S.Brand><img src={dandiLogoUrl} alt="단디" /></S.Brand>
-        <S.Title>{isSignUp ? '회원가입' : '단디 시작하기'}</S.Title>
-        {!isSignUp ? <S.Subtitle>부모님 여행을 가족이 함께 챙기는 앱</S.Subtitle> : null}
-        <S.Subtitle>{isSignUp
-          ? '카카오톡 또는 Google 계정으로 바로 가입하세요.'
-          : '카카오톡 또는 Google 계정으로 바로 시작하세요.'}</S.Subtitle>
+        <S.BrandIcon src={dandiAppLogoUrl} alt="단디 로고" width={480} height={480} />
+        <S.Title>단디 시작하기</S.Title>
+        <S.Subtitle>부모님 여행을 가족이 함께 챙기는 앱</S.Subtitle>
+        <S.Subtitle>카카오톡 또는 Google 계정으로 로그인하세요. 처음 이용하는 계정은 자동으로 가입돼요.</S.Subtitle>
       </S.Header>
       <S.Body>
-        <S.Form aria-label={isSignUp ? '회원가입' : '로그인'} onSubmit={(event) => event.preventDefault()}>
+        <S.Form aria-label="로그인" onSubmit={(event) => event.preventDefault()}>
           {message ? <S.Message $tone="error" aria-live="polite">{message}</S.Message> : null}
           <S.Actions>
             <KakaoLoginControl
               disabled={isGoogleSubmitting}
-              label={isSignUp ? '카카오로 가입하기' : undefined}
               redirect={safeRedirect}
               onError={(error) => setMessage(getErrorMessage(error))}
             />
@@ -56,17 +49,10 @@ export function SocialAuthForm({ mode, redirect }: Props) {
             <GoogleLoginControl
               disabled={isGoogleSubmitting}
               isSubmitting={isGoogleSubmitting}
-              label={isSignUp ? 'Google로 가입하기' : undefined}
-              onError={() => setMessage(`Google ${isSignUp ? '회원가입' : '로그인'}에 실패했습니다.`)}
+              onError={() => setMessage('Google 로그인에 실패했습니다.')}
               onLogin={handleGoogleLogin}
             />
-            <S.AuthSwitch
-              search={safeRedirect ? { redirect: safeRedirect } : undefined}
-              to={isSignUp ? paths.login : paths.signUp}
-            >
-              {isSignUp ? '이미 계정이 있나요? 로그인' : '계정이 없으신가요? 회원가입'}
-            </S.AuthSwitch>
-            <S.AuthSwitch to="/privacy">개인정보처리방침</S.AuthSwitch>
+            <S.AuthSwitch to={paths.privacy}>개인정보처리방침</S.AuthSwitch>
           </S.Actions>
         </S.Form>
       </S.Body>

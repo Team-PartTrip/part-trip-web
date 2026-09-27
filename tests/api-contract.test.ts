@@ -95,9 +95,11 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
   assert.match(kakaoCallback, /getKakaoAuthRequest/)
   assert.match(kakaoCallback, /callback\.state/)
   assert.match(kakaoCallback, /pendingRequest\.state/)
-  assert.match(loginRoute, /SocialAuthForm mode="login"/)
-  assert.match(signUpRoute, /SocialAuthForm mode="sign-up"/)
+  assert.match(loginRoute, /SocialAuthForm redirect=\{redirect\}/)
+  assert.match(signUpRoute, /throw redirect\(/)
+  assert.doesNotMatch(signUpRoute, /SocialAuthForm/)
   assert.match(socialAuthForm, /KakaoLoginControl/)
+  assert.doesNotMatch(socialAuthForm, /회원가입|sign-up|paths\.signUp/)
   assert.match(socialAuthForm, /googleLogin\(\{ idToken \}\)/)
   assert.doesNotMatch(
     socialAuthForm,

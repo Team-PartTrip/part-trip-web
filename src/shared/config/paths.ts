@@ -1,6 +1,7 @@
 export const paths = {
   kakaoCallback: '/auth/kakao/callback',
   login: '/login',
+  privacy: '/privacy',
   main: '/main',
   planner: '/planner',
   plannerDestination: '/planner/destination',
@@ -22,5 +23,4 @@ export const paths = {
   record: '/record',
   recordCalendar: '/record/calendar',
   recordWrite: '/record/write',
-  signUp: '/sign-up',
 } as const

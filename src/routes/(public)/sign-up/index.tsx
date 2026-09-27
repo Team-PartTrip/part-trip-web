@@ -1,14 +1,14 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { AuthForm } from '@/shared/ui'
-import { SocialAuthForm } from '@/features/social-auth'
+import { createFileRoute, redirect } from '@tanstack/react-router'
+import { paths } from '@/shared/config'
 import { validateAuthSearch } from '@/shared/utils'
 
 export const Route = createFileRoute('/(public)/sign-up/')({
   validateSearch: validateAuthSearch,
-  component: SignUpRoute,
+  beforeLoad: ({ search }) => {
+    throw redirect({
+      to: paths.login,
+      search: search.redirect ? { redirect: search.redirect } : undefined,
+      replace: true,
+    })
+  },
 })
-
-function SignUpRoute() {
-  const { redirect } = Route.useSearch()
-  return <AuthForm.AuthPage className="page"><SocialAuthForm mode="sign-up" redirect={redirect} /></AuthForm.AuthPage>
-}

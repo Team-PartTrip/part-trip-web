@@ -1,5 +1,5 @@
 import { Link, useLocation } from '@tanstack/react-router'
-import { dandiLogoUrl } from '@/shared/assets'
+import { dandiAppLogoUrl } from '@/shared/assets'
 import { paths } from '@/shared/config'
 
 import type { SidebarMenuType } from '../types/sidebar-item/sidebar-item'
@@ -30,7 +30,7 @@ export default function Sidebar({ menus, notificationCount = 0 }: Props) {
     <S.SidebarWrapper>
       <S.Aside>
         <S.LogoSection>
-          <Link to={paths.main} aria-label="단디 홈"><img src={dandiLogoUrl} alt="" /></Link>
+          <Link to={paths.main} aria-label="단디 홈"><img width={480} height={480} src={dandiAppLogoUrl} alt="" /></Link>
         </S.LogoSection>
 
         <S.MenuList aria-label="메인 메뉴">

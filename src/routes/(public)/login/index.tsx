@@ -10,5 +10,5 @@ export const Route = createFileRoute('/(public)/login/')({
 
 function LoginRoute() {
   const { redirect } = Route.useSearch()
-  return <AuthForm.AuthPage className="page"><SocialAuthForm mode="login" redirect={redirect} /></AuthForm.AuthPage>
+  return <AuthForm.AuthPage className="page"><SocialAuthForm redirect={redirect} /></AuthForm.AuthPage>
 }

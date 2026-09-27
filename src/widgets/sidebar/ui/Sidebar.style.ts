@@ -39,16 +39,17 @@ export const Aside = styled.div`
 `
 
 export const LogoSection = styled.div`
-  height: 2.125rem;
+  height: 3.5rem;
   margin-bottom: 1.625rem;
 
   a {
+    display: inline-flex;
     text-decoration: none;
 
     img {
       display: block;
-      width: 8.5rem;
-      height: auto;
+      width: 3.5rem;
+      height: 3.5rem;
     }
   }
 

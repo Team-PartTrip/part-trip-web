@@ -94,6 +94,9 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
                   <S.SettingsRow to={paths.profileAccessibility}>
                     <span><strong>접근성 설정</strong><small>휴대폰 글자 크기 · 고대비 설정</small></span><b>확인</b>
                   </S.SettingsRow>
+                  <S.SettingsRow to={paths.privacy}>
+                    <span><strong>개인정보처리방침</strong><small>개인정보 처리 내용을 확인해요</small></span><b>보기</b>
+                  </S.SettingsRow>
                 </S.SettingsList>
               </S.SettingsGroup>
             </S.SettingsNav>
