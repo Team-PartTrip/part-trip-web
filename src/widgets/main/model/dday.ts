@@ -3,7 +3,7 @@ import type { TripPhase } from '../../../entities/travel/api.ts'
 export type DdayPlan = {
   cityName?: string | null
   dday?: string | null
-  countryName?: string | null
+  regionName?: string | null
   endDate?: string | null
   startDate?: string | null
   status?: TripPhase

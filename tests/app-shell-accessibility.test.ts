@@ -10,6 +10,6 @@ test('AppShell provides a first, focus-revealed link to the focusable main landm
 
   assert.notEqual(skipLink, -1)
   assert.ok(skipLink < sidebar)
-  assert.match(shell, /<S\.Main id="main-content" tabIndex=\{-1\}>/)
+  assert.match(shell, /<S\.Main(?: \$fillHeight=\{fillHeight\})? id="main-content" tabIndex=\{-1\}>/)
   assert.match(styles, /transform: translateY\(-160%\);[\s\S]*&:focus-visible\s*\{\s*transform: translateY\(0\);[\s\S]*outline:/)
 })

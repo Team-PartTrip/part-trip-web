@@ -19,11 +19,18 @@ export type TravelPreferenceRequestDto = {
 
 export type TravelPreferenceResponseDto = Partial<TravelPreferenceRequestDto>
 
+export type ProfileStatsResponseDto = {
+  tripCount?: number
+  regionCount?: number
+  recordCount?: number
+}
+
 const PROFILE_API_PATHS = {
   base: '/profile',
   image: '/profile/image',
   mine: '/profile/myInfo',
   travelPreferences: '/profile/travel-preferences',
+  stats: '/profile/stats',
 } as const
 
 export async function getProfile(): Promise<ProfileResponseDto> {
@@ -31,9 +38,18 @@ export async function getProfile(): Promise<ProfileResponseDto> {
   return data
 }
 
+export async function getProfileStats(): Promise<ProfileStatsResponseDto> {
+  const { data } = await apiClient.get<ProfileStatsResponseDto>(PROFILE_API_PATHS.stats)
+  return data
+}
+
 export async function updateProfile(payload: ProfileUpdateRequestDto): Promise<ProfileResponseDto> {
   const { data } = await apiClient.put<ProfileResponseDto>(PROFILE_API_PATHS.base, payload)
   return data
+}
+
+export async function deleteProfile(): Promise<void> {
+  await apiClient.delete(PROFILE_API_PATHS.base)
 }
 
 export async function uploadProfileImage(file: File): Promise<string> {

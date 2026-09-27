@@ -1,11 +1,12 @@
 import { apiClient } from '@/shared/libs/api-client'
 export type NotificationType = string
-export type NotificationFilter = 'ALL' | 'VOTE' | 'RECORD'
+export type NotificationCategory = string
+export type NotificationFilter = string
 
 export type NotificationResponseDto = {
   notificationId?: number
   type?: NotificationType
-  category?: string
+  category?: NotificationCategory
   title?: string
   body?: string
   linkType?: string

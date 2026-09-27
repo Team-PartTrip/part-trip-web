@@ -7,6 +7,7 @@ import {
   getPopularCities,
   searchCities,
   getTourPlace,
+  getTourPlaceAccessibility,
   type DdayResponseDto,
   type TourPlaceResponseDto,
 } from './api'
@@ -97,6 +98,14 @@ export function useMoreTourPlacesQuery(
   return useInfiniteQuery(moreTourPlacesQueryOptions(countryName ?? '', cityName ?? '', category ?? '', enabled))
 }
 
+export function useTourPlaceAccessibilityQuery(tourPlaceId: number, enabled = true) {
+  return useQuery({
+    queryKey: travelQueryKeys.tourPlaceAccessibility(tourPlaceId),
+    queryFn: () => getTourPlaceAccessibility(tourPlaceId),
+    enabled: enabled && Number.isSafeInteger(tourPlaceId) && tourPlaceId > 0,
+  })
+}
+
 type MainTravelQueryData = {
   plan?: DdayResponseDto
   tourPlaces: TourPlaceResponseDto[]
@@ -104,7 +113,7 @@ type MainTravelQueryData = {
 
 export function useMainTravelQuery() {
   const ddayQuery = useDdayQuery()
-  const countryName = ddayQuery.data?.countryName ?? ''
+  const countryName = ddayQuery.data?.regionName ? '대한민국' : ''
   const hasCountry = Boolean(countryName)
     && (ddayQuery.data?.status === 'BEFORE' || ddayQuery.data?.status === 'DURING')
   const tourPlaces = useQuery(tourPlacesQueryOptions(countryName, undefined, undefined, hasCountry))

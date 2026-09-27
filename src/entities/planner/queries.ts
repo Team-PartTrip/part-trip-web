@@ -4,6 +4,7 @@ import {
   getMyPlannerInvitations,
   getMyPlanners,
   getPlannerBlocks,
+  getPlannerConfirmedPlaces,
   getPlannerDetail,
   getPlannerMembers,
   getPlannerSchedule,
@@ -64,6 +65,14 @@ export const plannerScheduleQueryOptions = (plannerId: number, enabled = true) =
 
 export function usePlannerScheduleQuery(plannerId: number, enabled = true) {
   return useQuery(plannerScheduleQueryOptions(plannerId, enabled))
+}
+
+export function usePlannerConfirmedPlacesQuery(plannerId: number, enabled = true) {
+  return useQuery({
+    queryKey: plannerQueryKeys.confirmedPlaces(plannerId),
+    queryFn: () => getPlannerConfirmedPlaces(plannerId),
+    enabled: enabled && isPositiveSafeInteger(plannerId),
+  })
 }
 
 export function usePlannerScheduleCandidatesQuery(plannerId: number, date: string, query: string, enabled = true) {

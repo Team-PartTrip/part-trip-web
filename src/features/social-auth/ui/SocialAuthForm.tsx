@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { googleLogin, saveAuthTokens } from '@/entities/session/api'
-import { partTripLogoUrl } from '@/shared/assets'
+import { dandiLogoUrl } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import { getErrorMessage, getSafeRedirect } from '@/shared/utils'
 import { AuthForm as S, GoogleLoginControl, KakaoLoginControl } from '@/shared/ui'
@@ -35,8 +35,9 @@ export function SocialAuthForm({ mode, redirect }: Props) {
   return (
     <S.Container>
       <S.Header>
-        <S.Brand><img src={partTripLogoUrl} alt="PartTrip" /></S.Brand>
-        <S.Title>{isSignUp ? '회원가입' : 'PartTrip 시작하기'}</S.Title>
+        <S.Brand><img src={dandiLogoUrl} alt="단디" /></S.Brand>
+        <S.Title>{isSignUp ? '회원가입' : '단디 시작하기'}</S.Title>
+        {!isSignUp ? <S.Subtitle>부모님 여행을 가족이 함께 챙기는 앱</S.Subtitle> : null}
         <S.Subtitle>{isSignUp
           ? '카카오톡 또는 Google 계정으로 바로 가입하세요.'
           : '카카오톡 또는 Google 계정으로 바로 시작하세요.'}</S.Subtitle>

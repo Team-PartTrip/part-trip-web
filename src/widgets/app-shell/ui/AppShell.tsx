@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 import { useUnreadNotificationCountQuery } from '@/entities/notification'
-import { partTripLogoUrl } from '@/shared/assets'
+import { dandiLogoUrl } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import { MENUS } from '@/widgets/sidebar'
 import { Sidebar } from '@/widgets/sidebar'
@@ -21,7 +21,7 @@ export function AppShell({ children, fillHeight = false }: AppShellProps) {
       <Sidebar menus={MENUS} notificationCount={notificationCount?.unreadCount} />
       <S.Content>
         <S.Topbar>
-          <S.MobileLogoLink to={paths.main} aria-label="PartTrip 홈"><img width={362} height={86} src={partTripLogoUrl} alt="" /></S.MobileLogoLink>
+          <S.MobileLogoLink to={paths.main} aria-label="단디 홈"><img width={362} height={86} src={dandiLogoUrl} alt="" /></S.MobileLogoLink>
           <S.TopbarSpacer />
           <S.NotificationLink to={paths.notifications}>알림{typeof notificationCount?.unreadCount === 'number' ? ` ${notificationCount.unreadCount}` : ''}</S.NotificationLink>
         </S.Topbar>

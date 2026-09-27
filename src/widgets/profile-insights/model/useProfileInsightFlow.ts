@@ -1,11 +1,11 @@
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 
-import { useAcquireCountryMutation, useWorldMapQuery, useWorldMapStatsQuery } from '@/entities/world-map'
 import { useMyTravelRecords } from '@/entities/trip-card'
+import { getRegionMap } from '@/entities/region-map/api'
 import { paths } from '@/shared/config'
 import { readSessionValue, writeSessionValue } from '@/shared/libs/session-storage'
-import { isPositiveSafeInteger } from '@/shared/utils'
 
 import { getProfileInsightModel, type ProfileInsightKind } from './profile-insight'
 
@@ -16,52 +16,27 @@ const PROFILE_COUNTRY_KEY = 'parttrip:profile-selected-country'
 export function useProfileInsightFlow(kind: ProfileInsightKind) {
   const navigate = useNavigate()
   const { hasError: hasTripsError, isLoading: isTripsLoading, trips } = useMyTravelRecords()
-  const needsWorldMap = kind === 'claim'
-  const worldMapQuery = useWorldMapQuery(needsWorldMap)
-  const worldMapStatsQuery = useWorldMapStatsQuery(false)
-  const acquireCountryMutation = useAcquireCountryMutation()
+  const regionMapQuery = useQuery({ queryKey: ['region-map'], queryFn: getRegionMap, enabled: kind === 'map' || kind === 'countries' })
   const [selectedCountry, setSelectedCountry] = useState(() => readSessionValue(PROFILE_COUNTRY_KEY) ?? '')
-  const [claimFeedback, setClaimFeedback] = useState('')
   const model = getProfileInsightModel({
     kind,
     selectedCountry,
     trips,
-    worldMap: worldMapQuery.data,
-    worldMapStats: worldMapStatsQuery.data,
+    visitedRegions: regionMapQuery.data?.visited,
   })
-  const isLoading = isTripsLoading || (needsWorldMap && worldMapQuery.isLoading)
-  const hasError = hasTripsError || (needsWorldMap && worldMapQuery.isError)
+  const isLoading = isTripsLoading || ((kind === 'map' || kind === 'countries') && regionMapQuery.isLoading)
+  const hasError = hasTripsError || ((kind === 'map' || kind === 'countries') && regionMapQuery.isError)
 
   const selectCountry = (country: string) => {
     setSelectedCountry(country)
     writeSessionValue(PROFILE_COUNTRY_KEY, country)
-    setClaimFeedback('')
-  }
-
-  const handleAcquireCountry = async () => {
-    const tripId = model.selectedTrip?.tripId
-    if (!isPositiveSafeInteger(tripId)) {
-      setClaimFeedback('획득할 여행 기록을 찾을 수 없습니다.')
-      return
-    }
-
-    try {
-      const result = await acquireCountryMutation.mutateAsync({ tripId })
-      setClaimFeedback(result.isNew ? `${model.activeCountry}을 새로 획득했어요.` : `${model.activeCountry}은 이미 획득한 국가예요.`)
-    } catch {
-      setClaimFeedback('국가 획득에 실패했습니다. 여행 기록을 확인해주세요.')
-    }
   }
 
   return {
     ...model,
-    acquireCountryPending: acquireCountryMutation.isPending,
-    claimFeedback,
     hasError,
-    handleAcquireCountry,
     isLoading,
     openCountries: () => navigate({ to: paths.profileCountries }),
-    openMap: () => navigate({ to: paths.profileMap }),
     openRecords: () => navigate({ to: paths.record }),
     openYearReview: () => navigate({ to: paths.profileAchievements }),
     openRecord: (tripId: number) => navigate({ params: { recordId: String(tripId) }, to: '/record/$recordId' }),

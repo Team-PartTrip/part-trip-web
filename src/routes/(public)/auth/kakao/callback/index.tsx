@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 
 import { kakaoLogin, saveAuthTokens } from '@/entities/session/api'
-import { partTripLogoUrl } from '@/shared/assets'
+import { dandiLogoUrl } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import { clearKakaoAuthRequest, getKakaoAuthRequest, getKakaoRedirectUri } from '@/shared/libs/kakao-auth'
 import { getErrorMessage, getSafeRedirect } from '@/shared/utils'
@@ -71,7 +71,7 @@ function KakaoCallbackRoute() {
     <S.AuthPage className="page">
       <S.Container>
         <S.Header>
-          <S.Brand><img src={partTripLogoUrl} alt="PartTrip" /></S.Brand>
+          <S.Brand><img src={dandiLogoUrl} alt="단디" /></S.Brand>
           <S.Title>카카오 로그인</S.Title>
         </S.Header>
         <S.Body>

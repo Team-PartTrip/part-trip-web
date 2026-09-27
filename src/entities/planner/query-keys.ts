@@ -6,6 +6,7 @@ export const plannerQueryKeys = {
   detail: (plannerId: number) => [...plannerQueryKeys.all, 'detail', plannerId] as const,
   members: (plannerId: number) => [...plannerQueryKeys.all, 'members', plannerId] as const,
   schedule: (plannerId: number) => [...plannerQueryKeys.all, 'schedule', plannerId] as const,
+  confirmedPlaces: (plannerId: number) => [...plannerQueryKeys.all, 'confirmed-places', plannerId] as const,
   scheduleCandidates: (plannerId: number, date: string, query: string) =>
     [...plannerQueryKeys.all, 'schedule-candidates', plannerId, date, query] as const,
 }

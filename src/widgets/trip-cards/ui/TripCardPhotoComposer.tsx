@@ -39,9 +39,9 @@ export function TripCardPhotoComposer({ cards }: Props) {
     <S.Composer>
       <S.CreateCardLayout>
         <S.CreateFormPanel>
-          <S.FormHeading>{selectedCard ? `${selectedCard.title || `${selectedCard.cityName || selectedCard.countryName || "여행"} 여행`} · ${formatDate(selectedCard.startDate || "")} 시작` : "사진 · 코멘트"}</S.FormHeading>
+          <S.FormHeading>{selectedCard ? `${selectedCard.title || `${selectedCard.cityName || selectedCard.regionName || selectedCard.countryName || "여행"} 여행`} · ${formatDate(selectedCard.startDate || "")} 시작` : "사진 · 코멘트"}</S.FormHeading>
           <S.Form onSubmit={(event) => void handleSubmit(event)}>
-            {cards.length > 1 ? <S.CardField><S.FieldLabel htmlFor="trip-card-select">여행 카드</S.FieldLabel><S.CardSelector id="trip-card-select" value={selectedCard?.tripId == null ? "" : String(selectedCard.tripId)} onChange={(event) => setSelectedCardId(event.target.value)} disabled={isPending}>{cards.filter((card) => card.tripId != null).map((card) => <option key={card.tripId} value={card.tripId}>{card.title || `${card.cityName || card.countryName || "여행"} 기록`}</option>)}</S.CardSelector></S.CardField> : null}
+            {cards.length > 1 ? <S.CardField><S.FieldLabel htmlFor="trip-card-select">여행 카드</S.FieldLabel><S.CardSelector id="trip-card-select" value={selectedCard?.tripId == null ? "" : String(selectedCard.tripId)} onChange={(event) => setSelectedCardId(event.target.value)} disabled={isPending}>{cards.filter((card) => card.tripId != null).map((card) => <option key={card.tripId} value={card.tripId}>{card.title || `${card.cityName || card.regionName || card.countryName || "여행"} 기록`}</option>)}</S.CardSelector></S.CardField> : null}
             <S.FieldLabel htmlFor="trip-card-photos">사진 선택</S.FieldLabel>
             <S.Gallery>
               {photos.slice(0, MAX_PHOTOS).map((photo) => (

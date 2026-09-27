@@ -1,6 +1,6 @@
 import { useNavigate } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-import { useMyPlannersQuery, usePlannerScheduleQuery } from '@/entities/planner'
+import { useMyPlannersQuery, usePlannerConfirmedPlacesQuery } from '@/entities/planner'
 import { useMainTravelQuery, type DdayResponseDto } from '@/entities/travel'
 import { figmaPlannerIcon } from '@/shared/assets'
 import { paths } from '@/shared/config'
@@ -90,21 +90,20 @@ export function MainPage() {
     && planner.endDate === plan?.endDate
     && (!plan?.cityName || !planner.cityName || planner.cityName.trim() === plan.cityName.trim()),
   )
-  const scheduleQuery = usePlannerScheduleQuery(currentPlanner?.plannerId ?? 0, isDuring && currentPlanner?.plannerId != null)
-  const todaySchedule = scheduleQuery.data?.days?.find((day) => day.date === today)
-  const todayStops = [...(todaySchedule?.slots ?? [])]
-    .sort((left, right) => (left.order ?? 0) - (right.order ?? 0))
-    .flatMap((slot) => slot.place?.name?.trim() ? [slot.place.name.trim()] : [])
-  const isTodayScheduleLoading = isDuring && (isPlannerListLoading || Boolean(currentPlanner?.plannerId && scheduleQuery.isLoading))
+  const confirmedPlacesQuery = usePlannerConfirmedPlacesQuery(currentPlanner?.plannerId ?? 0, isDuring && currentPlanner?.plannerId != null)
+  const todayStops = (confirmedPlacesQuery.data?.places ?? [])
+    .filter((place) => place.visitedDate === today)
+    .flatMap((place) => place.placeName?.trim() ? [place.placeName.trim()] : [])
+  const isTodayScheduleLoading = isDuring && (isPlannerListLoading || Boolean(currentPlanner?.plannerId && confirmedPlacesQuery.isLoading))
   let todayScheduleMessage = ''
-  if (plannerListError || scheduleQuery.isError) {
+  if (plannerListError || confirmedPlacesQuery.isError) {
     todayScheduleMessage = '오늘 일정을 불러오지 못했어요.'
   } else if (!currentPlanner) {
     todayScheduleMessage = '확정된 여행 일정을 찾을 수 없어요.'
   } else if (!todayStops.length) {
     todayScheduleMessage = '오늘 확정된 일정이 없어요.'
   }
-  const destination = plan?.cityName || plan?.countryName || '여행지'
+  const destination = plan?.cityName || plan?.regionName || '여행지'
   const dateRange = plan ? formatDateRange(plan.startDate, plan.endDate) : '여행 정보가 없습니다.'
   const recommendations = data.tourPlaces.slice(0, 3)
   const presentation = getMainQueryPresentation({
@@ -164,7 +163,7 @@ export function MainPage() {
             today={today}
             todayStops={todayStops}
             scheduleMessage={effectiveScheduleMessage}
-            scheduleError={plannerListError || scheduleQuery.isError}
+            scheduleError={plannerListError || confirmedPlacesQuery.isError}
             scheduleLoading={presentation.schedule === 'loading'}
             onStartPlanner={() => void navigate({ to: paths.plannerDestination })}
             onOpenTodaySchedule={openTodaySchedule}
@@ -177,7 +176,7 @@ export function MainPage() {
               <S.CalendarIcon><img src={figmaPlannerIcon} alt="" /></S.CalendarIcon>
               <S.CalendarCopy>
                 <strong>축제 · 이벤트 캘린더</strong>
-                <span>{plan?.countryName || '여행지'}의 여행 기간 전후 일정</span>
+                <span>{plan?.regionName || '여행지'}의 여행 기간 전후 일정</span>
               </S.CalendarCopy>
               <S.CalendarArrow aria-hidden="true">›</S.CalendarArrow>
             </S.CalendarCard>

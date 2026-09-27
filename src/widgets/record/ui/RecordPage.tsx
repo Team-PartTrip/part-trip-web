@@ -16,7 +16,7 @@ export function RecordPage() {
   const today = formatCalendarDate(now.getFullYear(), now.getMonth(), now.getDate())
   const records = trips.map((trip) => ({
     id: trip.tripId,
-    title: trip.title || `${trip.cityName || trip.countryName || '여행'} 여행`,
+    title: trip.title || `${trip.cityName || trip.regionName || trip.countryName || '여행'} 여행`,
     date: `${formatDate(trip.startDate)} – ${formatDate(trip.endDate)}`,
     year: trip.startDate?.slice(0, 4) || trip.createDate?.slice(0, 4) || '',
     photoCount: trip.photoCount ?? trip.images?.length ?? 0,

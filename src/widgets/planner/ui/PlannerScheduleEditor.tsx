@@ -1,9 +1,11 @@
 import { useMemo, useState, type ReactNode } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import {
   useSavePlannerScheduleMutation,
   type PlannerSchedulePlaceDto,
   type PlannerScheduleResponseDto,
 } from '@/entities/planner'
+import { tourPlacesQueryOptions } from '@/entities/travel'
 import { Button } from '@/shared/ui/parttrip'
 import { formatDate, getErrorMessage } from '@/shared/utils'
 import {
@@ -17,6 +19,7 @@ import {
   type EditableScheduleDay,
 } from '../model/schedule-edit'
 import { PlannerPlacePicker, type Position } from './PlannerPlacePicker'
+import { PlannerPlaceAccessibility } from './PlannerPlaceAccessibility'
 import * as S from './PlannerAiFlow.styles'
 
 function serialized(days: EditableScheduleDay[]) {
@@ -37,6 +40,7 @@ export function PlannerScheduleEditor({
   isConfirmed: boolean
 }) {
   const saveMutation = useSavePlannerScheduleMutation()
+  const placesQuery = useQuery(tourPlacesQueryOptions('대한민국', cityName, undefined, Boolean(cityName)))
   const [draft, setDraft] = useState<EditableScheduleDay[]>()
   const [picker, setPicker] = useState<Position>()
   const [swapSource, setSwapSource] = useState<Position>()
@@ -130,13 +134,15 @@ export function PlannerScheduleEditor({
           const position = { dayIndex, slotIndex }
           const isSwapSource = swapSource?.dayIndex === dayIndex && swapSource.slotIndex === slotIndex
           const placeId = slot.tourPlaceId ?? slot.place?.tourPlaceId
-          const placeName = slot.place?.name || '장소 미정'
+          const place = slot.place
+          const apiPlace = placesQuery.data?.find((item) => item.tourPlaceId === placeId)
+          const placeName = place?.name || apiPlace?.placeName || (placeId ? `장소 ${placeId}` : '장소 미정')
           let swapLabel = '바꾸기'
           if (swapSource && !isSwapSource) swapLabel = '이 카드와 바꾸기'
           if (isSwapSource) swapLabel = '교환 취소'
           return <S.SchedulePlace key={`${day.date}-${slot.slotId ?? placeId ?? 'empty'}-${slotIndex}`}>
             <b aria-hidden="true">{slotIndex + 1}</b>
-            <span><strong>{placeName}</strong>{slot.place?.address ? <small>{slot.place.address}</small> : null}</span>
+            <div style={{ minWidth: 0 }}><strong>{placeName}</strong>{place?.address || apiPlace?.address ? <small>{place?.address || apiPlace?.address}</small> : null}{placeId ? <PlannerPlaceAccessibility tourPlaceId={placeId} /> : null}</div>
             {draft ? <S.SlotTools>
               <Button type="button" $variant="secondary" aria-label={`${placeName} 위로 이동`} disabled={slotIndex === 0 || saveMutation.isPending}
                 onClick={() => setDraft((current) => current ? moveScheduleSlot(current, dayIndex, slotIndex, -1) : current)}>위로</Button>

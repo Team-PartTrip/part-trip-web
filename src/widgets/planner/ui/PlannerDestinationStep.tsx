@@ -5,7 +5,7 @@ import { useCitySearchQuery, usePopularCitiesQuery } from '@/entities/travel'
 import { paths } from '@/shared/config'
 import { Button, Input } from '@/shared/ui/parttrip'
 import { formatCalendarDate, formatDateRange } from '@/shared/utils'
-import { getDomesticCityNames } from '../model/domestic-cities'
+import { getDomesticCities, getDomesticPopularCityNames } from '../model/domestic-cities'
 import type { PlannerCreationDraft } from '../model/planner-creation'
 import { writePlannerCreationDraft } from '../model/planner-creation'
 import { isValidPlannerDateRange, overlapsExistingTrip } from '../model/planner-date'
@@ -29,8 +29,10 @@ export function PlannerDestinationStep({ initialDraft }: { initialDraft?: Planne
   const isSearchingCities = Boolean(cityKeyword)
   const cityQuery = useCitySearchQuery('대한민국', cityKeyword, isSearchingCities)
   const popularCitiesQuery = usePopularCitiesQuery(100)
-  const displayedCities = isSearchingCities ? cityQuery.data ?? [] : popularCitiesQuery.data ?? []
-  const domesticCities = getDomesticCityNames(displayedCities)
+  const matchingDomesticCities = getDomesticCities(cityQuery.data ?? [])
+  const domesticCities: Array<{ cityName: string; regionName?: string }> = isSearchingCities
+    ? matchingDomesticCities.map(({ cityName, regionName }) => ({ cityName, regionName }))
+    : getDomesticPopularCityNames(popularCitiesQuery.data ?? []).map((cityName) => ({ cityName }))
   const cityListIsFetching = isSearchingCities ? cityQuery.isFetching : popularCitiesQuery.isFetching
   const cityListIsError = isSearchingCities ? cityQuery.isError : popularCitiesQuery.isError
   const now = new Date()
@@ -54,13 +56,14 @@ export function PlannerDestinationStep({ initialDraft }: { initialDraft?: Planne
     if (!cityKeyword) return setMessage('국내 여행 도시를 선택해주세요.')
     if (cityQuery.isLoading || cityQuery.isFetching) return setMessage('국내 도시 목록을 불러오는 중이에요. 잠시 후 다시 시도해주세요.')
     if (cityQuery.isError) return setMessage('국내 도시 목록을 불러오지 못했어요. 다시 시도해주세요.')
-    if (!domesticCities.includes(cityKeyword)) return setMessage('검색 결과에서 대한민국 도시를 선택해주세요.')
+    const selectedCity = matchingDomesticCities.find((city) => city.cityName === cityKeyword)
+    if (!selectedCity) return setMessage('검색 결과에서 지역 정보가 있는 대한민국 도시를 선택해주세요.')
     if (startDate < today || !isValidPlannerDateRange(startDate, endDate)) {
       return setMessage('여행 날짜를 확인해주세요. 과거 날짜는 선택할 수 없고 최대 14일까지 계획할 수 있어요.')
     }
     if (existingTripConflict) return setMessage('선택한 기간에 다른 여행이 있어요. 날짜를 바꿔주세요.')
 
-    writePlannerCreationDraft({ cityName: cityKeyword, startDate, endDate, blocks: [] })
+    writePlannerCreationDraft({ cityName: cityKeyword, regionCode: selectedCity.regionCode, regionName: selectedCity.regionName, startDate, endDate, blocks: [] })
     void navigate({ to: paths.plannerExplore })
   }
 
@@ -77,8 +80,8 @@ export function PlannerDestinationStep({ initialDraft }: { initialDraft?: Planne
               {cityListIsFetching ? <p role="status">{isSearchingCities ? '국내 도시를 찾고 있어요.' : '인기 여행지를 불러오고 있어요.'}</p> : null}
               {cityListIsError ? <S.Error role="alert">{isSearchingCities ? '국내 도시 목록을 불러오지 못했어요.' : '인기 여행지를 불러오지 못했어요.'}</S.Error> : null}
               {!cityListIsFetching && !cityListIsError && !domesticCities.length ? <small>{isSearchingCities ? '일치하는 국내 도시가 없습니다. 국내 여행은 대한민국 도시만 선택할 수 있어요.' : '인기 여행지가 아직 없어요. 도시 이름을 검색해보세요.'}</small> : null}
-              {!cityListIsFetching && domesticCities.map((city) => <S.City key={city} type="button" $active={cityKeyword === city} aria-pressed={cityKeyword === city} onClick={() => setCityName(city)}>
-                <strong>{city}</strong><span>대한민국</span>
+              {!cityListIsFetching && domesticCities.map((city) => <S.City key={city.cityName} type="button" $active={cityKeyword === city.cityName} aria-pressed={cityKeyword === city.cityName} onClick={() => setCityName(city.cityName)}>
+                <strong>{city.cityName}</strong><span>{city.regionName || '대한민국'}</span>
               </S.City>)}
             </S.CityList>
           </S.Field>

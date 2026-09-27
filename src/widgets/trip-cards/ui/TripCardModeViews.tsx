@@ -41,7 +41,7 @@ export function TripCardListView({ card, imageUrl, navigate }: TripCardListViewP
           </S.TravelCardImage>
           <S.TravelCardInfo>
             <S.TravelCardTitle>
-              <span><strong>{(card.cityName || card.countryName || '여행').toUpperCase()}</strong><small>{[card.countryName, card.startDate, card.endDate].filter(Boolean).join(' · ') || '여행 일정 정보 없음'}</small></span>
+              <span><strong>{(card.cityName || card.regionName || card.countryName || '여행').toUpperCase()}</strong><small>{[card.regionName || card.countryName, card.startDate, card.endDate].filter(Boolean).join(' · ') || '여행 일정 정보 없음'}</small></span>
               <S.FavoriteBadge aria-label="즐겨찾기">★</S.FavoriteBadge>
             </S.TravelCardTitle>
             <S.MetricList>

@@ -28,6 +28,7 @@ export const SkipLink = styled.a`
 
 export const Content = styled.div`
   display: flex;
+  align-self: flex-start;
   min-width: 0;
   flex: 1;
   flex-direction: column;
@@ -101,7 +102,7 @@ export const NotificationLink = styled(Link)`
 
 export const Main = styled.main<{ $fillHeight?: boolean }>`
   min-width: 0;
-  flex: 1;
+  flex: ${({ $fillHeight }) => ($fillHeight ? '0 0 auto' : '1')};
   display: ${({ $fillHeight }) => ($fillHeight ? 'flex' : 'block')};
   flex-direction: column;
   padding: 2.5rem;

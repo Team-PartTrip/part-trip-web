@@ -159,6 +159,16 @@ export const RecordAction = styled.button`
   flex: 0 0 2.875rem;
 `
 
+export const MetadataForm = styled.form`
+  display: grid;
+  width: 100%;
+  gap: 0.625rem;
+  label { display: grid; gap: 0.25rem; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.8125rem; }
+  input { min-width: 0; border: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle}; border-radius: 0.5rem; padding: 0.5rem; color: ${({ theme }) => theme.colors.text.strong}; font: inherit; }
+  > div { display: flex; gap: 0.5rem; }
+  button { min-height: 2.25rem; padding: 0.5rem 0.75rem; font-size: 0.8125rem; }
+`
+
 export const CommentEditLayout = styled.div`
   display: grid;
   margin: 0 2rem;

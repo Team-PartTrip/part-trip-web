@@ -15,7 +15,7 @@ export function ProfileAccessibilityPage() {
       <S.Page>
         <header>
           <h1>접근성 설정</h1>
-          <p>PartTrip 화면의 글자 크기를 조정하고 고대비 색상을 사용할 수 있어요. 기기의 고대비 설정도 함께 반영됩니다.</p>
+          <p>단디 화면의 글자 크기를 조정하고 고대비 색상을 사용할 수 있어요. 기기의 고대비 설정도 함께 반영됩니다.</p>
         </header>
         <S.Card>
           <section>

@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useDdayQuery, useFestivalMonthQuery, type FestivalResponseDto } from '@/entities/travel'
 import { paths } from '@/shared/config'
 import { Skeleton } from '@/shared/ui/parttrip'
-import { formatDate, getDateRangeWithPadding, getMonthCalendarDays } from '@/shared/utils'
+import { formatCalendarDate, formatDate, getDateRangeWithPadding, getMonthCalendarDays } from '@/shared/utils'
 import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './RecordCalendarPage.styles'
@@ -19,19 +19,33 @@ export function RecordCalendarPage() {
   const viewMonth = month ?? (planStartMonth && !Number.isNaN(planStartMonth.getTime()) ? planStartMonth : new Date())
   const viewYear = viewMonth.getFullYear()
   const viewMonthIndex = viewMonth.getMonth()
-  const festivalsQuery = useFestivalMonthQuery(plan?.countryName, viewYear, viewMonthIndex + 1)
+  const festivalsQuery = useFestivalMonthQuery(plan?.regionName ? '대한민국' : undefined, viewYear, viewMonthIndex + 1)
   const festivals = festivalsQuery.data ?? []
   const dateRange = getDateRangeWithPadding(plan?.startDate, plan?.endDate)
   const safeFestivals = festivals.filter((festival): festival is FestivalResponseDto => Boolean(festival))
-  const categories = [...new Set(safeFestivals.map((festival) => festival.category).filter((value): value is string => Boolean(value)))]
+  const tripCity = plan?.cityName?.trim().toLowerCase()
+  const tripFestivals = safeFestivals.filter((festival) => {
+    const matchesCity = !tripCity || festival.location?.toLowerCase().includes(tripCity)
+    const matchesDate = !dateRange || Boolean(festival.startDate && festival.startDate <= dateRange.endDate && (festival.endDate ?? festival.startDate) >= dateRange.startDate)
+    return matchesCity && matchesDate
+  })
+  const categories = [...new Set(tripFestivals.map((festival) => festival.category).filter((value): value is string => Boolean(value)))]
   const filteredFestivals = categoryFilter === 'ALL' || !categories.includes(categoryFilter)
-    ? safeFestivals
-    : safeFestivals.filter((festival) => festival.category === categoryFilter)
-  const visibleFestivals = selectedDate ? filteredFestivals.filter((festival) => festival.startDate === selectedDate) : filteredFestivals
+    ? tripFestivals
+    : tripFestivals.filter((festival) => festival.category === categoryFilter)
+  const visibleFestivals = selectedDate ? filteredFestivals.filter((festival) => Boolean(festival.startDate && festival.startDate <= selectedDate && (festival.endDate ?? festival.startDate) >= selectedDate)) : filteredFestivals
   const cells = useMemo(() => getMonthCalendarDays(viewYear, viewMonthIndex), [viewYear, viewMonthIndex])
   const eventByDay = filteredFestivals.reduce((byDay, festival) => {
-    if (!festival.startDate) return byDay
-    byDay.set(festival.startDate, [...(byDay.get(festival.startDate) ?? []), festival])
+    const startDate = festival.startDate
+    if (!startDate) return byDay
+    const endDate = festival.endDate ?? startDate
+    cells.forEach((day) => {
+      if (!day) return
+      const date = formatCalendarDate(viewYear, viewMonthIndex, day)
+      if (date >= startDate && date <= endDate) {
+        byDay.set(date, [...(byDay.get(date) ?? []), festival])
+      }
+    })
     return byDay
   }, new Map<string, FestivalResponseDto[]>())
   const isLoading = isPlanLoading || festivalsQuery.isLoading
@@ -45,7 +59,7 @@ export function RecordCalendarPage() {
   return (
     <AppShell>
       <S.Page>
-        <S.Header><S.Title>축제 & 이벤트</S.Title>{plan ? <S.Subtitle>{plan.countryName || '여행지'} · {dateRange ? `${formatDate(dateRange.startDate)} – ${formatDate(dateRange.endDate)} (여행 기간 ±1주)` : '여행 기간 미설정'}</S.Subtitle> : null}</S.Header>
+        <S.Header><S.Title>축제 & 이벤트</S.Title>{plan ? <S.Subtitle>{plan.regionName || '여행지'} · {dateRange ? `${formatDate(dateRange.startDate)} – ${formatDate(dateRange.endDate)} (여행 기간 ±1주)` : '여행 기간 미설정'}</S.Subtitle> : null}</S.Header>
         {hasError ? <S.State role="alert">{isPlanError ? '여행 정보를 불러오지 못했습니다.' : '축제 및 이벤트 정보를 불러오지 못했습니다.'}</S.State> : isLoading ? <S.LoadingLayout aria-busy="true" aria-label="축제 이벤트 로딩 중"><Skeleton $height="40.625rem" $radius="1rem" /><Skeleton $height="40.625rem" $radius="1rem" /></S.LoadingLayout> : <S.CalendarLayout>
           <CalendarSection cells={cells} eventByDay={eventByDay} hasFestivals={filteredFestivals.length > 0} isLoading={isLoading} onChangeMonth={changeMonth} onSelectDate={(date) => setSelectedDate((current) => current === date ? undefined : date)} plan={plan} selectedDate={selectedDate} viewMonth={viewMonth} />
           <FestivalSection

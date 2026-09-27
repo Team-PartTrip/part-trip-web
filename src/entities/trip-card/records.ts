@@ -18,6 +18,8 @@ export type TravelRecordDto = {
   title?: string
   countryInfoId?: number
   countryName?: string
+  regionCode?: string
+  regionName?: string
   cityName?: string
   startDate?: string
   endDate?: string
@@ -38,7 +40,7 @@ function toTravelRecord(card?: TravelCardListItemDto, detail?: TravelCardDetailD
     ...item,
     imageUrl: resolveApiAssetUrl(item.imageUrl) ?? item.imageUrl,
   })))
-  const destination = card?.cityName || card?.countryName
+  const destination = card?.cityName || card?.regionName
   const images = timeline.map((item) => item.imageUrl).filter((url): url is string => Boolean(url))
   const coverImage = resolveApiAssetUrl(card?.coverImageUrl) ?? card?.coverImageUrl
   let recordImages = images
@@ -47,7 +49,8 @@ function toTravelRecord(card?: TravelCardListItemDto, detail?: TravelCardDetailD
   return {
     cityName: card?.cityName,
     content: timeline.map((item) => item.comment).filter(Boolean).join('\n') || undefined,
-    countryName: card?.countryName,
+    regionCode: card?.regionCode,
+    regionName: card?.regionName,
     endDate: detail?.endDate ?? card?.endDate,
     images: recordImages,
     photoCount: card?.photoCount ?? images.length,
@@ -71,7 +74,8 @@ export async function getTravelRecord(tripId: number, summary?: TravelRecordDto)
   const cachedCard: TravelCardListItemDto | undefined = summary ? {
     cardId: summary.tripId,
     cityName: summary.cityName,
-    countryName: summary.countryName,
+    regionCode: summary.regionCode,
+    regionName: summary.regionName,
     coverImageUrl: summary.images?.[0],
     endDate: summary.endDate,
     photoCount: summary.photoCount,

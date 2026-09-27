@@ -1,2 +1,2 @@
-export { default as partTripLogoUrl } from './logo.png'
+export { default as dandiLogoUrl } from './dandi-logo.svg'
 export * from './figma'

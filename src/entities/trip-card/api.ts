@@ -3,7 +3,8 @@ import { apiClient } from '../../shared/libs/api-client.ts'
 export type TravelCardListItemDto = {
   cardId?: number
   cityName?: string
-  countryName?: string
+  regionCode?: string
+  regionName?: string
   coverImageUrl?: string
   endDate?: string
   photoCount?: number
@@ -21,7 +22,9 @@ export type TravelCardTimelineItemDto = {
   placeName?: string
   rating?: number
   takenAt?: string
-  type?: 'PLACE' | 'PHOTO'
+  locationSource?: 'EXIF' | 'MANUAL' | null
+  takenAtSource?: 'EXIF' | 'MANUAL' | null
+  type?: 'PLACE' | 'PHOTO' | 'NO_INFO_PHOTO'
 }
 
 export type TravelCardDetailDto = {
@@ -39,13 +42,23 @@ export type TravelCardEntryRequestDto = {
 export type TravelCardEntryResponseDto = {
   entryId?: number
   imageUrl?: string
+  takenAt?: string
   latitude?: number
   longitude?: number
-  takenAt?: string
+  placeName?: string
+  locationSource?: 'EXIF' | 'MANUAL' | null
+  takenAtSource?: 'EXIF' | 'MANUAL' | null
 }
 
 export type TravelCardEntryCommentRequestDto = {
   comment: string
+}
+
+export type TravelCardEntryMetadataRequestDto = {
+  latitude?: number
+  longitude?: number
+  placeName?: string
+  takenAt?: string
 }
 
 export type TravelCardDeleteRequestDto = {
@@ -57,6 +70,8 @@ const TRAVEL_CARD_API_PATHS = {
   detail: (cardId: number) => `/travel-cards/${cardId}`,
   entries: (cardId: number) => `/travel-cards/${cardId}/entries`,
   entry: (cardId: number, entryId: number) => `/travel-cards/${cardId}/entries/${entryId}`,
+  entryMetadata: (cardId: number, entryId: number) => `/travel-cards/${cardId}/entries/${entryId}/metadata`,
+  place: (cardId: number, placeId: number) => `/travel-cards/${cardId}/places/${placeId}`,
 } as const
 
 export async function listTravelCards(): Promise<TravelCardListItemDto[]> {
@@ -70,7 +85,10 @@ export async function getTravelCard(cardId: number): Promise<TravelCardDetailDto
 }
 
 export async function createTravelCardEntry(cardId: number, payload: TravelCardEntryRequestDto): Promise<TravelCardEntryResponseDto> {
-  const { data } = await apiClient.postForm<TravelCardEntryResponseDto>(TRAVEL_CARD_API_PATHS.entries(cardId), payload)
+  const { comment, ...formData } = payload
+  const { data } = await apiClient.postForm<TravelCardEntryResponseDto>(TRAVEL_CARD_API_PATHS.entries(cardId), formData, {
+    params: { comment },
+  })
   return data
 }
 
@@ -83,10 +101,24 @@ export async function deleteTravelCardEntry(cardId: number, entryId: number): Pr
   await apiClient.delete(TRAVEL_CARD_API_PATHS.entry(cardId, entryId))
 }
 
+export async function deleteTravelCardPlace(cardId: number, placeId: number): Promise<void> {
+  await apiClient.delete(TRAVEL_CARD_API_PATHS.place(cardId, placeId))
+}
+
 export async function updateTravelCardEntryComment(
   cardId: number,
   entryId: number,
   payload: TravelCardEntryCommentRequestDto,
-): Promise<void> {
-  await apiClient.patch(TRAVEL_CARD_API_PATHS.entry(cardId, entryId), payload)
+): Promise<TravelCardEntryResponseDto> {
+  const { data } = await apiClient.patch<TravelCardEntryResponseDto>(TRAVEL_CARD_API_PATHS.entry(cardId, entryId), payload)
+  return data
+}
+
+export async function updateTravelCardEntryMetadata(
+  cardId: number,
+  entryId: number,
+  payload: TravelCardEntryMetadataRequestDto,
+): Promise<TravelCardEntryResponseDto> {
+  const { data } = await apiClient.patch<TravelCardEntryResponseDto>(TRAVEL_CARD_API_PATHS.entryMetadata(cardId, entryId), payload)
+  return data
 }

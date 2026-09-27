@@ -148,6 +148,7 @@ function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) {
     const payload = {
       ...party,
       title: `${draft.cityName} 여행`,
+      regionCode: draft.regionCode,
       cityName: draft.cityName,
       startDate: draft.startDate,
       endDate: draft.endDate,

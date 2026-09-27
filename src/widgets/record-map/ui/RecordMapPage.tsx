@@ -19,7 +19,7 @@ export function RecordMapPage() {
   const trip = tripQuery.data ?? tripSummary
   const isLoading = tripsQuery.isLoading || (tripSummary?.tripId != null && tripQuery.isLoading)
   const hasError = tripsQuery.hasError || tripQuery.isError
-  const title = trip ? [trip.countryName, trip.cityName].filter(Boolean).join(' · ') || '여행 기록' : '여행 기록'
+  const title = trip ? [trip.regionName || trip.countryName, trip.cityName].filter(Boolean).join(' · ') || '여행 기록' : '여행 기록'
   const locations = getRecordLocations(tripQuery.data?.timeline)
   const mappedLocations = locations.flatMap((location) => {
     const position = mapPosition(location.latitude, location.longitude)
@@ -38,7 +38,7 @@ export function RecordMapPage() {
         {isLoading ? <S.LoadingLayout aria-busy="true" aria-label="여행 지도 로딩 중"><S.LoadingHeader /><S.LoadingTabs /><S.LoadingBody><S.LoadingMap /><S.LoadingLocations /></S.LoadingBody></S.LoadingLayout> : <>
           <S.Header>
             <div><S.Title>{title}</S.Title><S.Subtitle>촬영 위치 {locationCount}곳</S.Subtitle></div>
-            {trips.length > 1 ? <S.TripSelect aria-label="지도에 표시할 여행 선택" value={trip?.tripId ?? ''} onChange={(event) => setSelectedTripId(Number(event.target.value))}>{trips.map((item) => <option key={item.tripId} value={item.tripId}>{item.title || `${item.cityName || item.countryName || '여행'} 기록`}</option>)}</S.TripSelect> : null}
+            {trips.length > 1 ? <S.TripSelect aria-label="지도에 표시할 여행 선택" value={trip?.tripId ?? ''} onChange={(event) => setSelectedTripId(Number(event.target.value))}>{trips.map((item) => <option key={item.tripId} value={item.tripId}>{item.title || `${item.cityName || item.regionName || item.countryName || '여행'} 기록`}</option>)}</S.TripSelect> : null}
           </S.Header>
           <S.RecordTabs aria-label="여행 기록 보기 방식">
             {supportsMap ? <button type="button" className="active" aria-current="page">지도</button> : null}

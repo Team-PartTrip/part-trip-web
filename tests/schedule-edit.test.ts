@@ -12,12 +12,12 @@ import {
 
 test('schedule 저장 요청은 화면 카드 순서를 그대로 전달하고 표현 가능한 필드만 보낸다', () => {
   const days = copyScheduleDays([{ date: '2026-10-01', slots: [
-    { slotId: 11, order: 2, tourPlaceId: 22, place: { name: '둘째' } },
-    { slotId: 10, order: 1, tourPlaceId: 21, place: { name: '첫째' } },
+    { slotId: 11, tourPlaceId: 22 },
+    { slotId: 10, tourPlaceId: 21 },
   ] }])
   const ordered = moveScheduleSlot(days, 0, 0, 1)
   assert.deepEqual(toSaveScheduleRequest(ordered), {
-    days: [{ date: '2026-10-01', slots: [{ slotId: 11, tourPlaceId: 22 }, { slotId: 10, tourPlaceId: 21 }] }],
+    days: [{ date: '2026-10-01', slots: [{ slotId: 10, tourPlaceId: 21 }, { slotId: 11, tourPlaceId: 22 }] }],
   })
 })
 

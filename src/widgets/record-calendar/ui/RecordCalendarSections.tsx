@@ -8,7 +8,7 @@ const weekdays = ['일', '월', '화', '수', '목', '금', '토']
 
 type TravelPlan = {
   cityName?: string | null
-  countryName?: string | null
+  regionName?: string | null
   endDate?: string | null
   startDate?: string | null
 }
@@ -41,7 +41,7 @@ export function CalendarSection({
 }) {
   return (
     <S.CalendarCard>
-      <S.MonthBar><div><h2>{viewMonth.getFullYear()}년 {viewMonth.getMonth() + 1}월</h2><p>{plan?.cityName || plan?.countryName || '여행지'} · 여행 기간 {plan ? `${formatDate(plan.startDate)} – ${formatDate(plan.endDate)}` : '미설정'}</p></div><span><button type="button" aria-label="이전 달" onClick={() => onChangeMonth(-1)}>‹</button><button type="button" aria-label="다음 달" onClick={() => onChangeMonth(1)}>›</button></span></S.MonthBar>
+      <S.MonthBar><div><h2>{viewMonth.getFullYear()}년 {viewMonth.getMonth() + 1}월</h2><p>{plan?.cityName || plan?.regionName || '여행지'} · 여행 기간 {plan ? `${formatDate(plan.startDate)} – ${formatDate(plan.endDate)}` : '미설정'}</p></div><span><button type="button" aria-label="이전 달" onClick={() => onChangeMonth(-1)}>‹</button><button type="button" aria-label="다음 달" onClick={() => onChangeMonth(1)}>›</button></span></S.MonthBar>
       <S.Weekdays>{weekdays.map((day) => <span key={day}>{day}</span>)}</S.Weekdays>
       <S.CalendarGrid>{cells.map((day, index) => {
         const date = day ? formatCalendarDate(viewMonth.getFullYear(), viewMonth.getMonth(), day) : ''
@@ -54,7 +54,7 @@ export function CalendarSection({
         }
         return <S.Cell key={`${day}-${index}`} type="button" disabled={day === null} $empty={day === null} $inTrip={Boolean(inTrip)} $selected={date === selectedDate} aria-pressed={day === null ? undefined : date === selectedDate} onClick={() => { if (date) onSelectDate(date) }}>{cellContent}</S.Cell>
       })}</S.CalendarGrid>
-      {!isLoading && !hasFestivals ? <S.Note>{plan?.countryName ? '선택한 달에 등록된 축제 및 이벤트가 없습니다.' : '여행지를 설정하면 해당 지역의 월별 축제를 볼 수 있습니다.'}</S.Note> : null}
+      {!isLoading && !hasFestivals ? <S.Note>{plan?.regionName ? '선택한 달에 등록된 축제 및 이벤트가 없습니다.' : '여행지를 설정하면 해당 지역의 월별 축제를 볼 수 있습니다.'}</S.Note> : null}
     </S.CalendarCard>
   )
 }

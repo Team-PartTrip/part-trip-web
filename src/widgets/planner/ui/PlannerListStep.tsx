@@ -47,7 +47,7 @@ export function PlannerListStep({
       <S.PlannerListLayout>
         <S.PlanListPanel>
           {availablePlanners.map((planner, index) => {
-            const title = planner.title || `${planner.cityName || planner.countryName || '여행'} 여행`
+            const title = planner.title || `${planner.cityName || planner.regionName || '여행'} 여행`
             return (
               <S.PlanItem key={planner.plannerId ?? index}>
                 <S.PlanRow

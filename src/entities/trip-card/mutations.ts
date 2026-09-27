@@ -5,8 +5,10 @@ import {
   deleteTravelCardEntry,
   deleteTravelCards,
   updateTravelCardEntryComment,
+  updateTravelCardEntryMetadata,
   type TravelCardDeleteRequestDto,
   type TravelCardEntryCommentRequestDto,
+  type TravelCardEntryMetadataRequestDto,
   type TravelCardEntryRequestDto,
 } from './api'
 import { tripCardQueryKeys } from './query-keys'
@@ -49,6 +51,16 @@ export function useUpdateTravelCardEntryCommentMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ cardId, entryId, payload }: { cardId: number; entryId: number; payload: TravelCardEntryCommentRequestDto }) => updateTravelCardEntryComment(cardId, entryId, payload),
+    onSuccess: () => {
+      void invalidateTripCardQueries(queryClient)
+    },
+  })
+}
+
+export function useUpdateTravelCardEntryMetadataMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ cardId, entryId, payload }: { cardId: number; entryId: number; payload: TravelCardEntryMetadataRequestDto }) => updateTravelCardEntryMetadata(cardId, entryId, payload),
     onSuccess: () => {
       void invalidateTripCardQueries(queryClient)
     },

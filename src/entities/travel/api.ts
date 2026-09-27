@@ -5,12 +5,13 @@ import { isMissingTravelPlanResponse } from './main-error'
 export type TripPhase = 'NO_TRIP' | 'BEFORE' | 'DURING' | 'ENDED'
 
 export type DdayResponseDto = {
-  countryName?: string | null
+  regionName?: string | null
   cityName?: string | null
   headcount?: number | null
   startDate?: string | null
   endDate?: string | null
   dday?: string | null
+  todaySchedule?: Array<{ slotId?: number; tourPlaceId?: number }>
   status: TripPhase
 }
 
@@ -31,12 +32,18 @@ export type MoreTourPlacesResponseDto = {
   cursor?: string | null
 }
 
+export type AccessibilityResponseDto = {
+  matched?: boolean
+  items?: Array<{ key?: string; label?: string; text?: string }>
+}
+
 export type FestivalResponseDto = {
   festivalId?: number
   title?: string
   category?: string
   description?: string
   startDate?: string
+  endDate?: string
   startTime?: string
   location?: string
   imageUrl?: string
@@ -66,6 +73,7 @@ const MAIN_API_PATHS = {
   dday: '/main/dday',
   tourPlace: '/main/tour-place',
   tourPlaceMore: '/main/tour-place/more',
+  tourPlaceAccessibility: (tourPlaceId: number) => `/main/tour-place/${tourPlaceId}/accessibility`,
   festivals: '/main/festivals',
   countries: '/main/countries',
   cities: '/main/cities',
@@ -89,7 +97,7 @@ export async function getDday(): Promise<DdayResponseDto> {
     return normalizeDdayResponse(data)
   } catch (error) {
     if (isAxiosError(error) && isMissingTravelPlanResponse(error.response?.status, error.response?.data)) {
-      return { cityName: null, countryName: null, dday: '쉬는 중', endDate: null, headcount: null, startDate: null, status: 'NO_TRIP' }
+      return { cityName: null, regionName: null, dday: '쉬는 중', endDate: null, headcount: null, startDate: null, status: 'NO_TRIP' }
     }
     throw error
   }
@@ -115,6 +123,11 @@ export async function getMoreTourPlaces(
   const { data } = await apiClient.get<MoreTourPlacesResponseDto>(MAIN_API_PATHS.tourPlaceMore, {
     params: { category, cityName, countryName, cursor },
   })
+  return data
+}
+
+export async function getTourPlaceAccessibility(tourPlaceId: number): Promise<AccessibilityResponseDto> {
+  const { data } = await apiClient.get<AccessibilityResponseDto>(MAIN_API_PATHS.tourPlaceAccessibility(tourPlaceId))
   return data
 }
 

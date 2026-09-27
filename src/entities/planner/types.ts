@@ -2,6 +2,26 @@ export type CreatePlannerRequestDto = {
   title: string
   memberCount: number
   isSolo: boolean
+  regionCode?: string
+  cityName?: string
+  startDate?: string
+  endDate?: string
+  cities?: PlannerCityRequestDto[]
+}
+
+export type PlannerCityRequestDto = {
+  regionCode: string
+  cityName: string
+  startDate: string
+  endDate: string
+}
+
+export type PlannerCityResponseDto = {
+  regionCode?: string
+  regionName?: string
+  cityName?: string
+  startDate?: string
+  endDate?: string
 }
 
 export type PlannerCreateResponseDto = {
@@ -11,7 +31,8 @@ export type PlannerCreateResponseDto = {
   memberCount?: number
   startDate?: string
   endDate?: string
-  countryName?: string
+  regionCode?: string
+  regionName?: string
   cityName?: string
   inviteLink?: string
 }
@@ -19,11 +40,13 @@ export type PlannerCreateResponseDto = {
 export type PlannerListResponseDto = {
   plannerId?: number
   title?: string
-  countryName?: string
+  regionCode?: string
+  regionName?: string
   cityName?: string
   startDate?: string
   endDate?: string
   status?: string
+  role?: string
   memberCount?: number
   joinedMemberCount?: number
 }
@@ -31,7 +54,8 @@ export type PlannerListResponseDto = {
 export type PlannerDetailResponseDto = {
   plannerId?: number
   title?: string
-  countryName?: string
+  regionCode?: string
+  regionName?: string
   cityName?: string
   startDate?: string
   endDate?: string
@@ -40,6 +64,7 @@ export type PlannerDetailResponseDto = {
   memberCount?: number
   joinedMemberCount?: number
   inviteLink?: string
+  cities?: PlannerCityResponseDto[]
 }
 
 export type PlannerMemberResponseDto = {
@@ -76,21 +101,65 @@ export type PlannerJoinResponseDto = {
 }
 
 export type ConfirmedPlaceResponseDto = {
-  voteId?: number
   category?: string
   categoryLabel?: string
-  optionId?: number
   tourPlaceId?: number
   placeName?: string
   imageUrl?: string
   address?: string
   rating?: number
-  voteCount?: number
+  visitedDate?: string
 }
 
 export type PlannerConfirmResponseDto = {
   confirmedSchedule?: ConfirmedPlaceResponseDto[]
   plannerId?: number
+  tripCardId?: number
+}
+
+export type SavePlannerTravelPlanRequestDto = {
+  regionCode: string
+  cityName: string
+  startDate: string
+  endDate: string
+  memberCount?: number
+  isSolo?: boolean
+  cities?: PlannerCityRequestDto[]
+}
+
+export type PlannerTravelPlanResponseDto = {
+  plannerId?: number
+  planId?: number
+  title?: string
+  memberCount?: number
+  isSolo?: boolean
+  regionCode?: string
+  regionName?: string
+  cityName?: string
+  startDate?: string
+  endDate?: string
+}
+
+export type InvitePlannerMembersRequestDto = {
+  userIds: string[]
+}
+
+export type PlannerInviteResponseDto = {
+  inviteLink?: string
+  invitedCount?: number
+  invitations?: PlannerInvitationResponseDto[]
+}
+
+export type PlannerFinalResponseDto = {
+  plannerId?: number
+  title?: string
+  regionCode?: string
+  regionName?: string
+  cityName?: string
+  startDate?: string
+  endDate?: string
+  status?: string
+  places?: ConfirmedPlaceResponseDto[]
 }
 
 export type PlannerSchedulePlaceDto = {
@@ -107,9 +176,7 @@ export type PlannerSchedulePlaceDto = {
 
 export type PlannerScheduleSlotDto = {
   slotId?: number
-  order?: number
   tourPlaceId?: number
-  place?: PlannerSchedulePlaceDto
 }
 
 export type PlannerScheduleDayDto = {
@@ -154,6 +221,7 @@ export type GeneratePlannerRequestDto = {
   title: string
   memberCount: number
   isSolo: boolean
+  regionCode: string
   cityName: string
   startDate: string
   endDate: string

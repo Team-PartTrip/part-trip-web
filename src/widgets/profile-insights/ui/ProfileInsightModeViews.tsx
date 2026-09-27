@@ -1,5 +1,4 @@
 import { useMemo, type KeyboardEvent, type MouseEvent } from 'react'
-import { Button as PartTripButton } from '@/shared/ui/parttrip'
 import koreaRegionsSvg from '@/shared/assets/figma/korea-regions.svg?raw'
 import { formatDate } from '@/shared/utils'
 import type { DomesticRegionVisit } from '../model/profile-insight'
@@ -7,17 +6,6 @@ import type { DomesticRegionVisit } from '../model/profile-insight'
 import * as S from './ProfileInsightPage.styles'
 
 const regionNames = Array.from(koreaRegionsSvg.matchAll(/data-region="([^"]+)"/g), (match) => match[1]).filter((name): name is string => Boolean(name))
-
-type TripRecord = {
-  cityName?: string | null
-  countryName?: string | null
-  endDate?: string | null
-  images?: unknown[] | null
-  photoCount?: number | null
-  startDate?: string | null
-  title?: string | null
-  tripId?: number | null
-}
 
 export function ProfileMapView({
   regions,
@@ -93,60 +81,6 @@ export function ProfileMapView({
         <S.MoreLink type="button" onClick={onOpenYearReview}>올해의 여행 돌아보기</S.MoreLink>
       </S.CountryStats>
     </S.MapBody>
-  )
-}
-
-export function ProfileClaimView({
-  acquiredCount,
-  activeCountry,
-  claimCountries,
-  claimFeedback,
-  countryCode,
-  countryTrips,
-  isPending,
-  onAcquire,
-  onMap,
-  onSelectCountry,
-  selectedTrip,
-  totalCountries,
-  achievementPercentage,
-}: {
-  acquiredCount: number
-  achievementPercentage: number
-  activeCountry?: string
-  claimCountries: string[]
-  claimFeedback: string
-  countryCode: string
-  countryTrips: TripRecord[]
-  isPending: boolean
-  onAcquire: () => void
-  onMap: () => void
-  onSelectCountry: (country: string) => void
-  selectedTrip?: TripRecord
-  totalCountries: number
-}) {
-  if (!activeCountry) return <S.State>획득할 여행 기록이 없습니다.</S.State>
-
-  return (
-    <S.ClaimBody>
-      {claimCountries.length > 1 ? <S.CityTabs aria-label="획득할 국가 선택">{claimCountries.map((country) => <button key={country} type="button" className={activeCountry === country ? 'active' : ''} onClick={() => onSelectCountry(country)}>{country}</button>)}</S.CityTabs> : null}
-      <S.ClaimCountry>{countryCode}</S.ClaimCountry>
-      <S.ClaimNew>CLAIM</S.ClaimNew>
-      <S.ClaimTitle>{activeCountry} 국가를 획득하세요</S.ClaimTitle>
-      <S.ClaimSubtitle>{countryTrips.length ? `${countryTrips.length}개의 여행 기록을 바탕으로 처리합니다.` : '여행 기록을 남기면 국가를 획득할 수 있어요'}</S.ClaimSubtitle>
-      <S.ClaimInfo>
-        <S.InfoRow><span>국가</span><strong>{activeCountry}</strong></S.InfoRow>
-        <S.InfoRow><span>여행 기록</span><strong>{selectedTrip?.title || `${activeCountry} 여행`}</strong></S.InfoRow>
-        <S.InfoRow><span>여행 기간</span><strong>{selectedTrip?.startDate || '-'} – {selectedTrip?.endDate || '-'}</strong></S.InfoRow>
-      </S.ClaimInfo>
-      <S.ClaimNotice>종료된 여행 기록만 국가로 등록할 수 있어요.</S.ClaimNotice>
-      <S.ClaimProgress><strong>획득 진행도 <b>{acquiredCount} / {totalCountries || '-'}</b></strong><S.ProgressTrack><S.ProgressBar $progress={achievementPercentage} /></S.ProgressTrack></S.ClaimProgress>
-      <S.ActionRow>
-        <PartTripButton type="button" disabled={!selectedTrip?.tripId || isPending} onClick={onAcquire}>{isPending ? '획득 중' : '국가 획득'}</PartTripButton>
-        <PartTripButton type="button" $variant="secondary" onClick={onMap}>세계지도에서 보기</PartTripButton>
-      </S.ActionRow>
-      {claimFeedback ? <S.ClaimSubtitle role="status">{claimFeedback}</S.ClaimSubtitle> : null}
-    </S.ClaimBody>
   )
 }
 

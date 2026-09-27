@@ -1,5 +1,5 @@
 import { Link, useLocation } from '@tanstack/react-router'
-import { partTripLogoUrl } from '@/shared/assets'
+import { dandiLogoUrl } from '@/shared/assets'
 import { paths } from '@/shared/config'
 
 import type { SidebarMenuType } from '../types/sidebar-item/sidebar-item'
@@ -30,7 +30,7 @@ export default function Sidebar({ menus, notificationCount = 0 }: Props) {
     <S.SidebarWrapper>
       <S.Aside>
         <S.LogoSection>
-          <Link to={paths.main} aria-label="PartTrip 홈"><img src={partTripLogoUrl} alt="" /></Link>
+          <Link to={paths.main} aria-label="단디 홈"><img src={dandiLogoUrl} alt="" /></Link>
         </S.LogoSection>
 
         <S.MenuList aria-label="메인 메뉴">

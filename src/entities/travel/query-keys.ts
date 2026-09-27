@@ -10,4 +10,5 @@ export const travelQueryKeys = {
     [...travelQueryKeys.all, 'tour-places', countryName, cityName ?? null, category ?? null] as const,
   moreTourPlaces: (countryName: string, cityName: string, category: string) =>
     [...travelQueryKeys.all, 'more-tour-places', countryName, cityName, category] as const,
+  tourPlaceAccessibility: (tourPlaceId: number) => [...travelQueryKeys.all, 'tour-place-accessibility', tourPlaceId] as const,
 }

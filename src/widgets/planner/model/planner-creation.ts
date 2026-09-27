@@ -5,6 +5,8 @@ const PLANNER_CREATION_DRAFT_KEY = 'parttrip:planner-creation-draft'
 
 export type PlannerCreationDraft = {
   cityName: string
+  regionCode: string
+  regionName: string
   startDate: string
   endDate: string
   blocks?: PlannerBlockDto[]
@@ -15,9 +17,11 @@ export type PlannerCreationDraft = {
 export function readPlannerCreationDraft(): PlannerCreationDraft | undefined {
   try {
     const value = JSON.parse(readSessionValue(PLANNER_CREATION_DRAFT_KEY) ?? 'null') as Partial<PlannerCreationDraft> | null
-    if (!value || typeof value.cityName !== 'string' || typeof value.startDate !== 'string' || typeof value.endDate !== 'string') return undefined
+    if (!value || typeof value.cityName !== 'string' || typeof value.regionCode !== 'string' || typeof value.regionName !== 'string' || typeof value.startDate !== 'string' || typeof value.endDate !== 'string') return undefined
     return {
       cityName: value.cityName,
+      regionCode: value.regionCode,
+      regionName: value.regionName,
       startDate: value.startDate,
       endDate: value.endDate,
       blocks: Array.isArray(value.blocks) ? value.blocks : [],
