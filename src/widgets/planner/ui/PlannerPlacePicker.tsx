@@ -80,6 +80,7 @@ export function PlannerPlacePicker({
   const [showMore, setShowMore] = useState(false)
   const [voiceMessage, setVoiceMessage] = useState('')
   const [listening, setListening] = useState(false)
+  const pickerRef = useRef<HTMLElement>(null)
   const candidateListRef = useRef<HTMLDivElement>(null)
   const recognitionRef = useRef<SpeechRecognitionLike | undefined>(undefined)
   const selectedDay = days[position.dayIndex]
@@ -117,6 +118,11 @@ export function PlannerPlacePicker({
   const speechSupported = Boolean(speechRecognitionConstructor())
 
   useEffect(() => () => recognitionRef.current?.stop(), [])
+
+  useEffect(() => {
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    pickerRef.current?.scrollIntoView({ behavior, block: 'nearest' })
+  }, [])
 
   useEffect(() => {
     const root = candidateListRef.current
@@ -169,8 +175,11 @@ export function PlannerPlacePicker({
   }
 
   return (
-    <S.Picker aria-label="일정 장소 선택">
-      <h3>{selectedDay?.date ? `${formatDate(selectedDay.date)} 장소 고르기` : '장소 고르기'}</h3>
+    <S.Picker ref={pickerRef} aria-label="일정 장소 선택">
+      <div>
+        <h3>{selectedDay?.date ? `${formatDate(selectedDay.date)} · ${position.slotIndex + 1}번째 일정 장소 선택` : '장소 고르기'}</h3>
+        <S.PickerDescription>선택한 일정 카드에 넣을 장소를 검색하거나 목록에서 고르세요.</S.PickerDescription>
+      </div>
       <S.PickerForm onSubmit={(event) => {
         event.preventDefault()
         const next = searchText.trim()

@@ -199,17 +199,52 @@ export const ScheduleDay = styled.section`
   h2 { margin: 0 0 0.75rem; font-size: 1.0625rem; line-height: 1.5rem; }
 `
 
-export const SchedulePlace = styled.div`
+export const SlotTools = styled.div`
   display: flex;
-  min-height: 4rem;
-  align-items: center;
-  gap: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  button { min-width: 3rem; min-height: 3rem; padding-inline: 0.875rem; }
+`
+
+export const SchedulePlace = styled.div`
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  align-items: start;
+  column-gap: 0.875rem;
   border-top: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
-  padding: 0.625rem 0;
-  > b { display: grid; width: 2.25rem; height: 2.25rem; flex: 0 0 2.25rem; place-items: center; border-radius: 50%; background: #e3f2fd; color: #1565c0; }
-  span { min-width: 0; }
-  strong { display: block; font-size: 0.9375rem; line-height: 1.3125rem; }
-  small { display: block; margin-top: 0.125rem; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.8125rem; }
+  padding: 0.875rem 0;
+
+  > b {
+    display: grid;
+    width: 2.25rem;
+    height: 2.25rem;
+    grid-column: 1;
+    grid-row: 1;
+    place-items: center;
+    border-radius: 50%;
+    background: #e3f2fd;
+    color: #1565c0;
+    font-size: 1rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  > div {
+    min-width: 0;
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  strong { display: block; font-size: 1rem; line-height: 1.5rem; text-wrap: pretty; }
+  small { display: block; margin-top: 0.25rem; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.375rem; overflow-wrap: anywhere; }
+
+  > ${SlotTools} {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 0.75rem 0 0;
+    justify-content: flex-start;
+  }
 `
 
 export const EditorHeading = styled.div`
@@ -220,14 +255,6 @@ export const EditorHeading = styled.div`
   margin-bottom: 1.25rem;
   p { margin: 0.25rem 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.25rem; }
   @media (max-width: 35rem) { align-items: flex-start; flex-direction: column; }
-`
-
-export const SlotTools = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.375rem;
-  margin-left: auto;
-  button { min-width: 3rem; min-height: 3rem; padding-inline: 0.75rem; }
 `
 
 export const SwapButton = styled.button<{ $active?: boolean }>`
@@ -246,11 +273,19 @@ export const Picker = styled.section`
   display: grid;
   gap: 0.875rem;
   margin-top: 1.25rem;
+  scroll-margin-block: 1rem;
   border: 0.0625rem solid ${({ theme }) => theme.colors.border.default};
   border-radius: 0.875rem;
   padding: 1rem;
   background: ${({ theme }) => theme.colors.background.subtle};
-  h3 { margin: 0; font-size: 1rem; line-height: 1.5rem; }
+  h3 { margin: 0; font-size: 1rem; line-height: 1.5rem; text-wrap: balance; }
+`
+
+export const PickerDescription = styled.p`
+  margin: 0.25rem 0 0;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 0.875rem;
+  line-height: 1.375rem;
 `
 
 export const PickerForm = styled.form`
