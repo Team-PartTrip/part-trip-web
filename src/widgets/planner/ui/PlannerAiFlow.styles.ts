@@ -247,6 +247,57 @@ export const SchedulePlace = styled.div`
   }
 `
 
+export const RouteLine = styled.div`
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  align-items: start;
+  column-gap: 0.875rem;
+  border-top: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
+  padding: 0.75rem 0;
+
+  > div { min-width: 0; }
+  details { margin-top: 0.375rem; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.8125rem; }
+  summary { width: fit-content; min-height: 2rem; cursor: pointer; }
+  summary:hover { color: ${({ theme }) => theme.colors.brand.strong}; text-decoration: underline; text-underline-offset: 0.15em; }
+  summary:focus-visible, a:focus-visible { outline: 0.125rem solid ${({ theme }) => theme.colors.brand.primary}; outline-offset: 0.125rem; }
+  ol { display: grid; gap: 0.25rem; margin: 0.25rem 0 0; padding-left: 1.125rem; }
+  li { line-height: 1.375rem; overflow-wrap: anywhere; }
+  a { display: inline-flex; min-height: 2.75rem; align-items: center; color: ${({ theme }) => theme.colors.brand.strong}; font-weight: 600; text-underline-offset: 0.15em; }
+  a:hover { color: ${({ theme }) => theme.colors.brand.primary}; }
+`
+
+export const RouteModeIcon = styled.span`
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 50%;
+  background: ${({ theme }) => theme.colors.background.info};
+  color: ${({ theme }) => theme.colors.brand.strong};
+`
+
+export const RouteSummary = styled.div`
+  display: flex;
+  min-height: 2.25rem;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.75rem;
+  strong { font-size: 0.875rem; line-height: 1.25rem; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.8125rem; line-height: 1.25rem; }
+`
+
+export const RouteNotice = styled.p`
+  margin: 0 0 1rem;
+  border: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: ${({ theme }) => theme.colors.background.subtle};
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+`
+
 export const EditorHeading = styled.div`
   display: flex;
   align-items: center;

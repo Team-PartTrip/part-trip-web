@@ -5,13 +5,13 @@ import type {
   SavePlannerScheduleRequestDto,
 } from '@/entities/planner'
 
-export type EditableScheduleSlot = PlannerScheduleSlotDto & { place?: PlannerSchedulePlaceDto }
+export type EditableScheduleSlot = PlannerScheduleSlotDto
 export type EditableScheduleDay = { date: string; slots: EditableScheduleSlot[] }
 
 export function copyScheduleDays(days: PlannerScheduleDayDto[] = []): EditableScheduleDay[] {
   return days.map((day) => ({
     date: day.date ?? '',
-    slots: (day.slots ?? []).map(({ slotId, tourPlaceId }) => ({ slotId, tourPlaceId })),
+    slots: (day.slots ?? []).map((slot) => ({ ...slot })),
   }))
 }
 

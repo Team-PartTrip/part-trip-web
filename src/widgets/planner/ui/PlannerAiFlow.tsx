@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import {
@@ -202,6 +202,25 @@ function PlannerScheduleStep({ currentDraft }: { currentDraft?: PlannerCreationD
   const navigate = useNavigate()
   const plannerId = readSessionId(ACTIVE_PLANNER_ID_KEY)
   const scheduleQuery = usePlannerScheduleQuery(plannerId)
+  const routePolls = useRef({ plannerId, attempts: 0 })
+  const { dataUpdatedAt, errorUpdatedAt, isFetching, refetch } = scheduleQuery
+
+  const hasCalculatingRoute = scheduleQuery.data?.days?.some((day) =>
+    day.slots?.some((slot) => slot.routeStatus === 'CALCULATING'),
+  ) ?? false
+
+  useEffect(() => {
+    if (routePolls.current.plannerId !== plannerId) routePolls.current = { plannerId, attempts: 0 }
+    if (!hasCalculatingRoute || isFetching || routePolls.current.attempts >= 20) return
+
+    const timeout = window.setTimeout(() => {
+      routePolls.current.attempts += 1
+      void refetch()
+    }, 3000)
+
+    return () => window.clearTimeout(timeout)
+  }, [dataUpdatedAt, errorUpdatedAt, hasCalculatingRoute, isFetching, plannerId, refetch])
+
   const detailQuery = usePlannerDetailQuery(plannerId)
   const confirmMutation = useConfirmPlannerMutation()
   const [message, setMessage] = useState('')
@@ -233,7 +252,7 @@ function PlannerScheduleStep({ currentDraft }: { currentDraft?: PlannerCreationD
     content = <p role="alert">확인할 일정이 없어요. 플래너 목록에서 여행을 선택해주세요.</p>
   } else if (scheduleQuery.isLoading || detailQuery.isLoading) {
     content = <p role="status" aria-busy="true">AI 일정을 불러오는 중이에요.</p>
-  } else if (scheduleQuery.isError) {
+  } else if (scheduleQuery.isError && !scheduleQuery.data) {
     content = <><S.Error role="alert">일정을 불러오지 못했어요.</S.Error><S.ButtonRow><Button type="button" $variant="secondary" onClick={() => void scheduleQuery.refetch()}>다시 시도</Button></S.ButtonRow></>
   } else {
     let action: ReactNode = null

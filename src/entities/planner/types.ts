@@ -174,9 +174,42 @@ export type PlannerSchedulePlaceDto = {
   longitude?: number
 }
 
+export type PlannerScheduleRouteStatus =
+  | 'READY'
+  | 'CALCULATING'
+  | 'DAILY_QUOTA_REACHED'
+  | 'API_ERROR'
+  | 'NO_ROUTE'
+  | 'MISSING_COORDINATES'
+  | 'WAITING_FOR_API_KEY'
+
+export type PlannerScheduleTransportMode = 'PUBLIC_TRANSIT' | 'CAR' | 'TAXI' | 'WALKING'
+
+export type PlannerScheduleRouteStepDto = {
+  type?: string | null
+  name?: string | null
+  boardingStop?: string | null
+  alightingStop?: string | null
+  stopCount?: number | null
+  durationMinutes?: number | null
+}
+
+export type PlannerScheduleRouteDto = {
+  transportMode?: PlannerScheduleTransportMode | null
+  fromName?: string | null
+  toName?: string | null
+  durationMinutes?: number | null
+  walkingMinutes?: number | null
+  steps?: PlannerScheduleRouteStepDto[] | null
+}
+
 export type PlannerScheduleSlotDto = {
   slotId?: number
+  order?: number
   tourPlaceId?: number
+  place?: PlannerSchedulePlaceDto | null
+  routeStatus?: PlannerScheduleRouteStatus | null
+  routeFromPrevious?: PlannerScheduleRouteDto | null
 }
 
 export type PlannerScheduleDayDto = {
