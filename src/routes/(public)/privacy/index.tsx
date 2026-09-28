@@ -217,7 +217,7 @@ function PrivacyPage() {
       <Article>
         <header>
           <h1>개인정보처리방침</h1>
-          <time className="effective-date" dateTime="2026-09-26">2026년 9월 26일부터 시행</time>
+          <time className="effective-date" dateTime="2026-09-29">2026년 9월 29일부터 시행</time>
         </header>
 
         <nav className="contents" aria-label="개인정보처리방침 목차">
@@ -240,6 +240,7 @@ function PrivacyPage() {
                 <tr><th scope="row">프로필</th><td>닉네임(자동 생성, 수정 가능), 프로필 사진</td><td>가입 시 자동 생성, 사진은 이용자가 올릴 때</td><td>사진은 선택</td></tr>
                 <tr><th scope="row">여행 계획</th><td>여행 제목, 기간, 지역 · 도시, 인원, 고른 여행 지침, 일정, 함께 가는 일행</td><td>일정을 만들거나 초대를 받을 때</td><td>필수(일정을 쓸 때)</td></tr>
                 <tr><th scope="row">여행 편의 설정</th><td>선호 이동수단, 계단 이용 가능 여부, 하루에 다닐 장소 수, 우리 집 위치(이름 · 주소 · 좌표)</td><td>마이 → 여행 편의 설정에서 이용자가 고를 때. 고르지 않으면 기본값으로 일정을 짭니다</td><td>선택</td></tr>
+                <tr><th scope="row">음성 검색</th><td>마이크로 말한 소리, 이를 글자로 바꾼 검색어</td><td>검색창의 마이크 버튼을 누른 동안만. 소리는 휴대폰의 음성 인식(아이폰은 Apple, 안드로이드는 Google)이 글자로 바꾸며 단디 서버는 소리를 받거나 저장하지 않습니다</td><td>선택</td></tr>
                 <tr><th scope="row">여행 기록</th><td>사진, 사진의 촬영 시각 · 촬영 위치(사진 파일에 들어 있는 값), 남긴 글</td><td>이용자가 여행카드에 사진을 올릴 때</td><td>선택</td></tr>
                 <tr><th scope="row">보호자 연결</th><td>연결된 보호자 · 보호 대상, 초대 코드</td><td>가족 연결을 할 때</td><td>선택</td></tr>
                 <tr><th scope="row">실시간 위치</th><td>현재 위치(위도 · 경도), 기록 시각</td><td>위치 공유에 동의하고 여행 중일 때, 앱이 켜져 있는 동안 약 1~2분마다</td><td>선택</td></tr>
@@ -318,7 +319,8 @@ function PrivacyPage() {
                 <tr><th scope="row">Supabase</th><td>데이터베이스 보관</td><td>이 방침의 모든 항목</td><td>일본(도쿄)</td></tr>
                 <tr><th scope="row">Amazon Web Services</th><td>서버 운영, 사진 파일 보관</td><td>이 방침의 모든 항목</td><td>대한민국(서울)</td></tr>
                 <tr><th scope="row">OpenAI</th><td>AI 일정 초안 만들기</td><td>여행 도시, 날짜, 인원, 고른 지침, 이동 · 계단 이용 여부. 이름 · 이메일 · 여행 제목은 보내지 않음</td><td>미국</td></tr>
-                <tr><th scope="row">Google</th><td>구글 로그인, 장소 검색 · 사진, 안드로이드 지도, 이동 경로 계산(자동차 · 택시 · 도보)</td><td>로그인 정보, 검색한 도시 · 장소 이름, 이동 경로를 계산할 출발 · 도착 좌표</td><td>미국</td></tr>
+                <tr><th scope="row">Google</th><td>구글 로그인, 장소 검색 · 사진, 안드로이드 지도, 이동 경로 계산(자동차 · 택시 · 도보), 안드로이드 음성 검색</td><td>로그인 정보, 검색한 도시 · 장소 이름, 이동 경로를 계산할 출발 · 도착 좌표, 음성 검색 때 말한 소리</td><td>미국</td></tr>
+                <tr><th scope="row">Apple</th><td>아이폰 음성 검색(말한 소리를 글자로 바꾸기)</td><td>음성 검색 때 말한 소리</td><td>미국</td></tr>
                 <tr><th scope="row">ODsay (㈜아로정보기술)</th><td>대중교통 경로 계산</td><td>이동 경로를 계산할 출발 · 도착 좌표</td><td>대한민국</td></tr>
                 <tr><th scope="row">Kakao</th><td>카카오 로그인</td><td>로그인 정보</td><td>대한민국</td></tr>
                 <tr><th scope="row">Vercel</th><td>웹 사이트 운영</td><td>접속 기록</td><td>미국</td></tr>
@@ -334,7 +336,7 @@ function PrivacyPage() {
           <ul>
             <li><strong>앱에서 바로</strong>: 프로필 수정, 사진 · 여행카드 삭제, 보호자 연결 끊기, 위치 공유 끄기, 회원 탈퇴(마이 → 회원 탈퇴)</li>
             <li><strong>요청으로</strong>: 아래 보호책임자에게 이메일로 요청하면 10일 안에 처리하고 결과를 알려드립니다.</li>
-            <li><strong>동의 철회</strong>: 위치 공유 동의는 앱 설정에서, 로그인 연동은 구글 · 카카오 계정 설정에서 끊을 수 있습니다.</li>
+            <li><strong>동의 철회</strong>: 위치 공유 동의는 앱 설정에서, 로그인 연동은 구글 · 카카오 계정 설정에서 끊을 수 있습니다. 마이크 · 음성 인식은 휴대폰 설정에서 단디의 권한을 끄면 됩니다.</li>
           </ul>
           <p>보호자가 볼 수 있는 정보는 부모님(보호 대상) 본인이 연결을 끊으면 즉시 보이지 않게 됩니다.</p>
         </section>
@@ -370,7 +372,7 @@ function PrivacyPage() {
 
         <section className="section" aria-labelledby="changes">
           <h2 id="changes">11. 방침 변경</h2>
-          <p>이 방침은 2026년 9월 26일부터 적용합니다. 내용이 바뀌면 시행 7일 전(이용자에게 불리한 변경은 30일 전)에 앱과 웹에 알립니다.</p>
+          <p>이 방침은 2026년 9월 29일부터 적용합니다. 내용이 바뀌면 시행 7일 전(이용자에게 불리한 변경은 30일 전)에 앱과 웹에 알립니다.</p>
         </section>
       </Article>
     </Page>
