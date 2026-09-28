@@ -239,7 +239,7 @@ function PrivacyPage() {
                 <tr><th scope="row">회원 가입 · 로그인</th><td>이메일, 간편 로그인 식별자, 로그인 방식(구글 · 카카오)</td><td>구글 또는 카카오로 로그인할 때 해당 서비스에서 받음</td><td>필수</td></tr>
                 <tr><th scope="row">프로필</th><td>닉네임(자동 생성, 수정 가능), 프로필 사진</td><td>가입 시 자동 생성, 사진은 이용자가 올릴 때</td><td>사진은 선택</td></tr>
                 <tr><th scope="row">여행 계획</th><td>여행 제목, 기간, 지역 · 도시, 인원, 고른 여행 지침, 일정, 함께 가는 일행</td><td>일정을 만들거나 초대를 받을 때</td><td>필수(일정을 쓸 때)</td></tr>
-                <tr><th scope="row">여행 편의 설정</th><td>선호 이동수단, 계단 이용 가능 여부, 하루에 다닐 장소 수</td><td>마이 → 여행 편의 설정에서 이용자가 고를 때. 고르지 않으면 기본값으로 일정을 짭니다</td><td>선택</td></tr>
+                <tr><th scope="row">여행 편의 설정</th><td>선호 이동수단, 계단 이용 가능 여부, 하루에 다닐 장소 수, 우리 집 위치(이름 · 주소 · 좌표)</td><td>마이 → 여행 편의 설정에서 이용자가 고를 때. 고르지 않으면 기본값으로 일정을 짭니다</td><td>선택</td></tr>
                 <tr><th scope="row">여행 기록</th><td>사진, 사진의 촬영 시각 · 촬영 위치(사진 파일에 들어 있는 값), 남긴 글</td><td>이용자가 여행카드에 사진을 올릴 때</td><td>선택</td></tr>
                 <tr><th scope="row">보호자 연결</th><td>연결된 보호자 · 보호 대상, 초대 코드</td><td>가족 연결을 할 때</td><td>선택</td></tr>
                 <tr><th scope="row">실시간 위치</th><td>현재 위치(위도 · 경도), 기록 시각</td><td>위치 공유에 동의하고 여행 중일 때, 앱이 켜져 있는 동안 약 1~2분마다</td><td>선택</td></tr>
@@ -255,7 +255,7 @@ function PrivacyPage() {
           <p>모은 정보는 아래 목적에만 씁니다. 목적이 바뀔 때는 미리 알리고 다시 동의를 받습니다.</p>
           <ul>
             <li><strong>회원 관리</strong>: 본인 확인, 로그인 유지, 부정 이용 방지</li>
-            <li><strong>여행 일정</strong>: AI 일정 초안 만들기, 일정 편집, 일행 초대</li>
+            <li><strong>여행 일정</strong>: AI 일정 초안 만들기, 일정 편집, 일행 초대, 집 · 출발지에서 첫 장소까지와 장소 사이 이동 경로 안내</li>
             <li><strong>여행 기록</strong>: 여행카드, 사진을 찍은 곳을 지도에 표시, 대한민국 지도에 다녀온 지역 표시</li>
             <li><strong>보호자 기능</strong>: 가족 연결, 여행 중 보호자에게 현재 위치와 일정 보여주기</li>
             <li><strong>알림</strong>: 일정 확정, 여행카드 생성 등 서비스 알림</li>
@@ -318,7 +318,8 @@ function PrivacyPage() {
                 <tr><th scope="row">Supabase</th><td>데이터베이스 보관</td><td>이 방침의 모든 항목</td><td>일본(도쿄)</td></tr>
                 <tr><th scope="row">Amazon Web Services</th><td>서버 운영, 사진 파일 보관</td><td>이 방침의 모든 항목</td><td>대한민국(서울)</td></tr>
                 <tr><th scope="row">OpenAI</th><td>AI 일정 초안 만들기</td><td>여행 도시, 날짜, 인원, 고른 지침, 이동 · 계단 이용 여부. 이름 · 이메일 · 여행 제목은 보내지 않음</td><td>미국</td></tr>
-                <tr><th scope="row">Google</th><td>구글 로그인, 장소 검색 · 사진, 안드로이드 지도</td><td>로그인 정보, 검색한 도시 이름</td><td>미국</td></tr>
+                <tr><th scope="row">Google</th><td>구글 로그인, 장소 검색 · 사진, 안드로이드 지도, 이동 경로 계산(자동차 · 택시 · 도보)</td><td>로그인 정보, 검색한 도시 · 장소 이름, 이동 경로를 계산할 출발 · 도착 좌표</td><td>미국</td></tr>
+                <tr><th scope="row">ODsay (㈜아로정보기술)</th><td>대중교통 경로 계산</td><td>이동 경로를 계산할 출발 · 도착 좌표</td><td>대한민국</td></tr>
                 <tr><th scope="row">Kakao</th><td>카카오 로그인</td><td>로그인 정보</td><td>대한민국</td></tr>
                 <tr><th scope="row">Vercel</th><td>웹 사이트 운영</td><td>접속 기록</td><td>미국</td></tr>
               </tbody>
