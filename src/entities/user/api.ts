@@ -17,7 +17,9 @@ export type TravelPreferenceRequestDto = {
   canUseStairs: boolean
 }
 
-export type TravelPreferenceResponseDto = Partial<TravelPreferenceRequestDto>
+export type TravelPreferenceResponseDto = Partial<TravelPreferenceRequestDto> & {
+  home?: { name: string; address: string; latitude: number; longitude: number } | null
+}
 
 export type ProfileStatsResponseDto = {
   tripCount?: number

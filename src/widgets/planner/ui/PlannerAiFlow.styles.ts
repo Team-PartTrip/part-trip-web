@@ -176,6 +176,34 @@ export const MoreBlocks = styled.details`
   ${BlockList} { margin-top: 0.75rem; }
 `
 
+export const DepartureTools = styled.div`
+  display: grid;
+  gap: 0.625rem;
+  margin-top: 0.75rem;
+  > p { margin: 0; font-size: 0.875rem; line-height: 1.35; }
+  > div { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  button { min-height: 2.75rem; }
+`
+
+export const SearchDialog = styled.dialog`
+  display: grid;
+  width: min(34rem, 100%);
+  max-height: min(42rem, calc(100dvh - 2rem));
+  gap: 1rem;
+  overflow: auto;
+  overscroll-behavior: contain;
+  &:not([open]) { display: none; }
+  border: 0;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  background: #fff;
+  color: ${({ theme }) => theme.colors.text.strong};
+  box-shadow: 0 1.25rem 3rem rgb(15 23 42 / 20%);
+  &::backdrop { background: rgb(15 23 42 / 48%); }
+  h2 { margin: 0; font-size: 1.25rem; }
+  input { width: 100%; }
+`
+
 export const Summary = styled.aside`
   border: 0.0625rem solid #90caf9;
   border-radius: 1rem;

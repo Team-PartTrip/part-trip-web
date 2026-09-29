@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import {
@@ -11,6 +12,8 @@ import {
   type PlannerBlockDto,
   type PlannerBlockResponseDto,
 } from '@/entities/planner'
+import { usePlaceSearchQuery, type PlaceSearchResponseDto } from '@/entities/travel'
+import { useTravelPreferencesQuery } from '@/entities/user'
 import { ACTIVE_PLANNER_ID_KEY, PLANNER_CONFIRMED_KEY, paths } from '@/shared/config'
 import { readSessionId, readSessionValue, writeSessionValue } from '@/shared/libs/session-storage'
 import { Button, Input } from '@/shared/ui/parttrip'
@@ -28,7 +31,7 @@ import { PlannerScheduleEditor } from './PlannerScheduleEditor'
 type Step = 'destination' | 'criteria' | 'schedule' | 'invite'
 type SelectionMap = Record<string, string[]>
 
-const suggestedBlockTypes = ['TRAVEL_TYPE', 'COMPANION', 'WALK_PREFERENCE', 'DAILY_DENSITY', 'FOOD_TYPE', 'LODGING_TYPE', 'MUST_INCLUDE', 'EXCLUDE']
+const suggestedBlockTypes = ['DEPARTURE_PLACE', 'TRAVEL_TYPE', 'COMPANION', 'WALK_PREFERENCE', 'DAILY_DENSITY', 'FOOD_TYPE', 'LODGING_TYPE', 'MUST_INCLUDE', 'EXCLUDE']
 const stepIndex: Record<Step, number> = { destination: 1, criteria: 2, schedule: 3, invite: 4 }
 const stepLabels = ['여행지·기간', '여행 기준', 'AI 일정', '초대']
 const stepCopy: Record<Step, [string, string]> = {
@@ -100,16 +103,99 @@ function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) {
   const queryClient = useQueryClient()
   const blocksQuery = usePlannerBlocksQuery()
   const generateMutation = useGeneratePlannerMutation()
+  const preferencesQuery = useTravelPreferencesQuery()
   const [selections, setSelections] = useState<SelectionMap>(() => toSelectionMap(draft.blocks))
+  const [departurePoint, setDeparturePoint] = useState<PlaceSearchResponseDto | null>(null)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchText, setSearchText] = useState('')
+  const [debouncedSearchText, setDebouncedSearchText] = useState('')
+  const [departureMessage, setDepartureMessage] = useState('')
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const searchDialogRef = useRef<HTMLDialogElement>(null)
+  const searchReturnFocusRef = useRef<HTMLButtonElement | null>(null)
+  const wasSearchOpen = useRef(false)
+  const departureActionVersion = useRef(0)
+  const placeQuery = usePlaceSearchQuery(debouncedSearchText, searchOpen)
+  const searchTermIsCurrent = searchText.trim() === debouncedSearchText
   const [message, setMessage] = useState('')
   const blocks = useMemo(() => getBlockValues(selections), [selections])
   const availableBlocks = blocksQuery.data ?? []
   const priorityBlocks = availableBlocks.filter((block) => suggestedBlockTypes.includes(block.type ?? ''))
   const otherBlocks = availableBlocks.filter((block) => !suggestedBlockTypes.includes(block.type ?? ''))
 
-  const selectBlockOption = (block: PlannerBlockResponseDto, value: string) => {
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setDebouncedSearchText(searchText.trim()), 400)
+    return () => window.clearTimeout(timeout)
+  }, [searchText])
+
+  useEffect(() => {
+    const dialog = searchDialogRef.current
+    if (searchOpen) {
+      if (dialog && !dialog.open) dialog.showModal()
+      searchInputRef.current?.focus()
+    } else {
+      if (dialog?.open) dialog.close()
+      if (wasSearchOpen.current) searchReturnFocusRef.current?.focus()
+    }
+    wasSearchOpen.current = searchOpen
+    return () => { if (dialog?.open) dialog.close() }
+  }, [searchOpen])
+
+  const setDepartureOption = (value: string) => {
+    departureActionVersion.current += 1
+    setSelections((current) => ({ ...current, DEPARTURE_PLACE: [value] }))
+    setDeparturePoint(null)
+    setDepartureMessage('')
+  }
+
+  const selectPlace = (place: PlaceSearchResponseDto) => {
+    departureActionVersion.current += 1
+    setDeparturePoint(place)
+    setSelections((current) => ({ ...current, DEPARTURE_PLACE: ['직접 지정'] }))
+    setDepartureMessage('')
+    setSearchOpen(false)
+  }
+
+  const selectCurrentLocation = () => {
+    const actionVersion = ++departureActionVersion.current
+    setDepartureMessage('')
+    if (!navigator.geolocation) {
+      setDepartureMessage('이 브라우저에서는 현재 위치를 사용할 수 없어요.')
+      return
+    }
+    navigator.geolocation.getCurrentPosition(({ coords }) => {
+      if (departureActionVersion.current !== actionVersion) return
+      setDeparturePoint({ name: '지금 있는 곳', address: '', latitude: coords.latitude, longitude: coords.longitude })
+      setSelections((current) => ({ ...current, DEPARTURE_PLACE: ['직접 지정'] }))
+      setDepartureMessage('')
+    }, () => {
+      if (departureActionVersion.current === actionVersion) setDepartureMessage('현재 위치를 확인하지 못했어요. 위치 권한과 설정을 확인해주세요.')
+    })
+  }
+
+  const openPlaceSearch = (trigger: HTMLButtonElement) => {
+    departureActionVersion.current += 1
+    searchReturnFocusRef.current = trigger
+    setSearchText('')
+    setDebouncedSearchText('')
+    setSearchOpen(true)
+  }
+
+  const selectBlockOption = (block: PlannerBlockResponseDto, value: string, trigger: HTMLButtonElement) => {
     const type = block.type
     if (!type) return
+    if (type === 'DEPARTURE_PLACE') {
+      if (value === '직접 지정') {
+        openPlaceSearch(trigger)
+        return
+      }
+      departureActionVersion.current += 1
+      const next = selections[type]?.includes(value) ? [] : [value]
+      setSelections((current) => ({ ...current, [type]: next }))
+      setDeparturePoint(null)
+      setDepartureMessage('')
+      return
+    }
     setSelections((current) => {
       const selected = current[type] ?? []
       const next = block.multiple
@@ -122,17 +208,32 @@ function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) {
   const renderBlock = (block: PlannerBlockResponseDto) => {
     const type = block.type
     if (!type) return null
+    const isDeparture = type === 'DEPARTURE_PLACE'
+    const home = preferencesQuery.data?.home
+    const selectedDeparture = selections[type]?.[0]
+    const departureLabel = departurePoint?.name
+      ?? (selectedDeparture === '집 근처' && home ? home.name : selectedDeparture)
+      ?? (home ? home.name : '선택되지 않음')
     return (
       <S.Block key={type}>
         <h3>{block.label ?? type}</h3>
         <S.Options role="group" aria-label={block.label ?? type}>
           {(block.options ?? []).map((value) => (
-            <S.Option key={value} type="button" $active={Boolean(selections[type]?.includes(value))}
-              aria-pressed={Boolean(selections[type]?.includes(value))} onClick={() => selectBlockOption(block, value)}>
+            <S.Option key={value} type="button" $active={Boolean(selections[type]?.includes(value) || (isDeparture && !selectedDeparture && home && value === '집 근처'))}
+              aria-pressed={Boolean(selections[type]?.includes(value) || (isDeparture && !selectedDeparture && home && value === '집 근처'))} onClick={(event) => selectBlockOption(block, value, event.currentTarget)}>
               {value}
             </S.Option>
           ))}
         </S.Options>
+        {isDeparture ? <S.DepartureTools>
+          <p aria-live="polite">출발지: {departureLabel}</p>
+          <div>
+            <Button type="button" $variant="secondary" onClick={(event) => openPlaceSearch(event.currentTarget)}>다른 곳 찾기</Button>
+            <Button type="button" $variant="secondary" onClick={selectCurrentLocation}>지금 있는 곳</Button>
+            {home ? <Button type="button" $variant="secondary" onClick={() => setDepartureOption('집 근처')}>우리 집으로</Button> : null}
+          </div>
+          {departureMessage ? <S.Error role="alert">{departureMessage}</S.Error> : null}
+        </S.DepartureTools> : null}
       </S.Block>
     )
   }
@@ -153,6 +254,7 @@ function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) {
       startDate: draft.startDate,
       endDate: draft.endDate,
       blocks,
+      ...(departurePoint ? { departurePoint: { placeName: departurePoint.name, latitude: departurePoint.latitude, longitude: departurePoint.longitude } } : {}),
     }
     writePlannerCreationDraft({ ...draft, blocks, ...party })
     try {
@@ -194,6 +296,22 @@ function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) {
           <div><dt>선택한 기준</dt><dd>{blocks.length ? blocks.map((block) => block.value).join(' · ') : '기본 조건으로 만들어요'}</dd></div>
         </dl>
       </S.Summary>
+      {searchOpen ? createPortal(<S.SearchDialog ref={searchDialogRef} aria-labelledby="departure-search-title"
+        onCancel={(event) => { event.preventDefault(); setSearchOpen(false) }}
+        onClick={(event) => { if (event.target === event.currentTarget) setSearchOpen(false) }}>
+          <h2 id="departure-search-title">출발지 찾기</h2>
+          <Input ref={searchInputRef} name="departurePlace" maxLength={50} autoComplete="off" aria-label="장소 검색" value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder="예: 서울역, 부산시청…" />
+          <S.CityList aria-label="장소 검색 결과">
+            {searchTermIsCurrent && debouncedSearchText && placeQuery.isFetching ? <p role="status">장소를 찾고 있어요.</p> : null}
+            {searchTermIsCurrent && placeQuery.isError ? <S.Error role="alert">검색이 잠시 안 돼요</S.Error> : null}
+            {!debouncedSearchText ? <small>장소 이름이나 주소를 입력해 검색해보세요.</small> : null}
+            {searchTermIsCurrent && debouncedSearchText && !placeQuery.isFetching && !placeQuery.isError && !placeQuery.data?.length ? <small>검색 결과가 없어요.</small> : null}
+            {searchTermIsCurrent ? placeQuery.data?.map((place) => <S.City key={`${place.name}-${place.address}-${place.latitude}-${place.longitude}`} type="button" $active={false} onClick={() => selectPlace(place)}>
+              <strong>{place.name}</strong><span>{place.address}</span>
+            </S.City>) : null}
+          </S.CityList>
+          <S.ButtonRow><Button type="button" $variant="secondary" onClick={() => setSearchOpen(false)}>닫기</Button></S.ButtonRow>
+      </S.SearchDialog>, document.body) : null}
     </S.Grid>
   )
 }

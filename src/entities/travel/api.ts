@@ -63,6 +63,13 @@ export type CitySearchResponseDto = {
   regionName?: string
 }
 
+export type PlaceSearchResponseDto = {
+  name: string
+  address: string
+  latitude: number
+  longitude: number
+}
+
 export type PopularCityResponseDto = {
   cityName?: string
   countryName?: string
@@ -152,6 +159,11 @@ export async function searchCities(countryName: string, keyword: string): Promis
   const { data } = await apiClient.get<CitySearchResponseDto[]>(MAIN_API_PATHS.cities, {
     params: { countryName, keyword: keyword.trim() },
   })
+  return data
+}
+
+export async function searchPlaces(keyword: string): Promise<PlaceSearchResponseDto[]> {
+  const { data } = await apiClient.get<PlaceSearchResponseDto[]>('/places/search', { params: { q: keyword.trim() } })
   return data
 }
 

@@ -259,4 +259,5 @@ export type GeneratePlannerRequestDto = {
   startDate: string
   endDate: string
   blocks: PlannerBlockDto[]
+  departurePoint?: { placeName: string; latitude: number; longitude: number }
 }

@@ -6,6 +6,7 @@ import {
   getMoreTourPlaces,
   getPopularCities,
   searchCities,
+  searchPlaces,
   getTourPlace,
   getTourPlaceAccessibility,
   type DdayResponseDto,
@@ -44,6 +45,15 @@ export function useCitySearchQuery(countryName: string, keyword: string, enabled
     queryKey: travelQueryKeys.cities(countryName, keyword),
     queryFn: () => searchCities(countryName, keyword),
     enabled: enabled && Boolean(countryName && keyword.trim()),
+  }))
+}
+
+export function usePlaceSearchQuery(keyword: string, enabled = true) {
+  return useQuery(queryOptions({
+    queryKey: travelQueryKeys.places(keyword),
+    queryFn: () => searchPlaces(keyword),
+    enabled: enabled && Boolean(keyword.trim()),
+    retry: false,
   }))
 }
 
