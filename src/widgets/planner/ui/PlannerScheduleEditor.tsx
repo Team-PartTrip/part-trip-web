@@ -229,7 +229,7 @@ export function PlannerScheduleEditor({
           if (swapSource && !isSwapSource) swapLabel = '이 카드와 바꾸기'
           if (isSwapSource) swapLabel = '교환 취소'
           return <Fragment key={`${day.date}-${slot.slotId ?? placeId ?? 'empty'}-${slotIndex}`}>
-            {slotIndex > 0 && !isEditingSchedule && slot.routeStatus === 'READY' && slot.routeFromPrevious ? <PlannerRouteLine
+            {!isEditingSchedule && slot.routeStatus === 'READY' && slot.routeFromPrevious ? <PlannerRouteLine
               route={slot.routeFromPrevious}
               placeName={place?.name ?? apiPlace?.placeName}
               latitude={place?.latitude ?? apiPlace?.latitude}
