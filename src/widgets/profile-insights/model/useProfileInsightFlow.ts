@@ -41,6 +41,7 @@ export function useProfileInsightFlow(kind: ProfileInsightKind) {
     openYearReview: () => navigate({ to: paths.profileAchievements }),
     openRecord: (tripId: number) => navigate({ params: { recordId: String(tripId) }, to: '/record/$recordId' }),
     selectCountry,
+    regionMapTrips: regionMapQuery.data?.trips ?? [],
     trips,
   }
 }

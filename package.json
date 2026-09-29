@@ -15,17 +15,21 @@
     "@tanstack/react-query": "^5.102.2",
     "@tanstack/react-router": "^1.170.32",
     "axios": "^1.16.1",
+    "d3-geo": "^3.1.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-hook-form": "^7.76.0",
-    "styled-components": "^6.4.3"
+    "styled-components": "^6.4.3",
+    "topojson-client": "^3.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@tanstack/router-plugin": "^1.168.35",
+    "@types/d3-geo": "^3.1.1",
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@types/topojson-client": "^3.1.5",
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",

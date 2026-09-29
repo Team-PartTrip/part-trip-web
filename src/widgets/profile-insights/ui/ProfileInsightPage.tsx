@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { AppShell } from '@/widgets/app-shell'
 
 import { getAnnualTravelSummary } from '../model/profile-insight'
@@ -6,8 +7,9 @@ import * as S from './ProfileInsightPage.styles'
 import {
   ProfileAchievementsView,
   ProfileCountriesView,
-  ProfileMapView,
 } from './ProfileInsightModeViews'
+
+const ProfileMapView = lazy(() => import('./ProfileMapView'))
 
 export type { ProfileInsightKind } from '../model/useProfileInsightFlow'
 
@@ -24,6 +26,7 @@ export function ProfileInsightPage({ kind }: { kind: ProfileInsightKind }) {
     openRecord,
     pageSubtitle,
     pageTitle,
+    regionMapTrips,
     selectCountry,
     trips,
     unknownCities,
@@ -36,7 +39,7 @@ export function ProfileInsightPage({ kind }: { kind: ProfileInsightKind }) {
         {hasError ? <S.State role="alert">여행 기록을 불러오지 못했습니다.</S.State> : null}
         {isLoading ? <S.LoadingLayout aria-busy="true" aria-label="여행 기록 로딩 중"><S.LoadingHeader />{kind === 'map' || kind === 'countries' ? <S.LoadingGrid><S.LoadingPanel /><S.LoadingPanel /></S.LoadingGrid> : <S.LoadingSingle />}</S.LoadingLayout> : null}
 
-        {!isLoading && !hasError && kind === 'map' ? <ProfileMapView regions={domesticRegions} unknownCities={unknownCities} onOpenCountries={openCountries} onOpenRecords={openRecords} onOpenYearReview={openYearReview} onSelectRegion={selectCountry} /> : null}
+        {!isLoading && !hasError && kind === 'map' ? <Suspense fallback={<S.LoadingSingle aria-label="지도 로딩 중" />}><ProfileMapView trips={regionMapTrips} unknownCities={unknownCities} onOpenCountries={openCountries} onOpenRecords={openRecords} onOpenYearReview={openYearReview} onSelectRegion={selectCountry} /></Suspense> : null}
         {!isLoading && !hasError && kind === 'countries' ? <ProfileCountriesView activeRegion={activeRegion ? { ...activeRegion, trips: activeRegionTrips } : undefined} regions={domesticRegions} onOpenRecord={openRecord} onSelectRegion={selectCountry} /> : null}
         {!isLoading && !hasError && kind === 'achievements' ? <ProfileAchievementsView summary={getAnnualTravelSummary(trips, new Date().getFullYear())} year={new Date().getFullYear()} /> : null}
       </S.Page>

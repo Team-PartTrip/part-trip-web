@@ -134,16 +134,12 @@ export const KoreaMap = styled.div`
   height: 100%;
   place-items: center;
   svg { display: block; width: auto; max-width: 100%; height: 100%; }
-  svg [data-region] { cursor: pointer; }
-  svg [data-region] path {
-    stroke: ${({ theme }) => theme.colors.text.muted};
-    stroke-width: 0.03125rem;
-  }
-  svg [data-region]:hover path {
-    fill: ${({ theme }) => theme.colors.background.info} !important;
-    stroke: ${({ theme }) => theme.colors.brand.strong} !important;
-  }
-  svg [data-region]:focus-visible path { stroke: #003366; stroke-width: 1.5; }
+  svg path[data-visited] { fill: ${({ theme }) => theme.colors.background.muted}; stroke: ${({ theme }) => theme.colors.background.default}; stroke-width: 0.5; }
+  svg path[data-visited="true"] { fill: ${({ theme }) => theme.colors.brand.primary}; }
+  svg g[data-region-code] { cursor: pointer; }
+  svg g[data-region-code]:hover path { fill: ${({ theme }) => theme.colors.background.info}; stroke: ${({ theme }) => theme.colors.brand.strong}; }
+  svg g[data-region-code]:focus-visible { outline: none; }
+  svg g[data-region-code]:focus-visible path { stroke: ${({ theme }) => theme.colors.brand.strong}; stroke-width: 1.5; }
 `
 
 export const RegionPicker = styled.details`
