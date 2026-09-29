@@ -1,8 +1,10 @@
-import { useState, type FormEvent } from 'react'
-import { useTravelPreferencesQuery, useUpdateTravelPreferencesMutation } from '@/entities/user'
+import { useRef, useState, type FormEvent } from 'react'
+import { useDeleteHomeMutation, useTravelPreferencesQuery, useUpdateHomeMutation, useUpdateTravelPreferencesMutation } from '@/entities/user'
+import type { PlaceSearchResponseDto } from '@/entities/travel'
 import type { TravelPreferenceRequestDto } from '@/entities/user/api'
 import { Button } from '@/shared/ui/parttrip'
 import { AppShell } from '@/widgets/app-shell'
+import { PlaceSearchDialog } from '@/widgets/place-search'
 import * as S from './TravelPreferencesPage.styles'
 
 const transportOptions: Array<{ value: TravelPreferenceRequestDto['preferredTransport']; label: string }> = [
@@ -15,6 +17,12 @@ const transportOptions: Array<{ value: TravelPreferenceRequestDto['preferredTran
 export function TravelPreferencesPage() {
   const { data, isError, isLoading, refetch } = useTravelPreferencesQuery()
   const updatePreferences = useUpdateTravelPreferencesMutation()
+  const updateHome = useUpdateHomeMutation()
+  const deleteHome = useDeleteHomeMutation()
+  const homeButtonRef = useRef<HTMLButtonElement>(null)
+  const [homeSearchOpen, setHomeSearchOpen] = useState(false)
+  const [homeFeedback, setHomeFeedback] = useState('')
+  const [homeError, setHomeError] = useState(false)
   const [preferredTransportOverride, setPreferredTransportOverride] = useState<TravelPreferenceRequestDto['preferredTransport']>()
   const [dailyScheduleCountOverride, setDailyScheduleCountOverride] = useState<number>()
   const [canUseStairsOverride, setCanUseStairsOverride] = useState<boolean>()
@@ -23,6 +31,33 @@ export function TravelPreferencesPage() {
   const preferredTransport = preferredTransportOverride ?? data?.preferredTransport ?? 'CAR'
   const dailyScheduleCount = dailyScheduleCountOverride ?? data?.dailyScheduleCount ?? 3
   const canUseStairs = canUseStairsOverride ?? data?.canUseStairs ?? true
+  const isHomeMutationPending = updateHome.isPending || deleteHome.isPending
+
+  const selectHome = async (place: PlaceSearchResponseDto) => {
+    setHomeSearchOpen(false)
+    setHomeFeedback('')
+    setHomeError(false)
+    try {
+      await updateHome.mutateAsync({ name: '우리 집', address: place.address, latitude: place.latitude, longitude: place.longitude })
+      setHomeFeedback('우리 집 위치를 저장했어요.')
+    } catch {
+      setHomeError(true)
+      setHomeFeedback('우리 집 위치를 저장하지 못했어요. 연결을 확인하고 다시 시도해주세요.')
+    }
+  }
+
+  const removeHome = async () => {
+    if (!window.confirm('등록한 우리 집 위치를 삭제할까요?')) return
+    setHomeFeedback('')
+    setHomeError(false)
+    try {
+      await deleteHome.mutateAsync()
+      setHomeFeedback('우리 집 위치를 삭제했어요.')
+    } catch {
+      setHomeError(true)
+      setHomeFeedback('우리 집 위치를 삭제하지 못했어요. 연결을 확인하고 다시 시도해주세요.')
+    }
+  }
 
   const save = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -50,6 +85,18 @@ export function TravelPreferencesPage() {
         {isLoading ? <p role="status">설정을 불러오는 중이에요.</p> : isError ? (
           <p role="alert">설정을 불러오지 못했어요. <button type="button" onClick={() => void refetch()}>다시 시도</button></p>
         ) : (
+          <>
+          <S.Home>
+            <div><h2>우리 집</h2><p>{data?.home?.address || (data?.home ? '주소 정보가 없어요.' : '등록한 집이 없어요.')}</p></div>
+            <S.HomeActions>
+              <Button ref={homeButtonRef} type="button" $variant="secondary" disabled={isHomeMutationPending} onClick={() => { setHomeSearchOpen(true); setHomeFeedback(''); setHomeError(false) }}>
+                {updateHome.isPending ? '저장 중…' : data?.home ? '변경' : '등록'}
+              </Button>
+              {data?.home ? <Button type="button" $variant="secondary" disabled={isHomeMutationPending} onClick={() => void removeHome()}>{deleteHome.isPending ? '삭제 중…' : '삭제'}</Button> : null}
+            </S.HomeActions>
+            {homeFeedback ? <S.HomeFeedback role={homeError ? 'alert' : 'status'} $error={homeError}>{homeFeedback}</S.HomeFeedback> : null}
+          </S.Home>
+          <PlaceSearchDialog isOpen={homeSearchOpen} returnFocusRef={homeButtonRef} title="우리 집 위치 찾기" onClose={() => setHomeSearchOpen(false)} onSelect={(place) => void selectHome(place)} />
           <S.Panel onSubmit={(event) => void save(event)}>
             <S.Row>
               <S.Copy><legend>선호하는 이동수단</legend><p>가장 편한 이동 방법을 선택해주세요.</p></S.Copy>
@@ -89,6 +136,7 @@ export function TravelPreferencesPage() {
               {updatePreferences.isPending ? '저장 중…' : '저장'}
             </Button></S.Actions>
           </S.Panel>
+          </>
         )}
       </S.Page>
     </AppShell>

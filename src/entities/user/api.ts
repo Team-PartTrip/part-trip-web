@@ -21,6 +21,8 @@ export type TravelPreferenceResponseDto = Partial<TravelPreferenceRequestDto> & 
   home?: { name: string; address: string; latitude: number; longitude: number } | null
 }
 
+export type HomeRequestDto = { name: string; address?: string; latitude: number; longitude: number }
+
 export type ProfileStatsResponseDto = {
   tripCount?: number
   regionCount?: number
@@ -32,6 +34,7 @@ const PROFILE_API_PATHS = {
   image: '/profile/image',
   mine: '/profile/myInfo',
   travelPreferences: '/profile/travel-preferences',
+  home: '/profile/home',
   stats: '/profile/stats',
 } as const
 
@@ -67,4 +70,12 @@ export async function getTravelPreferences(): Promise<TravelPreferenceResponseDt
 export async function updateTravelPreferences(payload: TravelPreferenceRequestDto): Promise<TravelPreferenceResponseDto> {
   const { data } = await apiClient.put<TravelPreferenceResponseDto>(PROFILE_API_PATHS.travelPreferences, payload)
   return data
+}
+
+export async function updateHome(payload: HomeRequestDto): Promise<void> {
+  await apiClient.put(PROFILE_API_PATHS.home, payload)
+}
+
+export async function deleteHome(): Promise<void> {
+  await apiClient.delete(PROFILE_API_PATHS.home)
 }

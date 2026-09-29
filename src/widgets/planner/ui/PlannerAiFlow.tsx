@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { createPortal } from 'react-dom'
 import { useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import {
@@ -12,7 +11,7 @@ import {
   type PlannerBlockDto,
   type PlannerBlockResponseDto,
 } from '@/entities/planner'
-import { usePlaceSearchQuery, type PlaceSearchResponseDto } from '@/entities/travel'
+import type { PlaceSearchResponseDto } from '@/entities/travel'
 import { useTravelPreferencesQuery } from '@/entities/user'
 import { ACTIVE_PLANNER_ID_KEY, PLANNER_CONFIRMED_KEY, paths } from '@/shared/config'
 import { readSessionId, readSessionValue, writeSessionValue } from '@/shared/libs/session-storage'
@@ -27,6 +26,7 @@ import { canManagePlanner } from '../model/planner-role'
 import * as S from './PlannerAiFlow.styles'
 import { PlannerDestinationStep } from './PlannerDestinationStep'
 import { PlannerScheduleEditor } from './PlannerScheduleEditor'
+import { PlaceSearchDialog } from '@/widgets/place-search'
 
 type Step = 'destination' | 'criteria' | 'schedule' | 'invite'
 type SelectionMap = Record<string, string[]>
@@ -107,39 +107,14 @@ function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) {
   const [selections, setSelections] = useState<SelectionMap>(() => toSelectionMap(draft.blocks))
   const [departurePoint, setDeparturePoint] = useState<PlaceSearchResponseDto | null>(null)
   const [searchOpen, setSearchOpen] = useState(false)
-  const [searchText, setSearchText] = useState('')
-  const [debouncedSearchText, setDebouncedSearchText] = useState('')
   const [departureMessage, setDepartureMessage] = useState('')
-  const searchInputRef = useRef<HTMLInputElement>(null)
-  const searchDialogRef = useRef<HTMLDialogElement>(null)
   const searchReturnFocusRef = useRef<HTMLButtonElement | null>(null)
-  const wasSearchOpen = useRef(false)
   const departureActionVersion = useRef(0)
-  const placeQuery = usePlaceSearchQuery(debouncedSearchText, searchOpen)
-  const searchTermIsCurrent = searchText.trim() === debouncedSearchText
   const [message, setMessage] = useState('')
   const blocks = useMemo(() => getBlockValues(selections), [selections])
   const availableBlocks = blocksQuery.data ?? []
   const priorityBlocks = availableBlocks.filter((block) => suggestedBlockTypes.includes(block.type ?? ''))
   const otherBlocks = availableBlocks.filter((block) => !suggestedBlockTypes.includes(block.type ?? ''))
-
-  useEffect(() => {
-    const timeout = window.setTimeout(() => setDebouncedSearchText(searchText.trim()), 400)
-    return () => window.clearTimeout(timeout)
-  }, [searchText])
-
-  useEffect(() => {
-    const dialog = searchDialogRef.current
-    if (searchOpen) {
-      if (dialog && !dialog.open) dialog.showModal()
-      searchInputRef.current?.focus()
-    } else {
-      if (dialog?.open) dialog.close()
-      if (wasSearchOpen.current) searchReturnFocusRef.current?.focus()
-    }
-    wasSearchOpen.current = searchOpen
-    return () => { if (dialog?.open) dialog.close() }
-  }, [searchOpen])
 
   const setDepartureOption = (value: string) => {
     departureActionVersion.current += 1
@@ -176,8 +151,6 @@ function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) {
   const openPlaceSearch = (trigger: HTMLButtonElement) => {
     departureActionVersion.current += 1
     searchReturnFocusRef.current = trigger
-    setSearchText('')
-    setDebouncedSearchText('')
     setSearchOpen(true)
   }
 
@@ -296,22 +269,7 @@ function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) {
           <div><dt>선택한 기준</dt><dd>{blocks.length ? blocks.map((block) => block.value).join(' · ') : '기본 조건으로 만들어요'}</dd></div>
         </dl>
       </S.Summary>
-      {searchOpen ? createPortal(<S.SearchDialog ref={searchDialogRef} aria-labelledby="departure-search-title"
-        onCancel={(event) => { event.preventDefault(); setSearchOpen(false) }}
-        onClick={(event) => { if (event.target === event.currentTarget) setSearchOpen(false) }}>
-          <h2 id="departure-search-title">출발지 찾기</h2>
-          <Input ref={searchInputRef} name="departurePlace" maxLength={50} autoComplete="off" aria-label="장소 검색" value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder="예: 서울역, 부산시청…" />
-          <S.CityList aria-label="장소 검색 결과">
-            {searchTermIsCurrent && debouncedSearchText && placeQuery.isFetching ? <p role="status">장소를 찾고 있어요.</p> : null}
-            {searchTermIsCurrent && placeQuery.isError ? <S.Error role="alert">검색이 잠시 안 돼요</S.Error> : null}
-            {!debouncedSearchText ? <small>장소 이름이나 주소를 입력해 검색해보세요.</small> : null}
-            {searchTermIsCurrent && debouncedSearchText && !placeQuery.isFetching && !placeQuery.isError && !placeQuery.data?.length ? <small>검색 결과가 없어요.</small> : null}
-            {searchTermIsCurrent ? placeQuery.data?.map((place) => <S.City key={`${place.name}-${place.address}-${place.latitude}-${place.longitude}`} type="button" $active={false} onClick={() => selectPlace(place)}>
-              <strong>{place.name}</strong><span>{place.address}</span>
-            </S.City>) : null}
-          </S.CityList>
-          <S.ButtonRow><Button type="button" $variant="secondary" onClick={() => setSearchOpen(false)}>닫기</Button></S.ButtonRow>
-      </S.SearchDialog>, document.body) : null}
+      <PlaceSearchDialog isOpen={searchOpen} returnFocusRef={searchReturnFocusRef} title="출발지 찾기" onClose={() => setSearchOpen(false)} onSelect={selectPlace} />
     </S.Grid>
   )
 }

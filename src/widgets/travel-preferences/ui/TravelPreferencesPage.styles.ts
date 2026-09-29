@@ -76,3 +76,29 @@ export const Actions = styled.div`
 
   button { min-width: 8.75rem; min-height: 3rem; }
 `
+
+export const Home = styled.section`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 0 1.5rem 1rem;
+  border: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: ${({ theme }) => theme.colors.background.default};
+  h2 { margin: 0; font-size: 1.0625rem; }
+  > div p { margin: 0.375rem 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; overflow-wrap: anywhere; }
+  @media (max-width: 45rem) { grid-template-columns: 1fr; padding: 1rem; }
+`
+
+export const HomeActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  button { min-height: 3rem; }
+`
+
+export const HomeFeedback = styled(Feedback)`
+  grid-column: 1 / -1;
+`
