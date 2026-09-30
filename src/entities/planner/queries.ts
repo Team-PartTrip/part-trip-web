@@ -61,6 +61,7 @@ export const plannerScheduleQueryOptions = (plannerId: number, enabled = true) =
     queryKey: plannerQueryKeys.schedule(plannerId),
     queryFn: () => getPlannerSchedule(plannerId),
     enabled: enabled && isPositiveSafeInteger(plannerId),
+    refetchOnMount: 'always',
   })
 
 export function usePlannerScheduleQuery(plannerId: number, enabled = true) {

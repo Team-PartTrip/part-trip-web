@@ -221,6 +221,7 @@ export type PlannerScheduleResponseDto = {
   plannerId?: number
   title?: string
   cityName?: string
+  departure?: { name?: string | null; latitude?: number | null; longitude?: number | null } | null
   startDate?: string
   endDate?: string
   days?: PlannerScheduleDayDto[]

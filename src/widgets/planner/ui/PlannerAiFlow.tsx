@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import { useQueryClient } from '@tanstack/react-query'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   plannerQueryKeys,
   useConfirmPlannerMutation,
@@ -10,83 +10,139 @@ import {
   usePlannerScheduleQuery,
   type PlannerBlockDto,
   type PlannerBlockResponseDto,
-} from '@/entities/planner'
-import type { PlaceSearchResponseDto } from '@/entities/travel'
-import { useTravelPreferencesQuery } from '@/entities/user'
-import { ACTIVE_PLANNER_ID_KEY, PLANNER_CONFIRMED_KEY, paths } from '@/shared/config'
-import { readSessionId, readSessionValue, writeSessionValue } from '@/shared/libs/session-storage'
-import { Button, Input } from '@/shared/ui/parttrip'
-import { formatDateRange, normalizeStatus } from '@/shared/utils'
-import { isPositiveSafeInteger } from '@/shared/utils/number'
-import { AppShell } from '@/widgets/app-shell'
-import { activatePlannerSession } from '../model/planner-session'
-import { clearPlannerCreationDraft, readPlannerCreationDraft, writePlannerCreationDraft, type PlannerCreationDraft } from '../model/planner-creation'
-import { getPlannerTravelParty } from '../model/member-count'
-import { canManagePlanner } from '../model/planner-role'
-import * as S from './PlannerAiFlow.styles'
-import { PlannerDestinationStep } from './PlannerDestinationStep'
-import { PlannerScheduleEditor } from './PlannerScheduleEditor'
-import { PlaceSearchDialog } from '@/widgets/place-search'
+} from "@/entities/planner";
+import type { PlaceSearchResponseDto } from "@/entities/travel";
+import { useTravelPreferencesQuery } from "@/entities/user";
+import {
+  ACTIVE_PLANNER_ID_KEY,
+  PLANNER_CONFIRMED_KEY,
+  paths,
+} from "@/shared/config";
+import {
+  readSessionId,
+  readSessionValue,
+  writeSessionValue,
+} from "@/shared/libs/session-storage";
+import { Button, Input } from "@/shared/ui/parttrip";
+import { formatDateRange, normalizeStatus } from "@/shared/utils";
+import { isPositiveSafeInteger } from "@/shared/utils/number";
+import { AppShell } from "@/widgets/app-shell";
+import { activatePlannerSession } from "../model/planner-session";
+import {
+  clearPlannerCreationDraft,
+  readPlannerCreationDraft,
+  writePlannerCreationDraft,
+  type PlannerCreationDraft,
+} from "../model/planner-creation";
+import { getPlannerTravelParty } from "../model/member-count";
+import { canManagePlanner } from "../model/planner-role";
+import * as S from "./PlannerAiFlow.styles";
+import { PlannerDestinationStep } from "./PlannerDestinationStep";
+import { PlannerScheduleEditor } from "./PlannerScheduleEditor";
+import { PlaceSearchDialog } from "@/widgets/place-search";
 
-type Step = 'destination' | 'criteria' | 'schedule' | 'invite'
-type SelectionMap = Record<string, string[]>
+type Step = "destination" | "criteria" | "schedule" | "invite";
+type SelectionMap = Record<string, string[]>;
 
-const suggestedBlockTypes = ['DEPARTURE_PLACE', 'TRAVEL_TYPE', 'COMPANION', 'WALK_PREFERENCE', 'DAILY_DENSITY', 'FOOD_TYPE', 'LODGING_TYPE', 'MUST_INCLUDE', 'EXCLUDE']
-const stepIndex: Record<Step, number> = { destination: 1, criteria: 2, schedule: 3, invite: 4 }
-const stepLabels = ['여행지·기간', '여행 기준', 'AI 일정', '초대']
+const suggestedBlockTypes = [
+  "DEPARTURE_PLACE",
+  "TRAVEL_TYPE",
+  "COMPANION",
+  "WALK_PREFERENCE",
+  "DAILY_DENSITY",
+  "FOOD_TYPE",
+  "LODGING_TYPE",
+  "MUST_INCLUDE",
+  "EXCLUDE",
+];
+const stepIndex: Record<Step, number> = {
+  destination: 1,
+  criteria: 2,
+  schedule: 3,
+  invite: 4,
+};
+const stepLabels = ["여행지·기간", "여행 기준", "AI 일정", "초대"];
 const stepCopy: Record<Step, [string, string]> = {
-  destination: ['국내 도시 & 기간', '여행 도시와 날짜를 정해주세요. 최대 14일까지 계획할 수 있어요.'],
-  criteria: ['여행 기준을 선택해 주세요', '선택한 조건은 AI 일정 생성에 사용됩니다. 도시와 날짜는 앞 단계에서 정한 값이에요.'],
-  schedule: ['AI 일정 초안', '날짜별 추천 장소를 확인하고 여행 일정을 확정해주세요.'],
-  invite: ['함께할 사람 초대', '초대 링크를 가족에게 보내면 같은 일정을 볼 수 있어요.'],
-}
+  destination: [
+    "국내 도시 & 기간",
+    "여행 도시와 날짜를 정해주세요. 최대 14일까지 계획할 수 있어요.",
+  ],
+  criteria: [
+    "여행 기준을 선택해 주세요",
+    "선택한 조건은 AI 일정 생성에 사용됩니다. 도시와 날짜는 앞 단계에서 정한 값이에요.",
+  ],
+  schedule: [
+    "AI 일정 초안",
+    "날짜별 추천 장소를 확인하고 여행 일정을 확정해주세요.",
+  ],
+  invite: [
+    "함께할 사람 초대",
+    "초대 링크를 가족에게 보내면 같은 일정을 볼 수 있어요.",
+  ],
+};
 
 function toSelectionMap(blocks: PlannerBlockDto[] = []): SelectionMap {
   return blocks.reduce<SelectionMap>((result, block) => {
-    result[block.type] = [...(result[block.type] ?? []), block.value]
-    return result
-  }, {})
+    result[block.type] = [...(result[block.type] ?? []), block.value];
+    return result;
+  }, {});
 }
 
 function getBlockValues(selections: SelectionMap): PlannerBlockDto[] {
-  return Object.entries(selections).flatMap(([type, values]) => values.map((value) => ({ type, value })))
+  return Object.entries(selections).flatMap(([type, values]) =>
+    values.map((value) => ({ type, value })),
+  );
 }
 
 export function PlannerAiFlow({ step }: { step: Step }) {
-  const navigate = useNavigate()
-  const [currentDraft] = useState(readPlannerCreationDraft)
-  const [title, subtitle] = stepCopy[step]
-  let stepContent: ReactNode
+  const navigate = useNavigate();
+  const [currentDraft] = useState(readPlannerCreationDraft);
+  const [title, subtitle] = stepCopy[step];
+  let stepContent: ReactNode;
 
   useEffect(() => {
-    if (step === 'criteria' && !currentDraft) void navigate({ to: paths.plannerDestination, replace: true })
-  }, [currentDraft, navigate, step])
+    if (step === "criteria" && !currentDraft)
+      void navigate({ to: paths.plannerDestination, replace: true });
+  }, [currentDraft, navigate, step]);
 
   switch (step) {
-    case 'destination':
-      stepContent = <PlannerDestinationStep initialDraft={currentDraft} />
-      break
-    case 'criteria':
-      stepContent = currentDraft
-        ? <PlannerCriteriaStep draft={currentDraft} />
-        : <S.Card role="status"><p>여행 정보를 확인하는 중이에요.</p></S.Card>
-      break
-    case 'schedule':
-      stepContent = <PlannerScheduleStep currentDraft={currentDraft} />
-      break
-    case 'invite':
-      stepContent = <PlannerInviteStep currentDraft={currentDraft} />
-      break
+    case "destination":
+      stepContent = <PlannerDestinationStep initialDraft={currentDraft} />;
+      break;
+    case "criteria":
+      stepContent = currentDraft ? (
+        <PlannerCriteriaStep draft={currentDraft} />
+      ) : (
+        <S.Card role="status">
+          <p>여행 정보를 확인하는 중이에요.</p>
+        </S.Card>
+      );
+      break;
+    case "schedule":
+      stepContent = <PlannerScheduleStep currentDraft={currentDraft} />;
+      break;
+    case "invite":
+      stepContent = <PlannerInviteStep currentDraft={currentDraft} />;
+      break;
   }
 
   return (
     <AppShell>
       <S.Page>
         <S.Header>
-          <div><h1>{title}</h1><p>{subtitle}</p></div>
+          <div>
+            <h1>{title}</h1>
+            <p>{subtitle}</p>
+          </div>
           <S.Steps aria-label="여행 플래너 진행 단계">
             {stepLabels.map((label, index) => (
-              <S.Step key={label} $active={stepIndex[step] === index + 1} aria-current={stepIndex[step] === index + 1 ? 'step' : undefined}>
+              <S.Step
+                key={label}
+                $active={stepIndex[step] === index + 1}
+                aria-current={
+                  stepIndex[step] === index + 1 ? "step" : undefined
+                }
+              >
                 {index + 1} {label}
               </S.Step>
             ))}
@@ -95,130 +151,219 @@ export function PlannerAiFlow({ step }: { step: Step }) {
         {stepContent}
       </S.Page>
     </AppShell>
-  )
+  );
 }
 
 function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) {
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const blocksQuery = usePlannerBlocksQuery()
-  const generateMutation = useGeneratePlannerMutation()
-  const preferencesQuery = useTravelPreferencesQuery()
-  const [selections, setSelections] = useState<SelectionMap>(() => toSelectionMap(draft.blocks))
-  const [departurePoint, setDeparturePoint] = useState<PlaceSearchResponseDto | null>(null)
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [departureMessage, setDepartureMessage] = useState('')
-  const searchReturnFocusRef = useRef<HTMLButtonElement | null>(null)
-  const departureActionVersion = useRef(0)
-  const [message, setMessage] = useState('')
-  const blocks = useMemo(() => getBlockValues(selections), [selections])
-  const availableBlocks = blocksQuery.data ?? []
-  const priorityBlocks = availableBlocks.filter((block) => suggestedBlockTypes.includes(block.type ?? ''))
-  const otherBlocks = availableBlocks.filter((block) => !suggestedBlockTypes.includes(block.type ?? ''))
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const blocksQuery = usePlannerBlocksQuery();
+  const generateMutation = useGeneratePlannerMutation();
+  const preferencesQuery = useTravelPreferencesQuery();
+  const [selections, setSelections] = useState<SelectionMap>(() =>
+    toSelectionMap(draft.blocks),
+  );
+  const [departurePoint, setDeparturePoint] =
+    useState<PlaceSearchResponseDto | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [departureMessage, setDepartureMessage] = useState("");
+  const searchReturnFocusRef = useRef<HTMLButtonElement | null>(null);
+  const departureActionVersion = useRef(0);
+  const [message, setMessage] = useState("");
+  const blocks = useMemo(() => {
+    const values = getBlockValues(selections);
+    if (!selections.DEPARTURE_PLACE?.length && preferencesQuery.data?.home) {
+      return [...values, { type: "DEPARTURE_PLACE", value: "집 근처" }];
+    }
+    return values;
+  }, [preferencesQuery.data?.home, selections]);
+  const availableBlocks = blocksQuery.data ?? [];
+  const priorityBlocks = availableBlocks.filter((block) =>
+    suggestedBlockTypes.includes(block.type ?? ""),
+  );
+  const otherBlocks = availableBlocks.filter(
+    (block) => !suggestedBlockTypes.includes(block.type ?? ""),
+  );
 
   const setDepartureOption = (value: string) => {
-    departureActionVersion.current += 1
-    setSelections((current) => ({ ...current, DEPARTURE_PLACE: [value] }))
-    setDeparturePoint(null)
-    setDepartureMessage('')
-  }
+    departureActionVersion.current += 1;
+    setSelections((current) => ({ ...current, DEPARTURE_PLACE: [value] }));
+    setDeparturePoint(null);
+    setDepartureMessage("");
+  };
 
   const selectPlace = (place: PlaceSearchResponseDto) => {
-    departureActionVersion.current += 1
-    setDeparturePoint(place)
-    setSelections((current) => ({ ...current, DEPARTURE_PLACE: ['직접 지정'] }))
-    setDepartureMessage('')
-    setSearchOpen(false)
-  }
+    departureActionVersion.current += 1;
+    setDeparturePoint(place);
+    setSelections((current) => ({
+      ...current,
+      DEPARTURE_PLACE: ["직접 지정"],
+    }));
+    setDepartureMessage("");
+    setSearchOpen(false);
+  };
 
   const selectCurrentLocation = () => {
-    const actionVersion = ++departureActionVersion.current
-    setDepartureMessage('')
+    const actionVersion = ++departureActionVersion.current;
+    setDepartureMessage("");
     if (!navigator.geolocation) {
-      setDepartureMessage('이 브라우저에서는 현재 위치를 사용할 수 없어요.')
-      return
+      setDepartureMessage("이 브라우저에서는 현재 위치를 사용할 수 없어요.");
+      return;
     }
-    navigator.geolocation.getCurrentPosition(({ coords }) => {
-      if (departureActionVersion.current !== actionVersion) return
-      setDeparturePoint({ name: '지금 있는 곳', address: '', latitude: coords.latitude, longitude: coords.longitude })
-      setSelections((current) => ({ ...current, DEPARTURE_PLACE: ['직접 지정'] }))
-      setDepartureMessage('')
-    }, () => {
-      if (departureActionVersion.current === actionVersion) setDepartureMessage('현재 위치를 확인하지 못했어요. 위치 권한과 설정을 확인해주세요.')
-    })
-  }
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        if (departureActionVersion.current !== actionVersion) return;
+        setDeparturePoint({
+          name: "지금 있는 곳",
+          address: "",
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+        });
+        setSelections((current) => ({
+          ...current,
+          DEPARTURE_PLACE: ["직접 지정"],
+        }));
+        setDepartureMessage("");
+      },
+      () => {
+        if (departureActionVersion.current === actionVersion)
+          setDepartureMessage(
+            "현재 위치를 확인하지 못했어요. 위치 권한과 설정을 확인해주세요.",
+          );
+      },
+    );
+  };
 
   const openPlaceSearch = (trigger: HTMLButtonElement) => {
-    departureActionVersion.current += 1
-    searchReturnFocusRef.current = trigger
-    setSearchOpen(true)
-  }
+    departureActionVersion.current += 1;
+    searchReturnFocusRef.current = trigger;
+    setSearchOpen(true);
+  };
 
-  const selectBlockOption = (block: PlannerBlockResponseDto, value: string, trigger: HTMLButtonElement) => {
-    const type = block.type
-    if (!type) return
-    if (type === 'DEPARTURE_PLACE') {
-      if (value === '직접 지정') {
-        openPlaceSearch(trigger)
-        return
+  const selectBlockOption = (
+    block: PlannerBlockResponseDto,
+    value: string,
+    trigger: HTMLButtonElement,
+  ) => {
+    const type = block.type;
+    if (!type) return;
+    if (type === "DEPARTURE_PLACE") {
+      if (value === "직접 지정") {
+        openPlaceSearch(trigger);
+        return;
       }
-      departureActionVersion.current += 1
-      const next = selections[type]?.includes(value) ? [] : [value]
-      setSelections((current) => ({ ...current, [type]: next }))
-      setDeparturePoint(null)
-      setDepartureMessage('')
-      return
+      departureActionVersion.current += 1;
+      const next = selections[type]?.includes(value) ? [] : [value];
+      setSelections((current) => ({ ...current, [type]: next }));
+      setDeparturePoint(null);
+      setDepartureMessage("");
+      return;
     }
     setSelections((current) => {
-      const selected = current[type] ?? []
+      const selected = current[type] ?? [];
       const next = block.multiple
-        ? selected.includes(value) ? selected.filter((item) => item !== value) : [...selected, value]
-        : selected.includes(value) ? [] : [value]
-      return { ...current, [type]: next }
-    })
-  }
+        ? selected.includes(value)
+          ? selected.filter((item) => item !== value)
+          : [...selected, value]
+        : selected.includes(value)
+          ? []
+          : [value];
+      return { ...current, [type]: next };
+    });
+  };
 
   const renderBlock = (block: PlannerBlockResponseDto) => {
-    const type = block.type
-    if (!type) return null
-    const isDeparture = type === 'DEPARTURE_PLACE'
-    const home = preferencesQuery.data?.home
-    const selectedDeparture = selections[type]?.[0]
-    const departureLabel = departurePoint?.name
-      ?? (selectedDeparture === '집 근처' && home ? home.name : selectedDeparture)
-      ?? (home ? home.name : '선택되지 않음')
+    const type = block.type;
+    if (!type) return null;
+    const isDeparture = type === "DEPARTURE_PLACE";
+    const home = preferencesQuery.data?.home;
+    const selectedDeparture = selections[type]?.[0];
+    const departureLabel =
+      departurePoint?.name ??
+      (selectedDeparture === "집 근처" && home
+        ? home.name
+        : selectedDeparture) ??
+      (home ? home.name : "선택되지 않음");
     return (
       <S.Block key={type}>
         <h3>{block.label ?? type}</h3>
         <S.Options role="group" aria-label={block.label ?? type}>
           {(block.options ?? []).map((value) => (
-            <S.Option key={value} type="button" $active={Boolean(selections[type]?.includes(value) || (isDeparture && !selectedDeparture && home && value === '집 근처'))}
-              aria-pressed={Boolean(selections[type]?.includes(value) || (isDeparture && !selectedDeparture && home && value === '집 근처'))} onClick={(event) => selectBlockOption(block, value, event.currentTarget)}>
+            <S.Option
+              key={value}
+              type="button"
+              $active={Boolean(
+                selections[type]?.includes(value) ||
+                (isDeparture &&
+                  !selectedDeparture &&
+                  home &&
+                  value === "집 근처"),
+              )}
+              aria-pressed={Boolean(
+                selections[type]?.includes(value) ||
+                (isDeparture &&
+                  !selectedDeparture &&
+                  home &&
+                  value === "집 근처"),
+              )}
+              onClick={(event) =>
+                selectBlockOption(block, value, event.currentTarget)
+              }
+            >
               {value}
             </S.Option>
           ))}
         </S.Options>
-        {isDeparture ? <S.DepartureTools>
-          <p aria-live="polite">출발지: {departureLabel}</p>
-          <div>
-            <Button type="button" $variant="secondary" onClick={(event) => openPlaceSearch(event.currentTarget)}>다른 곳 찾기</Button>
-            <Button type="button" $variant="secondary" onClick={selectCurrentLocation}>지금 있는 곳</Button>
-            {home ? <Button type="button" $variant="secondary" onClick={() => setDepartureOption('집 근처')}>우리 집으로</Button> : null}
-          </div>
-          {departureMessage ? <S.Error role="alert">{departureMessage}</S.Error> : null}
-        </S.DepartureTools> : null}
+        {isDeparture ? (
+          <S.DepartureTools>
+            <p aria-live="polite">출발지: {departureLabel}</p>
+            <div>
+              <Button
+                type="button"
+                $variant="secondary"
+                onClick={(event) => openPlaceSearch(event.currentTarget)}
+              >
+                다른 곳 찾기
+              </Button>
+              <Button
+                type="button"
+                $variant="secondary"
+                onClick={selectCurrentLocation}
+              >
+                지금 있는 곳
+              </Button>
+              {home ? (
+                <Button
+                  type="button"
+                  $variant="secondary"
+                  onClick={() => setDepartureOption("집 근처")}
+                >
+                  우리 집으로
+                </Button>
+              ) : null}
+            </div>
+            {departureMessage ? (
+              <S.Error role="alert">{departureMessage}</S.Error>
+            ) : null}
+          </S.DepartureTools>
+        ) : null}
       </S.Block>
-    )
-  }
+    );
+  };
 
   const generate = async () => {
-    if (generateMutation.isPending) return
-    setMessage('')
-    const party = getPlannerTravelParty(blocks)
+    if (generateMutation.isPending) return;
+    setMessage("");
+    const party = getPlannerTravelParty(blocks);
     if (!party) {
-      setMessage('혼자 여행인지, 동행이 있는지 선택해주세요.')
-      return
+      setMessage("혼자 여행인지, 동행이 있는지 선택해주세요.");
+      return;
     }
+    const home = preferencesQuery.data?.home;
+    const useHomeAsDeparture =
+      selections.DEPARTURE_PLACE?.[0] === "집 근처" ||
+      (!selections.DEPARTURE_PLACE?.length && home != null);
+    const resolvedDeparture = departurePoint ?? (useHomeAsDeparture ? home : undefined);
     const payload = {
       ...party,
       title: `${draft.cityName} 여행`,
@@ -227,188 +372,379 @@ function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) {
       startDate: draft.startDate,
       endDate: draft.endDate,
       blocks,
-      ...(departurePoint ? { departurePoint: { placeName: departurePoint.name, latitude: departurePoint.latitude, longitude: departurePoint.longitude } } : {}),
-    }
-    writePlannerCreationDraft({ ...draft, blocks, ...party })
+      ...(resolvedDeparture
+        ? {
+            departurePoint: {
+              placeName: resolvedDeparture.name,
+              latitude: resolvedDeparture.latitude,
+              longitude: resolvedDeparture.longitude,
+            },
+          }
+        : {}),
+    };
+    writePlannerCreationDraft({ ...draft, blocks, ...party });
     try {
-      const schedule = await generateMutation.mutateAsync(payload)
-      if (!isPositiveSafeInteger(schedule.plannerId)) throw new Error('plannerId is missing')
-      activatePlannerSession(schedule.plannerId)
-      queryClient.setQueryData(plannerQueryKeys.schedule(schedule.plannerId), schedule)
-      void navigate({ to: paths.plannerProgress })
+      const schedule = await generateMutation.mutateAsync(payload);
+      if (!isPositiveSafeInteger(schedule.plannerId))
+        throw new Error("plannerId is missing");
+      activatePlannerSession(schedule.plannerId);
+      queryClient.setQueryData(
+        plannerQueryKeys.schedule(schedule.plannerId),
+        schedule,
+      );
+      void navigate({ to: paths.plannerProgress });
     } catch {
-      setMessage('AI 일정을 만들지 못했어요. 도시와 날짜를 확인하고 다시 시도해주세요.')
+      setMessage(
+        "AI 일정을 만들지 못했어요. 도시와 날짜를 확인하고 다시 시도해주세요.",
+      );
     }
-  }
+  };
 
   return (
     <S.Grid>
       <S.Card>
-        {blocksQuery.isLoading ? <p role="status">여행 기준을 불러오는 중이에요.</p> : blocksQuery.isError ? (
-          <S.Error role="alert">여행 기준을 불러오지 못했어요. 새로고침 후 다시 시도해주세요.</S.Error>
+        {blocksQuery.isLoading ? (
+          <p role="status">여행 기준을 불러오는 중이에요.</p>
+        ) : blocksQuery.isError ? (
+          <S.Error role="alert">
+            여행 기준을 불러오지 못했어요. 새로고침 후 다시 시도해주세요.
+          </S.Error>
         ) : (
           <>
             <S.BlockList>{priorityBlocks.map(renderBlock)}</S.BlockList>
-            {otherBlocks.length ? <S.MoreBlocks><summary>다른 여행 기준 더 보기 ({otherBlocks.length})</summary><S.BlockList>{otherBlocks.map(renderBlock)}</S.BlockList></S.MoreBlocks> : null}
+            {otherBlocks.length ? (
+              <S.MoreBlocks>
+                <summary>다른 여행 기준 더 보기 ({otherBlocks.length})</summary>
+                <S.BlockList>{otherBlocks.map(renderBlock)}</S.BlockList>
+              </S.MoreBlocks>
+            ) : null}
             {message ? <S.Error role="alert">{message}</S.Error> : null}
             <S.ButtonRow>
-              <Button type="button" $variant="secondary" onClick={() => void navigate({ to: paths.plannerDestination })}>이전</Button>
-              <Button type="button" disabled={generateMutation.isPending || blocksQuery.isLoading} onClick={() => void generate()}>
-                {generateMutation.isPending ? 'AI가 일정을 만드는 중…' : 'AI 여행 플래너 만들기'}
+              <Button
+                type="button"
+                $variant="secondary"
+                onClick={() => void navigate({ to: paths.plannerDestination })}
+              >
+                이전
+              </Button>
+              <Button
+                type="button"
+                disabled={
+                  generateMutation.isPending ||
+                  blocksQuery.isLoading ||
+                  preferencesQuery.isLoading
+                }
+                onClick={() => void generate()}
+              >
+                {generateMutation.isPending
+                  ? "AI가 일정을 만드는 중…"
+                  : "AI 여행 플래너 만들기"}
               </Button>
             </S.ButtonRow>
-            {generateMutation.isPending ? <p role="status" aria-live="polite">선택한 여행지와 조건으로 일정을 만들고 있어요. 잠시 기다려주세요.</p> : null}
+            {generateMutation.isPending ? (
+              <p role="status" aria-live="polite">
+                선택한 여행지와 조건으로 일정을 만들고 있어요. 잠시
+                기다려주세요.
+              </p>
+            ) : null}
           </>
         )}
       </S.Card>
       <S.Summary>
         <h2>선택한 여행</h2>
         <dl>
-          <div><dt>여행지</dt><dd>{draft.cityName}</dd></div>
-          <div><dt>기간</dt><dd>{formatDateRange(draft.startDate, draft.endDate)}</dd></div>
-          <div><dt>선택한 기준</dt><dd>{blocks.length ? blocks.map((block) => block.value).join(' · ') : '기본 조건으로 만들어요'}</dd></div>
+          <div>
+            <dt>여행지</dt>
+            <dd>{draft.cityName}</dd>
+          </div>
+          <div>
+            <dt>기간</dt>
+            <dd>{formatDateRange(draft.startDate, draft.endDate)}</dd>
+          </div>
+          <div>
+            <dt>선택한 기준</dt>
+            <dd>
+              {blocks.length
+                ? blocks.map((block) => block.value).join(" · ")
+                : "기본 조건으로 만들어요"}
+            </dd>
+          </div>
         </dl>
       </S.Summary>
-      <PlaceSearchDialog isOpen={searchOpen} returnFocusRef={searchReturnFocusRef} title="출발지 찾기" onClose={() => setSearchOpen(false)} onSelect={selectPlace} />
+      <PlaceSearchDialog
+        isOpen={searchOpen}
+        returnFocusRef={searchReturnFocusRef}
+        title="출발지 찾기"
+        onClose={() => setSearchOpen(false)}
+        onSelect={selectPlace}
+      />
     </S.Grid>
-  )
+  );
 }
 
-function PlannerScheduleStep({ currentDraft }: { currentDraft?: PlannerCreationDraft }) {
-  const navigate = useNavigate()
-  const plannerId = readSessionId(ACTIVE_PLANNER_ID_KEY)
-  const scheduleQuery = usePlannerScheduleQuery(plannerId)
-  const routePolls = useRef({ plannerId, attempts: 0 })
-  const { dataUpdatedAt, errorUpdatedAt, isFetching, refetch } = scheduleQuery
+function PlannerScheduleStep({
+  currentDraft,
+}: {
+  currentDraft?: PlannerCreationDraft;
+}) {
+  const navigate = useNavigate();
+  const plannerId = readSessionId(ACTIVE_PLANNER_ID_KEY);
+  const scheduleQuery = usePlannerScheduleQuery(plannerId);
+  const routePolls = useRef({ plannerId, attempts: 0 });
+  const { dataUpdatedAt, errorUpdatedAt, isFetching, refetch } = scheduleQuery;
 
-  const hasCalculatingRoute = scheduleQuery.data?.days?.some((day) =>
-    day.slots?.some((slot) => slot.routeStatus === 'CALCULATING'),
-  ) ?? false
+  const hasCalculatingRoute =
+    scheduleQuery.data?.days?.some((day) =>
+      day.slots?.some((slot) => slot.routeStatus === "CALCULATING"),
+    ) ?? false;
 
   useEffect(() => {
-    if (routePolls.current.plannerId !== plannerId) routePolls.current = { plannerId, attempts: 0 }
-    if (!hasCalculatingRoute || isFetching || routePolls.current.attempts >= 20) return
+    if (routePolls.current.plannerId !== plannerId)
+      routePolls.current = { plannerId, attempts: 0 };
+    if (!hasCalculatingRoute) {
+      routePolls.current.attempts = 0;
+      return;
+    }
+    if (isFetching || routePolls.current.attempts >= 20)
+      return;
 
     const timeout = window.setTimeout(() => {
-      routePolls.current.attempts += 1
-      void refetch()
-    }, 3000)
+      routePolls.current.attempts += 1;
+      void refetch();
+    }, 3000);
 
-    return () => window.clearTimeout(timeout)
-  }, [dataUpdatedAt, errorUpdatedAt, hasCalculatingRoute, isFetching, plannerId, refetch])
+    return () => window.clearTimeout(timeout);
+  }, [
+    dataUpdatedAt,
+    errorUpdatedAt,
+    hasCalculatingRoute,
+    isFetching,
+    plannerId,
+    refetch,
+  ]);
 
-  const detailQuery = usePlannerDetailQuery(plannerId)
-  const confirmMutation = useConfirmPlannerMutation()
-  const [message, setMessage] = useState('')
-  const [confirmed, setConfirmed] = useState(false)
-  const serverConfirmed = ['CONFIRMED', 'TRAVELING', 'COMPLETED'].includes(normalizeStatus(detailQuery.data?.status))
-  const isConfirmed = confirmed || serverConfirmed || readSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`) === 'true'
-  const canManageCurrentPlanner = canManagePlanner(detailQuery.data?.role)
+  const detailQuery = usePlannerDetailQuery(plannerId);
+  const confirmMutation = useConfirmPlannerMutation();
+  const [message, setMessage] = useState("");
+  const [confirmed, setConfirmed] = useState(false);
+  const serverConfirmed = ["CONFIRMED", "TRAVELING", "COMPLETED"].includes(
+    normalizeStatus(detailQuery.data?.status),
+  );
+  const isConfirmed =
+    confirmed ||
+    serverConfirmed ||
+    readSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`) === "true";
+  const canManageCurrentPlanner = canManagePlanner(detailQuery.data?.role);
 
   const confirmSchedule = async () => {
-    if (!canManageCurrentPlanner || !isPositiveSafeInteger(plannerId) || !scheduleQuery.data) return
-    setMessage('')
+    if (
+      !canManageCurrentPlanner ||
+      !isPositiveSafeInteger(plannerId) ||
+      !scheduleQuery.data
+    )
+      return;
+    setMessage("");
     try {
-      await confirmMutation.mutateAsync(plannerId)
-      setConfirmed(true)
-      writeSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`, 'true')
+      await confirmMutation.mutateAsync(plannerId);
+      setConfirmed(true);
+      writeSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`, "true");
       if (currentDraft?.isSolo) {
-        clearPlannerCreationDraft()
-        void navigate({ to: paths.planner })
+        clearPlannerCreationDraft();
+        void navigate({ to: paths.planner });
       } else {
-        void navigate({ to: paths.plannerInvite })
+        void navigate({ to: paths.plannerInvite });
       }
     } catch {
-      setMessage('일정을 확정하지 못했어요. 잠시 후 다시 시도해주세요.')
+      setMessage("일정을 확정하지 못했어요. 잠시 후 다시 시도해주세요.");
     }
-  }
+  };
 
-  let content: ReactNode
+  let content: ReactNode;
   if (!isPositiveSafeInteger(plannerId)) {
-    content = <p role="alert">확인할 일정이 없어요. 플래너 목록에서 여행을 선택해주세요.</p>
+    content = (
+      <p role="alert">
+        확인할 일정이 없어요. 플래너 목록에서 여행을 선택해주세요.
+      </p>
+    );
   } else if (scheduleQuery.isLoading || detailQuery.isLoading) {
-    content = <p role="status" aria-busy="true">AI 일정을 불러오는 중이에요.</p>
+    content = (
+      <p role="status" aria-busy="true">
+        AI 일정을 불러오는 중이에요.
+      </p>
+    );
   } else if (scheduleQuery.isError && !scheduleQuery.data) {
-    content = <><S.Error role="alert">일정을 불러오지 못했어요.</S.Error><S.ButtonRow><Button type="button" $variant="secondary" onClick={() => void scheduleQuery.refetch()}>다시 시도</Button></S.ButtonRow></>
+    content = (
+      <>
+        <S.Error role="alert">일정을 불러오지 못했어요.</S.Error>
+        <S.ButtonRow>
+          <Button
+            type="button"
+            $variant="secondary"
+            onClick={() => void scheduleQuery.refetch()}
+          >
+            다시 시도
+          </Button>
+        </S.ButtonRow>
+      </>
+    );
   } else {
-    let action: ReactNode = null
+    let action: ReactNode = null;
     if (isConfirmed && canManageCurrentPlanner) {
-      action = <Button type="button" onClick={() => void navigate({ to: paths.plannerInvite })}>초대 단계로</Button>
+      action = (
+        <Button
+          type="button"
+          onClick={() => void navigate({ to: paths.plannerInvite })}
+        >
+          초대 단계로
+        </Button>
+      );
     } else if (!isConfirmed && canManageCurrentPlanner) {
-      action = <Button type="button" disabled={confirmMutation.isPending || !scheduleQuery.data?.days?.length} onClick={() => void confirmSchedule()}>
-        {confirmMutation.isPending ? '확정 중…' : '일정 확정'}
-      </Button>
+      action = (
+        <Button
+          type="button"
+          disabled={
+            confirmMutation.isPending || !scheduleQuery.data?.days?.length
+          }
+          onClick={() => void confirmSchedule()}
+        >
+          {confirmMutation.isPending ? "확정 중…" : "일정 확정"}
+        </Button>
+      );
     } else if (!isConfirmed && !canManageCurrentPlanner) {
-      action = <p role="status">리더가 일정을 확정하면 초대 단계가 열립니다.</p>
+      action = (
+        <p role="status">리더가 일정을 확정하면 초대 단계가 열립니다.</p>
+      );
     }
 
-    content = <>
-      {detailQuery.isError ? <S.Error role="alert">플래너 권한을 확인하지 못해 일정은 읽기 전용으로 표시됩니다.</S.Error> : null}
-      {scheduleQuery.data ? <PlannerScheduleEditor
-        plannerId={plannerId}
-        cityName={detailQuery.data?.cityName ?? scheduleQuery.data.cityName}
-        schedule={scheduleQuery.data}
-        canManage={canManageCurrentPlanner}
-        isConfirmed={isConfirmed}
-      /> : <p role="alert">일정 응답에 표시할 내용이 없습니다.</p>}
-      {message ? <S.Error role="alert">{message}</S.Error> : null}
-      <S.ButtonRow>
-        <Button type="button" $variant="secondary" onClick={() => void navigate({ to: paths.planner })}>플래너 목록</Button>
-        {action}
-      </S.ButtonRow>
-    </>
+    content = (
+      <>
+        {detailQuery.isError ? (
+          <S.Error role="alert">
+            플래너 권한을 확인하지 못해 일정은 읽기 전용으로 표시됩니다.
+          </S.Error>
+        ) : null}
+        {scheduleQuery.data ? (
+          <PlannerScheduleEditor
+            plannerId={plannerId}
+            cityName={detailQuery.data?.cityName ?? scheduleQuery.data.cityName}
+            schedule={scheduleQuery.data}
+            canManage={canManageCurrentPlanner}
+            isConfirmed={isConfirmed}
+          />
+        ) : (
+          <p role="alert">일정 응답에 표시할 내용이 없습니다.</p>
+        )}
+        {message ? <S.Error role="alert">{message}</S.Error> : null}
+        <S.ButtonRow>
+          <Button
+            type="button"
+            $variant="secondary"
+            onClick={() => void navigate({ to: paths.planner })}
+          >
+            플래너 목록
+          </Button>
+          {action}
+        </S.ButtonRow>
+      </>
+    );
   }
 
-  return <S.Card>{content}</S.Card>
+  return <S.Card>{content}</S.Card>;
 }
 
-function PlannerInviteStep({ currentDraft }: { currentDraft?: PlannerCreationDraft }) {
-  const navigate = useNavigate()
-  const plannerId = readSessionId(ACTIVE_PLANNER_ID_KEY)
-  const detailQuery = usePlannerDetailQuery(plannerId)
-  const [inviteFeedback, setInviteFeedback] = useState('')
-  const isConfirmed = ['CONFIRMED', 'TRAVELING', 'COMPLETED'].includes(normalizeStatus(detailQuery.data?.status))
-    || readSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`) === 'true'
+function PlannerInviteStep({
+  currentDraft,
+}: {
+  currentDraft?: PlannerCreationDraft;
+}) {
+  const navigate = useNavigate();
+  const plannerId = readSessionId(ACTIVE_PLANNER_ID_KEY);
+  const detailQuery = usePlannerDetailQuery(plannerId);
+  const [inviteFeedback, setInviteFeedback] = useState("");
+  const isConfirmed =
+    ["CONFIRMED", "TRAVELING", "COMPLETED"].includes(
+      normalizeStatus(detailQuery.data?.status),
+    ) || readSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`) === "true";
 
   const copyInviteLink = async () => {
-    const link = detailQuery.data?.inviteLink
+    const link = detailQuery.data?.inviteLink;
     if (!link) {
-      setInviteFeedback('서버에서 초대 링크를 불러오지 못했어요.')
-      return
+      setInviteFeedback("서버에서 초대 링크를 불러오지 못했어요.");
+      return;
     }
     try {
-      await navigator.clipboard.writeText(link)
-      setInviteFeedback('초대 링크를 복사했어요.')
+      await navigator.clipboard.writeText(link);
+      setInviteFeedback("초대 링크를 복사했어요.");
     } catch {
-      setInviteFeedback('링크를 선택해 복사해주세요.')
+      setInviteFeedback("링크를 선택해 복사해주세요.");
     }
-  }
+  };
 
   return (
     <S.Grid>
       <S.Card>
         <h2>초대 링크로 함께 일정 보기</h2>
-        <p>링크를 카카오톡이나 문자로 보내 가족을 초대할 수 있어요. 혼자 여행이면 초대를 건너뛰어도 됩니다.</p>
-        {detailQuery.isLoading ? <p role="status">초대 링크를 불러오는 중이에요.</p> : (
+        <p>
+          링크를 카카오톡이나 문자로 보내 가족을 초대할 수 있어요. 혼자 여행이면
+          초대를 건너뛰어도 됩니다.
+        </p>
+        {detailQuery.isLoading ? (
+          <p role="status">초대 링크를 불러오는 중이에요.</p>
+        ) : (
           <S.LinkBox>
-            <Input aria-label="여행 초대 링크" readOnly value={detailQuery.data?.inviteLink ?? ''} placeholder="초대 링크가 아직 없어요" />
-            <Button type="button" disabled={!detailQuery.data?.inviteLink} onClick={() => void copyInviteLink()}>링크 복사</Button>
+            <Input
+              aria-label="여행 초대 링크"
+              readOnly
+              value={detailQuery.data?.inviteLink ?? ""}
+              placeholder="초대 링크가 아직 없어요"
+            />
+            <Button
+              type="button"
+              disabled={!detailQuery.data?.inviteLink}
+              onClick={() => void copyInviteLink()}
+            >
+              링크 복사
+            </Button>
           </S.LinkBox>
         )}
         {inviteFeedback ? <p role="status">{inviteFeedback}</p> : null}
-        <S.ButtonRow><Button type="button" $variant="secondary" onClick={() => {
-          clearPlannerCreationDraft()
-          void navigate({ to: paths.planner })
-        }}>완료</Button></S.ButtonRow>
+        <S.ButtonRow>
+          <Button
+            type="button"
+            $variant="secondary"
+            onClick={() => {
+              clearPlannerCreationDraft();
+              void navigate({ to: paths.planner });
+            }}
+          >
+            완료
+          </Button>
+        </S.ButtonRow>
       </S.Card>
       <S.Summary>
         <h2>확정한 일정</h2>
         <dl>
-          <div><dt>여행지</dt><dd>{detailQuery.data?.cityName ?? currentDraft?.cityName ?? '여행지'}</dd></div>
-          <div><dt>기간</dt><dd>{formatDateRange(detailQuery.data?.startDate ?? currentDraft?.startDate, detailQuery.data?.endDate ?? currentDraft?.endDate)}</dd></div>
-          <div><dt>상태</dt><dd>{isConfirmed ? '확정됨' : '일정 확정 전'}</dd></div>
+          <div>
+            <dt>여행지</dt>
+            <dd>
+              {detailQuery.data?.cityName ?? currentDraft?.cityName ?? "여행지"}
+            </dd>
+          </div>
+          <div>
+            <dt>기간</dt>
+            <dd>
+              {formatDateRange(
+                detailQuery.data?.startDate ?? currentDraft?.startDate,
+                detailQuery.data?.endDate ?? currentDraft?.endDate,
+              )}
+            </dd>
+          </div>
+          <div>
+            <dt>상태</dt>
+            <dd>{isConfirmed ? "확정됨" : "일정 확정 전"}</dd>
+          </div>
         </dl>
       </S.Summary>
     </S.Grid>
-  )
+  );
 }

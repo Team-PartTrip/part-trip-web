@@ -3,15 +3,21 @@ import { useQuery } from '@tanstack/react-query'
 import {
   type PlannerScheduleRouteDto,
   type PlannerScheduleRouteStepDto,
+  type PlannerScheduleSlotDto,
   useSavePlannerScheduleMutation,
   type PlannerSchedulePlaceDto,
   type PlannerScheduleResponseDto,
 } from '@/entities/planner'
 import { tourPlacesQueryOptions } from '@/entities/travel'
+import odsayAttributionUrl from '@/shared/assets/odsay-attribution.png'
 import { Button } from '@/shared/ui/parttrip'
 import { formatDate, getErrorMessage } from '@/shared/utils'
 import {
   addEmptyScheduleSlot,
+  getDayOrigin,
+  hasCoordinates,
+  getKakaoMapUrl,
+  type RoutePoint,
   copyScheduleDays,
   moveScheduleSlot,
   removeScheduleSlot,
@@ -67,11 +73,13 @@ function formatRouteStep(step: PlannerScheduleRouteStepDto) {
   ].filter(Boolean).join(' · ')
 }
 
-function getKakaoMapUrl(name?: string, latitude?: number, longitude?: number) {
-  if (!name?.trim() || typeof latitude !== 'number' || !Number.isFinite(latitude)
-    || typeof longitude !== 'number' || !Number.isFinite(longitude)) return undefined
-
-  return `https://map.kakao.com/link/to/${encodeURIComponent(name.trim())},${latitude},${longitude}`
+function DepartureIcon({ kind }: { kind: 'bed' | 'home' | 'train' | 'pin' }) {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {kind === 'bed' ? <path d="M3 18v-7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v7M3 14h18M5 9V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v3M3 18v2m18-2v2" /> : null}
+    {kind === 'home' ? <path d="m3 11 9-8 9 8M5 10v10h14V10M9 20v-6h6v6" /> : null}
+    {kind === 'train' ? <><rect x="5" y="3" width="14" height="16" rx="3" /><path d="M5 8h14M8 14h.01M16 14h.01M8 19l-2 2m10-2 2 2" /></> : null}
+    {kind === 'pin' ? <><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.5" /></> : null}
+  </svg>
 }
 
 function PlannerRouteLine({
@@ -79,11 +87,13 @@ function PlannerRouteLine({
   placeName,
   latitude,
   longitude,
+  origin,
 }: {
   route: PlannerScheduleRouteDto
   placeName?: string
   latitude?: number
   longitude?: number
+  origin?: RoutePoint
 }) {
   const modeLabel = route.transportMode ? routeModeLabels[route.transportMode] ?? '이동' : '이동'
   const summary = [
@@ -91,7 +101,7 @@ function PlannerRouteLine({
     typeof route.walkingMinutes === 'number' && route.walkingMinutes > 0 ? `도보 ${route.walkingMinutes}분` : undefined,
   ].filter(Boolean).join(' · ')
   const steps = (route.steps ?? []).map(formatRouteStep).filter(Boolean)
-  const kakaoMapUrl = getKakaoMapUrl(placeName, latitude, longitude)
+  const kakaoMapUrl = getKakaoMapUrl(route.transportMode, placeName, latitude, longitude, origin)
 
   return <S.RouteLine>
     <S.RouteModeIcon><RouteModeIcon mode={route.transportMode} /></S.RouteModeIcon>
@@ -105,6 +115,33 @@ function PlannerRouteLine({
         <summary>경로 상세</summary>
         <ol>{steps.map((step, index) => <li key={`${step}-${index}`}>{step}</li>)}</ol>
       </details> : null}
+    </div>
+  </S.RouteLine>
+}
+
+function PlannerRouteFallback({
+  placeName,
+  latitude,
+  longitude,
+  origin,
+}: {
+  placeName?: string
+  latitude?: number
+  longitude?: number
+  origin?: RoutePoint
+}) {
+  const kakaoMapUrl = origin && hasCoordinates(origin)
+    ? getKakaoMapUrl('PUBLIC_TRANSIT', placeName, latitude, longitude, origin)
+    : undefined
+
+  return <S.RouteLine>
+    <S.RouteModeIcon><RouteModeIcon mode="PUBLIC_TRANSIT" /></S.RouteModeIcon>
+    <div>
+      <S.RouteSummary>
+        <strong>대중교통</strong>
+        <span>경로 정보를 불러오지 못했어요.</span>
+        {kakaoMapUrl ? <a href={kakaoMapUrl} target="_blank" rel="noopener noreferrer">카카오맵에서 길 찾기</a> : null}
+      </S.RouteSummary>
     </div>
   </S.RouteLine>
 }
@@ -133,9 +170,22 @@ export function PlannerScheduleEditor({
   const days = draft ?? copyScheduleDays(schedule.days)
   const original = useMemo(() => copyScheduleDays(schedule.days), [schedule.days])
   const changed = draft != null && serialized(draft) !== serialized(original)
-  const isEditingSchedule = draft != null || saveMutation.isPending
+  const resolveSlotPlace = (slot: PlannerScheduleSlotDto) => {
+    const placeId = slot.tourPlaceId ?? slot.place?.tourPlaceId
+    const apiPlace = placesQuery.data?.find((item) => item.tourPlaceId === placeId)
+    if (!slot.place && !placeId) return undefined
+    return {
+      name: slot.place?.name ?? apiPlace?.placeName ?? (placeId ? `장소 ${placeId}` : undefined),
+      category: slot.place?.category ?? apiPlace?.category ?? slot.place?.categoryLabel,
+      latitude: slot.place?.latitude ?? apiPlace?.latitude,
+      longitude: slot.place?.longitude ?? apiPlace?.longitude,
+    }
+  }
   const hasDailyQuotaReached = schedule.days?.some((day) =>
     day.slots?.some((slot) => slot.routeStatus === 'DAILY_QUOTA_REACHED'),
+  ) ?? false
+  const hasRouteApiError = schedule.days?.some((day) =>
+    day.slots?.some((slot) => slot.routeStatus === 'API_ERROR' && !slot.routeFromPrevious),
   ) ?? false
   const canEdit = canManage && !isConfirmed
   let editorStatus = '리더만 일정을 수정할 수 있어요.'
@@ -211,29 +261,47 @@ export function PlannerScheduleEditor({
       {editorActions}
     </S.EditorHeading>
     {hasDailyQuotaReached ? <S.RouteNotice role="status">오늘 이동 경로 조회 한도를 다 써서 경로를 못 불러왔어요.</S.RouteNotice> : null}
+    {hasRouteApiError ? <S.RouteNotice role="alert">일정은 불러왔지만, 일부 장소 간 경로 계산에 실패했어요.</S.RouteNotice> : null}
     <S.ScheduleDays>
-      {days.map((day, dayIndex) => <S.ScheduleDay key={day.date || dayIndex}>
+      {days.map((day, dayIndex) => {
+        const origin = getDayOrigin(days, dayIndex, schedule.departure, resolveSlotPlace)
+        const originName = origin?.point.name?.trim() ?? ''
+        const originKind = origin?.isLodging ? 'bed' : originName.includes('집') ? 'home' : originName.endsWith('역') ? 'train' : 'pin'
+        return <S.ScheduleDay key={day.date || dayIndex}>
         <header><h2>{day.date ? formatDate(day.date) : `${dayIndex + 1}일차`}</h2>{draft ? <Button type="button" $variant="secondary" disabled={day.slots.length >= 50 || saveMutation.isPending}
           onClick={() => {
             setDraft((current) => current ? addEmptyScheduleSlot(current, dayIndex) : current)
             openPicker({ dayIndex, slotIndex: day.slots.length })
           }}>＋ 빈 일정 카드</Button> : null}</header>
+        {origin ? <S.SchedulePlace>
+          <b aria-hidden="true"><DepartureIcon kind={originKind} /></b>
+          <div><small>0번째 · {origin.isLodging ? '숙소에서 출발' : '출발'}</small><strong>{originName || '출발지'}</strong></div>
+        </S.SchedulePlace> : null}
         {day.slots.length ? day.slots.map((slot, slotIndex) => {
           const position = { dayIndex, slotIndex }
           const isSwapSource = swapSource?.dayIndex === dayIndex && swapSource.slotIndex === slotIndex
           const placeId = slot.tourPlaceId ?? slot.place?.tourPlaceId
           const place = slot.place
           const apiPlace = placesQuery.data?.find((item) => item.tourPlaceId === placeId)
+          const routeOriginSlot = [...day.slots.slice(0, slotIndex)].reverse().find((previousSlot) => previousSlot.place || previousSlot.tourPlaceId)
+          const routeOrigin = routeOriginSlot ? resolveSlotPlace(routeOriginSlot) : origin?.point
           const placeName = place?.name || apiPlace?.placeName || (placeId ? `장소 ${placeId}` : canEdit ? '장소를 선택해주세요' : '장소가 아직 정해지지 않았어요')
           let swapLabel = '바꾸기'
           if (swapSource && !isSwapSource) swapLabel = '이 카드와 바꾸기'
           if (isSwapSource) swapLabel = '교환 취소'
           return <Fragment key={`${day.date}-${slot.slotId ?? placeId ?? 'empty'}-${slotIndex}`}>
-            {!isEditingSchedule && slot.routeStatus === 'READY' && slot.routeFromPrevious ? <PlannerRouteLine
+            {!changed && slot.routeFromPrevious ? <PlannerRouteLine
               route={slot.routeFromPrevious}
               placeName={place?.name ?? apiPlace?.placeName}
               latitude={place?.latitude ?? apiPlace?.latitude}
               longitude={place?.longitude ?? apiPlace?.longitude}
+              origin={routeOrigin}
+            /> : null}
+            {!changed && !slot.routeFromPrevious && slot.routeStatus === 'API_ERROR' ? <PlannerRouteFallback
+              placeName={place?.name ?? apiPlace?.placeName}
+              latitude={place?.latitude ?? apiPlace?.latitude}
+              longitude={place?.longitude ?? apiPlace?.longitude}
+              origin={routeOrigin}
             /> : null}
             <S.SchedulePlace>
               <b aria-hidden="true">{slotIndex + 1}</b>
@@ -267,9 +335,14 @@ export function PlannerScheduleEditor({
             /> : null}
           </Fragment>
         }) : <p>이 날짜에는 장소가 아직 정해지지 않았어요.</p>}
-      </S.ScheduleDay>)}
+      </S.ScheduleDay>
+      })}
     </S.ScheduleDays>
     {swapSource ? <S.EditorFeedback role="status">바꿀 카드를 선택해주세요.</S.EditorFeedback> : null}
     {feedback ? <S.EditorFeedback role={feedbackError ? 'alert' : 'status'} $error={feedbackError}>{feedback}</S.EditorFeedback> : null}
+    {!changed && schedule.days?.some((day) => day.slots?.some((slot) => slot.routeFromPrevious?.transportMode === 'PUBLIC_TRANSIT')) ? <S.ScheduleAttribution>
+      <span>대중교통 정보: 아로정보기술 컨텐츠</span>
+      <S.ODsayMark><img src={odsayAttributionUrl} alt="Powered by ODsay" /></S.ODsayMark>
+    </S.ScheduleAttribution> : null}
   </>
 }

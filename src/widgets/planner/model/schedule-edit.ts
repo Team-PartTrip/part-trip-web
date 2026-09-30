@@ -1,5 +1,6 @@
 import type {
   PlannerScheduleDayDto,
+  PlannerScheduleRouteDto,
   PlannerSchedulePlaceDto,
   PlannerScheduleSlotDto,
   SavePlannerScheduleRequestDto,
@@ -73,4 +74,31 @@ export function toSaveScheduleRequest(days: EditableScheduleDay[]): SavePlannerS
       }
     }),
   }
+}
+
+export type RoutePoint = { name?: string | null; latitude?: number | null; longitude?: number | null }
+
+export function hasCoordinates(point?: RoutePoint) {
+  return Boolean(point?.name?.trim()) && typeof point?.latitude === 'number' && Number.isFinite(point.latitude)
+    && typeof point.longitude === 'number' && Number.isFinite(point.longitude)
+}
+
+export function getKakaoMapUrl(transportMode: PlannerScheduleRouteDto['transportMode'], name?: string, latitude?: number, longitude?: number, origin?: RoutePoint) {
+  if (!name?.trim() || typeof latitude !== 'number' || !Number.isFinite(latitude)
+    || typeof longitude !== 'number' || !Number.isFinite(longitude)) return undefined
+
+  if (origin && hasCoordinates(origin)) {
+    const mode = transportMode === 'PUBLIC_TRANSIT' ? 'traffic' : transportMode === 'WALKING' ? 'walk' : 'car'
+    return `https://map.kakao.com/link/by/${mode}/${encodeURIComponent(origin.name!.trim())},${origin.latitude},${origin.longitude}/${encodeURIComponent(name.trim())},${latitude},${longitude}`
+  }
+  return `https://map.kakao.com/link/to/${encodeURIComponent(name.trim())},${latitude},${longitude}`
+}
+
+export function getDayOrigin(days: EditableScheduleDay[], dayIndex: number, departure: RoutePoint | null | undefined, resolveSlotPlace: (slot: EditableScheduleSlot) => (RoutePoint & { category?: string }) | undefined) {
+  const previousSlots = days[dayIndex - 1]?.slots ?? []
+  const lastPlaceSlot = [...previousSlots].reverse().find((slot) => slot.place || slot.tourPlaceId)
+  const previousPlace = lastPlaceSlot ? resolveSlotPlace(lastPlaceSlot) : undefined
+  const category = previousPlace?.category?.toUpperCase()
+  if (previousPlace && (category === 'ACCOMMODATION' || category === '숙소')) return { point: previousPlace, isLodging: true }
+  return departure ? { point: departure, isLodging: false } : undefined
 }

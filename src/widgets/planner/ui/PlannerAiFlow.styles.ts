@@ -13,7 +13,7 @@ export const Header = styled.header`
   gap: 1.25rem;
   margin: 0 1.5rem 1.5rem;
   h1 { margin: 0; font-size: 1.875rem; line-height: 2.375rem; }
-  p { margin: 0.5rem 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.9375rem; line-height: 1.375rem; }
+  p { margin: 0.5rem 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 1rem; line-height: 1.375rem; }
   @media (max-width: 53.75rem) { align-items: flex-start; flex-direction: column; }
 `
 
@@ -35,9 +35,9 @@ export const Step = styled.li<{ $active: boolean }>`
   padding: 0 0.75rem;
   background: ${({ $active }) => $active ? '#1565c0' : '#e3f2fd'};
   color: ${({ $active, theme }) => $active ? theme.colors.text.inverse : theme.colors.text.strong};
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   white-space: nowrap;
-  @media (max-width: 35rem) { flex: 1; justify-content: center; min-width: 0; padding-inline: 0.3125rem; font-size: 0.6875rem; }
+  @media (max-width: 35rem) { flex: 1; justify-content: center; min-width: 0; padding-inline: 0.3125rem; font-size: 0.875rem; }
 `
 
 export const Grid = styled.div`
@@ -56,7 +56,7 @@ export const Card = styled.section`
   background: #fff;
   box-shadow: 0 0.25rem 0.875rem rgb(15 33 51 / 5%);
   h2 { margin: 0; font-size: 1.125rem; line-height: 1.625rem; }
-  > p { margin: 0.5rem 0 1.25rem; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.3125rem; }
+  > p { margin: 0.5rem 0 1.25rem; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.375rem; }
 `
 
 export const Form = styled.form`
@@ -71,7 +71,7 @@ export const Field = styled.div`
   flex-direction: column;
   gap: 0.5rem;
   > label, > span { font-size: 0.875rem; font-weight: 600; }
-  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.8125rem; line-height: 1.1875rem; }
+  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.375rem; }
   input { max-width: 26.25rem; }
   #planner-city-name { width: 100%; max-width: none; }
 `
@@ -85,7 +85,7 @@ export const CityList = styled.div`
   border: 0.0625rem solid #e6edf4;
   border-radius: 0.75rem;
   background: #fff;
-  > strong { padding: 0.625rem 0.875rem 0.5rem; font-size: 0.8125rem; }
+  > strong { padding: 0.625rem 0.875rem 0.5rem; font-size: 0.875rem; }
   > p, > small { margin: 0; padding: 0.75rem 0.875rem; }
 `
 
@@ -103,8 +103,8 @@ export const City = styled.button<{ $active: boolean }>`
   cursor: pointer;
   font: inherit;
   text-align: left;
-  strong { font-size: 0.9375rem; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.75rem; }
+  strong { font-size: 1rem; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; }
   &:hover { background: #f3f8ff; }
   &:focus-visible { position: relative; outline: 0.125rem solid ${({ theme }) => theme.colors.brand.primary}; outline-offset: -0.125rem; }
 `
@@ -121,7 +121,7 @@ export const Error = styled.p`
   margin: 0;
   color: ${({ theme }) => theme.colors.status.error};
   font-size: 0.875rem;
-  line-height: 1.3125rem;
+  line-height: 1.375rem;
 `
 
 export const ButtonRow = styled.div`
@@ -146,7 +146,7 @@ export const Block = styled.section`
   border-radius: 0.875rem;
   padding: 0.875rem;
   background: #fff;
-  h3 { margin: 0 0 0.625rem; font-size: 0.875rem; line-height: 1.25rem; }
+  h3 { margin: 0 0 0.625rem; font-size: 0.875rem; line-height: 1.375rem; }
 `
 
 export const Options = styled.div`
@@ -192,13 +192,33 @@ export const Summary = styled.aside`
   background: #f3f8ff;
   h2 { margin: 0 0 1rem; font-size: 1.125rem; line-height: 1.625rem; }
   dl { display: grid; gap: 0.75rem; margin: 0; }
-  dt { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.75rem; }
-  dd { margin: 0.1875rem 0 0; font-size: 0.9375rem; font-weight: 600; line-height: 1.375rem; overflow-wrap: anywhere; }
+  dt { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; }
+  dd { margin: 0.1875rem 0 0; font-size: 1rem; font-weight: 600; line-height: 1.375rem; overflow-wrap: anywhere; }
 `
 
 export const ScheduleDays = styled.div`
   display: grid;
   gap: 1rem;
+`
+
+export const ScheduleAttribution = styled.div`
+  display: grid;
+  justify-items: center;
+  gap: 0.375rem;
+  margin-top: 1.5rem;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+`
+
+export const ODsayMark = styled.span`
+  display: grid;
+  min-height: 1.375rem;
+  place-items: center;
+  border-radius: 0.25rem;
+  padding: 0 0.375rem;
+  background: #fff;
+  img { display: block; width: auto; height: 14px; }
 `
 
 export const ScheduleDay = styled.section`
@@ -266,7 +286,7 @@ export const RouteLine = styled.div`
   padding: 0.75rem 0;
 
   > div { min-width: 0; }
-  details { margin-top: 0.375rem; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.8125rem; }
+  details { margin-top: 0.375rem; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; }
   summary { width: fit-content; min-height: 2rem; cursor: pointer; }
   summary:hover { color: ${({ theme }) => theme.colors.brand.strong}; text-decoration: underline; text-underline-offset: 0.15em; }
   summary:focus-visible, a:focus-visible { outline: 0.125rem solid ${({ theme }) => theme.colors.brand.primary}; outline-offset: 0.125rem; }
@@ -292,8 +312,8 @@ export const RouteSummary = styled.div`
   flex-wrap: wrap;
   align-items: center;
   gap: 0.375rem 0.75rem;
-  strong { font-size: 0.875rem; line-height: 1.25rem; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.8125rem; line-height: 1.25rem; }
+  strong { font-size: 0.875rem; line-height: 1.375rem; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.375rem; }
 `
 
 export const RouteNotice = styled.p`
@@ -313,7 +333,7 @@ export const EditorHeading = styled.div`
   justify-content: space-between;
   gap: 0.75rem;
   margin-bottom: 1.25rem;
-  p { margin: 0.25rem 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.25rem; }
+  p { margin: 0.25rem 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.375rem; }
   @media (max-width: 35rem) { align-items: flex-start; flex-direction: column; }
 `
 
@@ -326,7 +346,7 @@ export const SwapButton = styled.button<{ $active?: boolean }>`
   color: ${({ theme }) => theme.colors.text.strong};
   cursor: pointer;
   font: inherit;
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
 `
 
 export const Picker = styled.section`
@@ -377,7 +397,7 @@ export const CandidateButton = styled.button`
   cursor: pointer;
   text-align: left;
   strong { display: block; font-size: 0.875rem; }
-  small { display: block; margin-top: 0.1875rem; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.75rem; }
+  small { display: block; margin-top: 0.1875rem; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; }
 `
 
 export const PickerActions = styled.div`
@@ -392,7 +412,7 @@ export const EditorFeedback = styled.p<{ $error?: boolean }>`
   margin: 0.75rem 0 0;
   color: ${({ $error, theme }) => $error ? theme.colors.status.error : theme.colors.brand.strong};
   font-size: 0.875rem;
-  line-height: 1.3125rem;
+  line-height: 1.375rem;
 `
 
 export const LinkBox = styled.div`
@@ -403,3 +423,17 @@ export const LinkBox = styled.div`
   input { min-width: 0; }
   @media (max-width: 35rem) { grid-template-columns: 1fr; }
 `
+
+export const AccessibilityLink = styled.button`
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: ${({ theme }) => theme.colors.brand.primary};
+  cursor: pointer;
+  font-size: 0.875rem;
+  text-decoration: underline;
+  text-underline-offset: 0.1875rem;
+`;
