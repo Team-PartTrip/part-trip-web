@@ -89,11 +89,13 @@ export function PlannerScheduleRouteLine({
 }
 
 export function PlannerScheduleRouteFallback({
+  message,
   placeName,
   latitude,
   longitude,
   origin,
 }: {
+  message: string
   placeName?: string
   latitude?: number
   longitude?: number
@@ -108,7 +110,7 @@ export function PlannerScheduleRouteFallback({
     <div>
       <S.RouteSummary>
         <strong>대중교통</strong>
-        <span>경로 정보를 불러오지 못했어요.</span>
+        <span>{message}</span>
         {kakaoMapUrl ? <a href={kakaoMapUrl} target="_blank" rel="noopener noreferrer">카카오맵에서 길 찾기</a> : null}
       </S.RouteSummary>
     </div>

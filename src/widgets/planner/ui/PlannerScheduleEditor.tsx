@@ -12,6 +12,7 @@ import { formatDate, getErrorMessage } from '@/shared/utils'
 import {
   addEmptyScheduleSlot,
   getDayOrigin,
+  getRouteFailureMessage,
   copyScheduleDays,
   moveScheduleSlot,
   removeScheduleSlot,
@@ -70,7 +71,7 @@ export function PlannerScheduleEditor({
     day.slots?.some((slot) => slot.routeStatus === 'DAILY_QUOTA_REACHED'),
   ) ?? false
   const hasRouteApiError = schedule.days?.some((day) =>
-    day.slots?.some((slot) => slot.routeStatus === 'API_ERROR' && !slot.routeFromPrevious),
+    day.slots?.some((slot) => !slot.routeFromPrevious && slot.routeStatus !== 'DAILY_QUOTA_REACHED' && getRouteFailureMessage(slot.routeStatus)),
   ) ?? false
   const canEdit = canManage && !isConfirmed
   let editorStatus = '리더만 일정을 수정할 수 있어요.'
@@ -156,7 +157,7 @@ export function PlannerScheduleEditor({
       {editorActions}
     </S.EditorHeading>
     {hasDailyQuotaReached ? <S.RouteNotice role="status">오늘 이동 경로 조회 한도를 다 써서 경로를 못 불러왔어요.</S.RouteNotice> : null}
-    {hasRouteApiError ? <S.RouteNotice role="alert">일정은 불러왔지만, 일부 장소 간 경로 계산에 실패했어요.</S.RouteNotice> : null}
+    {hasRouteApiError ? <S.RouteNotice role="alert">일정은 불러왔지만, 일부 장소 사이 경로를 찾지 못했어요. 칸마다 이유를 확인해 주세요.</S.RouteNotice> : null}
     <S.ScheduleDays>
       {days.map((day, dayIndex) => {
         const origin = getDayOrigin(days, dayIndex, schedule.departure, resolveSlotPlace)
@@ -192,7 +193,8 @@ export function PlannerScheduleEditor({
               longitude={place?.longitude ?? apiPlace?.longitude}
               origin={routeOrigin}
             /> : null}
-            {!changed && !slot.routeFromPrevious && slot.routeStatus === 'API_ERROR' ? <PlannerScheduleRouteFallback
+            {!changed && !slot.routeFromPrevious && getRouteFailureMessage(slot.routeStatus) ? <PlannerScheduleRouteFallback
+              message={getRouteFailureMessage(slot.routeStatus)!}
               placeName={place?.name ?? apiPlace?.placeName}
               latitude={place?.latitude ?? apiPlace?.latitude}
               longitude={place?.longitude ?? apiPlace?.longitude}

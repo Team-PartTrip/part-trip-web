@@ -81,7 +81,7 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
   assert.match(scheduleEditor, /useSavePlannerScheduleMutation/)
   assert.match(scheduleEditor, /getDayOrigin\(days, dayIndex, schedule\.departure, resolveSlotPlace\)/)
   assert.match(scheduleEditor, /!changed && slot\.routeFromPrevious/)
-  assert.match(scheduleEditor, /slot\.routeStatus === 'API_ERROR'/)
+  assert.match(scheduleEditor, /getRouteFailureMessage\(slot\.routeStatus\)/)
   assert.match(scheduleEditor, /<PlannerScheduleRouteLine/)
   assert.match(scheduleEditor, /<PlannerScheduleRouteFallback/)
   assert.match(plannerQueries, /refetchOnMount: 'always'/)

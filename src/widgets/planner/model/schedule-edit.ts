@@ -1,5 +1,6 @@
 import type {
   PlannerScheduleDayDto,
+  PlannerScheduleRouteStatus,
   PlannerScheduleRouteDto,
   PlannerSchedulePlaceDto,
   PlannerScheduleSlotDto,
@@ -101,4 +102,16 @@ export function getDayOrigin(days: EditableScheduleDay[], dayIndex: number, depa
   const category = previousPlace?.category?.toUpperCase()
   if (previousPlace && (category === 'ACCOMMODATION' || category === '숙소')) return { point: previousPlace, isLodging: true }
   return departure ? { point: departure, isLodging: false } : undefined
+}
+
+const routeFailureMessages: Partial<Record<PlannerScheduleRouteStatus, string>> = {
+  API_ERROR: '경로를 불러오지 못했어요. 잠시 후 다시 확인하거나 카카오맵에서 찾아보세요.',
+  NO_ROUTE: '대중교통으로 가는 경로가 없어요. 택시나 도보를 이용해 주세요.',
+  MISSING_COORDINATES: '장소 위치 정보가 없어 경로를 찾지 못했어요. 다른 장소로 바꿔 보세요.',
+  DAILY_QUOTA_REACHED: '오늘 경로 조회 한도를 다 썼어요. 내일 다시 확인해 주세요.',
+  WAITING_FOR_API_KEY: '경로 안내를 준비하고 있어요.',
+}
+
+export function getRouteFailureMessage(status?: PlannerScheduleRouteStatus | null) {
+  return status ? routeFailureMessages[status] : undefined
 }
