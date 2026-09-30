@@ -30,12 +30,22 @@ function RouteModeIcon({ mode }: { mode?: PlannerScheduleRouteDto['transportMode
   </svg>
 }
 
+const stepTypeLabels: Record<string, string> = {
+  BUS: '버스',
+  SUBWAY: '지하철',
+  WALK: '도보',
+  TRAIN: '기차',
+  EXPRESS_BUS: '고속버스',
+  INTERCITY_BUS: '시외버스',
+  AIR: '비행기',
+}
+
 function formatRouteStep(step: PlannerScheduleRouteStepDto) {
   const stops = step.boardingStop && step.alightingStop
     ? `${step.boardingStop} → ${step.alightingStop}`
     : step.boardingStop || step.alightingStop
   return [
-    step.name?.trim() || step.type?.trim(),
+    step.name?.trim() || stepTypeLabels[step.type ?? ''] || step.type?.trim(),
     stops,
     typeof step.stopCount === 'number' && step.stopCount > 0 ? `${step.stopCount}정거장` : undefined,
     typeof step.durationMinutes === 'number' && step.durationMinutes > 0 ? `${step.durationMinutes}분` : undefined,
