@@ -69,6 +69,7 @@ export function PlannerScheduleStep({
     serverConfirmed ||
     readSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`) === "true";
   const canManageCurrentPlanner = canManagePlanner(detailQuery.data?.role);
+  const isSolo = currentDraft?.isSolo || detailQuery.data?.memberCount === 1;
 
   const confirmSchedule = async () => {
     if (
@@ -83,7 +84,7 @@ export function PlannerScheduleStep({
       await confirmMutation.mutateAsync(plannerId);
       setConfirmed(true);
       writeSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`, "true");
-      if (currentDraft?.isSolo) {
+      if (isSolo) {
         clearPlannerCreationDraft();
         void navigate({ to: paths.planner });
       } else {
@@ -124,7 +125,7 @@ export function PlannerScheduleStep({
     );
   } else {
     let action: ReactNode = null;
-    if (isConfirmed && canManageCurrentPlanner) {
+    if (isConfirmed && canManageCurrentPlanner && !isSolo) {
       action = (
         <Button
           type="button"
@@ -172,16 +173,7 @@ export function PlannerScheduleStep({
         )}
         {message ? <S.Error role="alert">{message}</S.Error> : null}
         {isEditingSchedule ? <p role="status">일정 편집을 저장하거나 취소한 뒤 확정해주세요.</p> : null}
-        <S.ButtonRow>
-          <Button
-            type="button"
-            $variant="secondary"
-            onClick={() => void navigate({ to: paths.planner })}
-          >
-            플래너 목록
-          </Button>
-          {action}
-        </S.ButtonRow>
+        {action ? <S.ButtonRow>{action}</S.ButtonRow> : null}
       </>
     );
   }
