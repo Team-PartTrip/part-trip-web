@@ -286,10 +286,3 @@ export const SettingRow = styled.div`
   strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 1rem; font-weight: 700; line-height: 1.5rem; }
   span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.375rem; }
 `
-
-export const SettingsNote = styled.p`
-  margin: 0.875rem 0 0.25rem;
-  color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 0.875rem;
-  line-height: 1.375rem;
-`

@@ -1,26 +1,17 @@
+import type { Dispatch, SetStateAction } from 'react'
+import type { TravelCardTimelineItemDto, TravelRecordDto } from '@/entities/trip-card'
+import type { UseNavigateResult } from '@tanstack/react-router'
 import { resolveApiAssetUrl } from '@/shared/libs/api-client'
 import { Button as PartTripButton } from '@/shared/ui/parttrip'
 
 import { paths } from '@/shared/config'
-import type { useTripCardsFlow } from '../model/useTripCardsFlow'
 import * as S from './TripCardsPage.styles'
 
-type TripCard = ReturnType<typeof useTripCardsFlow>['cards'][number]
-type Navigate = ReturnType<typeof useTripCardsFlow>['navigate']
-type SetSelected = ReturnType<typeof useTripCardsFlow>['setSelected']
-
-type TimelineItem = {
-  address?: string | null
-  date?: string | null
-  imageUrl?: string | null
-  placeName?: string | null
-  rating?: number | null
-  takenAt?: string | null
-}
-
-type TripCardDetail = {
-  startDate?: string | null
-}
+type TripCard = TravelRecordDto
+type Navigate = UseNavigateResult<'/'>
+type SetSelected = Dispatch<SetStateAction<number[]>>
+type TimelineItem = TravelCardTimelineItemDto
+type TripCardDetail = TravelRecordDto
 
 type TripCardListViewProps = {
   card?: TripCard

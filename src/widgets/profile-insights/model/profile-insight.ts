@@ -44,6 +44,32 @@ export function getDomesticTravelModel(trips: TravelRecordDto[]) {
   }
 }
 
+export function getProfileRegionModel(
+  trips: TravelRecordDto[],
+  selectedRegionName: string,
+  visitedRegions?: VisitedRegionResponseDto[],
+) {
+  const domestic = getDomesticTravelModel(trips)
+  const regions = visitedRegions
+    ? visitedRegions.flatMap((visited) => {
+        const region = getDomesticRegion(visited.regionCode, visited.regionName)
+        if (!region) return []
+        return [{ code: region.code, mapName: region.mapName, name: region.name, trips: domestic.domesticTrips.filter((trip) => trip.regionCode === visited.regionCode) }]
+      })
+    : domestic.regions
+  const selectedRegion = DOMESTIC_REGIONS.find((region) => region.name === selectedRegionName || region.mapName === selectedRegionName)
+  const activeRegion = selectedRegion
+    ? {
+        code: selectedRegion.code,
+        mapName: selectedRegion.mapName,
+        name: selectedRegion.name,
+        trips: domestic.domesticTrips.filter((trip) => regionForTrip(trip)?.code === selectedRegion.code),
+      }
+    : regions[0]
+
+  return { activeRegion, regions, unknownCities: domestic.unknownCities }
+}
+
 export function getAnnualTravelSummary(trips: TravelRecordDto[], year: number) {
   const domesticTrips = trips.filter((trip) =>
     isDomesticTrip(trip) && (trip.startDate ?? '').startsWith(String(year)),
@@ -74,58 +100,5 @@ export function getAnnualTravelSummary(trips: TravelRecordDto[], year: number) {
     longestStayName: longestStay?.cityName,
     longestStayDays,
     placeVisits: placeVisits.map(([name, summary]) => ({ name, ...summary })),
-  }
-}
-
-type ProfileInsightModelProps = {
-  kind: ProfileInsightKind
-  selectedCountry: string
-  trips: TravelRecordDto[]
-  visitedRegions?: VisitedRegionResponseDto[]
-}
-
-const copy: Record<ProfileInsightKind, { title: string; subtitle: string }> = {
-  map: { title: '내 국내 여행 지도', subtitle: '여행 카드 사진 위치로 방문한 시·군·구를 표시합니다.' },
-  countries: { title: '지역별 여행 기록', subtitle: '지역을 선택하면 해당 지역의 여행 기록을 모아봅니다.' },
-  achievements: { title: '올해의 여행 돌아보기', subtitle: '올해 다녀온 지역과 여행을 한눈에 모아봐요.' },
-}
-
-export function getProfileInsightModel({
-  kind,
-  selectedCountry,
-  trips,
-  visitedRegions,
-}: ProfileInsightModelProps) {
-  const domestic = getDomesticTravelModel(trips)
-  if (visitedRegions) domestic.regions = visitedRegions.flatMap((visited) => {
-    const region = getDomesticRegion(visited.regionCode, visited.regionName)
-    if (!region) return []
-    return [{ code: region.code, mapName: region.mapName, name: region.name, trips: domestic.domesticTrips.filter((trip) => trip.regionCode === visited.regionCode) }]
-  })
-  const selectedRegion = DOMESTIC_REGIONS.find((region) => region.name === selectedCountry || region.mapName === selectedCountry)
-  const activeRegion = selectedRegion
-    ? {
-        code: selectedRegion.code,
-        mapName: selectedRegion.mapName,
-        name: selectedRegion.name,
-        trips: domestic.domesticTrips.filter((trip) => regionForTrip(trip)?.code === selectedRegion.code),
-      }
-    : domestic.regions[0]
-  const activeRegionTrips = activeRegion?.trips ?? []
-  const { title, subtitle } = copy[kind]
-  const pageTitle = kind === 'countries' ? activeRegion?.name || '방문 지역' : title
-  const pageSubtitle = kind === 'map'
-    ? subtitle
-    : kind === 'countries'
-      ? `국내 여행 기록 ${activeRegionTrips.length}회`
-      : subtitle
-  return {
-    activeRegion,
-    activeRegionTrips,
-    pageSubtitle,
-    pageTitle,
-    domesticRegions: domestic.regions,
-    domesticTrips: domestic.domesticTrips,
-    unknownCities: domestic.unknownCities,
   }
 }

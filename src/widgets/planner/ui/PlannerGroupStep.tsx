@@ -1,27 +1,26 @@
+import type { Dispatch, FormEvent, SetStateAction } from 'react'
+import type { PlannerMemberResponseDto } from '@/entities/planner'
 import { Button as PartTripButton, Input as PartTripInput } from '@/shared/ui/parttrip'
 
-import { type usePlannerFlow } from '../model/usePlannerFlow'
 import { getPlannerMemberDisplayName } from '../model/member'
 import * as S from './PlannerPage.styles'
-
-type GroupFlow = ReturnType<typeof usePlannerFlow>['group']
 
 type Props = {
   currentUserInitial: string
   currentUserName: string
-  handleJoinPlanner: GroupFlow['handleJoinPlanner']
+  handleJoinPlanner: () => Promise<void>
   inviteCode: string
   isInviteOpen: boolean
   isSaving: boolean
   isSolo: boolean
   joinPlannerPending: boolean
   memberCount: string
-  members: GroupFlow['members']
-  saveGroupSettings: GroupFlow['saveGroupSettings']
-  setInviteCode: GroupFlow['setInviteCode']
-  setIsInviteOpen: (value: (current: boolean) => boolean) => void
-  setIsSolo: GroupFlow['setIsSolo']
-  setMemberCount: GroupFlow['setMemberCount']
+  members: PlannerMemberResponseDto[]
+  saveGroupSettings: (event: FormEvent<HTMLFormElement>) => Promise<void>
+  setInviteCode: Dispatch<SetStateAction<string>>
+  setIsInviteOpen: Dispatch<SetStateAction<boolean>>
+  setIsSolo: Dispatch<SetStateAction<boolean>>
+  setMemberCount: Dispatch<SetStateAction<string>>
 }
 
 export function PlannerGroupStep({

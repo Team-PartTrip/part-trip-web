@@ -3,10 +3,10 @@ import test from 'node:test'
 import { createTestJiti } from './helpers.ts'
 
 const jiti = createTestJiti()
-const { getDomesticTravelModel, getAnnualTravelSummary, getProfileInsightModel } = await jiti.import('./src/widgets/profile-insights/model/profile-insight.ts') as {
+const { getDomesticTravelModel, getAnnualTravelSummary, getProfileRegionModel } = await jiti.import('./src/widgets/profile-insights/model/profile-insight.ts') as {
   getDomesticTravelModel: (trips: Array<{ cityName?: string; countryName?: string; regionCode?: string; regionName?: string; startDate?: string; endDate?: string; tripId?: number }>) => { regions: Array<{ code: string; name: string; trips: unknown[] }>; unknownCities: string[]; domesticTrips: unknown[] }
   getAnnualTravelSummary: (trips: Array<{ cityName?: string; countryName?: string; startDate?: string; endDate?: string }>, year: number) => { placesVisited: number; tripCount: number; mostVisitedName?: string; longestStayName?: string; longestStayDays: number }
-  getProfileInsightModel: (input: { kind: 'countries'; selectedCountry: string; trips: Array<{ cityName?: string; countryName?: string }> }) => { activeRegion?: { name: string; trips: unknown[] } }
+  getProfileRegionModel: (trips: Array<{ cityName?: string; countryName?: string; regionCode?: string; regionName?: string }>, selectedRegionName: string) => { activeRegion?: { name: string; trips: unknown[] } }
 }
 
 test('국내 여행 지도는 시·도별 기록을 중복 없이 집계하고 연결 못한 도시를 표시한다', () => {
@@ -39,11 +39,10 @@ test('올해 회고는 방문 도시 수, 최다 방문, 최장 체류를 요약
 })
 
 test('방문하지 않은 지도 지역을 선택하면 다른 방문 지역으로 잘못 대체하지 않는다', () => {
-  const model = getProfileInsightModel({
-    kind: 'countries',
-    selectedCountry: '부산광역시',
-    trips: [{ cityName: '서울', countryName: '대한민국', regionCode: '11', regionName: '서울특별시' }],
-  })
+  const model = getProfileRegionModel(
+    [{ cityName: '서울', countryName: '대한민국', regionCode: '11', regionName: '서울특별시' }],
+    '부산광역시',
+  )
 
   assert.deepEqual(model.activeRegion, { code: '26', mapName: '부산광역시', name: '부산', trips: [] })
 })

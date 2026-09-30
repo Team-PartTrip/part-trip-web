@@ -36,15 +36,6 @@ export const Header = styled.header`
   gap: 1.25rem;
 `
 
-export const Brand = styled.span`
-  img {
-    display: block;
-    width: 11.25rem;
-    height: auto;
-    aspect-ratio: 362 / 86;
-  }
-`
-
 export const BrandIcon = styled.img`
   display: block;
   width: 7rem;

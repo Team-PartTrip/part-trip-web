@@ -9,19 +9,29 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
     '/src/entities/planner/types.ts',
   ])
   const plannerFlow = readSources([
-    '/src/widgets/planner/model/usePlannerFlow.ts',
+    '/src/widgets/planner/model/usePlannerListFlow.ts',
     '/src/widgets/planner/model/usePlannerGroupFlow.ts',
-    '/src/widgets/planner/model/usePlannerLifecycleFlow.ts',
+    '/src/widgets/planner/model/usePlannerState.ts',
   ])
-  const plannerAiFlow = read('/src/widgets/planner/ui/PlannerAiFlow.tsx')
-  const plannerMutations = read('/src/widgets/planner/model/usePlannerMutations.ts')
+  const plannerAiFlow = readSources([
+    '/src/widgets/planner/ui/PlannerAiFlow.tsx',
+    '/src/widgets/planner/ui/PlannerCriteriaStep.tsx',
+    '/src/widgets/planner/ui/PlannerScheduleStep.tsx',
+    '/src/widgets/planner/ui/PlannerInviteStep.tsx',
+  ])
+  const plannerMutations = read('/src/entities/planner/mutations.ts')
+  const plannerQueries = read('/src/entities/planner/queries.ts')
   const scheduleEditor = readSources([
     '/src/widgets/planner/ui/PlannerScheduleEditor.tsx',
+    '/src/widgets/planner/ui/PlannerScheduleRoute.tsx',
     '/src/widgets/planner/ui/PlannerPlacePicker.tsx',
   ])
   const plannerPage = readSources([
     '/src/widgets/planner/ui/PlannerPage.tsx',
     '/src/widgets/planner/ui/PlannerAiFlow.tsx',
+    '/src/widgets/planner/ui/PlannerCriteriaStep.tsx',
+    '/src/widgets/planner/ui/PlannerScheduleStep.tsx',
+    '/src/widgets/planner/ui/PlannerInviteStep.tsx',
     '/src/widgets/planner/ui/PlannerListStep.tsx',
     '/src/widgets/planner/ui/PlannerGroupStep.tsx',
   ])
@@ -51,7 +61,11 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
   assert.match(planner, /apiClient\.put<PlannerScheduleResponseDto>\(PLANNER_API_PATHS\.schedule\(plannerId\), payload\)/)
   assert.match(planner, /export async function confirmPlanner\(/)
   assert.match(planner, /export type GeneratePlannerRequestDto = \{[\s\S]*?cityName: string[\s\S]*?startDate: string[\s\S]*?endDate: string[\s\S]*?blocks: PlannerBlockDto\[\]/)
-  assert.match(plannerFlow, /hasPlannerManagementRole\(data\.plannerDetail\?\.role\)/)
+  assert.match(plannerFlow, /hasPlannerManagementRole\(detailQuery\.data\?\.role\)/)
+  assert.match(plannerFlow, /useMyPlannersQuery\(\)/)
+  assert.match(plannerFlow, /usePlannerMembersQuery\(activePlannerId\)/)
+  assert.match(plannerFlow, /useCreatePlannerMutation\(\)/)
+  assert.doesNotMatch(plannerFlow, /savedGroupSettings/)
   assert.match(plannerAiFlow, /if\s*\(\s*!canManageCurrentPlanner\s*\|\|\s*!isPositiveSafeInteger\(plannerId\)\s*\|\|\s*!scheduleQuery\.data\s*\)\s*return/)
   assert.match(plannerAiFlow, /!isConfirmed && canManageCurrentPlanner/)
   assert.match(plannerAiFlow, /!isConfirmed && !canManageCurrentPlanner/)
@@ -65,6 +79,12 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
   assert.match(scheduleEditor, /usePlannerScheduleCandidatesQuery/)
   assert.match(scheduleEditor, /useMoreTourPlacesQuery/)
   assert.match(scheduleEditor, /useSavePlannerScheduleMutation/)
+  assert.match(scheduleEditor, /getDayOrigin\(days, dayIndex, schedule\.departure, resolveSlotPlace\)/)
+  assert.match(scheduleEditor, /!changed && slot\.routeFromPrevious/)
+  assert.match(scheduleEditor, /slot\.routeStatus === 'API_ERROR'/)
+  assert.match(scheduleEditor, /<PlannerScheduleRouteLine/)
+  assert.match(scheduleEditor, /<PlannerScheduleRouteFallback/)
+  assert.match(plannerQueries, /refetchOnMount: 'always'/)
   assert.match(locationApi, /currentLocation: '\/location'/)
   assert.match(locationApi, /apiClient\.put\(paths\.currentLocation, payload\)/)
   assert.match(locationReporting, /const geolocation = navigator\.geolocation/)

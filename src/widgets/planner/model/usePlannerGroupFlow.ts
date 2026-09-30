@@ -1,46 +1,30 @@
 import { useCallback, useEffect, type FormEvent } from 'react'
-import { type useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 
-import { type usePlannerMutations } from './usePlannerMutations'
-import { type usePlannerState } from './usePlannerState'
-import { isValidPlannerMemberCount } from './member-count'
-import type { PlannerStep } from './types'
+import {
+  useCreatePlannerMutation,
+  useJoinPlannerMutation,
+  usePlannerDetailQuery,
+  usePlannerMembersQuery,
+  useRemovePlannerMemberMutation,
+} from '@/entities/planner'
 import { PLANNER_GROUP_SETTINGS_KEY, paths } from '@/shared/config'
 import { writeSessionValue } from '@/shared/libs/session-storage'
 import { isPositiveSafeInteger } from '@/shared/utils'
+import { isValidPlannerMemberCount } from './member-count'
+import { usePlannerState } from './usePlannerState'
+import { canManagePlanner as hasPlannerManagementRole } from './planner-role'
 
-type State = ReturnType<typeof usePlannerState>
-type Mutations = ReturnType<typeof usePlannerMutations>
-type Navigate = ReturnType<typeof useNavigate>
-
-type Props = {
-  canManagePlanner: boolean
-  mutations: Mutations
-  navigate: Navigate
-  state: State
-  step: PlannerStep
-}
-
-export function usePlannerGroupFlow({ canManagePlanner, mutations, navigate, state, step }: Props) {
-  const {
-    activePlannerId,
-    activatePlanner,
-    autoJoinInviteCodeRef,
-    inviteCode,
-    inviteCodeFromUrlRef,
-    isSolo,
-    memberCount,
-    setErrorMessage,
-    setInviteCode,
-    setIsSolo,
-    setMemberCount,
-    setSavedGroupSettings,
-  } = state
-  const {
-    createPlannerMutation,
-    joinPlannerMutation,
-    removePlannerMemberMutation,
-  } = mutations
+export function usePlannerGroupFlow() {
+  const navigate = useNavigate()
+  const state = usePlannerState()
+  const { activePlannerId, activatePlanner, autoJoinInviteCodeRef, errorMessage, inviteCode, inviteCodeFromUrlRef, isSolo, memberCount, setErrorMessage, setInviteCode, setIsSolo, setMemberCount } = state
+  const detailQuery = usePlannerDetailQuery(activePlannerId)
+  const membersQuery = usePlannerMembersQuery(activePlannerId)
+  const createPlannerMutation = useCreatePlannerMutation()
+  const joinPlannerMutation = useJoinPlannerMutation()
+  const removePlannerMemberMutation = useRemovePlannerMemberMutation()
+  const canManagePlanner = isPositiveSafeInteger(activePlannerId) && hasPlannerManagementRole(detailQuery.data?.role)
 
   const saveGroupSettings = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -53,7 +37,6 @@ export function usePlannerGroupFlow({ canManagePlanner, mutations, navigate, sta
       setErrorMessage('')
       const nextGroupSettings = { isSolo, memberCount: nextMemberCount }
       writeSessionValue(PLANNER_GROUP_SETTINGS_KEY, JSON.stringify(nextGroupSettings))
-      setSavedGroupSettings(nextGroupSettings)
       if (!isPositiveSafeInteger(activePlannerId)) {
         const planner = await createPlannerMutation.mutateAsync({
           isSolo,
@@ -88,10 +71,10 @@ export function usePlannerGroupFlow({ canManagePlanner, mutations, navigate, sta
 
   useEffect(() => {
     const code = inviteCodeFromUrlRef.current.trim()
-    if (step !== 'group' || !code || autoJoinInviteCodeRef.current === code) return
+    if (!code || autoJoinInviteCodeRef.current === code) return
     autoJoinInviteCodeRef.current = code
     void handleJoinPlanner()
-  }, [autoJoinInviteCodeRef, handleJoinPlanner, inviteCodeFromUrlRef, step])
+  }, [autoJoinInviteCodeRef, handleJoinPlanner, inviteCodeFromUrlRef])
 
   const handleRemovePlannerMember = async (memberUserId?: string) => {
     if (!canManagePlanner || !isPositiveSafeInteger(activePlannerId) || !memberUserId?.trim()) {
@@ -107,14 +90,21 @@ export function usePlannerGroupFlow({ canManagePlanner, mutations, navigate, sta
   }
 
   return {
-    handleJoinPlanner,
-    handleRemovePlannerMember,
+    canManagePlanner,
+    errorMessage,
+    hasError: detailQuery.isError || membersQuery.isError,
+    isLoading: detailQuery.isLoading || membersQuery.isLoading,
+    isManagingMembers: removePlannerMemberMutation.isPending,
+    isSaving: createPlannerMutation.isPending,
     inviteCode,
     isSolo,
-    isManagingMembers: removePlannerMemberMutation.isPending,
     joinPlannerPending: joinPlannerMutation.isPending,
     memberCount,
+    members: membersQuery.data ?? [],
+    plannerDetail: detailQuery.data,
     saveGroupSettings,
+    handleJoinPlanner,
+    handleRemovePlannerMember,
     setInviteCode,
     setIsSolo,
     setMemberCount,

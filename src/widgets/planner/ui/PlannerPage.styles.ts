@@ -404,26 +404,6 @@ export const InvitePanel = styled.section`
   p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; }
 `
 
-export const InvitationPanel = styled(InvitePanel)`
-  width: 100%;
-  box-sizing: border-box;
-  background: ${({ theme }) => theme.colors.background.muted};
-  box-shadow: none;
-`
-
-export const InvitationRow = styled.div`
-  display: flex;
-  width: 100%;
-  align-items: center;
-  gap: 0.625rem;
-  border-bottom: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
-  padding: 0.5rem 0;
-
-  &:last-child { border-bottom: 0; }
-  strong { flex: 1; color: ${({ theme }) => theme.colors.text.strong}; font-size: 0.875rem; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; }
-`
-
 export const SmallActionButton = styled.button`
   min-height: 1.875rem;
   border: 0.0625rem solid ${({ theme }) => theme.colors.border.default};

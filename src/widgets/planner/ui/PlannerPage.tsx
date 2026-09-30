@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useUserProfileQuery } from '@/entities/user'
 import { AppShell } from '@/widgets/app-shell'
 
-import { usePlannerFlow } from '../model/usePlannerFlow'
+import { usePlannerGroupFlow } from '../model/usePlannerGroupFlow'
+import { usePlannerListFlow } from '../model/usePlannerListFlow'
 import type { PlannerStep } from '../model/types'
 import { PlannerAiFlow } from './PlannerAiFlow'
 import { PlannerHeader } from './PlannerHeader'
@@ -14,11 +15,63 @@ import * as S from './PlannerPage.styles'
 export type { PlannerStep } from '../model/types'
 
 export function PlannerPage() {
-  return <PlannerFlowPage step="list" />
+  const planner = usePlannerListFlow()
+  const [plannerTab, setPlannerTab] = useState<PlannerTab>('active')
+
+  return (
+    <PlannerPageLayout step="list" onNewTrip={planner.handleStartNewPlanner} errorMessage={planner.errorMessage} hasError={planner.hasError} isLoading={planner.isLoading}>
+      <PlannerListStep
+        isLoading={planner.isLoading}
+        onSelectPlanner={planner.handleSelectPlanner}
+        onTabChange={setPlannerTab}
+        plannerTab={plannerTab}
+        planners={planner.planners}
+      />
+    </PlannerPageLayout>
+  )
 }
 
 export function PlannerGroupPage() {
-  return <PlannerFlowPage step="group" />
+  const { data: profile } = useUserProfileQuery()
+  const group = usePlannerGroupFlow()
+  const [isInviteOpen, setIsInviteOpen] = useState(() =>
+    typeof window !== 'undefined' && Boolean(new URLSearchParams(window.location.search).get('inviteCode')),
+  )
+  const currentUserName = profile?.name || '사용자'
+  const currentUserInitial = currentUserName.slice(0, 2).toUpperCase() || 'MS'
+  const otherMembers = group.members.filter((member) =>
+    profile?.id ? member.userId !== profile.id : member.nickName !== currentUserName,
+  )
+
+  return (
+    <PlannerPageLayout step="group" errorMessage={group.errorMessage} hasError={group.hasError} isLoading={group.isLoading}>
+      <PlannerGroupStep
+        currentUserInitial={currentUserInitial}
+        currentUserName={currentUserName}
+        handleJoinPlanner={group.handleJoinPlanner}
+        inviteCode={group.inviteCode}
+        isInviteOpen={isInviteOpen}
+        isSaving={group.isSaving}
+        isSolo={group.isSolo}
+        joinPlannerPending={group.joinPlannerPending}
+        memberCount={group.memberCount}
+        members={group.members}
+        saveGroupSettings={group.saveGroupSettings}
+        setInviteCode={group.setInviteCode}
+        setIsInviteOpen={setIsInviteOpen}
+        setIsSolo={group.setIsSolo}
+        setMemberCount={group.setMemberCount}
+      />
+      {group.plannerDetail ? (
+        <PlannerGroupManagementPanel
+          otherMembers={otherMembers}
+          isManagingMembers={group.isManagingMembers}
+          canManagePlanner={group.canManagePlanner}
+          onRemoveMember={group.handleRemovePlannerMember}
+        />
+      ) : null}
+    </PlannerPageLayout>
+  )
 }
 
 export function PlannerDestinationPage() {
@@ -37,41 +90,26 @@ export function PlannerInvitePage() {
   return <PlannerAiFlow step="invite" />
 }
 
-function PlannerFlowPage({ step }: { step: PlannerStep }) {
-  const { data: profile } = useUserProfileQuery()
-  const [plannerTab, setPlannerTab] = useState<PlannerTab>('active')
-  const [isInviteOpen, setIsInviteOpen] = useState(() =>
-    typeof window !== 'undefined' && Boolean(new URLSearchParams(window.location.search).get('inviteCode')),
-  )
-  const { common, group, planner } = usePlannerFlow(step)
-  const { errorMessage, hasError, isLoading, isSaving, plannerDetail } = common
-  const {
-    canManagePlanner,
-    handleJoinPlanner,
-    handleRemovePlannerMember,
-    inviteCode,
-    isManagingMembers,
-    isSolo,
-    joinPlannerPending,
-    memberCount,
-    members,
-    saveGroupSettings,
-    setInviteCode,
-    setIsSolo,
-    setMemberCount,
-  } = group
-  const { handleSelectPlanner, handleStartNewPlanner, planners } = planner
-  const currentUserName = profile?.name || '사용자'
-  const currentUserInitial = currentUserName.slice(0, 2).toUpperCase() || 'MS'
-  const otherMembers = members.filter((member) =>
-    profile?.id ? member.userId !== profile.id : member.nickName !== currentUserName,
-  )
-
+function PlannerPageLayout({
+  children,
+  errorMessage,
+  hasError,
+  isLoading,
+  onNewTrip,
+  step,
+}: {
+  children: ReactNode
+  errorMessage: string
+  hasError: boolean
+  isLoading: boolean
+  onNewTrip?: () => void
+  step: PlannerStep
+}) {
   return (
     <AppShell>
       <S.Page>
         <PlannerHeader
-          onNewTrip={handleStartNewPlanner}
+          onNewTrip={onNewTrip}
           showNewTrip={step === 'list'}
           step={step}
           isLoading={isLoading}
@@ -83,46 +121,7 @@ function PlannerFlowPage({ step }: { step: PlannerStep }) {
           </S.LoadingLayout>
         ) : hasError ? (
           <S.State role="alert">플래너 정보를 불러오지 못했습니다.</S.State>
-        ) : (
-          <>
-            {step === 'list' ? (
-              <PlannerListStep
-                isLoading={isLoading}
-                onSelectPlanner={handleSelectPlanner}
-                onTabChange={setPlannerTab}
-                plannerTab={plannerTab}
-                planners={planners}
-              />
-            ) : null}
-            {step === 'group' ? (
-              <PlannerGroupStep
-                currentUserInitial={currentUserInitial}
-                currentUserName={currentUserName}
-                handleJoinPlanner={handleJoinPlanner}
-                inviteCode={inviteCode}
-                isInviteOpen={isInviteOpen}
-                isSaving={isSaving}
-                isSolo={isSolo}
-                joinPlannerPending={joinPlannerPending}
-                memberCount={memberCount}
-                members={members}
-                saveGroupSettings={saveGroupSettings}
-                setInviteCode={setInviteCode}
-                setIsInviteOpen={setIsInviteOpen}
-                setIsSolo={setIsSolo}
-                setMemberCount={setMemberCount}
-              />
-            ) : null}
-            {step === 'group' && plannerDetail ? (
-              <PlannerGroupManagementPanel
-                otherMembers={otherMembers}
-                isManagingMembers={isManagingMembers}
-                canManagePlanner={canManagePlanner}
-                onRemoveMember={handleRemovePlannerMember}
-              />
-            ) : null}
-          </>
-        )}
+        ) : children}
       </S.Page>
     </AppShell>
   )
