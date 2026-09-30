@@ -18,6 +18,7 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
   const navigate = useNavigate()
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false)
   const [deleteError, setDeleteError] = useState('')
+  const [failedAvatarUrl, setFailedAvatarUrl] = useState<string>()
   const queryClient = useQueryClient()
   const deleteMutation = useDeleteProfileMutation()
   const { data: profile, isError, isLoading } = useUserProfileQuery()
@@ -58,7 +59,7 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
             <S.AccountPanel>
               <S.AccountHeader>
                 <S.Avatar>
-                  {profile.avatarUrl ? <img src={profile.avatarUrl} alt={`${name} 프로필 사진`} width={64} height={64} /> : initials}
+                  {profile.avatarUrl && profile.avatarUrl !== failedAvatarUrl ? <img src={profile.avatarUrl} alt={`${name} 프로필 사진`} width={64} height={64} onError={() => setFailedAvatarUrl(profile.avatarUrl)} /> : initials}
                 </S.Avatar>
                 <S.AccountCopy>
                   <strong>{name}</strong>
