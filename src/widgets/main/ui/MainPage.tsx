@@ -22,6 +22,14 @@ function RecommendationCategoryIcon({ category = '' }: { category?: string }) {
   </svg>
 }
 
+// 사진을 못 받으면 빈 칸 대신 카테고리 아이콘을 보인다
+function RecommendationPhoto({ imageUrl, category }: { imageUrl?: string; category?: string }) {
+  const [failed, setFailed] = useState(false)
+  return <S.RecommendationImage aria-hidden="true">
+    {imageUrl && !failed ? <img src={imageUrl} alt="" onError={() => setFailed(true)} /> : <RecommendationCategoryIcon category={category} />}
+  </S.RecommendationImage>
+}
+
 export function RecommendationCards({
   city,
   places,
@@ -44,7 +52,7 @@ export function RecommendationCards({
   } else if (recommendations.length) {
     content = recommendations.map((place, index) => (
       <S.Recommendation key={`${place.placeName || '추천 장소'}-${index}`}>
-        <S.RecommendationImage $imageUrl={place.imageUrl} aria-hidden="true">{!place.imageUrl ? <RecommendationCategoryIcon category={place.category} /> : null}</S.RecommendationImage>
+        <RecommendationPhoto imageUrl={place.imageUrl} category={place.category} />
         <span>{place.placeName || '추천 장소'}</span>
         <small>{[place.category, typeof place.rating === 'number' && Number.isFinite(place.rating) ? `평점 ${place.rating.toFixed(1)}` : undefined].filter(Boolean).join(' · ')}</small>
       </S.Recommendation>

@@ -273,7 +273,7 @@ export const Recommendation = styled.article`
   small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.375rem; }
 `
 
-export const RecommendationImage = styled.div<{ $imageUrl?: string }>`
+export const RecommendationImage = styled.div`
   display: grid;
   height: 9.375rem;
   flex: 0 0 9.375rem;
@@ -281,9 +281,8 @@ export const RecommendationImage = styled.div<{ $imageUrl?: string }>`
   border: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
   border-radius: 1rem;
   background-color: ${({ theme }) => theme.colors.background.muted};
-  background-image: ${({ $imageUrl }) => ($imageUrl ? `url(${JSON.stringify($imageUrl)})` : 'none')};
-  background-position: center;
-  background-size: cover;
+  overflow: hidden;
   color: ${({ theme }) => theme.colors.brand.strong};
   font-size: 0.875rem;
+  img { width: 100%; height: 100%; object-fit: cover; }
 `
