@@ -1,7 +1,7 @@
 import type { PlannerListResponseDto } from '@/entities/planner'
 import { formatDateRange } from '@/shared/utils'
 
-import { plannerStatusKey, plannerStatusLabel } from '../model/status'
+import { plannerMatchesTab, plannerStatusKey, plannerStatusLabel } from '../model/status'
 import { PlannerMemberAvatars } from './PlannerHeader'
 import * as S from './PlannerPage.styles'
 
@@ -22,7 +22,9 @@ export function PlannerListStep({
   plannerTab,
   planners,
 }: Props) {
-  const availablePlanners = planners.filter((planner) => plannerStatusKey(planner.status) === plannerTab)
+  const availablePlanners = planners.filter((planner) =>
+    plannerMatchesTab(planner.status, planner.startDate, planner.endDate, plannerTab),
+  )
 
   return (
     <>
@@ -52,7 +54,7 @@ export function PlannerListStep({
               <S.PlanItem key={planner.plannerId ?? index}>
                 <S.PlanRow
                   type="button"
-                  $state={plannerStatusKey(planner.status)}
+                  $state={plannerStatusKey(planner.status, planner.endDate)}
                   onClick={() => onSelectPlanner(planner.plannerId)}
                 >
                   <S.PlanContent>
@@ -60,8 +62,8 @@ export function PlannerListStep({
                       <strong>{title}</strong>
                       <span>{formatDateRange(planner.startDate, planner.endDate)}</span>
                       <S.PlanStatusRow>
-                        <S.PlanStatus $state={plannerStatusKey(planner.status)}>
-                          {plannerStatusLabel(planner.status)}
+                        <S.PlanStatus $state={plannerStatusKey(planner.status, planner.endDate)}>
+                          {plannerStatusLabel(planner.status, planner.endDate)}
                         </S.PlanStatus>
                         <S.PlanParticipation>
                           {planner.joinedMemberCount ?? 0}/{planner.memberCount ?? 0}명 참여
