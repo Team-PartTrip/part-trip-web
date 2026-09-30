@@ -4,7 +4,7 @@ import { Skeleton } from '@/shared/ui/parttrip'
 export const Page = styled.main`
   width: 100%;
   min-width: 0;
-  padding: 2rem;
+  padding: 0;
   box-sizing: border-box;
   color: ${({ theme }) => theme.colors.text.strong};
 
@@ -19,7 +19,7 @@ export const Header = styled.header`
   justify-content: space-between;
   gap: 1rem;
   min-height: 3rem;
-  padding-inline: 1.5rem;
+  padding-inline: 0;
   margin-bottom: 1.5rem;
 `
 
@@ -46,7 +46,7 @@ export const YearTabs = styled.nav`
     background: ${({ theme }) => theme.colors.background.muted};
     color: ${({ theme }) => theme.colors.brand.primary};
     cursor: pointer;
-    font-size: 0.6875rem;
+    font-size: 0.875rem;
     font-weight: 600;
   }
   button.active {
@@ -107,9 +107,9 @@ export const RecordCopy = styled.span`
   min-width: 0;
   flex-direction: column;
   gap: 0.375rem;
-  strong { font-size: 1.0625rem; line-height: 1.25rem; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.8125rem; line-height: 1rem; }
-  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.75rem; line-height: 0.9375rem; }
+  strong { font-size: 1.0625rem; line-height: 1.375rem; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.375rem; }
+  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.375rem; }
 `
 
 export const RecordStatus = styled.span`
@@ -124,7 +124,7 @@ export const RecordStatus = styled.span`
   padding: 0.625rem;
   background: ${({ theme }) => theme.colors.brand.primary};
   color: ${({ theme }) => theme.colors.text.inverse};
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 600;
 `
 

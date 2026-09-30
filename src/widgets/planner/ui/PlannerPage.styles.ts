@@ -5,7 +5,7 @@ export const Page = styled.main<{ $wide?: boolean }>`
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  padding: ${({ $wide }) => ($wide ? '0' : '2rem')};
+  padding: 0;
   color: ${({ theme }) => theme.colors.text.strong};
 
   @media (max-width: 47.9375rem) {
@@ -37,7 +37,7 @@ export const Header = styled.header<{ $hasSubtitle?: boolean; $wide?: boolean }>
   align-items: flex-start;
   justify-content: space-between;
   gap: 1.25rem;
-  padding-inline: 1.5rem;
+  padding-inline: 0;
   margin-top: ${({ $wide }) => ($wide ? '1.5rem' : '0')};
   margin-bottom: 1.5rem;
 
@@ -60,8 +60,8 @@ export const Title = styled.h1`
 export const Subtitle = styled.p`
   margin: 0.5rem 0 0;
   color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 0.875rem;
-  line-height: 1.0625rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
 `
 
 export const Error = styled.p`
@@ -174,7 +174,7 @@ export const PlanDetails = styled.span`
   gap: 0.5rem;
 
   strong { font-size: 1.1875rem; line-height: 1.375rem; }
-  > span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.8125rem; line-height: 1rem; }
+  > span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.375rem; }
 `
 
 export const PlanStatus = styled.span<{ $state: 'active' | 'planned' | 'completed' }>`
@@ -189,7 +189,7 @@ export const PlanStatus = styled.span<{ $state: 'active' | 'planned' | 'complete
   padding: 0.5rem;
   background: ${({ theme }) => theme.colors.background.subtle};
   color: ${({ $state, theme }) => $state === 'completed' ? theme.colors.brand.successStrong : $state === 'active' ? theme.colors.brand.accent : theme.colors.brand.primary};
-  font-size: 0.6875rem;
+  font-size: 0.875rem;
   font-weight: 600;
   white-space: nowrap;
 `
@@ -202,8 +202,8 @@ export const PlanStatusRow = styled.span`
 
 export const PlanParticipation = styled.span`
   color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 0.75rem;
-  line-height: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.375rem;
   white-space: nowrap;
 `
 
@@ -263,7 +263,7 @@ export const CountRow = styled.div`
   padding: 1.25rem;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
-  label { color: ${({ theme }) => theme.colors.text.strong}; font-size: 0.9375rem; font-weight: 600; }
+  label { color: ${({ theme }) => theme.colors.text.strong}; font-size: 1rem; font-weight: 600; }
   > div { min-height: 2.75rem; gap: 0.875rem; border: 0; padding: 0; background: transparent; }
   > div button { width: 2.75rem; height: 3rem; border: 0.0625rem solid ${({ theme }) => theme.colors.brand.primary}; border-radius: 0.75rem; background: ${({ theme }) => theme.colors.background.default}; font-size: 0.875rem; }
 `
@@ -297,8 +297,8 @@ export const GroupActions = styled.div`
 export const SectionTitle = styled.h2`
   margin: 0;
   color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 0.9375rem;
-  line-height: 1.25rem;
+  font-size: 1rem;
+  line-height: 1.375rem;
 `
 
 export const StepField = styled.div`
@@ -306,7 +306,7 @@ export const StepField = styled.div`
   flex-direction: column;
   gap: 0.375rem;
 
-  > label { color: ${({ theme }) => theme.colors.text.strong}; font-size: 0.75rem; font-weight: 600; }
+  > label { color: ${({ theme }) => theme.colors.text.strong}; font-size: 0.875rem; font-weight: 600; }
   input[readonly] { color: ${({ theme }) => theme.colors.text.muted}; }
 `
 
@@ -350,7 +350,7 @@ export const Avatar = styled.span`
   border-radius: 50%;
   background: ${({ theme }) => theme.colors.brand.primary};
   color: ${({ theme }) => theme.colors.text.inverse};
-  font-size: 0.6875rem;
+  font-size: 0.875rem;
   font-weight: 600;
 `
 
@@ -359,7 +359,7 @@ export const PlanMemberAvatars = styled.div`
   align-items: center;
   gap: 0.25rem;
 
-  ${Avatar} { width: 2.125rem; height: 2.125rem; flex-basis: 2.125rem; font-size: 0.6875rem; }
+  ${Avatar} { width: 2.125rem; height: 2.125rem; flex-basis: 2.125rem; font-size: 0.875rem; }
 `
 
 export const PlanMemberOverflow = styled.span`
@@ -371,7 +371,7 @@ export const PlanMemberOverflow = styled.span`
   border-radius: 50%;
   background: ${({ theme }) => theme.colors.background.muted};
   color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 0.6875rem;
+  font-size: 0.875rem;
   font-weight: 600;
 `
 
@@ -381,13 +381,13 @@ export const MemberDetails = styled.div`
   flex: 1;
   flex-direction: column;
   gap: 0.125rem;
-  strong { font-size: 0.9375rem; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.75rem; }
+  strong { font-size: 1rem; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; }
 `
 
 export const MemberState = styled.span`
   color: ${({ theme }) => theme.colors.brand.primary};
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   white-space: nowrap;
 `
 
@@ -401,7 +401,7 @@ export const InvitePanel = styled.section`
   padding: 1.5rem;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
-  p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.8125rem; }
+  p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; }
 `
 
 export const InvitationPanel = styled(InvitePanel)`
@@ -420,8 +420,8 @@ export const InvitationRow = styled.div`
   padding: 0.5rem 0;
 
   &:last-child { border-bottom: 0; }
-  strong { flex: 1; color: ${({ theme }) => theme.colors.text.strong}; font-size: 0.8125rem; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.6875rem; }
+  strong { flex: 1; color: ${({ theme }) => theme.colors.text.strong}; font-size: 0.875rem; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; }
 `
 
 export const SmallActionButton = styled.button`
@@ -432,7 +432,7 @@ export const SmallActionButton = styled.button`
   background: ${({ theme }) => theme.colors.background.default};
   color: ${({ theme }) => theme.colors.brand.strong};
   cursor: pointer;
-  font-size: 0.6875rem;
+  font-size: 0.875rem;
   font-weight: 600;
 
   &:disabled { cursor: not-allowed; opacity: .5; }
@@ -454,8 +454,8 @@ export const Notice = styled.p`
   padding: 0.75rem;
   background: ${({ theme }) => theme.colors.background.muted};
   color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 0.75rem;
-  line-height: 1.125rem;
+  font-size: 0.875rem;
+  line-height: 1.375rem;
 `
 
 export const Empty = styled.div`
@@ -464,6 +464,6 @@ export const Empty = styled.div`
   place-items: center;
   padding: 1.5rem;
   color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   text-align: center;
 `

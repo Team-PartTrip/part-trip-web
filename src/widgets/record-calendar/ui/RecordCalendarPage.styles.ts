@@ -20,7 +20,7 @@ export const Title = styled.h1`
 export const Subtitle = styled.p`
   margin: 0.375rem 0 0;
   color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 0.9375rem;
+  font-size: 1rem;
   line-height: 1.375rem;
 `
 
@@ -59,7 +59,7 @@ export const MonthBar = styled.header`
   justify-content: space-between;
   margin-bottom: 1rem;
   h2 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 1.125rem; }
-  p { margin: 0.25rem 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.6875rem; }
+  p { margin: 0.25rem 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; }
   span { display: flex; gap: 0.25rem; }
   button { width: 1.75rem; height: 1.75rem; border: 0; background: transparent; color: ${({ theme }) => theme.colors.brand.strong}; cursor: pointer; font-size: 1.125rem; }
 `
@@ -69,7 +69,7 @@ export const Weekdays = styled.div`
   grid-template-columns: repeat(7, 1fr);
   margin-bottom: 0.25rem;
   color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 0.6875rem;
+  font-size: 0.875rem;
   text-align: center;
   span:first-child { color: ${({ theme }) => theme.colors.status.error}; }
 `
@@ -91,7 +91,7 @@ export const Cell = styled.button<{ $empty: boolean; $inTrip: boolean; $selected
   color: ${({ theme }) => theme.colors.text.strong};
   cursor: ${({ $empty }) => ($empty ? 'default' : 'pointer')};
   font: inherit;
-  font-size: 0.6875rem;
+  font-size: 0.875rem;
   text-align: left;
   box-shadow: ${({ $selected, theme }) => ($selected ? `inset 0 0 0 0.125rem ${theme.colors.brand.primary}` : 'none')};
   &:disabled { cursor: default; }
@@ -110,7 +110,7 @@ export const EventLabel = styled.span`
   padding: 0.25rem 0.125rem;
   background: ${({ theme }) => theme.colors.brand.primary};
   color: ${({ theme }) => theme.colors.text.inverse};
-  font-size: 0.5625rem;
+  font-size: 0.875rem;
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -119,7 +119,7 @@ export const EventLabel = styled.span`
 export const Note = styled.p`
   margin: 1rem 0 0;
   color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   text-align: center;
 `
 
@@ -132,8 +132,8 @@ export const FestivalList = styled.section`
   padding: 1.5rem;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
-  h2 { margin: 0 0 1rem; color: ${({ theme }) => theme.colors.text.strong}; font-size: 0.9375rem; }
-  > button { margin-top: 1.5rem; border: 0; background: transparent; color: ${({ theme }) => theme.colors.brand.primary}; cursor: pointer; font-size: 0.75rem; font-weight: 600; }
+  h2 { margin: 0 0 1rem; color: ${({ theme }) => theme.colors.text.strong}; font-size: 1rem; }
+  > button { margin-top: 1.5rem; border: 0; background: transparent; color: ${({ theme }) => theme.colors.brand.primary}; cursor: pointer; font-size: 0.875rem; font-weight: 600; }
 `
 
 export const FilterButton = styled.button`
@@ -142,7 +142,7 @@ export const FilterButton = styled.button`
   background: transparent;
   color: ${({ theme }) => theme.colors.brand.primary};
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 600;
 `
 
@@ -171,7 +171,7 @@ export const FestivalRow = styled.article`
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
   div { display: flex; min-width: 0; flex-direction: column; gap: 0.25rem; }
-  strong { overflow: hidden; color: ${({ theme }) => theme.colors.text.strong}; font-size: 0.8125rem; text-overflow: ellipsis; white-space: nowrap; }
-  span { overflow: hidden; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.6875rem; text-overflow: ellipsis; white-space: nowrap; }
-  small { flex: 0 0 auto; border-radius: 62.4375rem; padding: 0.25rem 0.5rem; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.brand.primary}; font-size: 0.625rem; }
+  strong { overflow: hidden; color: ${({ theme }) => theme.colors.text.strong}; font-size: 0.875rem; text-overflow: ellipsis; white-space: nowrap; }
+  span { overflow: hidden; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; text-overflow: ellipsis; white-space: nowrap; }
+  small { flex: 0 0 auto; border-radius: 62.4375rem; padding: 0.25rem 0.5rem; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.brand.primary}; font-size: 0.875rem; }
 `

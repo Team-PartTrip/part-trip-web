@@ -101,6 +101,11 @@ export const NotificationLink = styled(Link)`
 `
 
 export const Main = styled.main<{ $fillHeight?: boolean }>`
+  width: 100%;
+  max-width: 65rem;
+  margin-inline: auto;
+  font-size: 1rem;
+  line-height: 1.5;
   min-width: 0;
   flex: ${({ $fillHeight }) => ($fillHeight ? '0 0 auto' : '1')};
   display: ${({ $fillHeight }) => ($fillHeight ? 'flex' : 'block')};

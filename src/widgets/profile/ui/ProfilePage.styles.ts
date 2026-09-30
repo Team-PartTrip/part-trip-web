@@ -140,7 +140,7 @@ export const AccountCopy = styled.div`
 
   span, small {
     color: ${({ theme }) => theme.colors.text.muted};
-    font-size: 0.9375rem;
+    font-size: 1rem;
     line-height: 1.375rem;
   }
 
@@ -228,7 +228,7 @@ export const SettingsRow = styled(Link)`
     color: ${({ theme }) => theme.colors.brand.strong};
     font-size: 0.875rem;
     font-weight: 600;
-    line-height: 1.25rem;
+    line-height: 1.375rem;
     text-align: right;
   }
 `

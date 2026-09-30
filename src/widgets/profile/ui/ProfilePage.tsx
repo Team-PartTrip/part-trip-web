@@ -68,7 +68,6 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
                 <S.ProfileActions>
                   <PartTripButton as={Link} to={paths.profileEdit} $variant="secondary">프로필 수정</PartTripButton>
                   <S.LogoutButton type="button" onClick={() => setIsLogoutDialogOpen(true)}>로그아웃</S.LogoutButton>
-                  <S.LogoutButton type="button" disabled={deleteMutation.isPending} onClick={() => void handleDeleteAccount()}>{deleteMutation.isPending ? '탈퇴 중' : '회원 탈퇴'}</S.LogoutButton>
                 </S.ProfileActions>
               </S.AccountHeader>
             </S.AccountPanel>
@@ -89,7 +88,7 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
                 <h2 id="app-settings-title">앱 설정</h2>
                 <S.SettingsList>
                   <S.SettingsRow to={paths.notificationSettings}>
-                    <span><strong>알림 설정</strong><small>여행 알림과 읽음 상태를 관리해요</small></span><b>관리</b>
+                    <span><strong>알림 안내</strong><small>받을 수 있는 여행 알림 종류를 확인해요</small></span><b>확인</b>
                   </S.SettingsRow>
                   <S.SettingsRow to={paths.profileAccessibility}>
                     <span><strong>접근성 설정</strong><small>휴대폰 글자 크기 · 고대비 설정</small></span><b>확인</b>
@@ -100,6 +99,7 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
                 </S.SettingsList>
               </S.SettingsGroup>
             </S.SettingsNav>
+            <S.ErrorActions><S.LogoutButton type="button" disabled={deleteMutation.isPending} onClick={() => void handleDeleteAccount()}>{deleteMutation.isPending ? '탈퇴 중' : '회원 탈퇴'}</S.LogoutButton></S.ErrorActions>
             {deleteError ? <S.DeletionError role="alert">계정 삭제에 실패했습니다. {deleteError}</S.DeletionError> : null}
           </>
         ) : null}

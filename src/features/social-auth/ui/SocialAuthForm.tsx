@@ -34,7 +34,7 @@ export function SocialAuthForm({ redirect }: Props) {
         <S.BrandIcon src={dandiAppLogoUrl} alt="단디 로고" width={480} height={480} />
         <S.Title>단디 시작하기</S.Title>
         <S.Subtitle>부모님 여행을 가족이 함께 챙기는 앱</S.Subtitle>
-        <S.Subtitle>카카오톡 또는 Google 계정으로 로그인하세요. 처음 이용하는 계정은 자동으로 가입돼요.</S.Subtitle>
+        <S.Subtitle>카카오톡 또는 Google로 로그인하세요.<br />첫 로그인 시 자동 가입돼요.</S.Subtitle>
       </S.Header>
       <S.Body>
         <S.Form aria-label="로그인" onSubmit={(event) => event.preventDefault()}>
