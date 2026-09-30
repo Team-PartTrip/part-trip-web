@@ -29,12 +29,9 @@ test('현재 달력 주는 월요일부터 일요일까지 계산한다', () => 
   assert.equal(isInCurrentCalendarWeek('2026-09-07T12:00:00', monday), false)
 })
 
-test('촬영 시각을 여행 국가 시간대로 표시한다', () => {
-  assert.equal(formatTravelDateTime('2026-08-31T15:00:00', 'JP'), '2026. 9. 1. 오전 12:00')
-  assert.equal(formatTravelDateTime('2026-08-31T15:00:00', 'US', undefined, 'Los Angeles'), '2026. 8. 31. 오전 8:00')
-  assert.equal(formatTravelDateTime('2026-08-31T15:00:00', 'US', '미국'), '2026. 8. 31. 오후 3:00')
-  assert.equal(formatTravelDateTime('2026-08-31T15:00:00', 'XX'), '2026. 8. 31. 오후 3:00')
-  assert.equal(formatTravelDateTime('2026-08-31T15:00:00', 'NZ', '뉴질랜드', 'Auckland'), '2026. 9. 1. 오전 3:00')
+test('촬영 시각은 국내 시간대 Asia/Seoul로 표시한다', () => {
+  assert.equal(formatTravelDateTime('2026-08-31T15:00:00'), '2026. 9. 1. 오전 12:00')
+  assert.equal(formatTravelDateTime('잘못된 시각'), '잘못된 시각')
 })
 
 test('월 달력은 일요일 기준 빈칸과 해당 월의 날짜만 포함한다', () => {

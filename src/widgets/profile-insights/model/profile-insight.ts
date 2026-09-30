@@ -86,7 +86,7 @@ type ProfileInsightModelProps = {
 
 const copy: Record<ProfileInsightKind, { title: string; subtitle: string }> = {
   map: { title: '내 국내 여행 지도', subtitle: '여행 카드 사진 위치로 방문한 시·군·구를 표시합니다.' },
-  countries: { title: '국가별 여행 기록', subtitle: '나라를 선택하면 해당 국가의 여행 기록을 모아봅니다.' },
+  countries: { title: '지역별 여행 기록', subtitle: '지역을 선택하면 해당 지역의 여행 기록을 모아봅니다.' },
   achievements: { title: '올해의 여행 돌아보기', subtitle: '올해 다녀온 지역과 여행을 한눈에 모아봐요.' },
 }
 

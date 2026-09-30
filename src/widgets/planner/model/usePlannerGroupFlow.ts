@@ -37,18 +37,10 @@ export function usePlannerGroupFlow({ canManagePlanner, mutations, navigate, sta
     setSavedGroupSettings,
   } = state
   const {
-    acceptPlannerInvitationMutation,
-    cancelPlannerInvitationMutation,
     createPlannerMutation,
     joinPlannerMutation,
-    rejectPlannerInvitationMutation,
     removePlannerMemberMutation,
   } = mutations
-  const isManagingMembers =
-    acceptPlannerInvitationMutation.isPending ||
-    rejectPlannerInvitationMutation.isPending ||
-    cancelPlannerInvitationMutation.isPending ||
-    removePlannerMemberMutation.isPending
 
   const saveGroupSettings = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -101,49 +93,6 @@ export function usePlannerGroupFlow({ canManagePlanner, mutations, navigate, sta
     void handleJoinPlanner()
   }, [autoJoinInviteCodeRef, handleJoinPlanner, inviteCodeFromUrlRef, step])
 
-  const handleAcceptPlannerInvitation = async (invitationId?: number) => {
-    if (!isPositiveSafeInteger(invitationId)) {
-      setErrorMessage('초대 정보를 확인할 수 없습니다.')
-      return
-    }
-    try {
-      setErrorMessage('')
-      const invitation = await acceptPlannerInvitationMutation.mutateAsync(invitationId)
-      if (isPositiveSafeInteger(invitation.plannerId)) {
-        activatePlanner(invitation.plannerId)
-        navigate({ to: paths.plannerProgress })
-      }
-    } catch {
-      setErrorMessage('초대를 수락하지 못했습니다.')
-    }
-  }
-
-  const handleRejectPlannerInvitation = async (invitationId?: number) => {
-    if (!isPositiveSafeInteger(invitationId)) {
-      setErrorMessage('초대 정보를 확인할 수 없습니다.')
-      return
-    }
-    try {
-      setErrorMessage('')
-      await rejectPlannerInvitationMutation.mutateAsync(invitationId)
-    } catch {
-      setErrorMessage('초대를 거절하지 못했습니다.')
-    }
-  }
-
-  const handleCancelPlannerInvitation = async (invitationId?: number) => {
-    if (!canManagePlanner || !isPositiveSafeInteger(activePlannerId) || !isPositiveSafeInteger(invitationId)) {
-      setErrorMessage('취소할 초대 정보를 확인할 수 없습니다.')
-      return
-    }
-    try {
-      setErrorMessage('')
-      await cancelPlannerInvitationMutation.mutateAsync({ invitationId, plannerId: activePlannerId })
-    } catch {
-      setErrorMessage('초대를 취소하지 못했습니다.')
-    }
-  }
-
   const handleRemovePlannerMember = async (memberUserId?: string) => {
     if (!canManagePlanner || !isPositiveSafeInteger(activePlannerId) || !memberUserId?.trim()) {
       setErrorMessage('내보낼 멤버 정보를 확인할 수 없습니다.')
@@ -158,14 +107,11 @@ export function usePlannerGroupFlow({ canManagePlanner, mutations, navigate, sta
   }
 
   return {
-    handleAcceptPlannerInvitation,
-    handleCancelPlannerInvitation,
     handleJoinPlanner,
-    handleRejectPlannerInvitation,
     handleRemovePlannerMember,
     inviteCode,
     isSolo,
-    isManagingMembers,
+    isManagingMembers: removePlannerMemberMutation.isPending,
     joinPlannerPending: joinPlannerMutation.isPending,
     memberCount,
     saveGroupSettings,

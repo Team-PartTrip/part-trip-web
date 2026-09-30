@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useUserProfileQuery } from '@/entities/user'
 import { AppShell } from '@/widgets/app-shell'
 
-import { normalizeStatus } from '../model/status'
 import { usePlannerFlow } from '../model/usePlannerFlow'
 import type { PlannerStep } from '../model/types'
 import { PlannerAiFlow } from './PlannerAiFlow'
@@ -48,14 +47,8 @@ function PlannerFlowPage({ step }: { step: PlannerStep }) {
   const { errorMessage, hasError, isLoading, isSaving, plannerDetail } = common
   const {
     canManagePlanner,
-    handleAcceptPlannerInvitation,
-    handleCancelPlannerInvitation,
     handleJoinPlanner,
-    handleRejectPlannerInvitation,
     handleRemovePlannerMember,
-    invitationError,
-    invitationLoading,
-    invitations,
     inviteCode,
     isManagingMembers,
     isSolo,
@@ -72,9 +65,6 @@ function PlannerFlowPage({ step }: { step: PlannerStep }) {
   const currentUserInitial = currentUserName.slice(0, 2).toUpperCase() || 'MS'
   const otherMembers = members.filter((member) =>
     profile?.id ? member.userId !== profile.id : member.nickName !== currentUserName,
-  )
-  const pendingInvitations = invitations.filter(
-    (invitation) => !['ACCEPTED', 'REJECTED', 'CANCELED', 'CANCELLED'].includes(normalizeStatus(invitation.status)),
   )
 
   return (
@@ -123,17 +113,11 @@ function PlannerFlowPage({ step }: { step: PlannerStep }) {
                 setMemberCount={setMemberCount}
               />
             ) : null}
-            {step === 'group' && (plannerDetail || invitations.length > 0) ? (
+            {step === 'group' && plannerDetail ? (
               <PlannerGroupManagementPanel
-                invitationLoading={invitationLoading}
-                invitationError={invitationError}
-                pendingInvitations={pendingInvitations}
                 otherMembers={otherMembers}
                 isManagingMembers={isManagingMembers}
                 canManagePlanner={canManagePlanner}
-                onAcceptInvitation={handleAcceptPlannerInvitation}
-                onRejectInvitation={handleRejectPlannerInvitation}
-                onCancelInvitation={handleCancelPlannerInvitation}
                 onRemoveMember={handleRemovePlannerMember}
               />
             ) : null}

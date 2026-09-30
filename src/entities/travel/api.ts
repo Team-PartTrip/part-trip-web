@@ -49,31 +49,11 @@ export type FestivalResponseDto = {
   imageUrl?: string
 }
 
-export type CountryInfoResponseDto = {
-  countryInfoId?: number
-  countryName?: string
-  cityName?: string
-  imageUrl?: string
-  summary?: string
-}
-
-export type CitySearchResponseDto = {
-  cityName?: string
-  countryName?: string
-  regionName?: string
-}
-
 export type PlaceSearchResponseDto = {
   name: string
   address: string
   latitude: number
   longitude: number
-}
-
-export type PopularCityResponseDto = {
-  cityName?: string
-  countryName?: string
-  planCount?: number
 }
 
 const MAIN_API_PATHS = {
@@ -82,9 +62,6 @@ const MAIN_API_PATHS = {
   tourPlaceMore: '/main/tour-place/more',
   tourPlaceAccessibility: (tourPlaceId: number) => `/main/tour-place/${tourPlaceId}/accessibility`,
   festivals: '/main/festivals',
-  countries: '/main/countries',
-  cities: '/main/cities',
-  popularCities: '/main/popular-cities',
 } as const
 
 function isTripPhase(value: unknown): value is TripPhase {
@@ -147,27 +124,7 @@ export async function getFestivals(
   return data
 }
 
-export async function getCountries(keyword?: string): Promise<CountryInfoResponseDto[]> {
-  const normalizedKeyword = keyword?.trim()
-  const { data } = await apiClient.get<CountryInfoResponseDto[]>(MAIN_API_PATHS.countries, {
-    params: normalizedKeyword ? { keyword: normalizedKeyword } : undefined,
-  })
-  return data
-}
-
-export async function searchCities(countryName: string, keyword: string): Promise<CitySearchResponseDto[]> {
-  const { data } = await apiClient.get<CitySearchResponseDto[]>(MAIN_API_PATHS.cities, {
-    params: { countryName, keyword: keyword.trim() },
-  })
-  return data
-}
-
 export async function searchPlaces(keyword: string): Promise<PlaceSearchResponseDto[]> {
   const { data } = await apiClient.get<PlaceSearchResponseDto[]>('/places/search', { params: { q: keyword.trim() } })
-  return data
-}
-
-export async function getPopularCities(limit: number): Promise<PopularCityResponseDto[]> {
-  const { data } = await apiClient.get<PopularCityResponseDto[]>(MAIN_API_PATHS.popularCities, { params: { limit } })
   return data
 }

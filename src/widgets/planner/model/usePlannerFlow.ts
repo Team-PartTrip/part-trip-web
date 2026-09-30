@@ -55,9 +55,6 @@ export function usePlannerFlow(step: PlannerStep) {
     group: {
       ...group,
       canManagePlanner,
-      invitationError: data.invitationError,
-      invitationLoading: data.invitationLoading,
-      invitations: data.invitations,
       members: data.members,
     },
     planner: {

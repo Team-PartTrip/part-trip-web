@@ -1,11 +1,8 @@
 import { infiniteQueryOptions, queryOptions, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import {
-  getCountries,
   getDday,
   getFestivals,
   getMoreTourPlaces,
-  getPopularCities,
-  searchCities,
   searchPlaces,
   getTourPlace,
   getTourPlaceAccessibility,
@@ -13,14 +10,6 @@ import {
   type TourPlaceResponseDto,
 } from './api'
 import { travelQueryKeys } from './query-keys'
-
-const countriesQueryOptions = (keyword = '', enabled = true) =>
-  queryOptions({
-    queryKey: travelQueryKeys.countries(keyword),
-    queryFn: () => getCountries(keyword),
-    enabled,
-    placeholderData: (previousData) => previousData,
-  })
 
 const ddayQueryOptions = (enabled = true) =>
   queryOptions({
@@ -36,32 +25,12 @@ const festivalsQueryOptions = (countryName: string, year?: number, month?: numbe
     enabled: Boolean(countryName),
   })
 
-export function useCountriesQuery(keyword = '', enabled = true) {
-  return useQuery(countriesQueryOptions(keyword, enabled))
-}
-
-export function useCitySearchQuery(countryName: string, keyword: string, enabled = true) {
-  return useQuery(queryOptions({
-    queryKey: travelQueryKeys.cities(countryName, keyword),
-    queryFn: () => searchCities(countryName, keyword),
-    enabled: enabled && Boolean(countryName && keyword.trim()),
-  }))
-}
-
 export function usePlaceSearchQuery(keyword: string, enabled = true) {
   return useQuery(queryOptions({
     queryKey: travelQueryKeys.places(keyword),
     queryFn: () => searchPlaces(keyword),
     enabled: enabled && Boolean(keyword.trim()),
     retry: false,
-  }))
-}
-
-export function usePopularCitiesQuery(limit: number, enabled = true) {
-  return useQuery(queryOptions({
-    queryKey: travelQueryKeys.popularCities(limit),
-    queryFn: () => getPopularCities(limit),
-    enabled,
   }))
 }
 

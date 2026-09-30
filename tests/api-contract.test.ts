@@ -52,7 +52,7 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
   assert.match(planner, /export async function confirmPlanner\(/)
   assert.match(planner, /export type GeneratePlannerRequestDto = \{[\s\S]*?cityName: string[\s\S]*?startDate: string[\s\S]*?endDate: string[\s\S]*?blocks: PlannerBlockDto\[\]/)
   assert.match(plannerFlow, /hasPlannerManagementRole\(data\.plannerDetail\?\.role\)/)
-  assert.match(plannerAiFlow, /if \(!canManageCurrentPlanner \|\| !isPositiveSafeInteger\(plannerId\) \|\| !scheduleQuery\.data\) return/)
+  assert.match(plannerAiFlow, /if\s*\(\s*!canManageCurrentPlanner\s*\|\|\s*!isPositiveSafeInteger\(plannerId\)\s*\|\|\s*!scheduleQuery\.data\s*\)\s*return/)
   assert.match(plannerAiFlow, /!isConfirmed && canManageCurrentPlanner/)
   assert.match(plannerAiFlow, /!isConfirmed && !canManageCurrentPlanner/)
   assert.match(plannerPage, /PlannerAiFlow step="destination"/)

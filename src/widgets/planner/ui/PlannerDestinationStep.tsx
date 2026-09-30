@@ -1,11 +1,11 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useMyPlannersQuery } from '@/entities/planner'
-import { useCitySearchQuery, usePopularCitiesQuery } from '@/entities/travel'
+import { DOMESTIC_CITIES, DOMESTIC_CITY_SUGGESTIONS, getDomesticCities } from '@/entities/region-map/domestic-cities'
+import type { DomesticCityOption } from '@/entities/region-map/domestic-cities'
 import { paths } from '@/shared/config'
 import { Button, Input } from '@/shared/ui/parttrip'
 import { formatCalendarDate, formatDateRange } from '@/shared/utils'
-import { getDomesticCities, getDomesticPopularCityNames } from '../model/domestic-cities'
 import type { PlannerCreationDraft } from '../model/planner-creation'
 import { writePlannerCreationDraft } from '../model/planner-creation'
 import { isValidPlannerDateRange, overlapsExistingTrip } from '../model/planner-date'
@@ -22,19 +22,16 @@ export function PlannerDestinationStep({ initialDraft }: { initialDraft?: Planne
   const navigate = useNavigate()
   const plannersQuery = useMyPlannersQuery()
   const [cityName, setCityName] = useState(initialDraft?.cityName ?? '')
+  const [selectedCity, setSelectedCity] = useState<DomesticCityOption | undefined>(() => {
+    const matches = DOMESTIC_CITIES.filter((city) => city.cityName === initialDraft?.cityName)
+    return matches.find((city) => city.regionCode === initialDraft?.regionCode) ?? (matches.length === 1 ? matches[0] : undefined)
+  })
   const [startDate, setStartDate] = useState(initialDraft?.startDate ?? '')
   const [endDate, setEndDate] = useState(initialDraft?.endDate ?? '')
   const [message, setMessage] = useState('')
   const cityKeyword = cityName.trim()
   const isSearchingCities = Boolean(cityKeyword)
-  const cityQuery = useCitySearchQuery('대한민국', cityKeyword, isSearchingCities)
-  const popularCitiesQuery = usePopularCitiesQuery(100)
-  const matchingDomesticCities = getDomesticCities(cityQuery.data ?? [])
-  const domesticCities: Array<{ cityName: string; regionName?: string }> = isSearchingCities
-    ? matchingDomesticCities.map(({ cityName, regionName }) => ({ cityName, regionName }))
-    : getDomesticPopularCityNames(popularCitiesQuery.data ?? []).map((cityName) => ({ cityName }))
-  const cityListIsFetching = isSearchingCities ? cityQuery.isFetching : popularCitiesQuery.isFetching
-  const cityListIsError = isSearchingCities ? cityQuery.isError : popularCitiesQuery.isError
+  const domesticCities = isSearchingCities ? getDomesticCities(cityKeyword) : DOMESTIC_CITY_SUGGESTIONS
   const now = new Date()
   const today = formatCalendarDate(now.getFullYear(), now.getMonth(), now.getDate())
   const maxEndDate = maxEndDateFor(startDate)
@@ -54,10 +51,7 @@ export function PlannerDestinationStep({ initialDraft }: { initialDraft?: Planne
     if (plannersQuery.isLoading) return
     if (plannersQuery.isError) return setMessage('기존 여행 날짜를 확인하지 못했어요. 다시 불러온 뒤 계속해주세요.')
     if (!cityKeyword) return setMessage('국내 여행 도시를 선택해주세요.')
-    if (cityQuery.isLoading || cityQuery.isFetching) return setMessage('국내 도시 목록을 불러오는 중이에요. 잠시 후 다시 시도해주세요.')
-    if (cityQuery.isError) return setMessage('국내 도시 목록을 불러오지 못했어요. 다시 시도해주세요.')
-    const selectedCity = matchingDomesticCities.find((city) => city.cityName === cityKeyword)
-    if (!selectedCity) return setMessage('검색 결과에서 지역 정보가 있는 대한민국 도시를 선택해주세요.')
+    if (!selectedCity || selectedCity.cityName !== cityKeyword) return setMessage('검색 결과에서 국내 도시를 선택해주세요.')
     if (startDate < today || !isValidPlannerDateRange(startDate, endDate)) {
       return setMessage('여행 날짜를 확인해주세요. 과거 날짜는 선택할 수 없고 최대 14일까지 계획할 수 있어요.')
     }
@@ -72,17 +66,18 @@ export function PlannerDestinationStep({ initialDraft }: { initialDraft?: Planne
       <S.Card>
         <S.Form onSubmit={goToCriteria}>
           <S.Field>
-            <label htmlFor="planner-city-name">여행 도시 · 대한민국</label>
+            <label htmlFor="planner-city-name">여행 도시</label>
             <Input id="planner-city-name" autoComplete="off" maxLength={50}
-              value={cityName} onChange={(event) => setCityName(event.target.value)} placeholder="국내 도시를 입력하세요" />
-            <S.CityList aria-label={isSearchingCities ? '대한민국 도시 검색 결과' : '인기 국내 여행지'}>
-              <strong>{isSearchingCities ? '검색 결과' : '인기 여행지'}</strong>
-              {cityListIsFetching ? <p role="status">{isSearchingCities ? '국내 도시를 찾고 있어요.' : '인기 여행지를 불러오고 있어요.'}</p> : null}
-              {cityListIsError ? <S.Error role="alert">{isSearchingCities ? '국내 도시 목록을 불러오지 못했어요.' : '인기 여행지를 불러오지 못했어요.'}</S.Error> : null}
-              {!cityListIsFetching && !cityListIsError && !domesticCities.length ? <small>{isSearchingCities ? '일치하는 국내 도시가 없습니다. 국내 여행은 대한민국 도시만 선택할 수 있어요.' : '인기 여행지가 아직 없어요. 도시 이름을 검색해보세요.'}</small> : null}
-              {!cityListIsFetching && domesticCities.map((city) => <S.City key={city.cityName} type="button" $active={cityKeyword === city.cityName} aria-pressed={cityKeyword === city.cityName} onClick={() => setCityName(city.cityName)}>
-                <strong>{city.cityName}</strong><span>{city.regionName || '대한민국'}</span>
-              </S.City>)}
+              value={cityName} onChange={(event) => { setCityName(event.target.value); setSelectedCity(undefined) }} placeholder="국내 도시를 입력하세요" />
+            <S.CityList aria-label={isSearchingCities ? '국내 도시 검색 결과' : '주요 국내 여행지'}>
+              <strong>{isSearchingCities ? '국내 도시 검색 결과' : '주요 국내 여행지'}</strong>
+              {!domesticCities.length ? <small>일치하는 국내 도시가 없어요.</small> : null}
+              {domesticCities.map((city) => {
+                const isSelected = selectedCity?.cityName === city.cityName && selectedCity?.regionCode === city.regionCode
+                return <S.City key={`${city.cityName}-${city.regionCode}`} type="button" $active={isSelected} aria-pressed={isSelected} onClick={() => { setCityName(city.cityName); setSelectedCity(city) }}>
+                  <strong>{city.cityName}</strong><span>{city.regionName}</span>
+                </S.City>
+              })}
             </S.CityList>
           </S.Field>
           <S.Field>

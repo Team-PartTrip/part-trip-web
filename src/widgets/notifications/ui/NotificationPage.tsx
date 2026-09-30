@@ -8,11 +8,12 @@ import * as S from './NotificationPage.styles'
 export function NotificationPage() { return <NotificationFlow mode="list" /> }
 export function NotificationDetailPage() { return <NotificationFlow mode="detail" /> }
 export function NotificationSettingsPage() {
-  return <AppShell><S.Page><S.Header><div><S.Title>알림 설정</S.Title><S.Subtitle>여행에 필요한 소식을 앱에서 확인할 수 있어요.</S.Subtitle></div></S.Header><S.SettingsCard>
-    <S.SettingRow><div><strong>여행 하루 전</strong><span>여행 시작을 미리 알려드려요.</span></div></S.SettingRow>
+  return <AppShell><S.Page><S.Header><div><S.Title>알림 안내</S.Title><S.Subtitle>알림을 켜거나 끄는 기능은 아직 제공하지 않아요.</S.Subtitle></div></S.Header><S.SettingsCard>
+    <S.SettingRow><div><strong>그룹 초대 수락</strong><span>여행 그룹 참여가 확인되면 알려드려요.</span></div></S.SettingRow>
+    <S.SettingRow><div><strong>여행카드 생성</strong><span>여행 기록 카드가 만들어지면 알려드려요.</span></div></S.SettingRow>
+    <S.SettingRow><div><strong>새 지역 방문</strong><span>새로운 지역 방문 기록이 생기면 알려드려요.</span></div></S.SettingRow>
+    <S.SettingRow><div><strong>여행 하루 전</strong><span>여행 시작 하루 전에 알려드려요.</span></div></S.SettingRow>
     <S.SettingRow><div><strong>오늘 일정</strong><span>오늘의 여행 일정을 알려드려요.</span></div></S.SettingRow>
-    <S.SettingRow><div><strong>가족이 사진을 확인했을 때</strong><span>가족이 여행 사진을 본 소식을 알려드려요.</span></div></S.SettingRow>
-    <S.SettingsNote>지난 투표 알림은 목록에서 기록으로 확인할 수 있어요.</S.SettingsNote>
   </S.SettingsCard></S.Page></AppShell>
 }
 

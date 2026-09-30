@@ -42,7 +42,7 @@ export function RecordDetailPage() {
   let selectedEntryDate = formatDate(record?.startDate)
   if (selectedEntry?.date) selectedEntryDate = formatDate(selectedEntry.date)
   if (selectedEntry?.takenAt) {
-    selectedEntryDate = formatTravelDateTime(selectedEntry.takenAt, undefined, record?.regionName || record?.countryName, record?.cityName)
+    selectedEntryDate = formatTravelDateTime(selectedEntry.takenAt)
   }
   const selectedEntrySummary = [
     selectedEntryDate,

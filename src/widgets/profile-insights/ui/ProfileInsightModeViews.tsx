@@ -23,7 +23,7 @@ export function ProfileCountriesView({
   return (
     <S.CountryRecordsLayout>
       <S.CountrySummaryCard>
-        <S.CountryCode>KR</S.CountryCode>
+        <S.CountryCode>국내</S.CountryCode>
         <h2>{activeRegion.name}</h2>
         <p>국내 · 첫 방문 {firstVisit}</p>
         <S.CountryMetrics><div><strong>{activeRegion.trips.length}</strong><span>여행 기록</span></div><div><strong>{cities.length}</strong><span>방문 도시</span></div><div><strong>{photoCount}</strong><span>사진 기록</span></div></S.CountryMetrics>
