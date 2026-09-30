@@ -1,3 +1,4 @@
+import { festivalMatchesCity } from '../model/festivals'
 import { useMemo, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useDdayQuery, useFestivalMonthQuery, type FestivalResponseDto } from '@/entities/travel'
@@ -25,7 +26,7 @@ export function RecordCalendarPage() {
   const safeFestivals = festivals.filter((festival): festival is FestivalResponseDto => Boolean(festival))
   const tripCity = plan?.cityName?.trim().toLowerCase()
   const tripFestivals = safeFestivals.filter((festival) => {
-    const matchesCity = !tripCity || festival.location?.toLowerCase().includes(tripCity)
+    const matchesCity = festivalMatchesCity(festival.location, tripCity)
     const matchesDate = !dateRange || Boolean(festival.startDate && festival.startDate <= dateRange.endDate && (festival.endDate ?? festival.startDate) >= dateRange.startDate)
     return matchesCity && matchesDate
   })

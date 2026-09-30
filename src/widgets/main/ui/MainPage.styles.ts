@@ -1,5 +1,4 @@
 import styled from 'styled-components'
-import { figmaHomeHero } from '@/shared/assets'
 import { Skeleton } from '@/shared/ui/parttrip'
 
 export const LoadingLayout = styled.div`
@@ -41,7 +40,7 @@ export const LoadingRecommendation = styled(Skeleton)`
 export const Page = styled.main`
   width: 100%;
   min-width: 0;
-  padding: 2rem;
+  padding: 0;
   box-sizing: border-box;
   color: ${({ theme }) => theme.colors.text.strong};
 
@@ -75,7 +74,6 @@ export const Hero = styled.section`
   border-radius: 1.25rem;
   padding: 2.25rem;
   background-color: ${({ theme }) => theme.colors.brand.strong};
-  background-image: linear-gradient(90deg, rgb(8 35 56 / 78%), rgb(8 35 56 / 58%) 48%, rgb(8 35 56 / 14%)), url(${figmaHomeHero});
   background-position: center;
   background-size: cover;
   color: ${({ theme }) => theme.colors.text.inverse};
@@ -89,8 +87,8 @@ export const Hero = styled.section`
 `
 
 export const HeroLabel = styled.span`
-  font-size: 0.8125rem;
-  line-height: 1.125rem;
+  font-size: 0.875rem;
+  line-height: 1.375rem;
 `
 
 export const Dday = styled.strong`
@@ -133,7 +131,7 @@ export const TodayRoute = styled.div`
     padding: 0 0.875rem;
     background: rgb(13 40 58 / 38%);
     color: #fff;
-    font-size: 0.9375rem;
+    font-size: 1rem;
     font-weight: 600;
   }
 
@@ -151,7 +149,7 @@ export const HeroAction = styled.button`
   color: ${({ theme }) => theme.colors.brand.strong};
   cursor: pointer;
   font: inherit;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 700;
 
   &:hover { background: #f2f7fc; }
@@ -166,8 +164,8 @@ export const Destination = styled.strong`
 `
 
 export const HeroMeta = styled.span`
-  font-size: 0.8125rem;
-  line-height: 1.125rem;
+  font-size: 0.875rem;
+  line-height: 1.375rem;
 `
 
 export const CalendarCard = styled.button`
@@ -204,8 +202,8 @@ export const CalendarCopy = styled.span`
   min-width: 0;
   flex-direction: column;
   gap: 0.25rem;
-  strong { font-size: 1rem; line-height: 1.1875rem; }
-  span { color: ${({ theme }) => theme.colors.brand.accent}; font-size: 0.8125rem; line-height: 1.125rem; }
+  strong { font-size: 1rem; line-height: 1.375rem; }
+  span { color: ${({ theme }) => theme.colors.brand.accent}; font-size: 0.875rem; line-height: 1.375rem; }
 `
 
 export const CalendarArrow = styled.span`
@@ -221,11 +219,34 @@ export const Recommendations = styled.section`
   margin-top: 1.5rem;
 `
 
+export const RecommendationsHeading = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+`
+
 export const SectionTitle = styled.h2`
   margin: 0;
   color: ${({ theme }) => theme.colors.text.strong};
   font-size: 1.25rem;
   line-height: 1.5rem;
+`
+
+export const RefreshRecommendations = styled.button`
+  min-height: 2.25rem;
+  border: 0;
+  border-radius: 0.625rem;
+  padding: 0 0.75rem;
+  background: transparent;
+  color: ${({ theme }) => theme.colors.brand.primary};
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  &:hover { background: ${({ theme }) => theme.colors.background.info}; }
+  &:focus-visible { outline: 0.1875rem solid ${({ theme }) => theme.colors.brand.primary}; outline-offset: 0.125rem; }
+  &:disabled { cursor: not-allowed; opacity: .5; }
 `
 
 export const RecommendationGrid = styled.div`
@@ -238,7 +259,7 @@ export const RecommendationGrid = styled.div`
 
 export const Recommendation = styled.article`
   display: flex;
-  height: 13.75rem;
+  min-height: 17.5rem;
   box-sizing: border-box;
   flex-direction: column;
   gap: 0.875rem;
@@ -248,7 +269,8 @@ export const Recommendation = styled.article`
   padding: 1.25rem;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
-  span { display: block; color: ${({ theme }) => theme.colors.text.strong}; font-size: 0.9375rem; font-weight: 600; line-height: 1.125rem; }
+  span { display: block; color: ${({ theme }) => theme.colors.text.strong}; font-size: 1rem; font-weight: 600; line-height: 1.5rem; overflow-wrap: anywhere; }
+  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.375rem; }
 `
 
 export const RecommendationImage = styled.div<{ $imageUrl?: string }>`
@@ -263,5 +285,5 @@ export const RecommendationImage = styled.div<{ $imageUrl?: string }>`
   background-position: center;
   background-size: cover;
   color: ${({ theme }) => theme.colors.brand.strong};
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
 `

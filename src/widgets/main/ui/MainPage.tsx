@@ -1,7 +1,7 @@
 import { useNavigate } from '@tanstack/react-router'
-import type { ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { useMyPlannersQuery, usePlannerConfirmedPlacesQuery } from '@/entities/planner'
-import { useMainTravelQuery, type DdayResponseDto } from '@/entities/travel'
+import { useMainTravelQuery, type DdayResponseDto, type TourPlaceResponseDto } from '@/entities/travel'
 import { figmaPlannerIcon } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import { formatCalendarDate, formatDateRange, formatTripDuration, normalizeStatus } from '@/shared/utils'
@@ -10,7 +10,61 @@ import { AppShell } from '@/widgets/app-shell'
 
 import { formatDday, getTravelStatusCopy, hasTravelPlan } from '../model/dday'
 import { getMainQueryPresentation } from '../model/main-query-presentation'
+import { pickRecommendations, readRecommendations, saveRecommendations } from '../model/recommendations'
 import * as S from './MainPage.styles'
+
+function RecommendationCategoryIcon({ category = '' }: { category?: string }) {
+  return <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {/맛집|식당|음식|RESTAURANT|FOOD|DINING/i.test(category) ? <><path d="M4 3v5a3 3 0 0 0 6 0V3M7 3v18M20 3c-4 0-5 5-5 9h5M20 3v18" /></>
+      : /카페|CAFE/i.test(category) ? <><path d="M4 8h12v7a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5ZM16 9h2a3 3 0 0 1 0 6h-2M7 3v2m5-2v2" /></>
+        : /숙소|숙박|ACCOMMODATION|HOTEL/i.test(category) ? <><path d="M3 18v3m18-3v3M3 10V5m0 12h18v-5a2 2 0 0 0-2-2H3v7Z" /><circle cx="7" cy="13" r="1" /></>
+          : <><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.5" /></>}
+  </svg>
+}
+
+export function RecommendationCards({
+  city,
+  places,
+  status,
+}: {
+  city: string
+  places: TourPlaceResponseDto[]
+  status: 'loading' | 'error' | 'empty' | 'ready'
+}) {
+  const [recommendations, setRecommendations] = useState(() => city ? readRecommendations(city, places) ?? pickRecommendations(places) : [])
+  useEffect(() => {
+    if (city && status === 'ready') saveRecommendations(city, recommendations)
+  }, [city, recommendations, status])
+
+  let content
+  if (status === 'loading') {
+    content = <>{[0, 1, 2].map((index) => <S.LoadingRecommendation key={index} aria-hidden="true" />)}</>
+  } else if (status === 'error') {
+    content = <S.State role="alert">추천 장소를 불러오지 못했습니다.</S.State>
+  } else if (recommendations.length) {
+    content = recommendations.map((place, index) => (
+      <S.Recommendation key={`${place.placeName || '추천 장소'}-${index}`}>
+        <S.RecommendationImage $imageUrl={place.imageUrl} aria-hidden="true">{!place.imageUrl ? <RecommendationCategoryIcon category={place.category} /> : null}</S.RecommendationImage>
+        <span>{place.placeName || '추천 장소'}</span>
+        <small>{[place.category, typeof place.rating === 'number' && Number.isFinite(place.rating) ? `평점 ${place.rating.toFixed(1)}` : undefined].filter(Boolean).join(' · ')}</small>
+      </S.Recommendation>
+    ))
+  } else {
+    content = <S.State>표시할 추천 장소가 없습니다.</S.State>
+  }
+
+  return <S.Recommendations>
+    <S.RecommendationsHeading>
+      <S.SectionTitle>가볼 만한 곳</S.SectionTitle>
+      <S.RefreshRecommendations type="button" disabled={status !== 'ready' || !city || !places.length} onClick={() => {
+        const next = pickRecommendations(places, recommendations)
+        saveRecommendations(city, next)
+        setRecommendations(next)
+      }}>새로고침</S.RefreshRecommendations>
+    </S.RecommendationsHeading>
+    <S.RecommendationGrid>{content}</S.RecommendationGrid>
+  </S.Recommendations>
+}
 
 function MainHero({
   plan,
@@ -77,6 +131,7 @@ export function MainPage() {
   const navigate = useNavigate()
   const { data, isError, isLoading, isRecommendationsError, isRecommendationsLoading } = useMainTravelQuery()
   const plan = data.plan
+  const recommendationCity = plan?.cityName?.trim() || plan?.regionName?.trim() || ''
   const hasPlan = hasTravelPlan(plan)
   const isDuring = plan?.status === 'DURING'
   const date = new Date()
@@ -105,33 +160,16 @@ export function MainPage() {
   }
   const destination = plan?.cityName || plan?.regionName || '여행지'
   const dateRange = plan ? formatDateRange(plan.startDate, plan.endDate) : '여행 정보가 없습니다.'
-  const recommendations = data.tourPlaces.slice(0, 3)
   const presentation = getMainQueryPresentation({
     isPlanLoading: isLoading,
     isRecommendationsLoading,
     isScheduleLoading: isTodayScheduleLoading,
     isRecommendationsError,
-    recommendationCount: recommendations.length,
+    recommendationCount: data.tourPlaces.length,
     isPlanError: isError,
     hasPlanData: Boolean(plan),
   })
   const effectiveScheduleMessage = isTodayScheduleLoading ? '오늘 일정을 불러오고 있어요.' : todayScheduleMessage
-  let recommendationsContent: ReactNode
-  if (presentation.recommendations === 'loading') {
-    recommendationsContent = <>{[0, 1, 2].map((index) => <S.LoadingRecommendation key={index} aria-hidden="true" />)}</>
-  } else if (presentation.recommendations === 'error') {
-    recommendationsContent = <S.State role="alert">추천 장소를 불러오지 못했습니다.</S.State>
-  } else if (recommendations.length) {
-    recommendationsContent = recommendations.map((place, index) => (
-      <S.Recommendation key={`${place.placeName || '추천 장소'}-${index}`}>
-        <S.RecommendationImage $imageUrl={place.imageUrl}>{!place.imageUrl ? '이미지 없음' : null}</S.RecommendationImage>
-        <span>{place.placeName || '추천 장소'}</span>
-      </S.Recommendation>
-    ))
-  } else {
-    recommendationsContent = <S.State>표시할 추천 장소가 없습니다.</S.State>
-  }
-
   const openTodaySchedule = () => {
     if (currentPlanner?.plannerId) {
       activatePlannerSession(currentPlanner.plannerId)
@@ -181,10 +219,7 @@ export function MainPage() {
               <S.CalendarArrow aria-hidden="true">›</S.CalendarArrow>
             </S.CalendarCard>
 
-            <S.Recommendations>
-              <S.SectionTitle>이번 주 추천</S.SectionTitle>
-              <S.RecommendationGrid>{recommendationsContent}</S.RecommendationGrid>
-            </S.Recommendations>
+            <RecommendationCards key={`${recommendationCity}:${presentation.recommendations}`} city={recommendationCity} places={data.tourPlaces} status={presentation.recommendations} />
           </>
         ) : null}
       </S.Page>

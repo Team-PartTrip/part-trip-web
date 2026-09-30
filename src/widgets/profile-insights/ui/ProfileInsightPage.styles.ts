@@ -5,7 +5,7 @@ export const Page = styled.main<{ $wide?: boolean }>`
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  padding: ${({ $wide }) => ($wide ? '0' : '2rem')};
+  padding: 0;
   color: ${({ theme }) => theme.colors.text.strong};
 
   @media (max-width: 47.9375rem) {
@@ -16,11 +16,11 @@ export const Page = styled.main<{ $wide?: boolean }>`
 
 export const Header = styled.header<{ $wide?: boolean; $hasSubtitle?: boolean }>`
   min-height: ${({ $hasSubtitle, $wide }) => ($hasSubtitle ? ($wide ? '4.25rem' : '3.5625rem') : '3rem')};
-  padding-inline: 1.5rem;
+  padding-inline: 0;
   margin-bottom: 1.5rem;
   margin-top: ${({ $wide }) => ($wide ? '1.5rem' : '0')};
   h1 { line-height: ${({ $hasSubtitle }) => ($hasSubtitle ? '2.25rem' : '2.375rem')}; }
-  p { margin-top: 0.25rem; font-size: 0.875rem; line-height: 1.0625rem; }
+  p { margin-top: 0.25rem; font-size: 0.875rem; line-height: 1.375rem; }
 `
 
 export const Title = styled.h1`
@@ -33,8 +33,8 @@ export const Title = styled.h1`
 export const Subtitle = styled.p`
   margin: 0.375rem 0 0;
   color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 0.9375rem;
-  line-height: 1.375rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
 `
 
 export const State = styled.p`
@@ -74,7 +74,7 @@ export const LoadingSingle = styled(Skeleton)`
 export const MapBody = styled.div`
   display: grid;
   gap: 1.5rem;
-  grid-template-columns: minmax(0, 47rem) 22.5rem;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
   @media (max-width: 53.75rem) { grid-template-columns: 1fr; }
 `
 
@@ -83,7 +83,7 @@ export const MapLegend = styled.div`
   gap: 1rem;
   margin-top: 0.5rem;
   color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   span { display: inline-flex; align-items: center; gap: 0.375rem; }
 `
 
@@ -91,14 +91,14 @@ export const LegendDot = styled.i<{ $visited?: boolean }>`
   width: 0.625rem;
   height: 0.625rem;
   border-radius: 50%;
-  background: ${({ $visited, theme }) => $visited ? theme.colors.brand.primary : theme.colors.background.muted};
+  background: ${({ $visited, theme }) => $visited ? theme.colors.brand.primary : theme.colors.border.default};
 `
 
 export const SectionTitle = styled.h2`
   margin: 0;
   color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 0.9375rem;
-  line-height: 1.25rem;
+  font-size: 1rem;
+  line-height: 1.375rem;
 `
 
 export const MapCard = styled.section`
@@ -110,7 +110,7 @@ export const MapCard = styled.section`
   padding: 1.5rem;
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
-  > ${SectionTitle} { margin: 0 0 0.5rem; color: ${({ theme }) => theme.colors.brand.primary}; font-size: 0.875rem; line-height: 1.0625rem; }
+  > ${SectionTitle} { margin: 0 0 0.5rem; color: ${({ theme }) => theme.colors.brand.primary}; font-size: 0.875rem; line-height: 1.375rem; }
   @media (max-width: 35rem) { min-height: 22.5rem; padding: 1rem; }
 `
 
@@ -119,13 +119,13 @@ export const MapCanvas = styled.div`
   display: grid;
   place-items: center;
   width: 100%;
-  height: 29.375rem;
+  height: 36rem;
   overflow: hidden;
   border: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
   border-radius: 1rem;
   background: ${({ theme }) => theme.colors.background.soft};
-  > div { width: 100%; height: 100%; }
-  @media (max-width: 35rem) { height: 16.25rem; }
+  > div { position: absolute; inset: 0; }
+  @media (max-width: 35rem) { height: 24rem; }
 `
 
 export const KoreaMap = styled.div`
@@ -134,10 +134,10 @@ export const KoreaMap = styled.div`
   height: 100%;
   place-items: center;
   svg { display: block; width: auto; max-width: 100%; height: 100%; }
-  svg path[data-visited] { fill: ${({ theme }) => theme.colors.background.muted}; stroke: ${({ theme }) => theme.colors.background.default}; stroke-width: 0.5; }
+  svg path[data-visited] { fill: ${({ theme }) => theme.colors.border.default}; stroke: ${({ theme }) => theme.colors.brand.strong}; stroke-width: 0.5; }
   svg path[data-visited="true"] { fill: ${({ theme }) => theme.colors.brand.primary}; }
   svg g[data-region-code] { cursor: pointer; }
-  svg g[data-region-code]:hover path { fill: ${({ theme }) => theme.colors.background.info}; stroke: ${({ theme }) => theme.colors.brand.strong}; }
+  svg g[data-region-code]:hover path { stroke-width: 1.5; }
   svg g[data-region-code]:focus-visible { outline: none; }
   svg g[data-region-code]:focus-visible path { stroke: ${({ theme }) => theme.colors.brand.strong}; stroke-width: 1.5; }
 `
@@ -177,10 +177,10 @@ export const RegionPickerList = styled.div`
     background: ${({ theme }) => theme.colors.background.default};
     color: ${({ theme }) => theme.colors.text.strong};
     cursor: pointer;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     text-align: left;
   }
-  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.6875rem; white-space: nowrap; }
+  small { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; white-space: nowrap; }
   button:focus-visible { outline: 0.125rem solid ${({ theme }) => theme.colors.brand.strong}; outline-offset: 0.125rem; }
 `
 
@@ -200,7 +200,7 @@ export const CountryStats = styled.aside`
   box-shadow: ${({ theme }) => theme.shadows.subtle};
   h2 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 1.125rem; line-height: 1.5rem; }
   > strong { color: ${({ theme }) => theme.colors.brand.strong}; font-size: 2rem; }
-  p, > span { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.75rem; line-height: 1.125rem; }
+  p, > span { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.375rem; }
   > button:last-of-type { margin-top: 0; }
   @media (max-width: 53.75rem) { min-height: 17.5rem; }
 `
@@ -222,7 +222,7 @@ export const CountrySummaryCard = styled.section`
   background: ${({ theme }) => theme.colors.background.default};
   box-shadow: ${({ theme }) => theme.shadows.subtle};
   h2 { margin: 1.125rem 0 0.375rem; color: ${({ theme }) => theme.colors.text.strong}; font-size: 1.75rem; line-height: 2.125rem; }
-  > p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.8125rem; line-height: 1.125rem; }
+  > p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.375rem; }
 `
 
 export const CountryCode = styled.strong`
@@ -245,7 +245,7 @@ export const CountryMetrics = styled.div`
   margin-top: 3.25rem;
   > div { display: flex; flex-direction: column; gap: 0.5rem; }
   strong { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 1.5rem; line-height: 1.875rem; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.6875rem; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; }
 `
 
 export const CountryProgress = styled.div`
@@ -254,7 +254,7 @@ export const CountryProgress = styled.div`
   gap: 0.75rem;
   margin-top: 2.625rem;
   > div { height: 0.625rem; }
-  > span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.75rem; font-weight: 600; }
+  > span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; font-weight: 600; }
 `
 
 export const CountryRecordsPanel = styled.section`
@@ -273,9 +273,9 @@ export const CityTabs = styled.div`
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
-  button { height: 2.25rem; border: 0; border-radius: 0.75rem; padding: 0 1rem; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.brand.primary}; cursor: pointer; font-size: 0.75rem; font-weight: 600; }
+  button { height: 2.25rem; border: 0; border-radius: 0.75rem; padding: 0 1rem; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.brand.primary}; cursor: pointer; font-size: 0.875rem; font-weight: 600; }
   button.active { background: ${({ theme }) => theme.colors.background.muted}; }
-  span { display: inline-flex; min-height: 2.25rem; align-items: center; border-radius: 0.75rem; padding: 0 1rem; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.text.strong}; font-size: 0.75rem; font-weight: 600; }
+  span { display: inline-flex; min-height: 2.25rem; align-items: center; border-radius: 0.75rem; padding: 0 1rem; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.text.strong}; font-size: 0.875rem; font-weight: 600; }
 `
 
 export const CountryRecordList = styled.div`
@@ -299,8 +299,8 @@ export const CountryRecordRow = styled.button`
   cursor: pointer;
   text-align: left;
   strong, span { display: block; }
-  strong { font-size: 0.9375rem; }
-  span { margin-top: 0.375rem; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.75rem; }
+  strong { font-size: 1rem; }
+  span { margin-top: 0.375rem; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; }
   b { color: ${({ theme }) => theme.colors.text.muted}; font-size: 1.125rem; font-weight: 600; }
   &:disabled { cursor: default; opacity: .7; }
 `
@@ -311,7 +311,7 @@ export const Empty = styled.div`
   place-items: center;
   grid-column: 1 / -1;
   color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   text-align: center;
 `
 
@@ -340,7 +340,7 @@ export const CountrySummaryRow = styled.button`
   cursor: pointer;
   text-align: left;
   strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 1rem; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.75rem; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; }
   b { margin-left: 0.5rem; font-size: 1.125rem; font-weight: 400; }
 `
 
@@ -365,8 +365,8 @@ export const UnknownRegionNotice = styled.p`
   padding: 0.75rem;
   background: ${({ theme }) => theme.colors.background.muted};
   color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 0.75rem;
-  line-height: 1.125rem;
+  font-size: 0.875rem;
+  line-height: 1.375rem;
   overflow-wrap: anywhere;
 `
 
@@ -400,7 +400,7 @@ export const ClaimNew = styled.span`
   padding: 0;
   background: ${({ theme }) => theme.colors.brand.primary};
   color: ${({ theme }) => theme.colors.text.inverse};
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 700;
 `
 
@@ -415,7 +415,7 @@ export const ClaimSubtitle = styled.p`
   margin: 0;
   color: ${({ theme }) => theme.colors.text.muted};
   font-size: 0.875rem;
-  line-height: 1.0625rem;
+  line-height: 1.375rem;
 `
 
 export const ClaimInfo = styled.section`
@@ -438,7 +438,7 @@ export const InfoRow = styled.div`
   display: grid;
   gap: 0.75rem;
   grid-template-columns: 3rem minmax(0, 1fr);
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.8125rem; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; }
   strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 0.875rem; }
 `
 
@@ -452,7 +452,7 @@ export const ClaimNotice = styled.p`
   padding: 0.75rem;
   background: #fff7f1;
   color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   white-space: nowrap;
 `
 
@@ -469,7 +469,7 @@ export const ClaimProgress = styled.section`
   background: ${({ theme }) => theme.colors.background.default};
   text-align: left;
   strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 0.875rem; }
-  strong b { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 0.9375rem; }
+  strong b { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 1rem; }
 `
 
 export const ActionRow = styled.div`
@@ -532,7 +532,7 @@ export const AchievementCount = styled.div<{ $progress: number }>`
 
   strong, span { position: relative; z-index: 1; }
   strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 2.25rem; line-height: 2.75rem; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.75rem; }
+  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; }
 `
 
 export const AchievementCopy = styled.div`
@@ -543,7 +543,7 @@ export const AchievementCopy = styled.div`
   span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; }
   strong { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 1.5rem; line-height: 1.875rem; }
   b { color: ${({ theme }) => theme.colors.brand.success}; font-size: 0.875rem; }
-  em { display: block; width: min(100%, 20rem); min-height: 2.625rem; box-sizing: border-box; border-radius: 0.75rem; padding: 0.625rem; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.text.strong}; font-size: 0.8125rem; font-style: normal; text-align: center; }
+  em { display: block; width: min(100%, 20rem); min-height: 2.625rem; box-sizing: border-box; border-radius: 0.75rem; padding: 0.625rem; background: ${({ theme }) => theme.colors.background.muted}; color: ${({ theme }) => theme.colors.text.strong}; font-size: 0.875rem; font-style: normal; text-align: center; }
 `
 
 export const ContinentSection = styled.section`
@@ -568,6 +568,6 @@ export const ContinentRow = styled.div`
   background: ${({ theme }) => theme.colors.background.default};
   > div { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
   strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 0.875rem; }
-  > div span { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 0.75rem; }
+  > div span { color: ${({ theme }) => theme.colors.brand.primary}; font-size: 0.875rem; }
   > ${ProgressTrack} { height: 0.375rem; }
 `
