@@ -527,6 +527,7 @@ function PlannerScheduleStep({
   const confirmMutation = useConfirmPlannerMutation();
   const [message, setMessage] = useState("");
   const [confirmed, setConfirmed] = useState(false);
+  const [isEditingSchedule, setIsEditingSchedule] = useState(false);
   const serverConfirmed = ["CONFIRMED", "TRAVELING", "COMPLETED"].includes(
     normalizeStatus(detailQuery.data?.status),
   );
@@ -543,6 +544,7 @@ function PlannerScheduleStep({
       !scheduleQuery.data
     )
       return;
+    if (isEditingSchedule || confirmMutation.isPending || isConfirmed) return;
     setMessage("");
     try {
       await confirmMutation.mutateAsync(plannerId);
@@ -603,7 +605,7 @@ function PlannerScheduleStep({
         <Button
           type="button"
           disabled={
-            confirmMutation.isPending || !scheduleQuery.data?.days?.length
+            isEditingSchedule || confirmMutation.isPending || !scheduleQuery.data?.days?.length
           }
           onClick={() => void confirmSchedule()}
         >
@@ -628,13 +630,15 @@ function PlannerScheduleStep({
             plannerId={plannerId}
             cityName={detailQuery.data?.cityName ?? scheduleQuery.data.cityName}
             schedule={scheduleQuery.data}
-            canManage={canManageCurrentPlanner}
+            canManage={canManageCurrentPlanner && !confirmMutation.isPending}
             isConfirmed={isConfirmed}
+            onEditingChange={setIsEditingSchedule}
           />
         ) : (
           <p role="alert">일정 응답에 표시할 내용이 없습니다.</p>
         )}
         {message ? <S.Error role="alert">{message}</S.Error> : null}
+        {isEditingSchedule ? <p role="status">일정 편집을 저장하거나 취소한 뒤 확정해주세요.</p> : null}
         <S.ButtonRow>
           <Button
             type="button"

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko"><meta charset="UTF-8"><title>편집 회귀 검사</title>
+<body><button id="run">회귀 검사 실행</button><pre id="result">npm run dev -- --host 127.0.0.1 --port 5182 후 http://127.0.0.1:5182/tests/editing-regressions.html에서 실행하세요. 서버 요청은 모두 테스트 응답으로 대체됩니다.</pre><div id="root"></div>
+<script type="module">
+import { createElement as h } from 'react'
+import { createRoot } from 'react-dom/client'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { createRootRoute, createRouter, RouterProvider } from '@tanstack/react-router'
+import { ThemeProvider } from 'styled-components'
+import { PlannerAiFlow } from '/src/widgets/planner/ui/PlannerAiFlow.tsx'
+import { TravelPreferencesPage } from '/src/widgets/travel-preferences/ui/TravelPreferencesPage.tsx'
+import { apiClient } from '/src/shared/libs/api-client.ts'
+import { appTheme } from '/src/shared/theme/index.ts'
+
+// Use an isolated origin (127.0.0.1) so the test does not share app session data.
+if (location.hostname !== '127.0.0.1') throw new Error('127.0.0.1에서 실행해주세요.')
+sessionStorage.setItem('parttrip:active-planner-id', '987654321')
+let schedule = { plannerId: 987654321, days: [{ date: '2026-10-01', slots: ['A', 'B', 'C'].map((name, i) => ({ slotId: i + 1, tourPlaceId: i + 1, place: { name, tourPlaceId: i + 1 } })) }] }
+let preferences = { preferredTransport: 'CAR', dailyScheduleCount: 3, canUseStairs: true }
+let pendingSave
+let confirmCalls = 0
+apiClient.get = async (url) => ({ data: url.endsWith('/schedule') ? schedule : url === '/profile/travel-preferences' ? preferences : /\/planners\/\d+$/.test(url) ? { role: 'OWNER', status: 'DRAFT' } : url.includes('/accessibility') ? {} : url.includes('unread') ? { unreadCount: 0 } : [] })
+apiClient.put = (url, payload) => new Promise((resolve, reject) => {
+  pendingSave = { reject, resolve: () => {
+    if (url.endsWith('/schedule')) schedule = { ...schedule, days: payload.days.map(day => ({ ...day, slots: day.slots.map(slot => ({ ...slot, place: { name: ['A', 'B', 'C'][slot.tourPlaceId - 1], tourPlaceId: slot.tourPlaceId } })) })) }
+    else preferences = payload
+    resolve({ data: url.endsWith('/schedule') ? schedule : preferences })
+  } }
+})
+apiClient.post = async () => { confirmCalls++; throw new Error('확정 요청이 발생하면 검사 실패') }
+const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } })
+const route = createRootRoute({ component: () => h('div', null,
+  h('section', { id: 'schedule' }, h(PlannerAiFlow, { step: 'schedule' })),
+  h('section', { id: 'preferences' }, h(TravelPreferencesPage))) })
+const router = createRouter({ routeTree: route })
+createRoot(document.getElementById('root')).render(h(QueryClientProvider, { client }, h(ThemeProvider, { theme: appTheme }, h(RouterProvider, { router }))))
+const button = (scope, text) => [...document.querySelectorAll(`#${scope} button`)].find(el => el.textContent.trim() === text)
+const check = (condition, message) => { if (!condition) throw new Error(message) }
+const until = async (condition) => {
+  const deadline = Date.now() + 5000
+  while (!condition()) { if (Date.now() > deadline) throw new Error('화면 갱신 시간 초과'); await new Promise(resolve => setTimeout(resolve, 20)) }
+}
+document.getElementById('run').onclick = async () => {
+  document.getElementById('run').disabled = true
+  try {
+    await until(() => button('schedule', '일정 편집') && button('preferences', '저장'))
+    button('schedule', '일정 편집').click()
+    await until(() => button('schedule', '일정 저장'))
+    check(button('schedule', '일정 확정').disabled, '편집 중 확정 가능')
+    button('schedule', '일정 확정').click()
+    check(confirmCalls === 0, '편집 중 확정 요청 발생')
+    button('schedule', '바꾸기').click()
+    await until(() => button('schedule', '교환 취소'))
+    document.querySelector('#schedule button[aria-label="A 아래로 이동"]').click()
+    await until(() => !button('schedule', '교환 취소'))
+    check([...document.querySelectorAll('#schedule button')].filter(el => el.textContent.trim() === '바꾸기').length === 3, '이동 후 교환 선택이 남음')
+    button('schedule', '일정 저장').click()
+    await until(() => pendingSave && button('schedule', '저장 중…'))
+    check(button('schedule', '일정 확정').disabled, '저장 중 확정 가능')
+    pendingSave.reject(new Error('의도한 저장 실패')); pendingSave = undefined
+    await until(() => button('schedule', '일정 저장'))
+    check(button('schedule', '일정 확정').disabled, '저장 실패 후 확정 가능')
+    button('schedule', '일정 저장').click()
+    await until(() => pendingSave)
+    pendingSave.resolve(); pendingSave = undefined
+    await until(() => !button('schedule', '일정 확정').disabled)
+    button('schedule', '일정 편집').click()
+    await until(() => button('schedule', '취소'))
+    button('schedule', '취소').click()
+    await until(() => !button('schedule', '일정 확정').disabled)
+    button('preferences', '저장').click()
+    await until(() => pendingSave && button('preferences', '저장 중…'))
+    const options = [...document.querySelectorAll('#preferences button[aria-pressed]')]
+    check(options.length === 9 && options.every(el => el.disabled), '저장 중 설정 선택 가능')
+    button('preferences', '4곳').click()
+    check(button('preferences', '4곳').getAttribute('aria-pressed') === 'false', '저장 중 선택 변경됨')
+    pendingSave.resolve(); pendingSave = undefined
+    await until(() => button('preferences', '저장'))
+    check(!button('preferences', '4곳').disabled, '저장 후 설정 선택 잠금 유지')
+    button('preferences', '4곳').click()
+    await until(() => button('preferences', '4곳').getAttribute('aria-pressed') === 'true')
+    document.getElementById('result').textContent = 'PASS: 편집·저장·저장 실패 시 확정 차단, 저장·취소 후 해제, 이동 후 교환 선택 해제, 설정 저장 중 잠금·완료 후 해제'
+  } catch (error) { document.getElementById('result').textContent = `FAIL: ${error.message}` }
+}
+</script></body></html>

@@ -152,12 +152,14 @@ export function PlannerScheduleEditor({
   schedule,
   canManage,
   isConfirmed,
+  onEditingChange,
 }: {
   plannerId: number
   cityName?: string
   schedule: PlannerScheduleResponseDto
   canManage: boolean
   isConfirmed: boolean
+  onEditingChange: (editing: boolean) => void
 }) {
   const saveMutation = useSavePlannerScheduleMutation()
   const placesQuery = useQuery(tourPlacesQueryOptions('대한민국', cityName, undefined, Boolean(cityName)))
@@ -207,6 +209,7 @@ export function PlannerScheduleEditor({
       setFeedbackError(false)
       await saveMutation.mutateAsync({ plannerId, payload: toSaveScheduleRequest(draft) })
       setDraft(undefined)
+      onEditingChange(false)
       setPicker(undefined)
       setSwapSource(undefined)
       setFeedback('일정을 저장했습니다.')
@@ -219,6 +222,7 @@ export function PlannerScheduleEditor({
   const cancel = () => {
     if (changed && !window.confirm('저장하지 않은 일정을 취소할까요?')) return
     setDraft(undefined)
+    onEditingChange(false)
     setPicker(undefined)
     setSwapSource(undefined)
     setFeedback('')
@@ -235,12 +239,20 @@ export function PlannerScheduleEditor({
     if (!draft || !swapSource || (swapSource.dayIndex === target.dayIndex && swapSource.slotIndex === target.slotIndex)) return
     setDraft((current) => current ? swapScheduleSlots(current, swapSource.dayIndex, swapSource.slotIndex, target.dayIndex, target.slotIndex) : current)
     setSwapSource(undefined)
+    closePicker()
     setFeedback('일정 카드를 서로 바꿨어요. 저장을 눌러 반영해주세요.')
   }
 
   const startEditing = () => {
     setDraft(copyScheduleDays(schedule.days))
+    onEditingChange(true)
     setFeedback('')
+  }
+
+  const moveSlot = (dayIndex: number, slotIndex: number, direction: -1 | 1) => {
+    setDraft((current) => current ? moveScheduleSlot(current, dayIndex, slotIndex, direction) : current)
+    setSwapSource(undefined)
+    closePicker()
   }
 
   let editorActions: ReactNode = null
@@ -308,9 +320,9 @@ export function PlannerScheduleEditor({
               <div style={{ minWidth: 0 }}><strong>{placeName}</strong>{place?.address || apiPlace?.address ? <small>{place?.address || apiPlace?.address}</small> : null}{placeId ? <PlannerPlaceAccessibility tourPlaceId={placeId} /> : null}</div>
               {draft ? <S.SlotTools>
                 <Button type="button" $variant="secondary" aria-label={`${placeName} 위로 이동`} disabled={slotIndex === 0 || saveMutation.isPending}
-                  onClick={() => setDraft((current) => current ? moveScheduleSlot(current, dayIndex, slotIndex, -1) : current)}>위로</Button>
+                  onClick={() => moveSlot(dayIndex, slotIndex, -1)}>위로</Button>
                 <Button type="button" $variant="secondary" aria-label={`${placeName} 아래로 이동`} disabled={slotIndex === day.slots.length - 1 || saveMutation.isPending}
-                  onClick={() => setDraft((current) => current ? moveScheduleSlot(current, dayIndex, slotIndex, 1) : current)}>아래로</Button>
+                  onClick={() => moveSlot(dayIndex, slotIndex, 1)}>아래로</Button>
                 <S.SwapButton type="button" $active={isSwapSource} disabled={saveMutation.isPending} onClick={() => {
                   if (swapSource && !isSwapSource) finishSwap(position)
                   else setSwapSource(isSwapSource ? undefined : position)
@@ -319,6 +331,7 @@ export function PlannerScheduleEditor({
                 <Button type="button" $variant="secondary" disabled={saveMutation.isPending} onClick={() => {
                   setDraft((current) => current ? removeScheduleSlot(current, dayIndex, slotIndex) : current)
                   setSwapSource(undefined)
+                  closePicker()
                 }}>삭제</Button>
               </S.SlotTools> : null}
             </S.SchedulePlace>

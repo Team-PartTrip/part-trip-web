@@ -61,6 +61,7 @@ export function TravelPreferencesPage() {
 
   const save = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (updatePreferences.isPending) return
     setFeedback('')
     setHasError(false)
     try {
@@ -102,7 +103,7 @@ export function TravelPreferencesPage() {
               <S.Copy><legend>선호하는 이동수단</legend><p>가장 편한 이동 방법을 선택해주세요.</p></S.Copy>
               <S.Options role="group" aria-label="선호하는 이동수단">
                 {transportOptions.map((option) => (
-                  <S.Option key={option.value} type="button" $active={preferredTransport === option.value}
+                  <S.Option key={option.value} type="button" disabled={updatePreferences.isPending} $active={preferredTransport === option.value}
                     aria-pressed={preferredTransport === option.value} onClick={() => setPreferredTransportOverride(option.value)}>
                     {option.label}
                   </S.Option>
@@ -113,7 +114,7 @@ export function TravelPreferencesPage() {
               <S.Copy><legend>하루 일정 개수</legend><p>하루에 무리 없이 둘러볼 장소 수예요.</p></S.Copy>
               <S.Options role="group" aria-label="하루 일정 개수">
                 {[2, 3, 4].map((count) => (
-                  <S.Option key={count} type="button" $active={dailyScheduleCount === count}
+                  <S.Option key={count} type="button" disabled={updatePreferences.isPending} $active={dailyScheduleCount === count}
                     aria-pressed={dailyScheduleCount === count} onClick={() => setDailyScheduleCountOverride(count)}>
                     {count}곳
                   </S.Option>
@@ -124,7 +125,7 @@ export function TravelPreferencesPage() {
               <S.Copy><legend>계단 이용</legend><p>계단이나 경사로를 이용할 수 있는지 알려주세요.</p></S.Copy>
               <S.Options role="group" aria-label="계단 이용 가능 여부">
                 {[{ value: true, label: '가능해요' }, { value: false, label: '어려워요' }].map((option) => (
-                  <S.Option key={option.label} type="button" $active={canUseStairs === option.value}
+                  <S.Option key={option.label} type="button" disabled={updatePreferences.isPending} $active={canUseStairs === option.value}
                     aria-pressed={canUseStairs === option.value} onClick={() => setCanUseStairsOverride(option.value)}>
                     {option.label}
                   </S.Option>
