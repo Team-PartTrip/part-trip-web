@@ -1,5 +1,5 @@
 import { isAxiosError } from 'axios'
-import { apiClient } from '@/shared/libs/api-client'
+import { apiClient, resolveApiAssetUrl } from '@/shared/libs/api-client'
 import { isMissingTravelPlanResponse } from './main-error'
 
 export type TripPhase = 'NO_TRIP' | 'BEFORE' | 'DURING' | 'ENDED'
@@ -95,7 +95,11 @@ export async function getTourPlace(
   const { data } = await apiClient.get<TourPlaceResponseDto[]>(MAIN_API_PATHS.tourPlace, {
     params: { category, cityName, countryName },
   })
-  return data
+  return data.map(normalizeTourPlace)
+}
+
+function normalizeTourPlace(place: TourPlaceResponseDto): TourPlaceResponseDto {
+  return { ...place, imageUrl: resolveApiAssetUrl(place.imageUrl) }
 }
 
 export async function getMoreTourPlaces(
@@ -107,7 +111,7 @@ export async function getMoreTourPlaces(
   const { data } = await apiClient.get<MoreTourPlacesResponseDto>(MAIN_API_PATHS.tourPlaceMore, {
     params: { category, cityName, countryName, cursor },
   })
-  return data
+  return { ...data, places: data.places?.map(normalizeTourPlace) }
 }
 
 export async function getTourPlaceAccessibility(tourPlaceId: number): Promise<AccessibilityResponseDto> {

@@ -92,10 +92,11 @@ type MainTravelQueryData = {
 
 export function useMainTravelQuery() {
   const ddayQuery = useDdayQuery()
-  const countryName = ddayQuery.data?.regionName ? '대한민국' : ''
+  const cityName = ddayQuery.data?.cityName?.trim() || ddayQuery.data?.regionName?.trim()
+  const countryName = cityName ? '대한민국' : ''
   const hasCountry = Boolean(countryName)
     && (ddayQuery.data?.status === 'BEFORE' || ddayQuery.data?.status === 'DURING')
-  const tourPlaces = useQuery(tourPlacesQueryOptions(countryName, undefined, undefined, hasCountry))
+  const tourPlaces = useQuery(tourPlacesQueryOptions(countryName, cityName, undefined, hasCountry))
 
   return {
     data: {
