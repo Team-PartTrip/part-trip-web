@@ -17,7 +17,7 @@ import { GlobalStyle } from '/src/shared/ui/global-style/index.ts'
 if (location.hostname !== '127.0.0.1') throw new Error('127.0.0.1에서 실행해주세요.')
 sessionStorage.setItem('parttrip:active-planner-id', '987654321')
 let schedule = { plannerId: 987654321, days: [{ date: '2026-10-01', slots: ['A', 'B', 'C'].map((name, i) => ({ slotId: i + 1, tourPlaceId: i + 1, place: { name, tourPlaceId: i + 1 } })) }] }
-let preferences = { preferredTransport: 'CAR', dailyScheduleCount: 3, canUseStairs: true, avoidFoods: null, usesWheelchair: null, limitedWalking: null }
+let preferences = { dailyScheduleCount: 3, canUseStairs: true, avoidFoods: null, usesWheelchair: null, limitedWalking: null }
 let pendingSave
 let confirmCalls = 0
 apiClient.get = async (url) => ({ data: url.endsWith('/schedule') ? schedule : url === '/profile/travel-preferences' ? preferences : /\/planners\/\d+$/.test(url) ? { role: 'OWNER', status: 'DRAFT' } : url.includes('/accessibility') ? {} : url.includes('unread') ? { unreadCount: 0 } : [] })
@@ -58,6 +58,8 @@ document.getElementById('run').onclick = async () => {
   document.getElementById('run').disabled = true
   try {
     await until(() => button('schedule', '일정 편집') && button('preferences', '저장'))
+    check([...preferenceGroup('선호하는 이동수단').querySelectorAll('button')].map(el => el.textContent.trim()).join() === '걸어서,대중교통,택시,자가용', '이동수단 이름·순서가 앱과 다름')
+    check(pressed(preferenceOption('선호하는 이동수단', '대중교통')), '서버 기본 이동수단과 다름')
     for (const label of ['휠체어를 쓰세요?', '오래 걸어도 괜찮으세요?', '피하는 음식이 있으세요?']) {
       check([...preferenceGroup(label).querySelectorAll('button')].every(el => !pressed(el)), `${label} 미응답을 없음으로 표시함`)
     }

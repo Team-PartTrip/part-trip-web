@@ -8,10 +8,10 @@ import { PlaceSearchDialog } from '@/widgets/place-search'
 import * as S from './TravelPreferencesPage.styles'
 
 const transportOptions: Array<{ value: TravelPreferenceRequestDto['preferredTransport']; label: string }> = [
-  { value: 'CAR', label: '차량 우선' },
+  { value: 'WALKING', label: '걸어서' },
   { value: 'PUBLIC_TRANSIT', label: '대중교통' },
-  { value: 'WALKING', label: '걷기 적게' },
   { value: 'TAXI', label: '택시' },
+  { value: 'CAR', label: '자가용' },
 ]
 
 const foodOptions: Array<{ value: NonNullable<TravelPreferenceRequestDto['avoidFoods']>[number]; label: string }> = [
@@ -39,7 +39,7 @@ export function TravelPreferencesPage() {
   const [limitedWalkingOverride, setLimitedWalkingOverride] = useState<TravelPreferenceRequestDto['limitedWalking']>()
   const [feedback, setFeedback] = useState('')
   const [hasError, setHasError] = useState(false)
-  const preferredTransport = preferredTransportOverride ?? data?.preferredTransport ?? 'CAR'
+  const preferredTransport = preferredTransportOverride ?? data?.preferredTransport ?? 'PUBLIC_TRANSIT'
   const dailyScheduleCount = dailyScheduleCountOverride ?? data?.dailyScheduleCount ?? 3
   const canUseStairs = canUseStairsOverride ?? data?.canUseStairs ?? true
   const avoidFoods = avoidFoodsOverride !== undefined ? avoidFoodsOverride : data?.avoidFoods
