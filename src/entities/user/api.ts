@@ -15,6 +15,9 @@ export type TravelPreferenceRequestDto = {
   preferredTransport: 'WALKING' | 'PUBLIC_TRANSIT' | 'TAXI' | 'CAR'
   dailyScheduleCount: number
   canUseStairs: boolean
+  avoidFoods?: ('SEAFOOD' | 'SPICY' | 'HARD' | 'MEAT' | 'DAIRY')[] | null
+  usesWheelchair?: boolean | null
+  limitedWalking?: boolean | null
 }
 
 export type TravelPreferenceResponseDto = Partial<TravelPreferenceRequestDto> & {

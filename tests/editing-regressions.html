@@ -2,7 +2,7 @@
 <html lang="ko"><meta charset="UTF-8"><title>편집 회귀 검사</title>
 <body><button id="run">회귀 검사 실행</button><pre id="result">npm run dev -- --host 127.0.0.1 --port 5182 후 http://127.0.0.1:5182/tests/editing-regressions.html에서 실행하세요. 서버 요청은 모두 테스트 응답으로 대체됩니다.</pre><div id="root"></div>
 <script type="module">
-import { createElement as h } from 'react'
+import { createElement as h, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createRootRoute, createRouter, RouterProvider } from '@tanstack/react-router'
@@ -11,31 +11,45 @@ import { PlannerAiFlow } from '/src/widgets/planner/ui/PlannerAiFlow.tsx'
 import { TravelPreferencesPage } from '/src/widgets/travel-preferences/ui/TravelPreferencesPage.tsx'
 import { apiClient } from '/src/shared/libs/api-client.ts'
 import { appTheme } from '/src/shared/theme/index.ts'
+import { GlobalStyle } from '/src/shared/ui/global-style/index.ts'
 
 // Use an isolated origin (127.0.0.1) so the test does not share app session data.
 if (location.hostname !== '127.0.0.1') throw new Error('127.0.0.1에서 실행해주세요.')
 sessionStorage.setItem('parttrip:active-planner-id', '987654321')
 let schedule = { plannerId: 987654321, days: [{ date: '2026-10-01', slots: ['A', 'B', 'C'].map((name, i) => ({ slotId: i + 1, tourPlaceId: i + 1, place: { name, tourPlaceId: i + 1 } })) }] }
-let preferences = { preferredTransport: 'CAR', dailyScheduleCount: 3, canUseStairs: true }
+let preferences = { preferredTransport: 'CAR', dailyScheduleCount: 3, canUseStairs: true, avoidFoods: null, usesWheelchair: null, limitedWalking: null }
 let pendingSave
 let confirmCalls = 0
 apiClient.get = async (url) => ({ data: url.endsWith('/schedule') ? schedule : url === '/profile/travel-preferences' ? preferences : /\/planners\/\d+$/.test(url) ? { role: 'OWNER', status: 'DRAFT' } : url.includes('/accessibility') ? {} : url.includes('unread') ? { unreadCount: 0 } : [] })
 apiClient.put = (url, payload) => new Promise((resolve, reject) => {
-  pendingSave = { reject, resolve: () => {
+  const body = JSON.parse(JSON.stringify(payload))
+  pendingSave = { body, reject, resolve: () => {
     if (url.endsWith('/schedule')) schedule = { ...schedule, days: payload.days.map(day => ({ ...day, slots: day.slots.map(slot => ({ ...slot, place: { name: ['A', 'B', 'C'][slot.tourPlaceId - 1], tourPlaceId: slot.tourPlaceId } })) })) }
-    else preferences = payload
+    else preferences = { ...preferences, ...body }
     resolve({ data: url.endsWith('/schedule') ? schedule : preferences })
   } }
 })
 apiClient.post = async () => { confirmCalls++; throw new Error('확정 요청이 발생하면 검사 실패') }
 const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } })
+const PreferencesTestView = () => {
+  const [version, setVersion] = useState(0)
+  return h('section', { id: 'preferences' },
+    h('button', { type: 'button', onClick: () => setVersion(value => value + 1) }, '설정 화면 다시 열기'),
+    h(TravelPreferencesPage, { key: version }))
+}
 const route = createRootRoute({ component: () => h('div', null,
   h('section', { id: 'schedule' }, h(PlannerAiFlow, { step: 'schedule' })),
-  h('section', { id: 'preferences' }, h(TravelPreferencesPage))) })
+  h(PreferencesTestView)) })
 const router = createRouter({ routeTree: route })
-createRoot(document.getElementById('root')).render(h(QueryClientProvider, { client }, h(ThemeProvider, { theme: appTheme }, h(RouterProvider, { router }))))
+createRoot(document.getElementById('root')).render(h(QueryClientProvider, { client }, h(ThemeProvider, { theme: appTheme }, h(GlobalStyle), h(RouterProvider, { router }))))
 const button = (scope, text) => [...document.querySelectorAll(`#${scope} button`)].find(el => el.textContent.trim() === text)
 const check = (condition, message) => { if (!condition) throw new Error(message) }
+const preferenceGroup = label => document.querySelector(`#preferences [role="group"][aria-label="${label}"]`)
+const preferenceOption = (label, text) => [...preferenceGroup(label).querySelectorAll('button')].find(el => el.textContent.trim() === text)
+const pressed = button => button.getAttribute('aria-pressed') === 'true'
+const checkUnchangedPreferences = () => {
+  for (const key of ['avoidFoods', 'usesWheelchair', 'limitedWalking']) check(!(key in pendingSave.body), `미선택 ${key} 전송됨`)
+}
 const until = async (condition) => {
   const deadline = Date.now() + 5000
   while (!condition()) { if (Date.now() > deadline) throw new Error('화면 갱신 시간 초과'); await new Promise(resolve => setTimeout(resolve, 20)) }
@@ -44,6 +58,9 @@ document.getElementById('run').onclick = async () => {
   document.getElementById('run').disabled = true
   try {
     await until(() => button('schedule', '일정 편집') && button('preferences', '저장'))
+    for (const label of ['휠체어를 쓰세요?', '오래 걸어도 괜찮으세요?', '피하는 음식이 있으세요?']) {
+      check([...preferenceGroup(label).querySelectorAll('button')].every(el => !pressed(el)), `${label} 미응답을 없음으로 표시함`)
+    }
     button('schedule', '일정 편집').click()
     await until(() => button('schedule', '일정 저장'))
     check(button('schedule', '일정 확정').disabled, '편집 중 확정 가능')
@@ -71,15 +88,90 @@ document.getElementById('run').onclick = async () => {
     button('preferences', '저장').click()
     await until(() => pendingSave && button('preferences', '저장 중…'))
     const options = [...document.querySelectorAll('#preferences button[aria-pressed]')]
-    check(options.length === 9 && options.every(el => el.disabled), '저장 중 설정 선택 가능')
+    check(options.length === 19 && options.every(el => el.disabled), '저장 중 설정 선택 가능')
+    checkUnchangedPreferences()
     button('preferences', '4곳').click()
     check(button('preferences', '4곳').getAttribute('aria-pressed') === 'false', '저장 중 선택 변경됨')
     pendingSave.resolve(); pendingSave = undefined
     await until(() => button('preferences', '저장'))
+    check(preferences.avoidFoods === null && preferences.usesWheelchair === null && preferences.limitedWalking === null, '미응답 값이 저장으로 바뀜')
     check(!button('preferences', '4곳').disabled, '저장 후 설정 선택 잠금 유지')
     button('preferences', '4곳').click()
     await until(() => button('preferences', '4곳').getAttribute('aria-pressed') === 'true')
-    document.getElementById('result').textContent = 'PASS: 편집·저장·저장 실패 시 확정 차단, 저장·취소 후 해제, 이동 후 교환 선택 해제, 설정 저장 중 잠금·완료 후 해제'
+    preferences = { ...preferences, avoidFoods: ['MEAT', 'DAIRY'], usesWheelchair: true, limitedWalking: false, canUseStairs: false }
+    await client.invalidateQueries({ queryKey: ['user', 'travel-preferences'] })
+    await until(() => pressed(preferenceOption('피하는 음식이 있으세요?', '고기')))
+    check(pressed(preferenceOption('피하는 음식이 있으세요?', '유제품')), '저장된 음식 표시 실패')
+    check(pressed(preferenceOption('휠체어를 쓰세요?', '써요')), '저장된 휠체어 표시 실패')
+    check(pressed(preferenceOption('오래 걸어도 괜찮으세요?', '괜찮아요')), '저장된 보행 표시 실패')
+    button('preferences', '저장').click()
+    await until(() => pendingSave)
+    checkUnchangedPreferences()
+    pendingSave.resolve(); pendingSave = undefined
+    await until(() => button('preferences', '저장'))
+    check(preferences.avoidFoods.join() === 'MEAT,DAIRY' && preferences.usesWheelchair && !preferences.limitedWalking, '기존 값이 저장으로 지워짐')
+    preferenceOption('계단 이용 가능 여부', '가능해요').click()
+    await until(() => pressed(preferenceOption('계단 이용 가능 여부', '가능해요')))
+    preferenceOption('휠체어를 쓰세요?', '써요').click()
+    await until(() => pressed(preferenceOption('계단 이용 가능 여부', '어려워요')))
+    preferenceOption('피하는 음식이 있으세요?', '없어요').click()
+    await until(() => pressed(preferenceOption('피하는 음식이 있으세요?', '없어요')))
+    preferenceOption('피하는 음식이 있으세요?', '해산물').click()
+    await until(() => pressed(preferenceOption('피하는 음식이 있으세요?', '해산물')))
+    preferenceOption('피하는 음식이 있으세요?', '매운 음식').click()
+    await until(() => pressed(preferenceOption('피하는 음식이 있으세요?', '매운 음식')))
+    preferenceOption('오래 걸어도 괜찮으세요?', '어려워요').click()
+    await until(() => pressed(preferenceOption('오래 걸어도 괜찮으세요?', '어려워요')))
+    button('preferences', '저장').click()
+    await until(() => pendingSave)
+    check(pendingSave.body.avoidFoods.join() === 'SEAFOOD,SPICY' && pendingSave.body.usesWheelchair === true && pendingSave.body.limitedWalking === true && pendingSave.body.canUseStairs === false, '새 설정 저장 본문 오류')
+    pendingSave.reject(new Error('의도한 설정 저장 실패')); pendingSave = undefined
+    await until(() => button('preferences', '저장'))
+    check(document.querySelector('#preferences [role="status"]').textContent.includes('저장하지 못했어요'), '설정 저장 오류 안내 없음')
+    check(pressed(preferenceOption('피하는 음식이 있으세요?', '해산물')) && pressed(preferenceOption('피하는 음식이 있으세요?', '매운 음식')), '저장 실패 후 선택 소실')
+    button('preferences', '저장').click()
+    await until(() => pendingSave)
+    pendingSave.resolve(); pendingSave = undefined
+    await until(() => button('preferences', '저장'))
+    check(preferences.avoidFoods.join() === 'SEAFOOD,SPICY' && preferences.usesWheelchair && preferences.limitedWalking && !preferences.canUseStairs, '설정 저장 결과 오류')
+    const webSavedPreferences = preferences
+    preferences = { ...preferences, avoidFoods: ['DAIRY'], usesWheelchair: false, limitedWalking: false }
+    await client.invalidateQueries({ queryKey: ['user', 'travel-preferences'] })
+    await until(() => pressed(preferenceOption('피하는 음식이 있으세요?', '유제품')))
+    check(!pressed(preferenceOption('피하는 음식이 있으세요?', '해산물')) && pressed(preferenceOption('휠체어를 쓰세요?', '안 써요')) && pressed(preferenceOption('오래 걸어도 괜찮으세요?', '괜찮아요')), '앱에서 변경한 설정이 이전 웹 선택에 가려짐')
+    button('preferences', '저장').click()
+    await until(() => pendingSave)
+    checkUnchangedPreferences()
+    pendingSave.resolve(); pendingSave = undefined
+    await until(() => button('preferences', '저장'))
+    check(preferences.avoidFoods.join() === 'DAIRY' && preferences.usesWheelchair === false && preferences.limitedWalking === false, '선택하지 않은 재저장이 앱 변경값을 덮어씀')
+    preferences = webSavedPreferences
+    await client.invalidateQueries({ queryKey: ['user', 'travel-preferences'] })
+    button('preferences', '설정 화면 다시 열기').click()
+    await until(() => !document.querySelector('#preferences [role="status"]') && pressed(preferenceOption('피하는 음식이 있으세요?', '해산물')))
+    check(pressed(preferenceOption('피하는 음식이 있으세요?', '매운 음식')) && pressed(preferenceOption('휠체어를 쓰세요?', '써요')) && pressed(preferenceOption('오래 걸어도 괜찮으세요?', '어려워요')), '다시 연 설정 화면에서 저장값 소실')
+    preferenceOption('피하는 음식이 있으세요?', '해산물').click()
+    await until(() => !pressed(preferenceOption('피하는 음식이 있으세요?', '해산물')))
+    preferenceOption('피하는 음식이 있으세요?', '매운 음식').click()
+    await until(() => pressed(preferenceOption('피하는 음식이 있으세요?', '없어요')))
+    preferenceOption('휠체어를 쓰세요?', '안 써요').click()
+    preferenceOption('오래 걸어도 괜찮으세요?', '괜찮아요').click()
+    await until(() => pressed(preferenceOption('휠체어를 쓰세요?', '안 써요')) && pressed(preferenceOption('오래 걸어도 괜찮으세요?', '괜찮아요')))
+    button('preferences', '저장').click()
+    await until(() => pendingSave)
+    check(pendingSave.body.avoidFoods.length === 0 && pendingSave.body.usesWheelchair === false && pendingSave.body.limitedWalking === false, '없음 답변이 저장에서 누락됨')
+    pendingSave.resolve(); pendingSave = undefined
+    await until(() => button('preferences', '저장'))
+    check(preferences.avoidFoods.length === 0 && preferences.usesWheelchair === false && preferences.limitedWalking === false, '없음 답변 저장 실패')
+    button('preferences', '설정 화면 다시 열기').click()
+    await until(() => !document.querySelector('#preferences [role="status"]') && pressed(preferenceOption('피하는 음식이 있으세요?', '없어요')))
+    check(pressed(preferenceOption('휠체어를 쓰세요?', '안 써요')) && pressed(preferenceOption('오래 걸어도 괜찮으세요?', '괜찮아요')), '다시 연 설정 화면에서 없음 답변 소실')
+    button('preferences', '저장').click()
+    await until(() => pendingSave)
+    checkUnchangedPreferences()
+    pendingSave.resolve(); pendingSave = undefined
+    await until(() => button('preferences', '저장'))
+    document.getElementById('result').textContent = 'PASS: 일정 편집 회귀, 설정 저장 잠금, 미응답·기존 값 보존, 저장값 표시·화면 재진입, 다른 클라이언트 변경 보존, 휠체어→계단 연동, 음식 복수 선택·해제, 저장 실패·재시도, 없음 답변 저장·복원'
   } catch (error) { document.getElementById('result').textContent = `FAIL: ${error.message}` }
 }
 </script></body></html>

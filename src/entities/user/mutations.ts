@@ -25,7 +25,10 @@ export function useUpdateTravelPreferencesMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (payload: TravelPreferenceRequestDto) => updateTravelPreferences(payload),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: userQueryKeys.travelPreferences() }),
+    onSuccess: (saved) => {
+      queryClient.setQueryData(userQueryKeys.travelPreferences(), saved)
+      return queryClient.invalidateQueries({ queryKey: userQueryKeys.travelPreferences() })
+    },
   })
 }
 

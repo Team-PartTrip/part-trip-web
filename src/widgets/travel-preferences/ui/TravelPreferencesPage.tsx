@@ -14,6 +14,14 @@ const transportOptions: Array<{ value: TravelPreferenceRequestDto['preferredTran
   { value: 'TAXI', label: '택시' },
 ]
 
+const foodOptions: Array<{ value: NonNullable<TravelPreferenceRequestDto['avoidFoods']>[number]; label: string }> = [
+  { value: 'SEAFOOD', label: '해산물' },
+  { value: 'SPICY', label: '매운 음식' },
+  { value: 'HARD', label: '딱딱하거나 질긴 음식' },
+  { value: 'MEAT', label: '고기' },
+  { value: 'DAIRY', label: '유제품' },
+]
+
 export function TravelPreferencesPage() {
   const { data, isError, isLoading, refetch } = useTravelPreferencesQuery()
   const updatePreferences = useUpdateTravelPreferencesMutation()
@@ -26,11 +34,17 @@ export function TravelPreferencesPage() {
   const [preferredTransportOverride, setPreferredTransportOverride] = useState<TravelPreferenceRequestDto['preferredTransport']>()
   const [dailyScheduleCountOverride, setDailyScheduleCountOverride] = useState<number>()
   const [canUseStairsOverride, setCanUseStairsOverride] = useState<boolean>()
+  const [avoidFoodsOverride, setAvoidFoodsOverride] = useState<TravelPreferenceRequestDto['avoidFoods']>()
+  const [usesWheelchairOverride, setUsesWheelchairOverride] = useState<TravelPreferenceRequestDto['usesWheelchair']>()
+  const [limitedWalkingOverride, setLimitedWalkingOverride] = useState<TravelPreferenceRequestDto['limitedWalking']>()
   const [feedback, setFeedback] = useState('')
   const [hasError, setHasError] = useState(false)
   const preferredTransport = preferredTransportOverride ?? data?.preferredTransport ?? 'CAR'
   const dailyScheduleCount = dailyScheduleCountOverride ?? data?.dailyScheduleCount ?? 3
   const canUseStairs = canUseStairsOverride ?? data?.canUseStairs ?? true
+  const avoidFoods = avoidFoodsOverride !== undefined ? avoidFoodsOverride : data?.avoidFoods
+  const usesWheelchair = usesWheelchairOverride !== undefined ? usesWheelchairOverride : data?.usesWheelchair
+  const limitedWalking = limitedWalkingOverride !== undefined ? limitedWalkingOverride : data?.limitedWalking
   const isHomeMutationPending = updateHome.isPending || deleteHome.isPending
 
   const selectHome = async (place: PlaceSearchResponseDto) => {
@@ -65,10 +79,18 @@ export function TravelPreferencesPage() {
     setFeedback('')
     setHasError(false)
     try {
-      const saved = await updatePreferences.mutateAsync({ preferredTransport, dailyScheduleCount, canUseStairs })
+      const saved = await updatePreferences.mutateAsync({
+        preferredTransport, dailyScheduleCount, canUseStairs,
+        avoidFoods: avoidFoodsOverride,
+        usesWheelchair: usesWheelchairOverride,
+        limitedWalking: limitedWalkingOverride,
+      })
       setPreferredTransportOverride(saved.preferredTransport ?? preferredTransport)
       setDailyScheduleCountOverride(saved.dailyScheduleCount ?? dailyScheduleCount)
       setCanUseStairsOverride(saved.canUseStairs ?? canUseStairs)
+      setAvoidFoodsOverride(undefined)
+      setUsesWheelchairOverride(undefined)
+      setLimitedWalkingOverride(undefined)
       setFeedback('여행 편의 설정을 저장했어요.')
     } catch {
       setHasError(true)
@@ -130,6 +152,46 @@ export function TravelPreferencesPage() {
                     {option.label}
                   </S.Option>
                 ))}
+              </S.Options>
+            </S.Row>
+            <S.Row>
+              <S.Copy><legend>휠체어를 쓰세요?</legend><p>써요를 고르면 계단 이용도 어려워요로 바뀌어요.</p></S.Copy>
+              <S.Options role="group" aria-label="휠체어를 쓰세요?">
+                {[{ value: true, label: '써요' }, { value: false, label: '안 써요' }].map((option) => (
+                  <S.Option key={option.label} type="button" disabled={updatePreferences.isPending} $active={usesWheelchair === option.value}
+                    aria-pressed={usesWheelchair === option.value} onClick={() => {
+                      setUsesWheelchairOverride(option.value)
+                      if (option.value) setCanUseStairsOverride(false)
+                    }}>
+                    {option.label}
+                  </S.Option>
+                ))}
+              </S.Options>
+            </S.Row>
+            <S.Row>
+              <S.Copy><legend>오래 걸어도 괜찮으세요?</legend><p>오래 걷는 일정이 어려운지 알려주세요.</p></S.Copy>
+              <S.Options role="group" aria-label="오래 걸어도 괜찮으세요?">
+                {[{ value: false, label: '괜찮아요' }, { value: true, label: '어려워요' }].map((option) => (
+                  <S.Option key={option.label} type="button" disabled={updatePreferences.isPending} $active={limitedWalking === option.value}
+                    aria-pressed={limitedWalking === option.value} onClick={() => setLimitedWalkingOverride(option.value)}>
+                    {option.label}
+                  </S.Option>
+                ))}
+              </S.Options>
+            </S.Row>
+            <S.Row>
+              <S.Copy><legend>피하는 음식이 있으세요?</legend><p id="avoid-foods-help">식당 종류만 참고해요. 알레르기가 있으면 식당에 꼭 확인하세요.</p></S.Copy>
+              <S.Options role="group" aria-label="피하는 음식이 있으세요?" aria-describedby="avoid-foods-help">
+                {foodOptions.map((option) => (
+                  <S.Option key={option.value} type="button" disabled={updatePreferences.isPending} $active={avoidFoods?.includes(option.value) === true}
+                    aria-pressed={avoidFoods?.includes(option.value) === true} onClick={() => setAvoidFoodsOverride(
+                      avoidFoods?.includes(option.value) ? avoidFoods.filter((food) => food !== option.value) : [...(avoidFoods ?? []), option.value],
+                    )}>
+                    {option.label}
+                  </S.Option>
+                ))}
+                <S.Option type="button" disabled={updatePreferences.isPending} $active={avoidFoods?.length === 0}
+                  aria-pressed={avoidFoods?.length === 0} onClick={() => setAvoidFoodsOverride([])}>없어요</S.Option>
               </S.Options>
             </S.Row>
             <S.Feedback role={feedback ? 'status' : undefined} $error={hasError}>{feedback}</S.Feedback>
