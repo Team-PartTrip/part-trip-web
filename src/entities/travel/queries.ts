@@ -82,6 +82,7 @@ export function useTourPlaceAccessibilityQuery(tourPlaceId: number, enabled = tr
     queryKey: travelQueryKeys.tourPlaceAccessibility(tourPlaceId),
     queryFn: () => getTourPlaceAccessibility(tourPlaceId),
     enabled: enabled && Number.isSafeInteger(tourPlaceId) && tourPlaceId > 0,
+    staleTime: Infinity,
   })
 }
 

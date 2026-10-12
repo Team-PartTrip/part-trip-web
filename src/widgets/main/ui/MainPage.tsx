@@ -1,6 +1,6 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { useMyPlannersQuery, usePlannerConfirmedPlacesQuery } from '@/entities/planner'
+import { useMyPlannersQuery } from '@/entities/planner'
 import { useMainTravelQuery, type DdayResponseDto, type TourPlaceResponseDto } from '@/entities/travel'
 import { figmaPlannerIcon } from '@/shared/assets'
 import { paths } from '@/shared/config'
@@ -12,6 +12,7 @@ import { formatDday, getTravelStatusCopy, hasTravelPlan } from '../model/dday'
 import { getMainQueryPresentation } from '../model/main-query-presentation'
 import { pickRecommendations, readRecommendations, saveRecommendations } from '../model/recommendations'
 import * as S from './MainPage.styles'
+import { TodaySchedule } from './TodaySchedule'
 
 function RecommendationCategoryIcon({ category = '' }: { category?: string }) {
   return <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -80,9 +81,6 @@ function MainHero({
   dateRange,
   today,
   todayStops,
-  scheduleMessage,
-  scheduleError,
-  scheduleLoading,
   onStartPlanner,
   onOpenTodaySchedule,
 }: {
@@ -91,9 +89,6 @@ function MainHero({
   dateRange: string
   today: string
   todayStops: string[]
-  scheduleMessage: string
-  scheduleError: boolean
-  scheduleLoading: boolean
   onStartPlanner: () => void
   onOpenTodaySchedule: () => void
 }) {
@@ -111,12 +106,12 @@ function MainHero({
     return (
       <S.Hero>
         <S.HeroLabel>오늘 일정 · {today.replace(/-/g, '.')}</S.HeroLabel>
-        <S.HeroTitle>{todayStops[0] || `${destination} 여행`}</S.HeroTitle>
+        <S.HeroTitle>{destination} 여행</S.HeroTitle>
         {todayStops.length ? (
           <S.TodayRoute aria-label={`오늘 일정 순서: ${todayStops.join(', ')}`}>
             {todayStops.map((stop, index) => <span key={`${stop}-${index}`}>{index ? <i aria-hidden="true">→</i> : null}{stop}</span>)}
           </S.TodayRoute>
-        ) : <S.HeroCopy role={scheduleError ? 'alert' : scheduleLoading ? 'status' : undefined}>{scheduleMessage}</S.HeroCopy>}
+        ) : <S.HeroCopy>오늘 확정된 일정이 없어요.</S.HeroCopy>}
         {todayStops.length ? <S.HeroMeta>확정된 일정 · 오늘 {todayStops.length}곳</S.HeroMeta> : null}
         <S.HeroAction type="button" onClick={onOpenTodaySchedule}>오늘 일정 보기</S.HeroAction>
       </S.Hero>
@@ -144,7 +139,7 @@ export function MainPage() {
   const isDuring = plan?.status === 'DURING'
   const date = new Date()
   const today = formatCalendarDate(date.getFullYear(), date.getMonth(), date.getDate())
-  const { data: planners = [], isError: plannerListError, isLoading: isPlannerListLoading } = useMyPlannersQuery(isDuring)
+  const { data: planners = [] } = useMyPlannersQuery(isDuring)
   const currentPlanner = planners.find((planner) =>
     isDuring
     && Boolean(planner.plannerId && plan?.startDate && plan.endDate)
@@ -153,31 +148,19 @@ export function MainPage() {
     && planner.endDate === plan?.endDate
     && (!plan?.cityName || !planner.cityName || planner.cityName.trim() === plan.cityName.trim()),
   )
-  const confirmedPlacesQuery = usePlannerConfirmedPlacesQuery(currentPlanner?.plannerId ?? 0, isDuring && currentPlanner?.plannerId != null)
-  const todayStops = (confirmedPlacesQuery.data?.places ?? [])
-    .filter((place) => place.visitedDate === today)
-    .flatMap((place) => place.placeName?.trim() ? [place.placeName.trim()] : [])
-  const isTodayScheduleLoading = isDuring && (isPlannerListLoading || Boolean(currentPlanner?.plannerId && confirmedPlacesQuery.isLoading))
-  let todayScheduleMessage = ''
-  if (plannerListError || confirmedPlacesQuery.isError) {
-    todayScheduleMessage = '오늘 일정을 불러오지 못했어요.'
-  } else if (!currentPlanner) {
-    todayScheduleMessage = '확정된 여행 일정을 찾을 수 없어요.'
-  } else if (!todayStops.length) {
-    todayScheduleMessage = '오늘 확정된 일정이 없어요.'
-  }
+  const todaySlots = isDuring ? plan.todaySchedule ?? [] : []
+  const todayStops = todaySlots.flatMap((slot) => slot.place?.name?.trim() ? [slot.place.name.trim()] : [])
   const destination = plan?.cityName || plan?.regionName || '여행지'
   const dateRange = plan ? formatDateRange(plan.startDate, plan.endDate) : '여행 정보가 없습니다.'
   const presentation = getMainQueryPresentation({
     isPlanLoading: isLoading,
     isRecommendationsLoading,
-    isScheduleLoading: isTodayScheduleLoading,
+    isScheduleLoading: false,
     isRecommendationsError,
     recommendationCount: data.tourPlaces.length,
     isPlanError: isError,
     hasPlanData: Boolean(plan),
   })
-  const effectiveScheduleMessage = isTodayScheduleLoading ? '오늘 일정을 불러오고 있어요.' : todayScheduleMessage
   const openTodaySchedule = () => {
     if (currentPlanner?.plannerId) {
       activatePlannerSession(currentPlanner.plannerId)
@@ -208,13 +191,12 @@ export function MainPage() {
             dateRange={dateRange}
             today={today}
             todayStops={todayStops}
-            scheduleMessage={effectiveScheduleMessage}
-            scheduleError={plannerListError || confirmedPlacesQuery.isError}
-            scheduleLoading={presentation.schedule === 'loading'}
             onStartPlanner={() => void navigate({ to: paths.plannerDestination })}
             onOpenTodaySchedule={openTodaySchedule}
           />
         )}
+
+        {isDuring ? <TodaySchedule key={today} date={today} slots={todaySlots} /> : null}
 
         {hasPlan && plan?.status !== 'ENDED' ? (
           <>

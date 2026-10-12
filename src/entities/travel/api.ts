@@ -1,6 +1,7 @@
 import { isAxiosError } from 'axios'
 import { apiClient, resolveApiAssetUrl } from '@/shared/libs/api-client'
 import { isMissingTravelPlanResponse } from './main-error'
+import type { PlannerScheduleSlotDto } from '../planner/types'
 
 export type TripPhase = 'NO_TRIP' | 'BEFORE' | 'DURING' | 'ENDED'
 
@@ -11,7 +12,7 @@ export type DdayResponseDto = {
   startDate?: string | null
   endDate?: string | null
   dday?: string | null
-  todaySchedule?: Array<{ slotId?: number; tourPlaceId?: number }>
+  todaySchedule?: PlannerScheduleSlotDto[]
   status: TripPhase
 }
 
