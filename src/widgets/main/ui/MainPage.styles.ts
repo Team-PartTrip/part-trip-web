@@ -242,21 +242,36 @@ export const TodaySchedule = styled.section`
 `
 
 export const TodayStop = styled.article<{ $visited: boolean; $next: boolean }>`
-  display: flex;
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: 1rem;
   border: 0.125rem solid ${({ $next, theme }) => $next ? theme.colors.brand.primary : theme.colors.border.subtle};
   border-radius: 1rem;
   padding: 1.25rem;
-  background: ${({ $visited, theme }) => $visited ? theme.colors.background.muted : theme.colors.background.default};
+  background: ${({ $visited, $next, theme }) => $next ? theme.colors.background.info : $visited ? theme.colors.background.muted : theme.colors.background.default};
   color: ${({ $visited, theme }) => $visited ? theme.colors.text.muted : theme.colors.text.strong};
   > div { display: flex; min-width: 0; flex-direction: column; gap: 0.375rem; }
   h3 { margin: 0; font-size: 1.125rem; overflow-wrap: anywhere; }
   small { font-size: 0.875rem; overflow-wrap: anywhere; }
   a { color: ${({ theme }) => theme.colors.brand.primary}; }
-  button { flex-shrink: 0; color: inherit; }
-  @media (max-width: 30rem) { align-items: flex-start; flex-direction: column; }
+  button { flex-shrink: 0; ${({ $visited, theme }) => $visited ? `background: ${theme.colors.background.muted}; color: ${theme.colors.text.muted};` : ''} }
+  @media (max-width: 30rem) {
+    align-items: start;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    button { grid-column: 2; justify-self: start; }
+  }
+`
+
+export const TodayStopNumber = styled.span<{ $visited: boolean }>`
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: ${({ $visited, theme }) => $visited ? theme.colors.background.muted : theme.colors.brand.primary};
+  color: ${({ $visited, theme }) => $visited ? theme.colors.text.muted : theme.colors.text.inverse};
 `
 
 export const RefreshRecommendations = styled.button`

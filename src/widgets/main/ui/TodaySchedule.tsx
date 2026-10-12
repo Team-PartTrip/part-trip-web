@@ -15,32 +15,36 @@ export function TodaySchedule({ date, slots }: { date: string; slots: PlannerSch
 
   return <S.TodaySchedule aria-label="오늘 갈 곳">
     <S.SectionTitle>오늘 갈 곳</S.SectionTitle>
-    {!places.length ? <p>오늘 확정된 일정이 없어요.</p> : nextIndex < 0 ? <p role="status">오늘 일정을 모두 다녀왔어요.</p> : null}
+    {!places.length ? <p>오늘은 정해진 일정이 없어요</p> : nextIndex < 0 ? <p role="status">오늘 일정을 모두 다녀왔어요.</p> : null}
     {places.map((slot, index) => {
       const place = slot.place
       const name = place?.name?.trim() || `장소 ${slot.tourPlaceId ?? place?.tourPlaceId ?? index + 1}`
       const origin = places[index - 1]?.place
       const placeId = place?.tourPlaceId ?? slot.tourPlaceId
       const visitedSlot = slot.slotId != null && visited.includes(slot.slotId)
+      const isNext = index === nextIndex
+      const showRoute = !visitedSlot && index > 0
+      const readyRoute = showRoute && slot.routeStatus === 'READY' ? slot.routeFromPrevious : undefined
       const directions = getKakaoMapUrl(slot.routeFromPrevious?.transportMode ?? 'PUBLIC_TRANSIT', name, place?.latitude, place?.longitude, origin ?? undefined)
       const routeMessage = slot.routeStatus === 'CALCULATING' ? '경로를 계산하고 있어요.' : getRouteFailureMessage(slot.routeStatus)
       return <Fragment key={slot.slotId ?? index}>
-        {slot.routeFromPrevious ? <PlannerScheduleRouteLine route={slot.routeFromPrevious} placeName={name}
-          latitude={place?.latitude} longitude={place?.longitude} origin={origin ?? undefined} /> : routeMessage ? <p>{routeMessage}</p> : null}
-        <S.TodayStop $visited={visitedSlot} $next={index === nextIndex} aria-label={name}>
+        {readyRoute ? <PlannerScheduleRouteLine route={readyRoute} placeName={name}
+          latitude={place?.latitude} longitude={place?.longitude} origin={origin ?? undefined} /> : showRoute && routeMessage ? <p>{routeMessage}</p> : null}
+        <S.TodayStop $visited={visitedSlot} $next={isNext} aria-label={name}>
+          <S.TodayStopNumber $visited={visitedSlot} aria-label={visitedSlot ? '방문 완료' : `${index + 1}번째 장소`}>{visitedSlot ? '✓' : index + 1}</S.TodayStopNumber>
           <div>
-            <small>{index === nextIndex ? '다음 갈 곳' : `${index + 1}번째 장소`}</small>
+            {isNext ? <small>다음 갈 곳</small> : null}
             <h3>{name}</h3>
             {place?.categoryLabel || place?.category ? <small>{place.categoryLabel || place.category}</small> : null}
-            {placeId ? <RestroomNote tourPlaceId={placeId} /> : null}
-            {!slot.routeFromPrevious && directions ? <a href={directions} target="_blank" rel="noopener noreferrer" aria-label={`${name} 카카오맵에서 길 안내 열기`}>길 안내</a> : null}
+            {!visitedSlot && placeId ? <RestroomNote tourPlaceId={placeId} /> : null}
+            {isNext && !readyRoute && directions ? <a href={directions} target="_blank" rel="noopener noreferrer" aria-label={`${name} 카카오맵에서 길 안내 열기`}>길 안내</a> : null}
           </div>
-          <Button type="button" $variant="secondary" aria-pressed={visitedSlot} aria-label={`${name} 다녀왔어요`}
+          <Button type="button" $variant={visitedSlot ? 'secondary' : undefined} aria-pressed={visitedSlot} aria-label={`${name} ${visitedSlot ? '방문 취소' : '다녀왔어요'}`}
             disabled={!Number.isSafeInteger(slot.slotId) || (slot.slotId ?? 0) <= 0} onClick={() => {
               const next = visitedSlot ? visited.filter((id) => id !== slot.slotId) : [...visited, slot.slotId!]
               setVisited(next)
               setStorageError(!saveVisitedStops(date, next))
-            }}>{visitedSlot ? '✓ 다녀왔어요' : '다녀왔어요'}</Button>
+            }}>{visitedSlot ? '취소' : '다녀왔어요'}</Button>
         </S.TodayStop>
       </Fragment>
     })}

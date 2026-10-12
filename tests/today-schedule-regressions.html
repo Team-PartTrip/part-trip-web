@@ -18,9 +18,9 @@ if (location.hostname !== '127.0.0.1') throw new Error('127.0.0.1에서 실행�
 const date = new Date()
 const today = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 const slots = [
-  { slotId: 98765401, order: 0, place: { tourPlaceId: 1, name: '첫 장소', categoryLabel: '관광지', latitude: 35, longitude: 128 } },
+  { slotId: 98765401, order: 0, place: { tourPlaceId: 1, name: '첫 장소', categoryLabel: '관광지', latitude: 35, longitude: 128 }, routeStatus: 'CALCULATING', routeFromPrevious: { transportMode: 'CAR', durationMinutes: 999 } },
   { slotId: 98765402, order: 1, place: { tourPlaceId: 2, name: '둘째 장소', categoryLabel: '맛집', latitude: 36, longitude: 129 }, routeStatus: 'READY', routeFromPrevious: { transportMode: 'PUBLIC_TRANSIT', durationMinutes: 25, walkingMinutes: 5, steps: [{ type: 'BUS', name: '100번' }] } },
-  { slotId: 98765403, order: 2, place: { tourPlaceId: 1, name: '첫 장소 재방문', categoryLabel: '관광지', latitude: 35, longitude: 128 }, routeStatus: 'API_ERROR' },
+  { slotId: 98765403, order: 2, place: { tourPlaceId: 1, name: '첫 장소 재방문', categoryLabel: '관광지', latitude: 35, longitude: 128 }, routeStatus: 'API_ERROR', routeFromPrevious: { transportMode: 'PUBLIC_TRANSIT', durationMinutes: 777 } },
   { slotId: 98765404, order: 3, place: { tourPlaceId: 3, name: '마지막 장소', categoryLabel: '카페' } },
 ]
 let plan = { status: 'DURING', cityName: '서울', startDate: today, endDate: today, todaySchedule: slots }
@@ -52,7 +52,7 @@ createRoot(document.getElementById('root')).render(h(QueryClientProvider, { clie
 const check = (value, message) => { if (!value) throw new Error(message) }
 const until = async fn => { const limit = Date.now() + 5000; while (!fn()) { if (Date.now() > limit) throw new Error('화면 갱신 시간 초과'); await new Promise(resolve => setTimeout(resolve, 20)) } }
 const screen = () => document.getElementById('screen')
-const visit = name => screen().querySelector(`button[aria-label="${name} 다녀왔어요"]`)
+const visit = name => screen().querySelector(`article[aria-label="${name}"] button`)
 const next = () => [...screen().querySelectorAll('article')].find(el => el.textContent.includes('다음 갈 곳'))?.getAttribute('aria-label')
 const accessibilityRequests = () => requests.filter(url => url.includes('/accessibility'))
 document.getElementById('run').onclick = async () => {
@@ -68,9 +68,11 @@ document.getElementById('run').onclick = async () => {
       check([...screen().querySelectorAll('article[aria-label]')].map(el => el.getAttribute('aria-label')).join() === '첫 장소,둘째 장소,첫 장소 재방문,마지막 장소', '서버 일정 순서가 바뀜')
       const firstLink = screen().querySelector('a[aria-label="첫 장소 카카오맵에서 길 안내 열기"]')
       check(firstLink?.href.includes('/link/to/'), '첫 장소 길 안내에 출발지 포함됨')
+      check(!screen().textContent.includes('999분') && !screen().textContent.includes('경로를 계산하고 있어요.'), '첫 장소 서버 경로 또는 안내 표시')
       const secondLink = screen().querySelector('a[aria-label="둘째 장소 카카오맵에서 길 안내 열기"]')
       check(secondLink?.href.includes('/by/traffic/') && secondLink.href.includes(',35,128/'), '장소 사이 길 안내 오류')
-      check(screen().querySelector('a[aria-label="첫 장소 재방문 카카오맵에서 길 안내 열기"]')?.href.includes('/by/traffic/'), '경로 실패 장소의 길 안내 이동수단 오류')
+      check(!screen().querySelector('a[aria-label="첫 장소 재방문 카카오맵에서 길 안내 열기"]'), '다음 장소가 아닌 곳에 길 안내 표시')
+      check(!screen().textContent.includes('777분'), 'READY가 아닌 경로 표시')
       check(screen().textContent.includes('25분') && screen().textContent.includes('도보 5분'), '경로 요약 없음')
       check(!screen().querySelector('a[aria-label="마지막 장소 카카오맵에서 길 안내 열기"]'), '좌표 없는 장소에 잘못된 길 안내 표시')
       await until(() => screen().textContent.includes('화장실 · 장애인 전용 화장실 있음'))
@@ -81,6 +83,19 @@ document.getElementById('run').onclick = async () => {
       visit('첫 장소').click()
       await until(() => next() === '둘째 장소')
       check(visit('첫 장소').getAttribute('aria-pressed') === 'true', '방문 체크 없음')
+      check(visit('첫 장소').textContent === '취소', '방문 완료 버튼 문구 오류')
+      check(!screen().querySelector('article[aria-label="첫 장소"]').textContent.includes('화장실 ·'), '다녀온 장소 화장실 표시')
+      visit('둘째 장소').click()
+      await until(() => next() === '첫 장소 재방문')
+      check(!screen().textContent.includes('25분'), '다녀온 장소 경로 표시')
+      check(screen().querySelector('a[aria-label="첫 장소 재방문 카카오맵에서 길 안내 열기"]')?.href.includes('/by/traffic/'), '다음 장소 경로 실패 길 안내 없음')
+      visit('첫 장소 재방문').click()
+      await until(() => next() === '마지막 장소')
+      check(!screen().textContent.includes('경로를 불러오지 못했어요'), '다녀온 장소 실패 안내 표시')
+      visit('둘째 장소').click()
+      await until(() => next() === '둘째 장소')
+      visit('첫 장소 재방문').click()
+      await until(() => next() === '둘째 장소')
       check(JSON.parse(localStorage.getItem(storageKey)).includes(slots[0].slotId), '방문 저장 없음')
       document.getElementById('reopen').click()
       await until(() => next() === '둘째 장소' && visit('첫 장소').getAttribute('aria-pressed') === 'true')
@@ -112,7 +127,7 @@ document.getElementById('run').onclick = async () => {
       await until(() => !screen().querySelector('section[aria-label="오늘 갈 곳"]'))
       plan = { ...plan, status: 'DURING', todaySchedule: [] }
       await client.invalidateQueries({ queryKey: ['travel', 'dday'] })
-      await until(() => screen().textContent.includes('오늘 확정된 일정이 없어요.'))
+      await until(() => screen().textContent.includes('오늘은 정해진 일정이 없어요'))
       check(!screen().querySelector('button[aria-label$=" 다녀왔어요"]'), '빈 일정에 방문 버튼 노출')
     } finally {
       if (previous === null) localStorage.removeItem(storageKey)
