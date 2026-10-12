@@ -155,6 +155,11 @@ export const Options = styled.div`
   gap: 0.5rem;
 `
 
+export const PreferenceQuestion = styled(Block)`
+  grid-column: 1 / -1;
+  > p { margin: 0 0 0.75rem; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.5; }
+`
+
 export const Option = styled.button<{ $active: boolean }>`
   min-height: 3rem;
   border: 0.0625rem solid ${({ $active }) => $active ? '#1766bf' : '#d1dee5'};

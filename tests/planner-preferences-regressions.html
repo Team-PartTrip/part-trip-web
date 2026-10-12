@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ko"><meta charset="UTF-8"><title>일정 생성 편의 질문 회귀 검사</title>
+<body><button id="run">회귀 검사 실행</button><pre id="result">모든 API는 로컬 테스트 응답으로 대체됩니다.</pre><div id="root"></div>
+<script type="module">
+import { createElement as h, useState } from 'react'
+import { createRoot } from 'react-dom/client'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { createRootRoute, createRouter, RouterProvider } from '@tanstack/react-router'
+import { ThemeProvider } from 'styled-components'
+import { PlannerCriteriaStep } from '/src/widgets/planner/ui/PlannerCriteriaStep.tsx'
+import { apiClient } from '/src/shared/libs/api-client.ts'
+import { appTheme } from '/src/shared/theme/index.ts'
+import { GlobalStyle } from '/src/shared/ui/global-style/index.ts'
+if (location.hostname !== '127.0.0.1') throw new Error('127.0.0.1에서만 실행하세요.')
+const base = { preferredTransport: 'CAR', dailyScheduleCount: 4, canUseStairs: true, usesWheelchair: null, limitedWalking: null, avoidFoods: null }
+let pref = { ...base }, failSave = false, calls = []
+apiClient.get = async url => ({ data: url === '/profile/travel-preferences' ? pref : url === '/planners/blocks' ? [
+  { type: 'DEPARTURE_PLACE', label: '어디로 가세요?', options: ['직접 지정'] },
+  { type: 'TRAVEL_TYPE', label: '어떤 여행을 원하세요?', options: ['관광'] },
+] : [] })
+apiClient.put = async (url, payload) => {
+  if (url !== '/profile/travel-preferences') throw new Error('예상 밖 쓰기')
+  calls.push({ type: 'save', payload })
+  await new Promise(resolve => setTimeout(resolve, 100))
+  if (failSave) throw new Error('테스트 저장 실패')
+  pref = { ...pref, ...payload }
+  return { data: pref }
+}
+apiClient.post = async (url, payload) => {
+  if (url !== '/planners/generate') throw new Error('예상 밖 쓰기')
+  calls.push({ type: 'generate', payload })
+  // 생성 호출을 확인하고 테스트 화면에 머물러 재시도를 검사한다.
+  throw new Error('테스트 생성 실패')
+}
+const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
+const draft = { cityName: '서울', regionCode: '11', regionName: '서울', startDate: '2099-01-01', endDate: '2099-01-02', blocks: [{ type: 'COMPANION', value: '혼자' }] }
+function View() {
+  const [version, setVersion] = useState(0)
+  return h('div', null, h('button', { id: 'reopen', onClick: () => setVersion(v => v + 1) }, '다시 열기'), h('div', { id: 'screen', 'data-version': version }, h(PlannerCriteriaStep, { key: version, draft })))
+}
+const route = createRootRoute({ component: View })
+createRoot(document.getElementById('root')).render(h(QueryClientProvider, { client }, h(ThemeProvider, { theme: appTheme }, h(GlobalStyle), h(RouterProvider, { router: createRouter({ routeTree: route }) }))))
+const screen = () => document.getElementById('screen')
+const button = label => [...screen().querySelectorAll('button')].find(el => el.textContent === label)
+const check = (value, message) => { if (!value) throw new Error(message) }
+const until = async fn => { const end = Date.now() + 5000; while (!fn()) { if (Date.now() > end) throw new Error('화면 갱신 시간 초과'); await new Promise(resolve => setTimeout(resolve, 20)) } }
+const selected = label => button(label)?.getAttribute('aria-pressed') === 'true'
+const reset = async values => {
+  pref = { ...base, ...values }; calls = []
+  client.setQueryData(['user', 'travel-preferences'], pref)
+  const nextVersion = Number(screen().dataset.version) + 1
+  document.getElementById('reopen').click()
+  await until(() => Number(screen().dataset.version) === nextVersion && button('AI로 일정 만들기') && !button('AI로 일정 만들기').disabled && Boolean(button('괜찮아요')) === (pref.usesWheelchair == null && pref.limitedWalking == null) && Boolean(button('없어요')) === (pref.avoidFoods == null))
+}
+document.getElementById('run').onclick = async () => {
+  document.getElementById('run').disabled = true
+  const draftKey = 'parttrip:planner-creation-draft', previous = sessionStorage.getItem(draftKey)
+  try {
+    await reset({})
+    check([...screen().querySelectorAll('h3')].map(el => el.textContent).join('|') === '어디로 가세요?|다니실 때 불편한 점이 있으세요?|피하는 음식이 있으세요?|어떤 여행을 원하세요?', '질문 순서 오류')
+    button('휠체어를 써요').click(); button('오래 걷기 어려워요').click()
+    await until(() => selected('휠체어를 써요') && selected('오래 걷기 어려워요'))
+    button('괜찮아요').click(); await until(() => selected('괜찮아요'))
+    check(!selected('휠체어를 써요') && !selected('오래 걷기 어려워요'), '괜찮아요 배타 선택 오류')
+    button('계단이 어려워요').click(); await until(() => selected('계단이 어려워요'))
+    check(!selected('괜찮아요'), '다른 선택 후 괜찮아요 유지')
+    button('해산물').click(); button('유제품').click()
+    await until(() => selected('해산물') && selected('유제품'))
+    button('없어요').click(); await until(() => selected('없어요'))
+    check(!selected('해산물') && !selected('유제품'), '음식 없음 배타 선택 오류')
+    button('AI로 일정 만들기').click(); button('AI로 일정 만들기')?.click()
+    await until(() => button('AI로 일정 만들기') && !button('AI로 일정 만들기').disabled && calls.length === 2)
+    check(calls.map(c => c.type).join() === 'save,generate', '저장 순서 또는 중복 생성 오류')
+    check(JSON.stringify(calls[0].payload) === JSON.stringify({ preferredTransport: 'CAR', dailyScheduleCount: 4, canUseStairs: false, usesWheelchair: false, limitedWalking: false, avoidFoods: [] }), '저장값 오류')
+    check(!button('괜찮아요') && !button('없어요'), '저장 후 질문 유지')
+    const reopenedVersion = Number(screen().dataset.version) + 1
+    document.getElementById('reopen').click()
+    await until(() => Number(screen().dataset.version) === reopenedVersion && button('AI로 일정 만들기'))
+    check(!button('괜찮아요') && !button('없어요'), '다음 일정에서 재질문')
+    await reset({})
+    button('AI로 일정 만들기').click()
+    await until(() => calls.length === 1 && !button('AI로 일정 만들기')?.disabled)
+    check(calls[0].type === 'generate' && button('괜찮아요'), `미답변 저장 또는 재질문 누락: ${JSON.stringify(calls)}`)
+    await reset({}); failSave = true
+    button('해산물').click(); await until(() => selected('해산물'))
+    button('AI로 일정 만들기').click()
+    await until(() => calls.length === 2 && !button('AI로 일정 만들기')?.disabled)
+    check(calls.map(c => c.type).join() === 'save,generate' && button('없어요'), '저장 실패가 생성을 막거나 질문을 숨김')
+    check(!('usesWheelchair' in calls[0].payload), '미응답 이동 편의 전송')
+    failSave = false
+    await reset({ usesWheelchair: false, limitedWalking: false })
+    check(!button('괜찮아요') && button('없어요'), '답변한 이동 편의 재질문')
+    await reset({ avoidFoods: [] })
+    check(button('괜찮아요') && !button('없어요'), '답변한 음식 재질문')
+    document.getElementById('result').textContent = 'PASS: 질문 순서·배타/복수 선택·저장값·저장 후 재진입·미답변 생략·저장 실패 후 생성·중복 클릭 방지'
+  } catch (error) { document.getElementById('result').textContent = `FAIL: ${error.message}` }
+  finally { if (previous === null) sessionStorage.removeItem(draftKey); else sessionStorage.setItem(draftKey, previous) }
+}
+</script></body></html>

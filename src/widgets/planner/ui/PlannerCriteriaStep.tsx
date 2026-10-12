@@ -9,7 +9,7 @@ import {
   type PlannerBlockResponseDto,
 } from "@/entities/planner";
 import type { PlaceSearchResponseDto } from "@/entities/travel";
-import { useTravelPreferencesQuery } from "@/entities/user";
+import { useTravelPreferencesQuery, useUpdateTravelPreferencesMutation } from "@/entities/user";
 import { paths } from "@/shared/config";
 import { Button } from "@/shared/ui/parttrip";
 import { formatDateRange } from "@/shared/utils";
@@ -17,10 +17,26 @@ import { isPositiveSafeInteger } from "@/shared/utils/number";
 import { activatePlannerSession } from "../model/planner-session";
 import { writePlannerCreationDraft, type PlannerCreationDraft } from "../model/planner-creation";
 import { getPlannerTravelParty } from "../model/member-count";
+import { getPreferenceAnswers, togglePreference, type Mobility, type AvoidFood } from "../model/preference-answers";
 import * as S from "./PlannerAiFlow.styles";
 import { PlaceSearchDialog } from "@/widgets/place-search";
 
 type SelectionMap = Record<string, string[]>;
+
+const mobilityOptions: Array<{ value: Mobility | null; label: string }> = [
+  { value: "WHEELCHAIR", label: "휠체어를 써요" },
+  { value: "WALKING", label: "오래 걷기 어려워요" },
+  { value: "STAIRS", label: "계단이 어려워요" },
+  { value: null, label: "괜찮아요" },
+];
+const foodOptions: Array<{ value: AvoidFood | null; label: string }> = [
+  { value: "SEAFOOD", label: "해산물" },
+  { value: "SPICY", label: "매운 음식" },
+  { value: "HARD", label: "딱딱하거나 질긴 음식" },
+  { value: "MEAT", label: "고기" },
+  { value: "DAIRY", label: "유제품" },
+  { value: null, label: "없어요" },
+];
 
 const suggestedBlockTypes = [
   "DEPARTURE_PLACE",
@@ -52,6 +68,14 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
   const blocksQuery = usePlannerBlocksQuery();
   const generateMutation = useGeneratePlannerMutation();
   const preferencesQuery = useTravelPreferencesQuery();
+  const updatePreferences = useUpdateTravelPreferencesMutation();
+  const [mobility, setMobility] = useState<Mobility[] | null>(null);
+  const [foods, setFoods] = useState<AvoidFood[] | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
+  const askMobility = preferencesQuery.data != null &&
+    preferencesQuery.data.usesWheelchair == null && preferencesQuery.data.limitedWalking == null;
+  const askFoods = preferencesQuery.data != null && preferencesQuery.data.avoidFoods == null;
   const [selections, setSelections] = useState<SelectionMap>(() =>
     toSelectionMap(draft.blocks),
   );
@@ -244,7 +268,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
   };
 
   const generate = async () => {
-    if (generateMutation.isPending) return;
+    if (submittingRef.current) return;
     setMessage("");
     const party = getPlannerTravelParty(blocks);
     if (!party) {
@@ -275,7 +299,14 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
         : {}),
     };
     writePlannerCreationDraft({ ...draft, blocks, ...party });
+    submittingRef.current = true;
+    setSubmitting(true);
     try {
+      const answers = getPreferenceAnswers(preferencesQuery.data, mobility, foods);
+      if (answers) {
+        // 편의 저장 실패가 일정 생성을 막지 않도록 한다.
+        await updatePreferences.mutateAsync(answers).catch(() => {});
+      }
       const schedule = await generateMutation.mutateAsync(payload);
       if (!isPositiveSafeInteger(schedule.plannerId))
         throw new Error("plannerId is missing");
@@ -289,6 +320,9 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
       setMessage(
         "AI 일정을 만들지 못했어요. 도시와 날짜를 확인하고 다시 시도해주세요.",
       );
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
     }
   };
 
@@ -303,7 +337,32 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
           </S.Error>
         ) : (
           <>
-            <S.BlockList>{priorityBlocks.map(renderBlock)}</S.BlockList>
+            <S.BlockList>
+              {priorityBlocks.filter(block => block.type === "DEPARTURE_PLACE").map(renderBlock)}
+              {askMobility ? <S.PreferenceQuestion>
+                <h3>다니실 때 불편한 점이 있으세요?</h3>
+                <p>AI가 장소를 고를 때 참고해요. 여행 편의 설정에서 언제든 바꿀 수 있어요.</p>
+                <S.Options role="group" aria-label="다니실 때 불편한 점이 있으세요?">
+                  {mobilityOptions.map(({ value, label }) => {
+                    const active = value === null ? mobility?.length === 0 : mobility?.includes(value) === true;
+                    return <S.Option key={label} type="button" $active={active} aria-pressed={active}
+                      disabled={submitting} onClick={() => setMobility(current => togglePreference(current, value))}>{label}</S.Option>;
+                  })}
+                </S.Options>
+              </S.PreferenceQuestion> : null}
+              {askFoods ? <S.PreferenceQuestion>
+                <h3>피하는 음식이 있으세요?</h3>
+                <p>AI가 맛집을 고를 때 빼요. 식당 종류만 참고해요. 알레르기가 있으면 식당에 꼭 확인하세요. 여행 편의 설정에서 언제든 바꿀 수 있어요.</p>
+                <S.Options role="group" aria-label="피하는 음식이 있으세요?">
+                  {foodOptions.map(({ value, label }) => {
+                    const active = value === null ? foods?.length === 0 : foods?.includes(value) === true;
+                    return <S.Option key={label} type="button" $active={active} aria-pressed={active}
+                      disabled={submitting} onClick={() => setFoods(current => togglePreference(current, value))}>{label}</S.Option>;
+                  })}
+                </S.Options>
+              </S.PreferenceQuestion> : null}
+              {priorityBlocks.filter(block => block.type !== "DEPARTURE_PLACE").map(renderBlock)}
+            </S.BlockList>
             {otherBlocks.length ? (
               <S.MoreBlocks>
                 <summary>다른 여행 기준 더 보기 ({otherBlocks.length})</summary>
@@ -315,6 +374,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
               <Button
                 type="button"
                 $variant="secondary"
+                disabled={submitting}
                 onClick={() => void navigate({ to: paths.plannerDestination })}
               >
                 이전
@@ -322,18 +382,18 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
               <Button
                 type="button"
                 disabled={
-                  generateMutation.isPending ||
+                  submitting ||
                   blocksQuery.isLoading ||
                   preferencesQuery.isLoading
                 }
                 onClick={() => void generate()}
               >
-                {generateMutation.isPending
+                {submitting
                   ? "AI가 일정을 만드는 중…"
-                  : "AI 여행 플래너 만들기"}
+                  : "AI로 일정 만들기"}
               </Button>
             </S.ButtonRow>
-            {generateMutation.isPending ? (
+            {submitting ? (
               <p role="status" aria-live="polite">
                 선택한 여행지와 조건으로 일정을 만들고 있어요. 잠시
                 기다려주세요.
