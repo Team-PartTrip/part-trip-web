@@ -25,7 +25,7 @@ export function TodaySchedule({ date, slots }: { date: string; slots: PlannerSch
       const isNext = index === nextIndex
       const showRoute = !visitedSlot && index > 0
       const readyRoute = showRoute && slot.routeStatus === 'READY' ? slot.routeFromPrevious : undefined
-      const directions = getKakaoMapUrl(slot.routeFromPrevious?.transportMode ?? 'PUBLIC_TRANSIT', name, place?.latitude, place?.longitude, origin ?? undefined)
+      const directions = getKakaoMapUrl(slot.routeFromPrevious?.transportMode ?? 'PUBLIC_TRANSIT', name, place?.latitude, place?.longitude)
       const routeMessage = slot.routeStatus === 'CALCULATING' ? '경로를 계산하고 있어요.' : getRouteFailureMessage(slot.routeStatus)
       return <Fragment key={slot.slotId ?? index}>
         {readyRoute ? <PlannerScheduleRouteLine route={readyRoute} placeName={name}

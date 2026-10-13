@@ -88,7 +88,7 @@ document.getElementById('run').onclick = async () => {
       visit('둘째 장소').click()
       await until(() => next() === '첫 장소 재방문')
       check(!screen().textContent.includes('25분'), '다녀온 장소 경로 표시')
-      check(screen().querySelector('a[aria-label="첫 장소 재방문 카카오맵에서 길 안내 열기"]')?.href.includes('/by/traffic/'), '다음 장소 경로 실패 길 안내 없음')
+      check(screen().querySelector('a[aria-label="첫 장소 재방문 카카오맵에서 길 안내 열기"]')?.href.includes('/link/to/'), '경로 실패 길 안내에 이전 장소 출발지 포함됨')
       visit('첫 장소 재방문').click()
       await until(() => next() === '마지막 장소')
       check(!screen().textContent.includes('경로를 불러오지 못했어요'), '다녀온 장소 실패 안내 표시')
