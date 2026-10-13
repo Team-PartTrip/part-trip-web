@@ -88,6 +88,11 @@ document.getElementById('run').onclick = async () => {
     check(calls.map(c => c.type).join() === 'save,generate' && button('없어요'), '저장 실패가 생성을 막거나 질문을 숨김')
     check(!('usesWheelchair' in calls[0].payload), '미응답 이동 편의 전송')
     failSave = false
+    await reset({ canUseStairs: false })
+    button('오래 걷기 어려워요').click(); await until(() => selected('오래 걷기 어려워요'))
+    button('AI로 일정 만들기').click()
+    await until(() => calls.length === 2 && button('AI로 일정 만들기') && !button('AI로 일정 만들기').disabled)
+    check(calls[0].payload.canUseStairs === false && pref.canUseStairs === false, '걷기 답변이 기존 계단 설정을 덮어씀')
     await reset({ usesWheelchair: false, limitedWalking: false })
     check(!button('괜찮아요') && button('없어요'), '답변한 이동 편의 재질문')
     await reset({ avoidFoods: [] })

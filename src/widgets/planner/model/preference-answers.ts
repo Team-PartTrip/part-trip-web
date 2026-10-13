@@ -18,7 +18,7 @@ export function getPreferenceAnswers(
   if (preferences.usesWheelchair == null && preferences.limitedWalking == null && mobility !== null) {
     answers.usesWheelchair = mobility.includes('WHEELCHAIR')
     answers.limitedWalking = mobility.includes('WALKING')
-    answers.canUseStairs = !(answers.usesWheelchair || mobility.includes('STAIRS'))
+    if (answers.usesWheelchair || mobility.includes('STAIRS')) answers.canUseStairs = false
   }
   if (preferences.avoidFoods == null && foods !== null) answers.avoidFoods = foods
   if (!Object.keys(answers).length) return
