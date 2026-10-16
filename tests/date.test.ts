@@ -7,7 +7,7 @@ test('날짜 포맷과 양끝 포함 기간을 공통 규칙으로 계산한다'
   assert.equal(formatDate('2026-07-01'), '2026.07.01')
   assert.equal(formatCalendarDate(2026, 6, 1), '2026-07-01')
   assert.equal(formatDateRange('2026-07-01', '2026-07-03'), '2026.07.01 – 07.03')
-  assert.equal(formatDateRange('2026-07-01', '2026-08-03'), '2026.07.01 – 2026.08.03')
+  assert.equal(formatDateRange('2026-07-01', '2026-08-03'), '2026.07.01 – 08.03')
   assert.equal(getDateRangeDays('2026-07-01', '2026-07-03'), 3)
   assert.equal(formatTripDuration('2026-07-01', '2026-07-03'), '2박 3일')
   assert.equal(formatTripDuration('2026-07-01', '2026-07-01'), '당일치기')

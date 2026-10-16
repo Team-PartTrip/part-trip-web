@@ -24,7 +24,7 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
   const { data: profile, isError, isLoading } = useUserProfileQuery()
   const { data: guardians } = useGuardianLinksQuery()
   const name = profile?.name || '여행자'
-  const initials = name.slice(0, 2).toUpperCase()
+  const initials = name.slice(0, 1).toUpperCase()
 
   const handleDeleteAccount = async () => {
     if (!window.confirm('계정을 삭제하면 복구할 수 없습니다. 정말 탈퇴할까요?')) return
@@ -63,7 +63,7 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
                 </S.Avatar>
                 <S.AccountCopy>
                   <strong>{name}</strong>
-                  <span>리더 · 여행 편의 설정과 보호자 연결을 관리해요</span>
+                  <span>여행 편의 설정과 가족 연결을 관리해요</span>
                   <small>@{profile.id}</small>
                 </S.AccountCopy>
                 <S.ProfileActions>
@@ -77,10 +77,10 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
                 <h2 id="travel-settings-title">여행 관리</h2>
                 <S.SettingsList>
                   <S.SettingsRow to={paths.profileTravelPreferences}>
-                    <span><strong>여행 편의 설정</strong><small>이동수단 · 하루 일정 개수 · 계단 이용</small></span><b>관리</b>
+                    <span><strong>여행 편의 설정</strong><small>이동수단 · 계단 이용 · 피하는 음식</small></span><b>관리</b>
                   </S.SettingsRow>
                   <S.SettingsRow to={paths.profileGuardians}>
-                    <span><strong>보호자 연결</strong><small>일정 공유 · 현재 위치 보기</small></span>
+                    <span><strong>가족 연결</strong><small>일정 공유 · 현재 위치 보기</small></span>
                     <b>{guardians ? `${guardians.length}명 연결됨 · 관리` : '관리'}</b>
                   </S.SettingsRow>
                 </S.SettingsList>

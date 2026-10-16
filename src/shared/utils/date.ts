@@ -58,7 +58,7 @@ export function formatDateRange(startDate: DateValue, endDate: DateValue) {
   const start = formatDate(startDate)
   const end = formatDate(endDate)
   if (startDate && startDate === endDate) return start
-  return start.length >= 7 && end.length >= 7 && start.slice(0, 7) === end.slice(0, 7)
+  return start.length >= 7 && end.length >= 7 && start.slice(0, 4) === end.slice(0, 4)
     ? `${start} – ${end.slice(5)}`
     : `${start} – ${end}`
 }

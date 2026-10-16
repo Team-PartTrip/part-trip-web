@@ -25,6 +25,8 @@ export const Subtitle = styled.p`
 `
 
 export const CalendarLayout = styled.div`
+  min-width: 0;
+  > * { min-width: 0; }
   display: grid;
   gap: 1.5rem;
   grid-template-columns: minmax(0, 45rem) minmax(20rem, 24.5rem);
@@ -60,13 +62,13 @@ export const MonthBar = styled.header`
   margin-bottom: 1rem;
   h2 { margin: 0; color: ${({ theme }) => theme.colors.text.strong}; font-size: 1.125rem; }
   p { margin: 0.25rem 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; }
-  span { display: flex; gap: 0.25rem; }
+  span { display: flex; flex-shrink: 0; gap: 0.25rem; }
   button { width: 1.75rem; height: 1.75rem; border: 0; background: transparent; color: ${({ theme }) => theme.colors.brand.strong}; cursor: pointer; font-size: 1.125rem; }
 `
 
 export const Weekdays = styled.div`
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   margin-bottom: 0.25rem;
   color: ${({ theme }) => theme.colors.text.muted};
   font-size: 0.875rem;
@@ -77,7 +79,7 @@ export const Weekdays = styled.div`
 export const CalendarGrid = styled.div`
   display: grid;
   gap: 0.25rem;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
 `
 
 export const Cell = styled.button<{ $empty: boolean; $inTrip: boolean; $selected: boolean }>`
@@ -95,9 +97,9 @@ export const Cell = styled.button<{ $empty: boolean; $inTrip: boolean; $selected
   text-align: left;
   box-shadow: ${({ $selected, theme }) => ($selected ? `inset 0 0 0 0.125rem ${theme.colors.brand.primary}` : 'none')};
   &:disabled { cursor: default; }
-  strong { font-weight: 500; }
+  strong { position: absolute; top: 0.5rem; left: 0.5rem; font-weight: 500; }
   &:nth-child(7n + 1) strong { color: ${({ theme }) => theme.colors.status.error}; }
-  @media (max-width: 35rem) { min-height: 3.125rem; padding: 0.375rem; }
+  @media (max-width: 35rem) { min-height: 4rem; padding: 0.375rem; }
 `
 
 export const EventLabel = styled.span`

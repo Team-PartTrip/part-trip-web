@@ -9,8 +9,8 @@ test('내 여행 지도는 대한민국 시·도 지도이며 국가 획득 경�
 
   assert.match(page, /<ProfileMapView/)
   assert.match(mapView, /skorea-municipalities-topo\.json\?url/)
-  assert.match(mapView, /summarizeVisitedAreas\(visitedDistricts, counts\)/)
-  assert.match(mapView, /area\.isMetro \? `여행 \$\{area\.visits\}번`/)
+  assert.match(mapView, /countProvinceTrips\(trips\)/)
+  assert.match(mapView, /방문한 시·도/)
   assert.doesNotMatch(`${page}\n${mapView}`, /<WorldMap/)
   assert.match(retiredClaimRoute, /redirect\(\{ to: paths\.profileMap \}\)/)
 })

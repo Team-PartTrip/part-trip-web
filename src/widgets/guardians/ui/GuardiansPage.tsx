@@ -137,7 +137,7 @@ export function GuardiansPage() {
     <AppShell>
       <S.Page>
         <S.Header>
-          <h1>보호자 연결</h1>
+          <h1>가족 연결</h1>
           <p>가족과 여행 일정을 공유하고, 필요할 때 현재 위치를 확인할 수 있어요.</p>
         </S.Header>
         <S.Grid>
@@ -153,7 +153,7 @@ export function GuardiansPage() {
             <h2>받은 코드 입력하기</h2>
             <p>가족이 보낸 6자리 코드를 입력하면 계정이 연결돼요.</p>
             <S.Form onSubmit={(event) => void acceptInvite(event)}>
-              <Input aria-label="보호자 연결 코드" autoComplete="one-time-code" autoCapitalize="characters" inputMode="text" maxLength={6} spellCheck={false}
+              <Input aria-label="가족 연결 코드" autoComplete="one-time-code" autoCapitalize="characters" inputMode="text" maxLength={6} spellCheck={false}
                 value={code} onChange={(event) => setCode(sanitizeGuardianInviteCode(event.target.value))} />
               <Button type="submit" disabled={acceptMutation.isPending || code.length !== 6}>
                 {acceptMutation.isPending ? '연결 중…' : '연결하기'}
