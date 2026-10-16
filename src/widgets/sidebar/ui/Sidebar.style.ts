@@ -44,6 +44,12 @@ export const LogoSection = styled.div`
 
   a {
     display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: ${({ theme }) => theme.colors.brand.strong};
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1;
     text-decoration: none;
 
     img {
