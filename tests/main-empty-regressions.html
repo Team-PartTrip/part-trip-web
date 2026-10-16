@@ -1,0 +1,56 @@
+<!doctype html><html lang="ko"><meta charset="UTF-8"><title>홈 빈 상태 회귀 검사</title>
+<button id="run">회귀 검사 실행</button><pre id="result">API는 로컬 응답으로 대체됩니다.</pre><div id="root"></div>
+<script type="module">
+import { createElement as h } from 'react'
+import { createRoot } from 'react-dom/client'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { createRootRoute, createRouter, RouterProvider } from '@tanstack/react-router'
+import { ThemeProvider } from 'styled-components'
+import { MainPage } from '/src/widgets/main/ui/MainPage.tsx'
+import { apiClient } from '/src/shared/libs/api-client.ts'
+import { appTheme } from '/src/shared/theme/index.ts'
+import { GlobalStyle } from '/src/shared/ui/global-style/index.ts'
+if (!['localhost', '127.0.0.1'].includes(location.hostname)) throw new Error('로컬에서만 실행하세요.')
+let plan = { status: 'NO_TRIP' }, places = [], fail = false, calls = 0
+apiClient.get = async path => {
+  if (path === '/main/dday') { calls++; return { data: plan } }
+  if (path === '/main/tour-place') {
+    calls++
+    if (fail) throw new Error('테스트 조회 실패')
+    return { data: places }
+  }
+  return { data: { unreadCount: 0 } }
+}
+const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } })
+client.setQueryData(['travel', 'dday'], plan)
+client.setQueryData(['notifications', 'unread-count'], { unreadCount: 0 })
+const route = createRootRoute({ component: MainPage })
+createRoot(document.getElementById('root')).render(h(QueryClientProvider, { client }, h(ThemeProvider, { theme: appTheme }, h(GlobalStyle), h(RouterProvider, { router: createRouter({ routeTree: route }) }))));
+const until = async fn => { const end = Date.now() + 5000; while (!fn()) { if (Date.now() > end) throw new Error('화면 갱신 시간 초과'); await new Promise(r => setTimeout(r, 20)) } }
+const check = (ok, message) => { if (!ok) throw new Error(message) }
+const refresh = () => [...document.querySelectorAll('button')].find(el => el.textContent.includes('새로고침'))
+const text = () => document.getElementById('root').textContent
+const calendar = () => [...document.querySelectorAll('button')].find(el => el.textContent.includes('축제 · 이벤트 캘린더'))
+document.getElementById('run').onclick = async () => {
+  try {
+    await until(() => refresh())
+    check(text().includes('여행지가 아직 정해지지 않았어요.'), '여행 없는 상태 안내 누락')
+    check(calendar()?.disabled, '미설정 캘린더 비활성 누락')
+    check(refresh().querySelector('svg[aria-hidden="true"]'), '새로고침 아이콘 누락')
+    const before = calls
+    refresh().click()
+    await until(() => calls > before && refresh() && !refresh().disabled)
+    plan = { status: 'BEFORE', cityName: '대구', regionName: '대구광역시', startDate: '2099-01-01', endDate: '2099-01-02' }
+    refresh().click()
+    await until(() => text().includes('추천 장소가 아직 준비되지 않았어요.') && refresh() && !refresh().disabled)
+    check(!calendar().disabled, '정해진 여행의 캘린더 사용 불가')
+    fail = true; refresh().click()
+    await until(() => text().includes('추천 장소를 불러오지 못했어요.') && refresh() && !refresh().disabled)
+    fail = false; places = [{ tourPlaceId: 991, placeName: '테스트 추천 장소', category: '명소', rating: 4.5 }]
+    refresh().click()
+    await until(() => text().includes('테스트 추천 장소'))
+    check(!text().includes('추천 장소를 불러오지 못했어요.'), '재시도 후 오류 안내 잔존')
+    document.getElementById('result').textContent = 'PASS: 여행 미설정, 빈 추천, 오류, 새로고침 재조회 및 복구, 캘린더와 아이콘'
+  } catch (error) { document.getElementById('result').textContent = 'FAIL: ' + error.message; throw error }
+}
+</script></html>

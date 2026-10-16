@@ -184,7 +184,8 @@ export const CalendarCard = styled.button`
   color: ${({ theme }) => theme.colors.text.strong};
   cursor: pointer;
   text-align: left;
-  &:hover { background: ${({ theme }) => theme.colors.background.soft}; }
+  &:hover:not(:disabled) { background: ${({ theme }) => theme.colors.background.soft}; }
+  &:disabled { cursor: default; }
 `
 
 export const CalendarIcon = styled.span`
@@ -275,6 +276,10 @@ export const TodayStopNumber = styled.span<{ $visited: boolean }>`
 `
 
 export const RefreshRecommendations = styled.button`
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 0.375rem;
   min-height: 2.25rem;
   border: 0;
   border-radius: 0.625rem;
@@ -296,6 +301,20 @@ export const RecommendationGrid = styled.div`
   gap: 1rem;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   @media (max-width: 43.75rem) { grid-template-columns: 1fr; }
+`
+
+export const RecommendationState = styled.p`
+  display: grid;
+  grid-column: 1 / -1;
+  place-items: center;
+  margin: 0;
+  border: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 1rem;
+  padding: 2rem 1.25rem;
+  background: ${({ theme }) => theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.text.muted};
+  text-align: center;
+  line-height: 1.6;
 `
 
 export const Recommendation = styled.article`

@@ -108,5 +108,7 @@ export function useMainTravelQuery() {
     isRecommendationsError: tourPlaces.isError,
     isLoading: ddayQuery.isLoading,
     isRecommendationsLoading: tourPlaces.isLoading,
+    isRefreshing: ddayQuery.isFetching || tourPlaces.isFetching,
+    refetch: () => Promise.all([ddayQuery.refetch(), ...(hasCountry ? [tourPlaces.refetch()] : [])]),
   }
 }

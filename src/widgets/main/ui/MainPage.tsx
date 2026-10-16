@@ -35,10 +35,16 @@ export function RecommendationCards({
   city,
   places,
   status,
+  emptyMessage = '추천 장소가 아직 준비되지 않았어요. 잠시 후 새로고침해 주세요.',
+  onRefresh,
+  isRefreshing = false,
 }: {
   city: string
   places: TourPlaceResponseDto[]
   status: 'loading' | 'error' | 'empty' | 'ready'
+  emptyMessage?: string
+  onRefresh?: () => void
+  isRefreshing?: boolean
 }) {
   const [recommendations, setRecommendations] = useState(() => city ? readRecommendations(city, places) ?? pickRecommendations(places) : [])
   useEffect(() => {
@@ -49,7 +55,7 @@ export function RecommendationCards({
   if (status === 'loading') {
     content = <>{[0, 1, 2].map((index) => <S.LoadingRecommendation key={index} aria-hidden="true" />)}</>
   } else if (status === 'error') {
-    content = <S.State role="alert">추천 장소를 불러오지 못했습니다.</S.State>
+    content = <S.RecommendationState role="alert">추천 장소를 불러오지 못했어요. 새로고침해 다시 시도해 주세요.</S.RecommendationState>
   } else if (recommendations.length) {
     content = recommendations.map((place, index) => (
       <S.Recommendation key={`${place.placeName || '추천 장소'}-${index}`}>
@@ -59,17 +65,24 @@ export function RecommendationCards({
       </S.Recommendation>
     ))
   } else {
-    content = <S.State>표시할 추천 장소가 없습니다.</S.State>
+    content = <S.RecommendationState>{emptyMessage}</S.RecommendationState>
   }
 
   return <S.Recommendations>
     <S.RecommendationsHeading>
       <S.SectionTitle>가볼 만한 곳</S.SectionTitle>
-      <S.RefreshRecommendations type="button" disabled={status !== 'ready' || !city || !places.length} onClick={() => {
+      <S.RefreshRecommendations type="button" disabled={status === 'loading' || isRefreshing} onClick={() => {
+        if (status !== 'ready' || !city || !places.length) {
+          onRefresh?.()
+          return
+        }
         const next = pickRecommendations(places, recommendations)
         saveRecommendations(city, next)
         setRecommendations(next)
-      }}>새로고침</S.RefreshRecommendations>
+      }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5" /><path d="M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 17.9 17" /></svg>
+        {isRefreshing ? '불러오는 중' : '새로고침'}
+      </S.RefreshRecommendations>
     </S.RecommendationsHeading>
     <S.RecommendationGrid>{content}</S.RecommendationGrid>
   </S.Recommendations>
@@ -132,10 +145,12 @@ function MainHero({
 
 export function MainPage() {
   const navigate = useNavigate()
-  const { data, isError, isLoading, isRecommendationsError, isRecommendationsLoading } = useMainTravelQuery()
+  const { data, isError, isLoading, isRecommendationsError, isRecommendationsLoading, isRefreshing, refetch } = useMainTravelQuery()
   const plan = data.plan
   const recommendationCity = plan?.cityName?.trim() || plan?.regionName?.trim() || ''
   const hasPlan = hasTravelPlan(plan)
+  const hasActivePlan = hasPlan && plan?.status !== 'ENDED'
+  const canOpenCalendar = Boolean(hasActivePlan && recommendationCity && plan?.startDate && plan.endDate)
   const isDuring = plan?.status === 'DURING'
   const date = new Date()
   const today = formatCalendarDate(date.getFullYear(), date.getMonth(), date.getDate())
@@ -198,18 +213,26 @@ export function MainPage() {
 
         {isDuring ? <TodaySchedule key={today} date={today} slots={todaySlots} /> : null}
 
-        {hasPlan && plan?.status !== 'ENDED' ? (
+        {presentation.page !== 'loading' ? (
           <>
-            <S.CalendarCard type="button" onClick={() => navigate({ to: paths.recordCalendar })}>
+            <S.CalendarCard type="button" disabled={!canOpenCalendar} onClick={() => navigate({ to: paths.recordCalendar })}>
               <S.CalendarIcon><img src={figmaPlannerIcon} alt="" /></S.CalendarIcon>
               <S.CalendarCopy>
                 <strong>축제 · 이벤트 캘린더</strong>
-                <span>{plan?.regionName || '여행지'}의 여행 기간 전후 일정</span>
+                <span>{canOpenCalendar ? `${plan?.regionName || recommendationCity}의 여행 기간 전후 일정` : '여행지와 날짜가 아직 정해지지 않았어요. 여행을 정하면 축제 일정을 확인할 수 있어요.'}</span>
               </S.CalendarCopy>
-              <S.CalendarArrow aria-hidden="true">›</S.CalendarArrow>
+              {canOpenCalendar ? <S.CalendarArrow aria-hidden="true">›</S.CalendarArrow> : null}
             </S.CalendarCard>
 
-            <RecommendationCards key={`${recommendationCity}:${presentation.recommendations}`} city={recommendationCity} places={data.tourPlaces} status={presentation.recommendations} />
+            <RecommendationCards
+              key={`${recommendationCity}:${presentation.recommendations}`}
+              city={recommendationCity}
+              places={hasActivePlan ? data.tourPlaces : []}
+              status={presentation.page === 'error' ? 'error' : hasActivePlan ? presentation.recommendations : 'empty'}
+              emptyMessage={!hasActivePlan || !recommendationCity ? '여행지가 아직 정해지지 않았어요. 여행지를 정하면 가볼 만한 곳을 추천해 드릴게요.' : undefined}
+              onRefresh={() => { void refetch() }}
+              isRefreshing={isRefreshing}
+            />
           </>
         ) : null}
       </S.Page>
