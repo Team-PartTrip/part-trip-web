@@ -167,3 +167,35 @@ export const LocationCard = styled.button`
   b { color: ${({ theme }) => theme.colors.text.muted}; font-size: 1.375rem; font-weight: 400; }
   &:hover { background: ${({ theme }) => theme.colors.background.muted}; }
 `
+
+export const MapFrame = styled.div`
+  position: relative;
+  overflow: hidden;
+  border: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 1rem;
+  background: ${({ theme }) => theme.colors.background.muted};
+  > p { position: absolute; z-index: 1; inset: 0; background: ${({ theme }) => theme.colors.background.default}; }
+`
+
+export const LiveMap = styled.div`
+  position: relative;
+  z-index: 0;
+  width: 100%;
+  height: 30rem;
+  @media (max-width: 40rem) { height: 24rem; }
+  .record-map-pin {
+    max-width: 14rem;
+    overflow: hidden;
+    border: 2px solid ${({ theme }) => theme.colors.background.default};
+    border-radius: 0.5rem;
+    padding: 0.375rem 0.625rem;
+    background: ${({ theme }) => theme.colors.brand.primary};
+    color: ${({ theme }) => theme.colors.text.inverse};
+    font: inherit;
+    font-size: 0.875rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .record-map-pin[aria-pressed='true'] { background: ${({ theme }) => theme.colors.brand.strong}; }
+`

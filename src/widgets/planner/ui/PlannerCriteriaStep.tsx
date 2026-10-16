@@ -11,6 +11,7 @@ import {
 import type { PlaceSearchResponseDto } from "@/entities/travel";
 import { useTravelPreferencesQuery, useUpdateTravelPreferencesMutation } from "@/entities/user";
 import { paths } from "@/shared/config";
+import { addressForCoordinates } from '@/shared/libs/kakao-maps';
 import { Button, Input } from "@/shared/ui/parttrip";
 import { formatDateRange, getErrorMessage } from "@/shared/utils";
 import { isPositiveSafeInteger } from "@/shared/utils/number";
@@ -85,6 +86,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
   const [departurePoint, setDeparturePoint] =
     useState<PlaceSearchResponseDto | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [locatingDeparture, setLocatingDeparture] = useState(false);
   const [departureMessage, setDepartureMessage] = useState("");
   const searchReturnFocusRef = useRef<HTMLButtonElement | null>(null);
   const departureActionVersion = useRef(0);
@@ -120,6 +122,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
 
   const setDepartureOption = (value: string) => {
     departureActionVersion.current += 1;
+    setLocatingDeparture(false);
     setSelections((current) => ({ ...current, DEPARTURE_PLACE: [value] }));
     setDeparturePoint(null);
     setDepartureMessage("");
@@ -127,6 +130,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
 
   const selectPlace = (place: PlaceSearchResponseDto) => {
     departureActionVersion.current += 1;
+    setLocatingDeparture(false);
     setDeparturePoint(place);
     setSelections((current) => ({
       ...current,
@@ -143,32 +147,40 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
       setDepartureMessage("이 브라우저에서는 현재 위치를 사용할 수 없어요.");
       return;
     }
+    setDeparturePoint(null);
+    setSelections(current => ({ ...current, DEPARTURE_PLACE: ['직접 지정'] }));
+    setLocatingDeparture(true);
+    setDepartureMessage('현재 위치의 주소를 확인하고 있어요.');
     navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
+      async ({ coords }) => {
         if (departureActionVersion.current !== actionVersion) return;
-        setDeparturePoint({
-          name: `선택한 출발지 (${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)})`,
-          address: "",
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-        });
-        setSelections((current) => ({
-          ...current,
-          DEPARTURE_PLACE: ["직접 지정"],
-        }));
-        setDepartureMessage("");
+        try {
+          const point = await addressForCoordinates(coords.latitude, coords.longitude);
+          if (departureActionVersion.current !== actionVersion) return;
+          setDeparturePoint(point);
+          setSelections(current => ({ ...current, DEPARTURE_PLACE: ['직접 지정'] }));
+          setDepartureMessage('');
+        } catch (error) {
+          if (departureActionVersion.current === actionVersion) setDepartureMessage(getErrorMessage(error));
+        } finally {
+          if (departureActionVersion.current === actionVersion) setLocatingDeparture(false);
+        }
       },
       () => {
+        if (departureActionVersion.current === actionVersion) setLocatingDeparture(false);
         if (departureActionVersion.current === actionVersion)
           setDepartureMessage(
             "현재 위치를 확인하지 못했어요. 위치 권한과 설정을 확인해주세요.",
           );
       },
+      { timeout: 10000, maximumAge: 30000 },
     );
   };
 
   const openPlaceSearch = (trigger: HTMLButtonElement) => {
     departureActionVersion.current += 1;
+    setLocatingDeparture(false);
+    setDepartureMessage('');
     searchReturnFocusRef.current = trigger;
     setSearchOpen(true);
   };
@@ -187,6 +199,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
         return;
       }
       departureActionVersion.current += 1;
+      setLocatingDeparture(false);
       const next = selections[type]?.includes(value) ? [] : [value];
       setSelections((current) => ({ ...current, [type]: next }));
       setDeparturePoint(null);
@@ -273,9 +286,9 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
               <Button
                 type="button"
                 $variant="secondary"
-                onClick={selectCurrentLocation}
+                disabled={locatingDeparture} onClick={selectCurrentLocation}
               >
-                지금 있는 곳
+                {locatingDeparture ? '주소 확인 중…' : '지금 있는 곳'}
               </Button>
               {home ? (
                 <Button
@@ -287,7 +300,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
                 </Button>
               ) : null}
             </div>
-            {departureMessage ? (
+            {departureMessage && locatingDeparture ? <p role="status">{departureMessage}</p> : departureMessage ? (
               <S.Error role="alert">{departureMessage}</S.Error>
             ) : null}
           </S.DepartureTools>
@@ -297,7 +310,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
   };
 
   const generate = async () => {
-    if (submittingRef.current) return;
+    if (submittingRef.current || locatingDeparture) return;
     setMessage("");
     const party = getPlannerTravelParty(blocks);
     if (!party) {
@@ -311,6 +324,11 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
       selections.DEPARTURE_PLACE?.[0] === "집 근처" ||
       (!selections.DEPARTURE_PLACE?.length && home != null);
     const resolvedDeparture = departurePoint ?? (useHomeAsDeparture ? home : undefined);
+    if (selections.DEPARTURE_PLACE?.[0] === '직접 지정' && !resolvedDeparture) {
+      setQuestionIndex(questions.indexOf('DEPARTURE_PLACE'));
+      setMessage('출발지 주소를 확인하거나 다른 곳 찾기에서 장소를 선택해주세요.');
+      return;
+    }
     const payload = {
       ...party,
       title: `${draft.cityName} 여행`,
@@ -443,7 +461,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
               <Button
                 type="button"
                 disabled={
-                  submitting ||
+                  submitting || locatingDeparture ||
                   blocksQuery.isLoading ||
                   preferencesQuery.isLoading
                 }
