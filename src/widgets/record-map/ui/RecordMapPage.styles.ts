@@ -123,88 +123,15 @@ export const MapSubtitle = styled.p`
   line-height: 1rem;
 `
 
-export const MapCanvas = styled.div`
-  position: relative;
-  width: 100%;
-  height: 29.375rem;
-  overflow: hidden;
-  border: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
-  border-radius: 1rem;
-  background: ${({ theme }) => theme.colors.background.muted};
-  img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-  }
-  @media (max-width: 40rem) { height: 22.5rem; }
-`
-
 export const MapState = styled.p`
   display: grid;
-  height: 100%;
+  min-height: 8rem;
   place-items: center;
   margin: 0;
   padding: 1.5rem;
   color: ${({ theme }) => theme.colors.text.muted};
   font-size: 0.8125rem;
   text-align: center;
-`
-
-export const RouteSegment = styled.span<{ $left: number; $top: number; $length: number; $angle: number }>`
-  position: absolute;
-  top: ${({ $top }) => `${$top}%`};
-  left: ${({ $left }) => `${$left}%`};
-  width: ${({ $length }) => `${$length}%`};
-  height: 0;
-  border-top: 0.1875rem dashed ${({ theme }) => theme.colors.brand.primary};
-  filter: drop-shadow(0 0 0.125rem rgb(255 255 255 / 90%));
-  transform: rotate(${({ $angle }) => `${$angle}deg`});
-  transform-origin: left center;
-  z-index: 1;
-`
-
-export const MarkerGroup = styled.span<{ $left: number; $top: number }>`
-  position: absolute;
-  top: ${({ $top }) => `${$top}%`};
-  left: ${({ $left }) => `${$left}%`};
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transform: translate(-50%, -100%);
-`
-
-export const MapMarker = styled.span`
-  position: relative;
-  display: grid;
-  width: 1.75rem;
-  height: 2.125rem;
-  place-items: center;
-  border: 0.125rem solid ${({ theme }) => theme.colors.background.default};
-  border-radius: 50% 50% 50% 0;
-  background: ${({ theme }) => theme.colors.brand.primary};
-  box-shadow: 0 0.125rem 0.3125rem rgb(15 33 51 / 22%);
-  color: ${({ theme }) => theme.colors.text.inverse};
-  transform: rotate(-45deg);
-  &::after {
-    color: inherit;
-    content: attr(data-number);
-    font-size: 0.6875rem;
-    font-weight: 700;
-    transform: rotate(45deg);
-  }
-`
-
-export const MapLabel = styled.span`
-  border-radius: 0.375rem;
-  padding: 0.25rem 0.375rem;
-  background: rgb(255 255 255 / 88%);
-  color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 0.625rem;
-  font-weight: 600;
-  white-space: nowrap;
 `
 
 export const LocationPanel = styled.aside`

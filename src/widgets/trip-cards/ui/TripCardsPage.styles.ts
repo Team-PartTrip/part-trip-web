@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Skeleton } from "@/shared/ui/parttrip";
+import { Button, Skeleton } from "@/shared/ui/parttrip";
 
 export const LoadingHeader = styled(Skeleton)`
   width: 13.75rem;
@@ -99,7 +99,13 @@ export const CarouselSection = styled.section`
   flex-direction: column;
   align-items: center;
   gap: 1.125rem;
-  > button { width: 9.1875rem; height: 3.25rem; min-height: 3.25rem; border-radius: 0.875rem; font-size: 0.875rem; }
+
+`
+
+export const AddButton = styled(Button)`
+  min-width: 12rem;
+  min-height: 3.25rem;
+  white-space: nowrap;
 `
 
 export const TravelCard = styled.button`
@@ -169,15 +175,6 @@ export const MetricList = styled.div`
   strong { font-size: 0.8125rem; }
 `
 
-export const Pagination = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  height: 0.75rem;
-  align-items: center;
-  width: 2.5rem;
-  span { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: ${({ theme }) => theme.colors.border.default}; }
-  span.active { background: ${({ theme }) => theme.colors.brand.primary}; }
-`
 
 export const PlaceOverview = styled.section`
   height: 27.125rem;

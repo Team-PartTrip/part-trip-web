@@ -132,14 +132,6 @@ export const RecordDetailCard = styled.section`
   @media (max-width: 56.25rem) { height: auto; min-height: 16.25rem; }
 `
 
-export const Badge = styled.span`
-  border-radius: 62.4375rem;
-  padding: 0.25rem 0.5rem;
-  background: var(--pt-bg-info);
-  color: ${({ theme }) => theme.colors.brand.strong};
-  font-size: 0.875rem;
-`
-
 export const RecordDescription = styled.p`
   max-width: 100%;
   color: ${({ theme }) => theme.colors.text.muted};
@@ -154,8 +146,11 @@ export const CommentHeading = styled.span`
 `
 
 export const RecordAction = styled.button`
-  width: 6.6875rem;
-  height: 2.875rem;
+  min-width: 6.6875rem;
+  width: auto;
+  min-height: 2.875rem;
+  padding-inline: 1rem;
+  white-space: nowrap;
   flex: 0 0 2.875rem;
 `
 

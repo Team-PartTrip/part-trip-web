@@ -1,10 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
 import { useTravelRecordQuery, useUpdateTravelCardEntryMetadataMutation } from '@/entities/trip-card'
-import { figmaRecordDetail } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import { formatDate, formatTravelDateTime, getDetailState, getErrorMessage } from '@/shared/utils'
 import { shareKakaoCardNews } from '@/shared/libs/kakao-share'
+import { PlaceSearchDialog } from '@/widgets/place-search'
+import type { PlaceSearchResponseDto } from '@/entities/travel'
 import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './RecordDetailPage.styles'
@@ -30,6 +31,7 @@ export function RecordDetailPage() {
   const [shareError, setShareError] = useState('')
   const [metadataError, setMetadataError] = useState('')
   const [metadataEditor, setMetadataEditor] = useState<{ cardId: number; entryId: number; mode: 'location' | 'time' } | null>(null)
+  const locationButtonRef = useRef<HTMLButtonElement>(null)
   const metadataMutation = useUpdateTravelCardEntryMetadataMutation()
   const currentPhotoIndex = recordImages.length ? Math.min(photoIndex, recordImages.length - 1) : 0
   const selectedEntry = recordImages.length > 0
@@ -61,9 +63,7 @@ export function RecordDetailPage() {
       ? entry.locationSource != null && entry.locationSource !== 'MANUAL'
       : entry.takenAtSource != null && entry.takenAtSource !== 'MANUAL') return
     const data = new FormData(event.currentTarget)
-    const payload = mode === 'location'
-      ? { latitude: Number(data.get('latitude')), longitude: Number(data.get('longitude')), placeName: String(data.get('placeName') ?? '').trim() }
-      : { takenAt: new Date(String(data.get('takenAt'))).toISOString() }
+    const payload = { takenAt: new Date(String(data.get('takenAt'))).toISOString() }
     try {
       await metadataMutation.mutateAsync({ cardId, entryId, payload })
       setMetadataError('')
@@ -71,6 +71,17 @@ export function RecordDetailPage() {
     } catch (error) {
       setMetadataError(getErrorMessage(error))
     }
+  }
+
+  const saveLocation = async (place: PlaceSearchResponseDto) => {
+    const target = metadataEditor
+    const { cardId, entry } = selectedEntryRef.current
+    if (!target || target.mode !== 'location' || target.cardId !== cardId || target.entryId !== entry?.entryId || !canEditLocation || metadataMutation.isPending) return
+    try {
+      await metadataMutation.mutateAsync({ cardId: target.cardId, entryId: target.entryId, payload: { latitude: place.latitude, longitude: place.longitude, placeName: place.name } })
+      setMetadataError('')
+      setMetadataEditor(current => current?.cardId === target.cardId && current.entryId === target.entryId ? null : current)
+    } catch (error) { setMetadataError(getErrorMessage(error)) }
   }
 
   const handleKakaoShare = () => {
@@ -108,7 +119,7 @@ export function RecordDetailPage() {
               <h1>촬영 기록 상세</h1>
               {record && hasRecordPhotos ? <p>사진 {currentPhotoIndex + 1} / {recordImages.length}</p> : null}
             </div>
-            {record?.tripId != null ? <div><button type="button" disabled={!hasRecordPhotos} onClick={handleKakaoShare}>카카오로 공유</button><button type="button" onClick={() => navigate({ search: { cardId: String(record.tripId) }, to: paths.recordWrite })}>사진 추가</button></div> : null}
+            {record?.tripId != null ? <div>{hasRecordPhotos ? <button type="button" onClick={handleKakaoShare}>카카오로 공유</button> : null}<button type="button" onClick={() => navigate({ search: { cardId: String(record.tripId) }, to: paths.recordWrite })}>사진 추가</button></div> : null}
           </S.TopBar>
         ) : null}
         {shareError ? <S.ErrorMessage role="alert">{shareError}</S.ErrorMessage> : null}
@@ -125,13 +136,17 @@ export function RecordDetailPage() {
             <S.LoadingBody><S.LoadingPhoto /><S.LoadingDetail /></S.LoadingBody>
           </S.LoadingLayout>
         ) : null}
-        {recordState === 'ready' && record ? (
+        {recordState === 'ready' && record && !hasRecordPhotos ? <S.StateCard>
+          <h2>아직 남긴 사진이 없어요</h2><p>여행의 순간을 사진으로 남겨보세요.</p>
+          <button type="button" onClick={() => navigate({ to: paths.recordWrite, search: { cardId: String(record.tripId) } })}>사진 추가하기</button>
+        </S.StateCard> : null}
+        {recordState === 'ready' && record && hasRecordPhotos ? (
           <S.DetailBody>
             <S.RecordPhoto>
               <img
                 width={696}
                 height={560}
-                src={recordImages[currentPhotoIndex] || figmaRecordDetail}
+                src={recordImages[currentPhotoIndex]}
                 alt={`${record.cityName || record.regionName || record.countryName || '여행'} 기록 사진`}
               />
               {hasRecordPhotos ? (
@@ -144,19 +159,15 @@ export function RecordDetailPage() {
             <S.RecordDetailCard>
               <h1>{placeTitle}</h1>
               <p>{selectedEntrySummary}</p>
-              <S.Badge>AI 해설</S.Badge>
               <S.CommentHeading>사진 코멘트</S.CommentHeading>
               <S.RecordDescription>{selectedEntry?.comment || '이 사진에 대한 메모를 남겨보세요'}</S.RecordDescription>
               <S.RecordAction type="button" disabled={selectedEntry?.entryId == null} onClick={() => navigate({ params: { recordId }, search: selectedEntry?.entryId != null ? { entryId: String(selectedEntry.entryId) } : undefined, to: '/record/$recordId/edit' })}>{selectedEntry?.comment ? '수정' : '작성'}</S.RecordAction>
-              {canEditLocation ? <S.RecordAction type="button" disabled={record.tripId == null || selectedEntry?.entryId == null} onClick={() => record.tripId != null && selectedEntry?.entryId != null && setMetadataEditor({ cardId: record.tripId, entryId: selectedEntry.entryId, mode: 'location' })}>위치 수정</S.RecordAction> : null}
-              {canEditTakenAt ? <S.RecordAction type="button" disabled={record.tripId == null || selectedEntry?.entryId == null} onClick={() => record.tripId != null && selectedEntry?.entryId != null && setMetadataEditor({ cardId: record.tripId, entryId: selectedEntry.entryId, mode: 'time' })}>촬영 시각 수정</S.RecordAction> : null}
+              {selectedEntry?.entryId != null && canEditLocation ? <S.RecordAction ref={locationButtonRef} type="button" disabled={record.tripId == null || selectedEntry?.entryId == null} onClick={() => record.tripId != null && selectedEntry?.entryId != null && setMetadataEditor({ cardId: record.tripId, entryId: selectedEntry.entryId, mode: 'location' })}>위치 수정</S.RecordAction> : null}
+              {selectedEntry?.entryId != null && canEditTakenAt ? <S.RecordAction type="button" disabled={record.tripId == null || selectedEntry?.entryId == null} onClick={() => record.tripId != null && selectedEntry?.entryId != null && setMetadataEditor({ cardId: record.tripId, entryId: selectedEntry.entryId, mode: 'time' })}>촬영 시각 수정</S.RecordAction> : null}
               {metadataError ? <S.ErrorMessage role="alert">{metadataError}</S.ErrorMessage> : null}
-              {metadataMode && metadataEditor ? <S.MetadataForm key={`${metadataEditor.cardId}-${metadataEditor.entryId}`} onSubmit={(event) => void handleMetadataSubmit(metadataEditor.cardId, metadataEditor.entryId, metadataEditor.mode, event)}>
-                {metadataMode === 'location' ? <>
-                  <label>장소명<input name="placeName" required defaultValue={selectedEntry?.placeName ?? ''} /></label>
-                  <label>위도<input name="latitude" type="number" min="-90" max="90" step="any" required defaultValue={selectedEntry?.latitude ?? ''} /></label>
-                  <label>경도<input name="longitude" type="number" min="-180" max="180" step="any" required defaultValue={selectedEntry?.longitude ?? ''} /></label>
-                </> : <label>촬영 시각<input name="takenAt" type="datetime-local" required defaultValue={toLocalDateTime(selectedEntry?.takenAt)} /></label>}
+              <PlaceSearchDialog isOpen={metadataMode === 'location'} returnFocusRef={locationButtonRef} title="사진 위치 찾기" onClose={() => setMetadataEditor(null)} onSelect={place => void saveLocation(place)} />
+              {metadataMode === 'time' && metadataEditor ? <S.MetadataForm key={`${metadataEditor.cardId}-${metadataEditor.entryId}`} onSubmit={(event) => void handleMetadataSubmit(metadataEditor.cardId, metadataEditor.entryId, 'time', event)}>
+                <label>촬영 시각<input name="takenAt" type="datetime-local" required defaultValue={toLocalDateTime(selectedEntry?.takenAt)} /></label>
                 <div><button type="button" onClick={() => setMetadataEditor(null)}>취소</button><button type="submit" disabled={metadataMutation.isPending}>{metadataMutation.isPending ? '저장 중' : '저장'}</button></div>
               </S.MetadataForm> : null}
             </S.RecordDetailCard>

@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useMyTravelRecords, useTravelRecordQuery } from '@/entities/trip-card'
-import { figmaRecordMap } from '@/shared/assets'
 import { Button } from '@/shared/ui/parttrip'
+import { formatDate } from '@/shared/utils'
+import { getKakaoMapUrl } from '@/widgets/planner/model/schedule-edit'
 import { paths } from '@/shared/config'
 import { AppShell } from '@/widgets/app-shell'
 
-import { getRecordLocations, mapPosition, routeSegment } from '../model/record-map'
+import { getRecordLocations } from '../model/record-map'
 import * as S from './RecordMapPage.styles'
 
-// ponytail: the bundled raster map is Osaka-only; replace with a real map viewport for other cities.
 export function RecordMapPage() {
   const navigate = useNavigate()
   const tripsQuery = useMyTravelRecords()
@@ -22,27 +22,18 @@ export function RecordMapPage() {
   const hasError = tripsQuery.hasError || tripQuery.isError
   const title = trip ? [trip.regionName || trip.countryName, trip.cityName].filter(Boolean).join(' · ') || '여행 기록' : '여행 기록'
   const locations = getRecordLocations(tripQuery.data?.timeline)
-  const mappedLocations = locations.flatMap((location) => {
-    const position = mapPosition(location.latitude, location.longitude)
-    return position ? [{ ...location, ...position }] : []
-  })
-  const canRenderMap = trip?.cityName === '오사카' && mappedLocations.length > 0
-  const supportsMap = trip?.cityName === '오사카'
   const locationCount = locations.length
-  let mapMessage = '현재 지역의 지도 배경을 지원하지 않아요.'
-  if (mappedLocations.length === 0) mapMessage = '위치 좌표가 있는 기록이 없어 지도를 표시할 수 없어요.'
-  if (!trip) mapMessage = '표시할 여행 기록이 없어요.'
 
   return (
     <AppShell>
       <S.Page>
         {isLoading ? <S.LoadingLayout aria-busy="true" aria-label="여행 지도 로딩 중"><S.LoadingHeader /><S.LoadingTabs /><S.LoadingBody><S.LoadingMap /><S.LoadingLocations /></S.LoadingBody></S.LoadingLayout> : <>
           <S.Header>
-            <div><S.Title>{title}</S.Title><S.Subtitle>촬영 위치 {locationCount}곳</S.Subtitle></div>
+            <div><S.Title>{title}</S.Title><S.Subtitle>방문 장소 {locationCount}곳</S.Subtitle></div>
             {trips.length > 1 ? <S.TripSelect aria-label="지도에 표시할 여행 선택" value={trip?.tripId ?? ''} onChange={(event) => setSelectedTripId(Number(event.target.value))}>{trips.map((item) => <option key={item.tripId} value={item.tripId}>{item.title || `${item.cityName || item.regionName || item.countryName || '여행'} 기록`}</option>)}</S.TripSelect> : null}
           </S.Header>
           <S.RecordTabs aria-label="여행 기록 보기 방식">
-            {supportsMap ? <button type="button" className="active" aria-current="page">지도</button> : null}
+            <button type="button" className="active" aria-current="page">방문 장소</button>
             <button type="button" onClick={() => navigate({ to: paths.record })}>목록</button>
           </S.RecordTabs>
 
@@ -51,23 +42,20 @@ export function RecordMapPage() {
           <S.Body>
             <S.MapPanel>
               <S.MapTitle>{title}</S.MapTitle>
-              <S.MapSubtitle>촬영 위치 {locationCount}곳</S.MapSubtitle>
-              <S.MapCanvas aria-label={`${title} 촬영 위치 지도`}>
-                {canRenderMap ? <><img src={figmaRecordMap} alt={`${title} 도심 지도`} />{mappedLocations.slice(1).map((location, index) => { const segment = routeSegment(mappedLocations[index], location); return <S.RouteSegment key={`${location.name}-${index}`} $left={segment.left} $top={segment.top} $length={segment.length} $angle={segment.angle} aria-hidden="true" /> })}{mappedLocations.map((location, index) => <S.MarkerGroup key={`${location.name}-${index}`} $left={location.left} $top={location.top}><S.MapMarker data-number={String(index + 1)} aria-label={`${location.name} 촬영 위치`} /><S.MapLabel>{location.name}</S.MapLabel></S.MarkerGroup>)}</> : <S.MapState>{mapMessage}</S.MapState>}
-              </S.MapCanvas>
+              <S.MapSubtitle>방문 장소 {locationCount}곳</S.MapSubtitle>
+              <S.MapState>지도는 준비 중이에요. 아래 방문 장소에서 지도 보기를 누르면 실제 위치를 확인할 수 있어요.</S.MapState>
             </S.MapPanel>
             <S.LocationPanel>
-              <S.LocationTitle>촬영 위치</S.LocationTitle>
+              <S.LocationTitle>방문 장소</S.LocationTitle>
               {locations.map((location, index) => (
-                <S.LocationCard key={`${location.name}-${index}`} type="button" onClick={() => trip?.tripId && navigate({ params: { recordId: String(trip.tripId) }, to: '/record/$recordId' })}>
-                  <span>
-                    <strong>{location.name}</strong>
-                    <small>{location.photos}</small>
-                  </span>
-                  <b aria-hidden="true">›</b>
-                </S.LocationCard>
+                <div key={`${location.name}-${index}`}>
+                  <S.LocationCard type="button" onClick={() => trip?.tripId && navigate({ params: { recordId: String(trip.tripId) }, to: '/record/$recordId' })}>
+                    <span><strong>{location.name}</strong><small>{formatDate(location.photos)}</small></span><b aria-hidden="true">›</b>
+                  </S.LocationCard>
+                  <a href={getKakaoMapUrl('PUBLIC_TRANSIT', location.name, location.latitude, location.longitude)} target="_blank" rel="noreferrer">{location.name} 지도 보기</a>
+                </div>
               ))}
-              {locations.length === 0 ? <S.State>촬영된 위치가 없어요.</S.State> : null}
+              {locations.length === 0 ? <S.State>방문한 장소가 없어요.</S.State> : null}
             </S.LocationPanel>
           </S.Body>
         ) : null}

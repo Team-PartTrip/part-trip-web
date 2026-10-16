@@ -1,7 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import { useTravelRecordQuery, useUpdateTravelCardEntryCommentMutation } from '@/entities/trip-card'
-import { figmaRecordMapPhoto } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import { formatDate, getErrorMessage } from '@/shared/utils'
 import { AppShell } from '@/widgets/app-shell'
@@ -17,8 +16,8 @@ export function RecordCommentEditPage() {
   const [message, setMessage] = useState('')
   const updateMutation = useUpdateTravelCardEntryCommentMutation()
   const editableEntry = search.entryId != null
-    ? record?.timeline?.find((item) => String(item.entryId) === search.entryId)
-    : record?.timeline?.find((item) => item.entryId != null)
+    ? record?.timeline?.find((item) => String(item.entryId) === search.entryId && item.imageUrl)
+    : record?.timeline?.find((item) => item.entryId != null && item.imageUrl)
   const contentValue = content ?? editableEntry?.comment ?? ''
   const placeTitle = record?.places?.[0]?.placeName || record?.title || '여행 기록'
   const photoDate = editableEntry?.takenAt || editableEntry?.date || record?.startDate
@@ -55,9 +54,7 @@ export function RecordCommentEditPage() {
       <S.Content>
         <S.TopBar $comment>
           <div><h1>코멘트 작성</h1></div>
-          <div>
-            <button type="submit" form="record-comment-form" disabled={isSaveDisabled}>저장</button>
-          </div>
+          <div>{editableEntry?.imageUrl ? <button type="submit" form="record-comment-form" disabled={isSaveDisabled}>저장</button> : null}</div>
         </S.TopBar>
         {isLoading ? (
           <S.LoadingLayout aria-busy="true" aria-label="코멘트 기록 로딩 중">
@@ -66,10 +63,11 @@ export function RecordCommentEditPage() {
           </S.LoadingLayout>
         ) : null}
         {isError ? <S.ErrorMessage role="alert">기록을 불러오지 못했어요.</S.ErrorMessage> : null}
-        {record ? (
+        {record && !editableEntry?.imageUrl ? <S.StateCard><h2>아직 남긴 사진이 없어요</h2><button type="button" onClick={() => navigate({ to: paths.recordWrite, search: { cardId: String(record.tripId) } })}>사진 추가하기</button></S.StateCard> : null}
+        {record && editableEntry?.imageUrl ? (
           <S.CommentEditLayout>
             <S.CommentPhoto>
-              <img src={editableEntry?.imageUrl || record.images?.[0] || figmaRecordMapPhoto} alt="여행 사진" />
+              <img src={editableEntry.imageUrl} alt="여행 사진" />
               <h2>{placeTitle}</h2>
               <span>{photoDate ? formatDate(photoDate) : '촬영일 정보 없음'}</span>
             </S.CommentPhoto>

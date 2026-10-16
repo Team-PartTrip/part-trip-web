@@ -38,16 +38,15 @@ export function TripCardListView({ card, imageUrl, navigate }: TripCardListViewP
               <S.FavoriteBadge aria-label="즐겨찾기">★</S.FavoriteBadge>
             </S.TravelCardTitle>
             <S.MetricList>
-              <span><small>함께한 사람</small><strong>정보 없음</strong></span>
+
               <span><small>방문 장소</small><strong>{card.places ? `${card.places.length}곳` : '정보 없음'}</strong></span>
               <span><small>남긴 사진</small><strong>{card.photoCount ?? card.images?.length ?? 0}장</strong></span>
-              <span><small>이동 거리</small><strong>정보 없음</strong></span>
+
             </S.MetricList>
           </S.TravelCardInfo>
         </S.TravelCard>
       ) : <S.Empty>여행카드가 없어요.</S.Empty>}
-      <S.Pagination aria-label="여행카드 페이지"><span className="active" /><span /><span /></S.Pagination>
-      <PartTripButton type="button" onClick={() => navigate({ to: paths.tripCardCreate })}>사진 · 코멘트 추가</PartTripButton>
+      <S.AddButton type="button" onClick={() => navigate({ to: paths.tripCardCreate })}>사진 · 코멘트 추가</S.AddButton>
     </S.CarouselSection>
   )
 }
