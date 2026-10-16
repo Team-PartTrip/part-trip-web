@@ -5,6 +5,7 @@ import { DOMESTIC_CITIES, DOMESTIC_CITY_SUGGESTIONS, getDomesticCities } from '@
 import type { DomesticCityOption } from '@/entities/region-map/domestic-cities'
 import { paths } from '@/shared/config'
 import { Button, Input } from '@/shared/ui/parttrip'
+import { DatePicker } from '@/shared/ui/date-picker/DatePicker'
 import { formatCalendarDate, formatDateRange } from '@/shared/utils'
 import type { PlannerCreationDraft } from '../model/planner-creation'
 import { writePlannerCreationDraft } from '../model/planner-creation'
@@ -42,7 +43,7 @@ export function PlannerDestinationStep({ initialDraft }: { initialDraft?: Planne
   const handleStartDateChange = (nextStartDate: string) => {
     setStartDate(nextStartDate)
     const lastAllowedDate = maxEndDateFor(nextStartDate)
-    if (endDate && lastAllowedDate && endDate > lastAllowedDate) setEndDate('')
+    if (endDate && (endDate < nextStartDate || (lastAllowedDate && endDate > lastAllowedDate))) setEndDate('')
   }
 
   const goToCriteria = (event: FormEvent<HTMLFormElement>) => {
@@ -83,8 +84,8 @@ export function PlannerDestinationStep({ initialDraft }: { initialDraft?: Planne
           <S.Field>
             <span>여행 기간</span>
             <S.DateGrid>
-              <div><label htmlFor="planner-start-date">출발일</label><Input id="planner-start-date" type="date" min={today} max={maxEndDate} value={startDate} onChange={(event) => handleStartDateChange(event.target.value)} /></div>
-              <div><label htmlFor="planner-end-date">도착일</label><Input id="planner-end-date" type="date" min={startDate || today} max={maxEndDate} value={endDate} onChange={(event) => setEndDate(event.target.value)} /></div>
+              <div><label htmlFor="planner-start-date">출발일</label><DatePicker id="planner-start-date" label="출발일" min={today} value={startDate} onChange={handleStartDateChange} /></div>
+              <div><label htmlFor="planner-end-date">도착일</label><DatePicker id="planner-end-date" label="도착일" min={startDate && startDate > today ? startDate : today} max={maxEndDate} value={endDate} onChange={setEndDate} /></div>
             </S.DateGrid>
             <small>이미 다른 여행이 있는 날짜는 선택할 수 없어요. 날짜는 필수예요.</small>
           </S.Field>

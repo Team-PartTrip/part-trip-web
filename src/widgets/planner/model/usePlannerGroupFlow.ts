@@ -18,7 +18,7 @@ import { canManagePlanner as hasPlannerManagementRole } from './planner-role'
 export function usePlannerGroupFlow() {
   const navigate = useNavigate()
   const state = usePlannerState()
-  const { activePlannerId, activatePlanner, autoJoinInviteCodeRef, errorMessage, inviteCode, inviteCodeFromUrlRef, isSolo, memberCount, setErrorMessage, setInviteCode, setIsSolo, setMemberCount } = state
+  const { activePlannerId, activatePlanner, autoJoinInviteCodeRef, errorMessage, inviteCodeFromUrlRef, isSolo, memberCount, setErrorMessage, setIsSolo, setMemberCount } = state
   const detailQuery = usePlannerDetailQuery(activePlannerId)
   const membersQuery = usePlannerMembersQuery(activePlannerId)
   const createPlannerMutation = useCreatePlannerMutation()
@@ -53,21 +53,19 @@ export function usePlannerGroupFlow() {
   }
 
   const handleJoinPlanner = useCallback(async () => {
-    if (!inviteCode.trim()) {
-      setErrorMessage('초대 코드를 입력해주세요.')
-      return
-    }
+    const inviteCode = inviteCodeFromUrlRef.current.trim()
+    if (!inviteCode) return
     try {
       setErrorMessage('')
-      const joined = await joinPlannerMutation.mutateAsync({ inviteCode: inviteCode.trim() })
+      const joined = await joinPlannerMutation.mutateAsync({ inviteCode })
       const plannerId = joined.plannerId
       if (!isPositiveSafeInteger(plannerId)) throw new Error('plannerId is missing')
       activatePlanner(plannerId)
       navigate({ to: paths.plannerProgress })
     } catch {
-      setErrorMessage('초대 코드로 여행 그룹에 참여하지 못했습니다.')
+      setErrorMessage('초대 링크로 여행에 참여하지 못했어요. 링크를 확인하고 다시 열어주세요.')
     }
-  }, [activatePlanner, inviteCode, joinPlannerMutation, navigate, setErrorMessage])
+  }, [activatePlanner, inviteCodeFromUrlRef, joinPlannerMutation, navigate, setErrorMessage])
 
   useEffect(() => {
     const code = inviteCodeFromUrlRef.current.trim()
@@ -96,16 +94,12 @@ export function usePlannerGroupFlow() {
     isLoading: detailQuery.isLoading || membersQuery.isLoading,
     isManagingMembers: removePlannerMemberMutation.isPending,
     isSaving: createPlannerMutation.isPending,
-    inviteCode,
     isSolo,
-    joinPlannerPending: joinPlannerMutation.isPending,
     memberCount,
     members: membersQuery.data ?? [],
     plannerDetail: detailQuery.data,
     saveGroupSettings,
-    handleJoinPlanner,
     handleRemovePlannerMember,
-    setInviteCode,
     setIsSolo,
     setMemberCount,
   }

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko"><meta charset="UTF-8"><title>플래너 초대 링크 회귀 검사</title>
+<body><pre id="result">검사 중… 모든 API는 로컬 테스트 응답입니다.</pre><div id="root"></div>
+<script type="module">
+import { createElement as h, StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { createRootRoute, createRoute, createRouter, createMemoryHistory, Outlet, RouterProvider } from '@tanstack/react-router'
+import { ThemeProvider } from 'styled-components'
+import { PlannerGroupPage } from '/src/widgets/planner/ui/PlannerPage.tsx'
+import { apiClient } from '/src/shared/libs/api-client.ts'
+import { appTheme } from '/src/shared/theme/index.ts'
+import { GlobalStyle } from '/src/shared/ui/global-style/index.ts'
+if (location.hostname !== '127.0.0.1') throw new Error('127.0.0.1에서만 실행하세요.')
+const params = new URLSearchParams(location.search)
+const code = (params.get('inviteCode') ?? '').trim()
+const fail = params.has('fail')
+const requests = []
+const key = 'parttrip:active-planner-id', previous = sessionStorage.getItem(key)
+sessionStorage.removeItem(key)
+apiClient.get = async url => ({ data: url.endsWith('/members') ? [] : url === '/profile/myInfo' ? { id: 'qa', name: '검사' } : { plannerId: 43, role: 'MEMBER', status: 'PLANNING' } })
+apiClient.post = async (url, payload) => {
+  if (url !== '/planners/join') throw new Error('예상 밖 쓰기 요청')
+  requests.push(payload)
+  if (fail) throw new Error('테스트 참여 실패')
+  return { data: { plannerId: 43, role: 'MEMBER', status: 'PLANNING' } }
+}
+const root = createRootRoute({ component: Outlet })
+const group = createRoute({ getParentRoute: () => root, path: '/planner/group', component: PlannerGroupPage })
+const progress = createRoute({ getParentRoute: () => root, path: '/planner/progress', component: () => h('h1', { id: 'joined' }, '참여 완료') })
+const router = createRouter({ routeTree: root.addChildren([group, progress]), history: createMemoryHistory({ initialEntries: ['/planner/group'] }) })
+const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
+createRoot(document.getElementById('root')).render(h(StrictMode, null, h(QueryClientProvider, { client }, h(ThemeProvider, { theme: appTheme }, h(GlobalStyle), h(RouterProvider, { router })))))
+const check = (value, message) => { if (!value) throw new Error(message) }
+const until = async predicate => { const end = Date.now() + 5000; while (!predicate()) { if (Date.now() > end) throw new Error('화면 갱신 시간 초과'); await new Promise(resolve => setTimeout(resolve, 20)) } }
+try {
+  await until(() => code ? fail ? document.querySelector('[role="alert"]') : document.getElementById('joined') : [...document.querySelectorAll('button')].some(el => el.textContent === '다음: 여행지'))
+  check(!document.getElementById('planner-invite-code') && !document.getElementById('root').textContent.includes('초대 코드'), '초대 코드 입력 UI가 남아 있음')
+  check(requests.length === (code ? 1 : 0), '링크 없이 참여하거나 중복 참여 요청을 보냄')
+  if (code) check(requests[0].inviteCode === code, '링크의 참여 코드 전달 오류')
+  if (code && fail) check(document.querySelector('[role="alert"]').textContent.includes('초대 링크로 여행에 참여하지 못했어요'), '링크 오류 안내 누락')
+  if (code && !fail) check(sessionStorage.getItem(key) === '43', '참여한 여행 활성화 누락')
+  document.getElementById('result').textContent = `PASS: 코드 입력 UI 없음 · ${code ? fail ? '링크 실패 안내' : '링크 자동 참여와 여행 이동' : '일반 진입 시 참여 요청 없음'} · 중복 요청 없음`
+} catch (error) { document.getElementById('result').textContent = `FAIL: ${error.message}` }
+finally { if (previous === null) sessionStorage.removeItem(key); else sessionStorage.setItem(key, previous) }
+</script></body></html>

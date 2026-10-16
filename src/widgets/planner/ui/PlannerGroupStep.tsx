@@ -1,6 +1,6 @@
 import type { Dispatch, FormEvent, SetStateAction } from 'react'
 import type { PlannerMemberResponseDto } from '@/entities/planner'
-import { Button as PartTripButton, Input as PartTripInput } from '@/shared/ui/parttrip'
+import { Button as PartTripButton } from '@/shared/ui/parttrip'
 
 import { getPlannerMemberDisplayName } from '../model/member'
 import * as S from './PlannerPage.styles'
@@ -8,17 +8,11 @@ import * as S from './PlannerPage.styles'
 type Props = {
   currentUserInitial: string
   currentUserName: string
-  handleJoinPlanner: () => Promise<void>
-  inviteCode: string
-  isInviteOpen: boolean
   isSaving: boolean
   isSolo: boolean
-  joinPlannerPending: boolean
   memberCount: string
   members: PlannerMemberResponseDto[]
   saveGroupSettings: (event: FormEvent<HTMLFormElement>) => Promise<void>
-  setInviteCode: Dispatch<SetStateAction<string>>
-  setIsInviteOpen: Dispatch<SetStateAction<boolean>>
   setIsSolo: Dispatch<SetStateAction<boolean>>
   setMemberCount: Dispatch<SetStateAction<string>>
 }
@@ -26,17 +20,11 @@ type Props = {
 export function PlannerGroupStep({
   currentUserInitial,
   currentUserName,
-  handleJoinPlanner,
-  inviteCode,
-  isInviteOpen,
   isSaving,
   isSolo,
-  joinPlannerPending,
   memberCount,
   members,
   saveGroupSettings,
-  setInviteCode,
-  setIsInviteOpen,
   setIsSolo,
   setMemberCount,
 }: Props) {
@@ -72,30 +60,6 @@ export function PlannerGroupStep({
           </button>
         </S.Stepper>
       </S.CountRow>
-      {isInviteOpen ? (
-        <S.InvitePanel>
-          <S.SectionTitle>초대 코드로 참여</S.SectionTitle>
-          <S.InviteCodeRow>
-            <S.StepField>
-              <label htmlFor="planner-invite-code">이미 받은 초대 코드가 있나요?</label>
-              <PartTripInput
-                id="planner-invite-code"
-                value={inviteCode}
-                onChange={(event) => setInviteCode(event.target.value)}
-                placeholder="초대 코드를 입력하세요"
-              />
-            </S.StepField>
-            <PartTripButton
-              type="button"
-              $variant="secondary"
-              disabled={joinPlannerPending}
-              onClick={() => void handleJoinPlanner()}
-            >
-              {joinPlannerPending ? '참여 중' : '그룹 참여'}
-            </PartTripButton>
-          </S.InviteCodeRow>
-        </S.InvitePanel>
-      ) : null}
       <S.MemberPanel>
         <S.SectionTitle>함께할 사람</S.SectionTitle>
         <S.MemberList>
@@ -114,9 +78,6 @@ export function PlannerGroupStep({
         </S.MemberList>
       </S.MemberPanel>
       <S.GroupActions>
-        <PartTripButton type="button" $variant="secondary" onClick={() => setIsInviteOpen((current) => !current)}>
-          {isInviteOpen ? '초대 코드 닫기' : '초대 코드로 참여'}
-        </PartTripButton>
         <PartTripButton type="submit" disabled={isSaving}>{isSaving ? '저장 중' : '다음: 여행지'}</PartTripButton>
       </S.GroupActions>
     </S.GroupForm>

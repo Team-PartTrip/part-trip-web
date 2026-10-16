@@ -34,9 +34,6 @@ export function PlannerPage() {
 export function PlannerGroupPage() {
   const { data: profile } = useUserProfileQuery()
   const group = usePlannerGroupFlow()
-  const [isInviteOpen, setIsInviteOpen] = useState(() =>
-    typeof window !== 'undefined' && Boolean(new URLSearchParams(window.location.search).get('inviteCode')),
-  )
   const currentUserName = profile?.name || '사용자'
   const currentUserInitial = currentUserName.slice(0, 2).toUpperCase() || 'MS'
   const otherMembers = group.members.filter((member) =>
@@ -48,17 +45,11 @@ export function PlannerGroupPage() {
       <PlannerGroupStep
         currentUserInitial={currentUserInitial}
         currentUserName={currentUserName}
-        handleJoinPlanner={group.handleJoinPlanner}
-        inviteCode={group.inviteCode}
-        isInviteOpen={isInviteOpen}
         isSaving={group.isSaving}
         isSolo={group.isSolo}
-        joinPlannerPending={group.joinPlannerPending}
         memberCount={group.memberCount}
         members={group.members}
         saveGroupSettings={group.saveGroupSettings}
-        setInviteCode={group.setInviteCode}
-        setIsInviteOpen={setIsInviteOpen}
         setIsSolo={group.setIsSolo}
         setMemberCount={group.setMemberCount}
       />

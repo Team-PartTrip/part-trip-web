@@ -135,62 +135,89 @@ export const ButtonRow = styled.div`
 
 export const BlockList = styled.div`
   display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  @media (max-width: 37.5rem) { grid-template-columns: 1fr; }
+  grid-template-columns: minmax(0, 1fr);
 `
 
-export const Block = styled.section`
+export const Block = styled.section<{ $departure?: boolean }>`
   min-width: 0;
-  border: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
-  border-radius: 0.875rem;
-  padding: 0.875rem;
-  background: #fff;
-  h3 { margin: 0 0 0.625rem; font-size: 0.875rem; line-height: 1.375rem; }
+  padding: 1.5rem 0;
+  & + & { border-top: 1px solid ${({ theme }) => theme.colors.border.subtle}; }
+  &:first-child { padding-top: 0; }
+  &:last-child { padding-bottom: 0; }
+  h3 { margin: 0 0 0.875rem; font-size: 1.0625rem; font-weight: 700; line-height: 1.5; }
+  ${({ $departure }) => $departure && `
+    > [role='group'] { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    @media (max-width: 42rem) { > [role='group'] { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  `}
 `
 
 export const Options = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.625rem;
 `
 
 export const PreferenceQuestion = styled(Block)`
-  grid-column: 1 / -1;
-  > p { margin: 0 0 0.75rem; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.5; }
+  > p { max-width: 65ch; margin: -0.375rem 0 1rem; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.65; }
 `
 
 export const Option = styled.button<{ $active: boolean }>`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
   min-height: 3rem;
-  border: 0.0625rem solid ${({ $active }) => $active ? '#1766bf' : '#d1dee5'};
-  border-radius: 0.875rem;
-  padding: 0 0.875rem;
-  background: ${({ $active }) => $active ? '#e0f2ff' : '#fff'};
-  color: ${({ theme }) => theme.colors.text.strong};
+  border: 1px solid ${({ $active, theme }) => $active ? theme.colors.brand.primary : theme.colors.border.default};
+  border-radius: 0.75rem;
+  padding: 0.75rem 0.875rem;
+  background: ${({ $active, theme }) => $active ? theme.colors.background.info : theme.colors.background.default};
+  color: ${({ $active, theme }) => $active ? theme.colors.brand.strong : theme.colors.text.strong};
   cursor: pointer;
   font: inherit;
   font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: left;
+  transition: border-color 120ms ease, background-color 120ms ease;
+  &::before { content: ''; box-sizing: border-box; width: 1.125rem; height: 1.125rem; flex: 0 0 1.125rem; border: 1px solid ${({ $active, theme }) => $active ? theme.colors.brand.primary : theme.colors.border.default}; border-radius: 50%; background: ${({ $active, theme }) => $active ? theme.colors.brand.primary : theme.colors.background.soft}; }
+  &::after { content: ''; display: ${({ $active }) => $active ? 'block' : 'none'}; position: absolute; left: 1.25rem; top: calc(50% - 0.3125rem); width: 0.25rem; height: 0.4375rem; border: solid ${({ theme }) => theme.colors.text.inverse}; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); }
+  &:hover:not(:disabled) { border-color: ${({ theme }) => theme.colors.brand.primary}; background: ${({ $active, theme }) => $active ? theme.colors.background.info : theme.colors.background.subtle}; }
+  &:disabled { cursor: not-allowed; opacity: 0.55; }
   &:focus-visible { outline: 0.1875rem solid ${({ theme }) => theme.colors.brand.primary}; outline-offset: 0.125rem; }
+  @media (prefers-reduced-motion: reduce) { transition: none; }
 `
 
 export const MoreBlocks = styled.details`
   margin-top: 1rem;
   border-top: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
   padding-top: 1rem;
-  > summary { min-height: 3rem; color: ${({ theme }) => theme.colors.brand.strong}; cursor: pointer; font-weight: 600; }
+  > summary { display: flex; min-height: 3rem; align-items: center; justify-content: space-between; gap: 0.75rem; border-radius: 0.75rem; padding: 0.5rem 0.875rem; background: ${({ theme }) => theme.colors.background.soft}; color: ${({ theme }) => theme.colors.brand.strong}; cursor: pointer; font-size: 0.875rem; font-weight: 600; list-style: none; }
+  > summary::-webkit-details-marker { display: none; }
+  > summary:hover { background: ${({ theme }) => theme.colors.background.muted}; }
+  > summary:focus-visible { outline: 2px solid ${({ theme }) => theme.colors.brand.primary}; outline-offset: 2px; }
+  > summary span:nth-child(2), &[open] > summary span:first-child { display: none; }
+  &[open] > summary span:nth-child(2) { display: inline; }
+  &[open] > summary svg { transform: rotate(180deg); }
   ${BlockList} { margin-top: 0.75rem; }
 `
 
 export const DepartureTools = styled.div`
   display: grid;
-  gap: 0.625rem;
-  margin-top: 0.75rem;
-  > p { margin: 0; font-size: 0.875rem; line-height: 1.35; }
+  gap: 0.5rem;
+  margin-top: 1rem;
+  > p { margin: 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.5; overflow-wrap: anywhere; }
+  > p strong { color: ${({ theme }) => theme.colors.text.strong}; font-weight: 600; }
   > div { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  button { min-height: 2.75rem; }
+  button { min-height: 2.75rem; border: 0; border-radius: 0.5rem; padding: 0.5rem 0.75rem; background: ${({ theme }) => theme.colors.background.soft}; font-size: 0.8125rem; }
+  button:focus-visible { outline: 2px solid ${({ theme }) => theme.colors.brand.primary}; outline-offset: 2px; }
 `
 
 export const Summary = styled.aside`
+  position: sticky;
+  top: 1.5rem;
+  max-height: calc(100dvh - 3rem);
+  overflow-y: auto;
   border: 0.0625rem solid #90caf9;
   border-radius: 1rem;
   padding: 1.5rem;
@@ -199,6 +226,7 @@ export const Summary = styled.aside`
   dl { display: grid; gap: 0.75rem; margin: 0; }
   dt { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; }
   dd { margin: 0.1875rem 0 0; font-size: 1rem; font-weight: 600; line-height: 1.375rem; overflow-wrap: anywhere; }
+  @media (max-width: 56.25rem) { position: static; max-height: none; overflow-y: visible; }
 `
 
 export const ScheduleDays = styled.div`

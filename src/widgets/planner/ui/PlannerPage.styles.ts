@@ -289,9 +289,7 @@ export const GroupActions = styled.div`
   gap: 0.75rem;
   margin-top: 0;
 
-  > button { height: 3rem; }
-  > button:first-child { width: 11.875rem; }
-  > button:last-child { width: 8.75rem; }
+  > button { width: 8.75rem; height: 3rem; }
 `
 
 export const SectionTitle = styled.h2`
@@ -299,15 +297,6 @@ export const SectionTitle = styled.h2`
   color: ${({ theme }) => theme.colors.text.strong};
   font-size: 1rem;
   line-height: 1.375rem;
-`
-
-export const StepField = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-
-  > label { color: ${({ theme }) => theme.colors.text.strong}; font-size: 0.875rem; font-weight: 600; }
-  input[readonly] { color: ${({ theme }) => theme.colors.text.muted}; }
 `
 
 export const Stepper = styled.div`
@@ -416,16 +405,6 @@ export const SmallActionButton = styled.button`
   font-weight: 600;
 
   &:disabled { cursor: not-allowed; opacity: .5; }
-`
-
-export const InviteCodeRow = styled.div`
-  display: grid;
-  width: 100%;
-  align-items: end;
-  gap: 0.5rem;
-  grid-template-columns: minmax(0, 1fr) auto;
-
-  @media (max-width: 38.75rem) { grid-template-columns: 1fr; }
 `
 
 export const Notice = styled.p`

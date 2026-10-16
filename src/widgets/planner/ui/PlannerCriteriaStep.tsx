@@ -39,12 +39,12 @@ const foodOptions: Array<{ value: AvoidFood | null; label: string }> = [
 ];
 
 const suggestedBlockTypes = [
-  "DEPARTURE_PLACE",
   "TRAVEL_TYPE",
   "COMPANION",
-  "WALK_PREFERENCE",
+  "WALKING",
   "DAILY_DENSITY",
   "FOOD_TYPE",
+  "TASTE",
   "LODGING_TYPE",
   "MUST_INCLUDE",
   "EXCLUDE",
@@ -201,7 +201,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
         : selectedDeparture) ??
       (home ? home.name : "선택되지 않음");
     return (
-      <S.Block key={type}>
+      <S.Block key={type} $departure={isDeparture}>
         <h3>{block.label ?? type}</h3>
         <S.Options role="group" aria-label={block.label ?? type}>
           {(block.options ?? []).map((value) => (
@@ -232,7 +232,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
         </S.Options>
         {isDeparture ? (
           <S.DepartureTools>
-            <p aria-live="polite">출발지: {departureLabel}</p>
+            <p aria-live="polite">출발지: <strong>{departureLabel}</strong></p>
             <div>
               <Button
                 type="button"
@@ -338,7 +338,6 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
         ) : (
           <>
             <S.BlockList>
-              {priorityBlocks.filter(block => block.type === "DEPARTURE_PLACE").map(renderBlock)}
               {askMobility ? <S.PreferenceQuestion>
                 <h3>다니실 때 불편한 점이 있으세요?</h3>
                 <p>AI가 장소를 고를 때 참고해요. 여행 편의 설정에서 언제든 바꿀 수 있어요.</p>
@@ -361,11 +360,15 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
                   })}
                 </S.Options>
               </S.PreferenceQuestion> : null}
-              {priorityBlocks.filter(block => block.type !== "DEPARTURE_PLACE").map(renderBlock)}
+              {priorityBlocks.map(renderBlock)}
             </S.BlockList>
             {otherBlocks.length ? (
               <S.MoreBlocks>
-                <summary>다른 여행 기준 더 보기 ({otherBlocks.length})</summary>
+                <summary>
+                  <span>더 자세히 정하기 ({otherBlocks.length}가지)</span>
+                  <span>간단히 보기</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                </summary>
                 <S.BlockList>{otherBlocks.map(renderBlock)}</S.BlockList>
               </S.MoreBlocks>
             ) : null}

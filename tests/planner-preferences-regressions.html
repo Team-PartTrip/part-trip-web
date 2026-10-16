@@ -14,9 +14,11 @@ import { GlobalStyle } from '/src/shared/ui/global-style/index.ts'
 if (location.hostname !== '127.0.0.1') throw new Error('127.0.0.1에서만 실행하세요.')
 const base = { preferredTransport: 'CAR', dailyScheduleCount: 4, canUseStairs: true, usesWheelchair: null, limitedWalking: null, avoidFoods: null }
 let pref = { ...base }, failSave = false, calls = []
+const featuredTypes = ['TRAVEL_TYPE', 'COMPANION', 'WALKING', 'DAILY_DENSITY', 'FOOD_TYPE', 'TASTE', 'LODGING_TYPE', 'MUST_INCLUDE', 'EXCLUDE']
 apiClient.get = async url => ({ data: url === '/profile/travel-preferences' ? pref : url === '/planners/blocks' ? [
   { type: 'DEPARTURE_PLACE', label: '어디로 가세요?', options: ['직접 지정'] },
-  { type: 'TRAVEL_TYPE', label: '어떤 여행을 원하세요?', options: ['관광'] },
+  ...featuredTypes.map(type => ({ type, label: type, options: ['기본 선택'] })),
+  { type: 'PARTY_SIZE', label: '여행 인원', options: ['4명'] },
 ] : [] })
 apiClient.put = async (url, payload) => {
   if (url !== '/profile/travel-preferences') throw new Error('예상 밖 쓰기')
@@ -57,7 +59,17 @@ document.getElementById('run').onclick = async () => {
   const draftKey = 'parttrip:planner-creation-draft', previous = sessionStorage.getItem(draftKey)
   try {
     await reset({})
-    check([...screen().querySelectorAll('h3')].map(el => el.textContent).join('|') === '어디로 가세요?|다니실 때 불편한 점이 있으세요?|피하는 음식이 있으세요?|어떤 여행을 원하세요?', '질문 순서 오류')
+    check([...screen().querySelectorAll('h3')].filter(el => !el.closest('details')).map(el => el.textContent).join('|') === ['다니실 때 불편한 점이 있으세요?', '피하는 음식이 있으세요?', ...featuredTypes].join('|'), '앱과 기본 여행 기준 또는 질문 순서가 다름')
+    const more = screen().querySelector('details')
+    const summary = more.querySelector('summary')
+    check(!more.open && summary.innerText === '더 자세히 정하기 (2가지)', '추가 기준 기본 접힘 또는 개수 오류')
+    check([...more.querySelectorAll('h3')].map(el => el.textContent).join('|') === '어디로 가세요?|여행 인원', '추가 여행 기준 분류 오류')
+    summary.click(); check(more.open && summary.innerText === '간단히 보기', '펼치기 또는 문구 오류')
+    button('4명').click(); await until(() => selected('4명'))
+    summary.click(); check(!more.open, '접기 오류')
+    summary.click(); check(selected('4명'), '접은 후 선택값 유실')
+    button('4명').click(); await until(() => !selected('4명'))
+    summary.click()
     button('휠체어를 써요').click(); button('오래 걷기 어려워요').click()
     await until(() => selected('휠체어를 써요') && selected('오래 걷기 어려워요'))
     button('괜찮아요').click(); await until(() => selected('괜찮아요'))
@@ -97,7 +109,7 @@ document.getElementById('run').onclick = async () => {
     check(!button('괜찮아요') && button('없어요'), '답변한 이동 편의 재질문')
     await reset({ avoidFoods: [] })
     check(button('괜찮아요') && !button('없어요'), '답변한 음식 재질문')
-    document.getElementById('result').textContent = 'PASS: 질문 순서·배타/복수 선택·저장값·저장 후 재진입·미답변 생략·저장 실패 후 생성·중복 클릭 방지'
+    document.getElementById('result').textContent = 'PASS: 앱 기본/추가 기준 분류·펼치기/접기·선택 유지·질문 순서·배타/복수 선택·저장값·저장 후 재진입·미답변 생략·저장 실패 후 생성·중복 클릭 방지'
   } catch (error) { document.getElementById('result').textContent = `FAIL: ${error.message}` }
   finally { if (previous === null) sessionStorage.removeItem(draftKey); else sessionStorage.setItem(draftKey, previous) }
 }

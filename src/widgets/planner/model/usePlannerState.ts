@@ -13,10 +13,9 @@ export function usePlannerState() {
   )
   const [memberCount, setMemberCount] = useState(() => String(initialGroupSettings.memberCount))
   const [isSolo, setIsSolo] = useState(() => initialGroupSettings.isSolo)
-  const [inviteCode, setInviteCode] = useState(() =>
+  const inviteCodeFromUrlRef = useRef(
     typeof window === 'undefined' ? '' : new URLSearchParams(window.location.search).get('inviteCode') ?? '',
   )
-  const inviteCodeFromUrlRef = useRef(inviteCode)
   const autoJoinInviteCodeRef = useRef('')
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -30,12 +29,10 @@ export function usePlannerState() {
     activatePlanner,
     autoJoinInviteCodeRef,
     errorMessage,
-    inviteCode,
     inviteCodeFromUrlRef,
     isSolo,
     memberCount,
     setErrorMessage,
-    setInviteCode,
     setIsSolo,
     setMemberCount,
     setStoredActivePlannerId,
