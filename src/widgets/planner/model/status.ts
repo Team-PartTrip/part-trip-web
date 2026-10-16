@@ -39,16 +39,16 @@ export function plannerMatchesTab(
   const completed = isCompletedStatus(status) || (isValidDateOnly(endDate) && endDate < today)
   if (tab === 'completed') return completed
   if (completed) return false
-  if (tab === 'active') return true
-  return isValidDateOnly(startDate) && startDate > today
+  const traveling = normalizeStatus(status) === 'TRAVELING' || (isValidDateOnly(startDate) && startDate <= today)
+  return tab === 'active' ? traveling : !traveling
 }
 
 export function plannerStatusLabel(status?: string, endDate?: string, today = koreaToday()) {
   const value = normalizeStatus(status)
 
   if (isCompletedStatus(status) || (isValidDateOnly(endDate) && endDate < today)) return '완료'
-  if (value === 'VOTING' || value.includes('투표')) return '투표 진행 중'
+  if (value === 'VOTING' || value.includes('투표')) return '일정 만드는 중'
   if (value === 'TRAVELING' || value.includes('여행 중')) return '여행 중'
-  if (value === 'CONFIRMED' || value.includes('확정')) return '여행 확정'
+  if (value === 'CONFIRMED' || value.includes('확정')) return '계획 확정'
   return '그룹 모집 중'
 }

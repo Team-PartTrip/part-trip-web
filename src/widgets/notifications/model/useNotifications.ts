@@ -29,7 +29,7 @@ function useReadNotification() {
       setActionError('')
       await markReadMutation.mutateAsync(id)
     } catch {
-      setActionError('알림을 읽음 처리하지 못했습니다.')
+      setActionError('알림을 읽음 처리하지 못했어요.')
     }
   }
   return { actionError, setActionError, markReadMutation, handleMarkRead }
@@ -54,7 +54,7 @@ export function useNotificationList() {
       setActionError('')
       await markAllMutation.mutateAsync()
     } catch {
-      setActionError('알림을 모두 읽음 처리하지 못했습니다.')
+      setActionError('알림을 모두 읽음 처리하지 못했어요.')
     }
   }
   return { notificationsQuery: data.notificationsQuery, unreadCount: data.unreadCount, notifications, activeTab, setActiveTab, actionError, hasUnread, markAllMutation, handleMarkAll, handleNotificationClick }

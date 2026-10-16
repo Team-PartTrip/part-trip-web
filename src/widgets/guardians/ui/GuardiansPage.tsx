@@ -101,7 +101,7 @@ export function GuardiansPage() {
   if (guardians.isLoading) {
     guardiansContent = <S.Message role="status">불러오는 중이에요.</S.Message>
   } else if (guardians.isError) {
-    guardiansContent = <S.Message $error role="alert">보호자 목록을 불러오지 못했어요.</S.Message>
+    guardiansContent = <S.Message $error role="alert">보호자 목록을 불러오지 못했어요. <Button type="button" disabled={guardians.isFetching} onClick={() => void guardians.refetch()}>다시 시도</Button></S.Message>
   } else if (guardians.data?.length) {
     guardiansContent = <S.List>{guardians.data.map((link) => (
       <S.Person key={link.linkId ?? link.userId}>
@@ -117,7 +117,7 @@ export function GuardiansPage() {
   if (seniors.isLoading) {
     seniorsContent = <S.Message role="status">불러오는 중이에요.</S.Message>
   } else if (seniors.isError) {
-    seniorsContent = <S.Message $error role="alert">연결된 가족 목록을 불러오지 못했어요.</S.Message>
+    seniorsContent = <S.Message $error role="alert">연결된 가족 목록을 불러오지 못했어요. <Button type="button" disabled={seniors.isFetching} onClick={() => void seniors.refetch()}>다시 시도</Button></S.Message>
   } else if (seniors.data?.length) {
     seniorsContent = <S.List>{seniors.data.map((link) => (
       <S.Person key={link.linkId ?? link.userId}>

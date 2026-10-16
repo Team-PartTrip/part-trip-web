@@ -89,6 +89,8 @@ export function usePlannerGroupFlow() {
 
   return {
     canManagePlanner,
+    refetch: () => Promise.all([detailQuery.refetch(), membersQuery.refetch()]),
+    isFetching: detailQuery.isFetching || membersQuery.isFetching,
     errorMessage,
     hasError: detailQuery.isError || membersQuery.isError,
     isLoading: detailQuery.isLoading || membersQuery.isLoading,

@@ -25,7 +25,7 @@ const stepCopy: Record<Step, [string, string]> = {
   ],
   criteria: [
     "여행 기준을 선택해 주세요",
-    "선택한 조건은 AI 일정 생성에 사용됩니다. 도시와 날짜는 앞 단계에서 정한 값이에요.",
+    "나에게 맞는 여행 기준을 하나씩 선택해 주세요.",
   ],
   schedule: [
     "AI 일정 초안",

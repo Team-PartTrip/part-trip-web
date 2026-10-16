@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useMyTravelRecords, useTravelRecordQuery } from '@/entities/trip-card'
 import { figmaRecordMap } from '@/shared/assets'
+import { Button } from '@/shared/ui/parttrip'
 import { paths } from '@/shared/config'
 import { AppShell } from '@/widgets/app-shell'
 
@@ -28,9 +29,9 @@ export function RecordMapPage() {
   const canRenderMap = trip?.cityName === '오사카' && mappedLocations.length > 0
   const supportsMap = trip?.cityName === '오사카'
   const locationCount = locations.length
-  let mapMessage = '현재 지역의 지도 배경을 지원하지 않습니다.'
-  if (mappedLocations.length === 0) mapMessage = '위치 좌표가 있는 기록이 없어 지도를 표시할 수 없습니다.'
-  if (!trip) mapMessage = '표시할 여행 기록이 없습니다.'
+  let mapMessage = '현재 지역의 지도 배경을 지원하지 않아요.'
+  if (mappedLocations.length === 0) mapMessage = '위치 좌표가 있는 기록이 없어 지도를 표시할 수 없어요.'
+  if (!trip) mapMessage = '표시할 여행 기록이 없어요.'
 
   return (
     <AppShell>
@@ -45,7 +46,7 @@ export function RecordMapPage() {
             <button type="button" onClick={() => navigate({ to: paths.record })}>목록</button>
           </S.RecordTabs>
 
-          {hasError ? <S.State role="alert">여행 기록을 불러오지 못했습니다.</S.State> : null}
+          {hasError ? <S.State role="alert">여행 기록을 불러오지 못했어요. <Button type="button" disabled={tripsQuery.isFetching || tripQuery.isFetching} onClick={() => { void tripsQuery.refetch(); if (tripSummary?.tripId) void tripQuery.refetch() }}>다시 시도</Button></S.State> : null}
         {!hasError ? (
           <S.Body>
             <S.MapPanel>
@@ -66,7 +67,7 @@ export function RecordMapPage() {
                   <b aria-hidden="true">›</b>
                 </S.LocationCard>
               ))}
-              {locations.length === 0 ? <S.State>촬영된 위치가 없습니다.</S.State> : null}
+              {locations.length === 0 ? <S.State>촬영된 위치가 없어요.</S.State> : null}
             </S.LocationPanel>
           </S.Body>
         ) : null}

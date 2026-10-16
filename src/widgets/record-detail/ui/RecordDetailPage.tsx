@@ -76,7 +76,7 @@ export function RecordDetailPage() {
   const handleKakaoShare = () => {
     const imageUrl = recordImages[currentPhotoIndex]
     if (!record?.tripId || !imageUrl) {
-      setShareError('공유할 사진이 없습니다.')
+      setShareError('공유할 사진이 없어요.')
       return
     }
 
@@ -114,7 +114,7 @@ export function RecordDetailPage() {
         {shareError ? <S.ErrorMessage role="alert">{shareError}</S.ErrorMessage> : null}
         {recordState === 'error' ? (
           <S.StateCard role="alert">
-            <h1>여행 기록을 불러오지 못했습니다.</h1>
+            <h1>여행 기록을 불러오지 못했어요.</h1>
             <p>연결을 확인하고 다시 시도해주세요.</p>
             <button type="button" onClick={() => navigate({ to: paths.record })}>목록으로 돌아가기</button>
           </S.StateCard>
@@ -164,7 +164,7 @@ export function RecordDetailPage() {
         ) : null}
         {recordState === 'empty' ? (
           <S.StateCard>
-            <h1>여행 기록을 찾을 수 없습니다.</h1>
+            <h1>여행 기록을 찾을 수 없어요.</h1>
             <p>목록에서 다른 기록을 선택해주세요.</p>
             <button type="button" onClick={() => navigate({ to: paths.record })}>목록으로 돌아가기</button>
           </S.StateCard>

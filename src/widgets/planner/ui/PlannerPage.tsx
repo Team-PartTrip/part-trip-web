@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { useUserProfileQuery } from '@/entities/user'
+import { Button } from '@/shared/ui/parttrip'
 import { AppShell } from '@/widgets/app-shell'
 
 import { usePlannerGroupFlow } from '../model/usePlannerGroupFlow'
@@ -16,10 +17,10 @@ export type { PlannerStep } from '../model/types'
 
 export function PlannerPage() {
   const planner = usePlannerListFlow()
-  const [plannerTab, setPlannerTab] = useState<PlannerTab>('active')
+  const [plannerTab, setPlannerTab] = useState<PlannerTab>('planned')
 
   return (
-    <PlannerPageLayout step="list" onNewTrip={planner.handleStartNewPlanner} errorMessage={planner.errorMessage} hasError={planner.hasError} isLoading={planner.isLoading}>
+    <PlannerPageLayout onRetry={() => void planner.refetch()} isRetrying={planner.isFetching} step="list" onNewTrip={planner.handleStartNewPlanner} errorMessage={planner.errorMessage} hasError={planner.hasError} isLoading={planner.isLoading}>
       <PlannerListStep
         isLoading={planner.isLoading}
         onSelectPlanner={planner.handleSelectPlanner}
@@ -35,15 +36,14 @@ export function PlannerGroupPage() {
   const { data: profile } = useUserProfileQuery()
   const group = usePlannerGroupFlow()
   const currentUserName = profile?.name || '사용자'
-  const currentUserInitial = currentUserName.slice(0, 2).toUpperCase() || 'MS'
   const otherMembers = group.members.filter((member) =>
     profile?.id ? member.userId !== profile.id : member.nickName !== currentUserName,
   )
 
   return (
-    <PlannerPageLayout step="group" errorMessage={group.errorMessage} hasError={group.hasError} isLoading={group.isLoading}>
+    <PlannerPageLayout onRetry={() => void group.refetch()} isRetrying={group.isFetching} step="group" errorMessage={group.errorMessage} hasError={group.hasError} isLoading={group.isLoading}>
       <PlannerGroupStep
-        currentUserInitial={currentUserInitial}
+        currentUserImageUrl={profile?.avatarUrl}
         currentUserName={currentUserName}
         isSaving={group.isSaving}
         isSolo={group.isSolo}
@@ -82,6 +82,8 @@ export function PlannerInvitePage() {
 }
 
 function PlannerPageLayout({
+  onRetry,
+  isRetrying,
   children,
   errorMessage,
   hasError,
@@ -89,6 +91,8 @@ function PlannerPageLayout({
   onNewTrip,
   step,
 }: {
+  onRetry: () => void
+  isRetrying: boolean
   children: ReactNode
   errorMessage: string
   hasError: boolean
@@ -111,7 +115,7 @@ function PlannerPageLayout({
             <S.LoadingBody />
           </S.LoadingLayout>
         ) : hasError ? (
-          <S.State role="alert">플래너 정보를 불러오지 못했습니다.</S.State>
+          <S.State role="alert">플래너 정보를 불러오지 못했어요. <Button type="button" disabled={isRetrying} onClick={onRetry}>다시 시도</Button></S.State>
         ) : children}
       </S.Page>
     </AppShell>

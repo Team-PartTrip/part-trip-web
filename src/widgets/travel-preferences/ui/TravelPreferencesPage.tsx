@@ -32,7 +32,6 @@ export function TravelPreferencesPage() {
   const [homeFeedback, setHomeFeedback] = useState('')
   const [homeError, setHomeError] = useState(false)
   const [preferredTransportOverride, setPreferredTransportOverride] = useState<TravelPreferenceRequestDto['preferredTransport']>()
-  const [dailyScheduleCountOverride, setDailyScheduleCountOverride] = useState<number>()
   const [canUseStairsOverride, setCanUseStairsOverride] = useState<boolean>()
   const [avoidFoodsOverride, setAvoidFoodsOverride] = useState<TravelPreferenceRequestDto['avoidFoods']>()
   const [usesWheelchairOverride, setUsesWheelchairOverride] = useState<TravelPreferenceRequestDto['usesWheelchair']>()
@@ -40,7 +39,7 @@ export function TravelPreferencesPage() {
   const [feedback, setFeedback] = useState('')
   const [hasError, setHasError] = useState(false)
   const preferredTransport = preferredTransportOverride ?? data?.preferredTransport ?? 'PUBLIC_TRANSIT'
-  const dailyScheduleCount = dailyScheduleCountOverride ?? data?.dailyScheduleCount ?? 3
+  const dailyScheduleCount = data?.dailyScheduleCount ?? 3
   const canUseStairs = canUseStairsOverride ?? data?.canUseStairs ?? true
   const avoidFoods = avoidFoodsOverride !== undefined ? avoidFoodsOverride : data?.avoidFoods
   const usesWheelchair = usesWheelchairOverride !== undefined ? usesWheelchairOverride : data?.usesWheelchair
@@ -86,7 +85,6 @@ export function TravelPreferencesPage() {
         limitedWalking: limitedWalkingOverride,
       })
       setPreferredTransportOverride(saved.preferredTransport ?? preferredTransport)
-      setDailyScheduleCountOverride(saved.dailyScheduleCount ?? dailyScheduleCount)
       setCanUseStairsOverride(saved.canUseStairs ?? canUseStairs)
       setAvoidFoodsOverride(undefined)
       setUsesWheelchairOverride(undefined)
@@ -128,17 +126,6 @@ export function TravelPreferencesPage() {
                   <S.Option key={option.value} type="button" disabled={updatePreferences.isPending} $active={preferredTransport === option.value}
                     aria-pressed={preferredTransport === option.value} onClick={() => setPreferredTransportOverride(option.value)}>
                     {option.label}
-                  </S.Option>
-                ))}
-              </S.Options>
-            </S.Row>
-            <S.Row>
-              <S.Copy><legend>하루 일정 개수</legend><p>하루에 무리 없이 둘러볼 장소 수예요.</p></S.Copy>
-              <S.Options role="group" aria-label="하루 일정 개수">
-                {[2, 3, 4].map((count) => (
-                  <S.Option key={count} type="button" disabled={updatePreferences.isPending} $active={dailyScheduleCount === count}
-                    aria-pressed={dailyScheduleCount === count} onClick={() => setDailyScheduleCountOverride(count)}>
-                    {count}곳
                   </S.Option>
                 ))}
               </S.Options>

@@ -42,11 +42,12 @@ export function useTripCardPhotoComposer({ cards }: Props) {
     incomingPhotos.slice(remaining).forEach(({ url }) => URL.revokeObjectURL(url));
     photosRef.current = [...photosRef.current, ...nextPhotos];
     setPhotos(photosRef.current);
+    if (photosRef.current.length > 1) setComment("");
     setSuccessMessage("");
     setErrorMessage(
       nextPhotos.length === 0
         ? remaining === 0
-          ? `사진은 최대 ${MAX_PHOTOS}장까지 선택할 수 있습니다.`
+          ? `사진은 최대 ${MAX_PHOTOS}장까지 선택할 수 있어요.`
           : "이미지 파일을 하나 이상 선택해주세요."
         : "",
     );
@@ -57,7 +58,7 @@ export function useTripCardPhotoComposer({ cards }: Props) {
     event.preventDefault();
     const cardId = Number(selectedCard?.tripId);
     if (!isPositiveSafeInteger(cardId)) {
-      setErrorMessage("사진을 추가할 여행 카드를 선택해주세요.");
+      setErrorMessage("사진을 추가할 여행카드를 선택해주세요.");
       return;
     }
     if (photos.length === 0) {
@@ -68,7 +69,7 @@ export function useTripCardPhotoComposer({ cards }: Props) {
     setIsUploading(true);
     const batch = photos;
     const commentAtSubmit = comment;
-    const submittedComment = comment.trim();
+    const submittedComment = photos.length === 1 ? comment.trim() : "";
     const photoCount = photos.length;
     let uploadedCount = 0;
     try {
@@ -87,7 +88,7 @@ export function useTripCardPhotoComposer({ cards }: Props) {
         photosRef.current = removeUploadedPhoto(photosRef.current, photo);
         setPhotos(photosRef.current);
       }
-      setSuccessMessage(`${photoCount}장의 사진을 여행 카드에 추가했습니다.`);
+      setSuccessMessage(`${photoCount}장의 사진을 여행카드에 추가했어요.`);
       setComment((current) => clearCommentIfUnchanged(
         current,
         commentAtSubmit,
@@ -97,7 +98,7 @@ export function useTripCardPhotoComposer({ cards }: Props) {
     } catch (error) {
       const failureMessage = getErrorMessage(error);
       setErrorMessage(uploadedCount > 0
-        ? `${uploadedCount}장 저장됐습니다. 남은 ${photoCount - uploadedCount}장은 선택 상태로 남아 있어 다시 시도할 수 있습니다. ${failureMessage}`
+        ? `${uploadedCount}장 저장됐어요. 남은 ${photoCount - uploadedCount}장은 선택 상태로 남아 있어 다시 시도할 수 있어요. ${failureMessage}`
         : failureMessage);
     } finally {
       isUploadingRef.current = false;

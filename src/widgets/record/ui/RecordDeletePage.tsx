@@ -22,9 +22,9 @@ export function RecordDeletePage() {
         <S.Page>
           <S.Header>
             <S.Title>기록 사진 삭제</S.Title>
-            <S.Subtitle>삭제할 사진이 없습니다.</S.Subtitle>
+            <S.Subtitle>삭제할 사진이 없어요.</S.Subtitle>
           </S.Header>
-          <S.State>남겨진 사진이 생기면 이곳에서 삭제할 수 있습니다.</S.State>
+          <S.State>남겨진 사진이 생기면 이곳에서 삭제할 수 있어요.</S.State>
         </S.Page>
       </AppShell>
     )
@@ -38,7 +38,7 @@ export function RecordDeletePage() {
           <S.Subtitle>삭제할 사진을 선택하세요. 여러 장을 한 번에 지울 수 있어요.</S.Subtitle>
         </S.Header>
         {isLoading ? <Skeleton aria-busy="true" aria-label="여행 기록 로딩 중" $height="23.375rem" $radius="1rem" /> : null}
-        {hasError ? <S.State role="alert">여행 기록을 불러오지 못했습니다.</S.State> : null}
+        {hasError ? <S.State role="alert">여행 기록을 불러오지 못했어요.</S.State> : null}
         {!isLoading && !hasError && record ? (
           <PhotoDeletionPanel photos={photos} recordId={record.tripId} title={record.title} />
         ) : null}

@@ -1,0 +1,16 @@
+<!doctype html><html lang="ko"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>여행지·기간 배치 검수</title><div id="root"></div><script type="module">
+import { createElement as h } from 'react'
+import { createRoot } from 'react-dom/client'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { createRootRoute,createRouter,RouterProvider } from '@tanstack/react-router'
+import { ThemeProvider } from 'styled-components'
+import { PlannerAiFlow } from '/src/widgets/planner/ui/PlannerAiFlow.tsx'
+import { apiClient } from '/src/shared/libs/api-client.ts'
+import { appTheme } from '/src/shared/theme/index.ts'
+import { GlobalStyle } from '/src/shared/ui/global-style/index.ts'
+if(!['localhost','127.0.0.1'].includes(location.hostname))throw new Error('로컬 검수 전용')
+apiClient.get=async path=>({data:path.includes('unread')?{unreadCount:0}:[]})
+const route=createRootRoute({component:()=>h(PlannerAiFlow,{step:new URLSearchParams(location.search).get('step') || 'destination'})})
+const client=new QueryClient({defaultOptions:{queries:{retry:false}}})
+createRoot(document.getElementById('root')).render(h(QueryClientProvider,{client},h(ThemeProvider,{theme:appTheme},h(GlobalStyle),h(RouterProvider,{router:createRouter({routeTree:route})}))))
+</script></html>

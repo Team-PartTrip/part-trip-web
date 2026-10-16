@@ -136,7 +136,7 @@ function MainHero({
         <S.HeroLabel>{getTravelStatusCopy(plan.status)}</S.HeroLabel>
         {plan.status === 'BEFORE' || plan.dday === 'D-Day' ? <S.Dday>{formatDday(plan.dday)}</S.Dday> : null}
         <S.Destination>{destination} · {formatTripDuration(plan.startDate, plan.endDate) || '여행 기간 미설정'}</S.Destination>
-        <S.HeroMeta>{dateRange} · {plan.headcount ?? '-'}명</S.HeroMeta>
+        <S.HeroMeta>{dateRange}</S.HeroMeta>
       </S.Hero>
     )
   }

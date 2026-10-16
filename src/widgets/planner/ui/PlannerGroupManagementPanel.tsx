@@ -3,6 +3,7 @@ import type { PlannerMemberResponseDto } from '@/entities/planner'
 import { getPlannerMemberDisplayName } from '../model/member'
 import { normalizeStatus } from '../model/status'
 import * as S from './PlannerPage.styles'
+import { PlannerMemberAvatar } from './PlannerMemberAvatar'
 
 type Props = {
   otherMembers: PlannerMemberResponseDto[]
@@ -29,7 +30,7 @@ export function PlannerGroupManagementPanel({
 
               return (
                 <S.MemberRow key={`${member.userId ?? member.nickName}-${index}`}>
-                  <S.Avatar>{getPlannerMemberDisplayName(member).slice(0, 2).toUpperCase()}</S.Avatar>
+                  <PlannerMemberAvatar name={getPlannerMemberDisplayName(member)} imgUrl={member.imgUrl} />
                   <S.MemberDetails>
                     <strong>{getPlannerMemberDisplayName(member)}</strong>
                     <span>{memberStatus || '상태 확인 중'}</span>

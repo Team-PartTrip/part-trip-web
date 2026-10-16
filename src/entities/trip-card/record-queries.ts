@@ -23,7 +23,7 @@ export const travelRecordsQueryOptions = (enabled = true) =>
 
 export function useMyTravelRecords(enabled = true) {
   const query = useQuery(travelRecordsQueryOptions(enabled))
-  return { hasError: query.isError, isLoading: query.isLoading, trips: query.data ?? [] }
+  return { refetch: query.refetch, isFetching: query.isFetching, hasError: query.isError, isLoading: query.isLoading, trips: query.data ?? [] }
 }
 
 export function useTravelRecordQuery(tripId: number) {

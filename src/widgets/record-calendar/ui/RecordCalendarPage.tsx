@@ -4,7 +4,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useDdayQuery, useFestivalMonthQuery, type FestivalResponseDto } from '@/entities/travel'
 import { paths } from '@/shared/config'
 import { Skeleton } from '@/shared/ui/parttrip'
-import { formatCalendarDate, formatDate, getDateRangeWithPadding, getMonthCalendarDays } from '@/shared/utils'
+import { formatCalendarDate, formatDateRange, getDateRangeWithPadding, getMonthCalendarDays } from '@/shared/utils'
 import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './RecordCalendarPage.styles'
@@ -60,8 +60,8 @@ export function RecordCalendarPage() {
   return (
     <AppShell>
       <S.Page>
-        <S.Header><S.Title>축제 & 이벤트</S.Title>{plan ? <S.Subtitle>{plan.regionName || '여행지'} · {dateRange ? `${formatDate(dateRange.startDate)} – ${formatDate(dateRange.endDate)} (여행 기간 ±1주)` : '여행 기간 미설정'}</S.Subtitle> : null}</S.Header>
-        {hasError ? <S.State role="alert">{isPlanError ? '여행 정보를 불러오지 못했습니다.' : '축제 및 이벤트 정보를 불러오지 못했습니다.'}</S.State> : isLoading ? <S.LoadingLayout aria-busy="true" aria-label="축제 이벤트 로딩 중"><Skeleton $height="40.625rem" $radius="1rem" /><Skeleton $height="40.625rem" $radius="1rem" /></S.LoadingLayout> : <S.CalendarLayout>
+        <S.Header><S.Title>축제 · 이벤트</S.Title>{plan ? <S.Subtitle>{plan.regionName || '여행지'} · {dateRange ? `${formatDateRange(dateRange.startDate, dateRange.endDate)} (여행 기간 ±1주)` : '여행 기간 미설정'}</S.Subtitle> : null}</S.Header>
+        {hasError ? <S.State role="alert">{isPlanError ? '여행 정보를 불러오지 못했어요.' : '축제 및 이벤트 정보를 불러오지 못했어요.'}</S.State> : isLoading ? <S.LoadingLayout aria-busy="true" aria-label="축제 이벤트 로딩 중"><Skeleton $height="40.625rem" $radius="1rem" /><Skeleton $height="40.625rem" $radius="1rem" /></S.LoadingLayout> : <S.CalendarLayout>
           <CalendarSection cells={cells} eventByDay={eventByDay} hasFestivals={filteredFestivals.length > 0} isLoading={isLoading} onChangeMonth={changeMonth} onSelectDate={(date) => setSelectedDate((current) => current === date ? undefined : date)} plan={plan} selectedDate={selectedDate} viewMonth={viewMonth} />
           <FestivalSection
             dateRange={dateRange ?? undefined}

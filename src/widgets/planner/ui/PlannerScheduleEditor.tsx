@@ -172,7 +172,7 @@ export function PlannerScheduleEditor({
           }}>＋ 빈 일정 카드</Button> : null}</header>
         {origin ? <S.SchedulePlace>
           <b aria-hidden="true"><PlannerScheduleDepartureIcon kind={originKind} /></b>
-          <div><small>0번째 · {origin.isLodging ? '숙소에서 출발' : '출발'}</small><strong>{originName || '출발지'}</strong></div>
+          <div><small>{origin.isLodging ? '숙소에서 출발' : '출발'}</small><strong>{originName || '출발지'}</strong></div>
         </S.SchedulePlace> : null}
         {day.slots.length ? day.slots.map((slot, slotIndex) => {
           const position = { dayIndex, slotIndex }

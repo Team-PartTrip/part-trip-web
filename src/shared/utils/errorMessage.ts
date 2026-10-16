@@ -15,18 +15,19 @@ function getResponseMessage(data: unknown) {
   return null
 }
 
-export function getErrorMessage(error: unknown) {
+export function getErrorMessage(error: unknown, fallback?: string) {
   if (isAxiosError(error)) {
     return (
-      getResponseMessage(error.response?.data) ??
-      error.message ??
+      getResponseMessage(error.response?.data)?.trim() ||
+      fallback ||
+      error.message ||
       fallbackErrorMessage
     )
   }
 
   if (error instanceof Error) {
-    return error.message
+    return fallback ?? error.message
   }
 
-  return fallbackErrorMessage
+  return fallback ?? fallbackErrorMessage
 }

@@ -1,0 +1,40 @@
+<!doctype html><html lang="ko"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>이슈 75·76 회귀 검사</title><button id="run">회귀 검사 실행</button><pre id="result">로컬 모의 API</pre><div id="root"></div>
+<script type="module">
+import {createElement as h,useState} from 'react'
+import {createRoot} from 'react-dom/client'
+import {QueryClient,QueryClientProvider} from '@tanstack/react-query'
+import {createRootRoute,createRouter,RouterProvider} from '@tanstack/react-router'
+import {ThemeProvider} from 'styled-components'
+import {TravelPreferencesPage} from '/src/widgets/travel-preferences/ui/TravelPreferencesPage.tsx'
+import {PlannerMemberAvatars} from '/src/widgets/planner/ui/PlannerHeader.tsx'
+import {PlannerGroupStep} from '/src/widgets/planner/ui/PlannerGroupStep.tsx'
+import {PlannerGroupManagementPanel} from '/src/widgets/planner/ui/PlannerGroupManagementPanel.tsx'
+import {apiClient,resolveApiAssetUrl} from '/src/shared/libs/api-client.ts'
+import {appTheme} from '/src/shared/theme/index.ts'
+import {GlobalStyle} from '/src/shared/ui/global-style/index.ts'
+if(!['localhost','127.0.0.1'].includes(location.hostname))throw Error('로컬 전용')
+apiClient.defaults.baseURL=location.origin+'/api'
+const photo='/src/shared/assets/figma/sidebar-home.svg'
+const members=[{userId:'1',nickName:'사진',imgUrl:photo},{userId:'2',nickName:'없음',imgUrl:null},{userId:'3',nickName:'누락'},{userId:'4',nickName:'깨짐',imgUrl:'/missing-profile-test.png'}]
+let count=4,saves=[]
+apiClient.get=async path=>({data:path==='/profile/travel-preferences'?{preferredTransport:'CAR',dailyScheduleCount:count,canUseStairs:true}:path==='/planners/7/members'?members:path==='/profile/myInfo'?{nickName:'나'}:[]})
+apiClient.put=async(path,body)=>{if(path!=='/profile/travel-preferences')throw Error('예상 밖 쓰기');saves.push(body);return {data:body}}
+const client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}})
+function View(){const[mode,setMode]=useState('preferences');return h('div',null,h('button',{id:'preferences',onClick:()=>setMode('preferences')},'편의 설정'),h('button',{id:'members',onClick:()=>setMode('members')},'멤버'),h('div',{id:'screen','data-mode':mode},mode==='preferences'?h(TravelPreferencesPage):h('div',null,h('section',{id:'list'},h(PlannerMemberAvatars,{plannerId:7})),h('section',{id:'group'},h(PlannerGroupStep,{currentUserName:'나',currentUserImageUrl:photo,isSaving:false,isSolo:false,memberCount:'5',members,saveGroupSettings:async e=>e.preventDefault(),setIsSolo:()=>{},setMemberCount:()=>{}})),h('section',{id:'management'},h(PlannerGroupManagementPanel,{otherMembers:members,isManagingMembers:false,canManagePlanner:false,onRemoveMember:async()=>{}})))))}
+const router=createRouter({routeTree:createRootRoute({component:View})})
+createRoot(document.getElementById('root')).render(h(QueryClientProvider,{client},h(ThemeProvider,{theme:appTheme},h(GlobalStyle),h(RouterProvider,{router}))))
+const check=(value,message)=>{if(!value)throw Error(message)}
+const until=async fn=>{const deadline=Date.now()+6000;while(!fn()){if(Date.now()>deadline)throw Error('갱신 시간 초과');await new Promise(r=>setTimeout(r,30))}}
+const saveButton=()=>[...document.querySelectorAll('#screen button')].find(el=>el.textContent==='저장')
+document.getElementById('run').onclick=async()=>{try{
+ document.getElementById('preferences').click();await until(()=>saveButton());check(!document.getElementById('screen').textContent.includes('하루 일정 개수'),'개수 UI 잔존')
+ saveButton().click();await until(()=>saves.length===1&&!saveButton().disabled);check(saves[0].dailyScheduleCount===4,'서버 개수 변경')
+ count=undefined;await client.invalidateQueries();await new Promise(r=>setTimeout(r,50));saveButton().click();await until(()=>saves.length===2&&!saveButton().disabled);check(saves[1].dailyScheduleCount===3,'기본값 3 누락')
+ document.getElementById('members').click();await until(()=>document.querySelector('#list img'))
+ for(const id of ['list','group','management']){
+  const el=document.getElementById(id);await until(()=>el.textContent.includes('깨'));check(el.querySelector('img[alt="사진 프로필 사진"]').getAttribute('src')===resolveApiAssetUrl(photo),id+' 사진 주소 오류');check(el.textContent.includes('없')&&el.textContent.includes('누'),id+' 누락 대체 표시 오류');check(!el.querySelector('img[alt="깨짐 프로필 사진"]'),id+' 실패 이미지 잔존')
+ }
+ check(document.querySelector('#group img[alt="나 프로필 사진"]'),'내 사진 누락')
+ document.getElementById('result').textContent='PASS: 일정 개수 UI 제거 / 기존 4 보존 / 기본 3 / 세 화면 사진과 누락·실패 대체 / 내 사진'
+}catch(error){document.getElementById('result').textContent='FAIL: '+error.message;console.error(error)}}
+</script>

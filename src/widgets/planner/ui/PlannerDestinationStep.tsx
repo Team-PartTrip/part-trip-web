@@ -63,7 +63,15 @@ export function PlannerDestinationStep({ initialDraft }: { initialDraft?: Planne
   }
 
   return (
-    <S.Grid>
+    <S.FlowLayout>
+      <S.TripSummary>
+        <h2>여행 정보</h2>
+        <dl>
+          <div><dt>여행지</dt><dd>{cityName || '도시를 선택해주세요'}</dd></div>
+          <div><dt>기간</dt><dd>{startDate && endDate ? formatDateRange(startDate, endDate) : '날짜를 선택해주세요'}</dd></div>
+          <div><dt>여행 유형</dt><dd>국내 여행</dd></div>
+        </dl>
+      </S.TripSummary>
       <S.Card>
         <S.Form onSubmit={goToCriteria}>
           <S.Field>
@@ -97,14 +105,7 @@ export function PlannerDestinationStep({ initialDraft }: { initialDraft?: Planne
           </S.ButtonRow>
         </S.Form>
       </S.Card>
-      <S.Summary>
-        <h2>여행 정보</h2>
-        <dl>
-          <div><dt>여행지</dt><dd>{cityName || '도시를 선택해주세요'}</dd></div>
-          <div><dt>기간</dt><dd>{startDate && endDate ? formatDateRange(startDate, endDate) : '날짜를 선택해주세요'}</dd></div>
-          <div><dt>여행 유형</dt><dd>국내 여행</dd></div>
-        </dl>
-      </S.Summary>
-    </S.Grid>
+
+    </S.FlowLayout>
   )
 }

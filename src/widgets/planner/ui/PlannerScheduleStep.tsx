@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   useConfirmPlannerMutation,
@@ -11,6 +11,7 @@ import { Button } from "@/shared/ui/parttrip";
 import { normalizeStatus } from "@/shared/utils";
 import { isPositiveSafeInteger } from "@/shared/utils/number";
 import { clearPlannerCreationDraft, type PlannerCreationDraft } from "../model/planner-creation";
+import { withRouteTimeout } from "../model/route-timeout";
 import { canManagePlanner } from "../model/planner-role";
 import * as S from "./PlannerAiFlow.styles";
 import { PlannerScheduleEditor } from "./PlannerScheduleEditor";
@@ -23,6 +24,7 @@ export function PlannerScheduleStep({
   const navigate = useNavigate();
   const plannerId = readSessionId(ACTIVE_PLANNER_ID_KEY);
   const scheduleQuery = usePlannerScheduleQuery(plannerId);
+  const [timedOutPlannerId, setTimedOutPlannerId] = useState<number>();
   const routePolls = useRef({ plannerId, attempts: 0 });
   const { dataUpdatedAt, errorUpdatedAt, isFetching, refetch } = scheduleQuery;
 
@@ -43,6 +45,7 @@ export function PlannerScheduleStep({
 
     const timeout = window.setTimeout(() => {
       routePolls.current.attempts += 1;
+      if (routePolls.current.attempts >= 20) setTimedOutPlannerId(plannerId);
       void refetch();
     }, 3000);
 
@@ -55,6 +58,10 @@ export function PlannerScheduleStep({
     plannerId,
     refetch,
   ]);
+
+  const visibleSchedule = useMemo(() => scheduleQuery.data
+    ? withRouteTimeout(scheduleQuery.data, timedOutPlannerId === plannerId && timedOutPlannerId !== undefined)
+    : undefined, [scheduleQuery.data, timedOutPlannerId, plannerId]);
 
   const detailQuery = usePlannerDetailQuery(plannerId);
   const confirmMutation = useConfirmPlannerMutation();
@@ -116,7 +123,8 @@ export function PlannerScheduleStep({
           <Button
             type="button"
             $variant="secondary"
-            onClick={() => void scheduleQuery.refetch()}
+            disabled={scheduleQuery.isFetching || detailQuery.isFetching}
+            onClick={() => { void scheduleQuery.refetch(); void detailQuery.refetch(); }}
           >
             다시 시도
           </Button>
@@ -156,14 +164,15 @@ export function PlannerScheduleStep({
       <>
         {detailQuery.isError ? (
           <S.Error role="alert">
-            플래너 권한을 확인하지 못해 일정은 읽기 전용으로 표시됩니다.
+            플래너 권한을 확인하지 못해 일정은 읽기 전용으로 표시돼요.
+            <Button type="button" disabled={detailQuery.isFetching} onClick={() => void detailQuery.refetch()}>다시 시도</Button>
           </S.Error>
         ) : null}
-        {scheduleQuery.data ? (
+        {visibleSchedule ? (
           <PlannerScheduleEditor
             plannerId={plannerId}
-            cityName={detailQuery.data?.cityName ?? scheduleQuery.data.cityName}
-            schedule={scheduleQuery.data}
+            cityName={detailQuery.data?.cityName ?? visibleSchedule.cityName}
+            schedule={visibleSchedule}
             canManage={canManageCurrentPlanner && !confirmMutation.isPending}
             isConfirmed={isConfirmed}
             onEditingChange={setIsEditingSchedule}
@@ -171,6 +180,11 @@ export function PlannerScheduleStep({
         ) : (
           <p role="alert">일정 응답에 표시할 내용이 없습니다.</p>
         )}
+        {timedOutPlannerId === plannerId && hasCalculatingRoute ? <Button type="button" $variant="secondary" disabled={isFetching} onClick={() => {
+          routePolls.current = { plannerId, attempts: 0 };
+          setTimedOutPlannerId(undefined);
+          void refetch();
+        }}>경로 다시 불러오기</Button> : null}
         {message ? <S.Error role="alert">{message}</S.Error> : null}
         {isEditingSchedule ? <p role="status">일정 편집을 저장하거나 취소한 뒤 확정해주세요.</p> : null}
         {action ? <S.ButtonRow>{action}</S.ButtonRow> : null}

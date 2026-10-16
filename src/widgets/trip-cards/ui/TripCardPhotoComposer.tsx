@@ -30,7 +30,7 @@ export function TripCardPhotoComposer({ cards }: Props) {
 
   if (cards.length === 0) {
     return <S.EmptyComposer>
-      <p role="status">여행 카드가 아직 없어요. 여행 계획을 확정하면 사진을 기록할 수 있어요.</p>
+      <p role="status">여행카드가 아직 없어요. 여행 계획을 확정하면 사진을 기록할 수 있어요.</p>
       <PartTripButton type="button" onClick={() => navigate({ to: paths.planner })}>여행 계획 만들기</PartTripButton>
     </S.EmptyComposer>;
   }
@@ -41,11 +41,11 @@ export function TripCardPhotoComposer({ cards }: Props) {
         <S.CreateFormPanel>
           <S.FormHeading>{selectedCard ? `${selectedCard.title || `${selectedCard.cityName || selectedCard.regionName || selectedCard.countryName || "여행"} 여행`} · ${formatDate(selectedCard.startDate || "")} 시작` : "사진 · 코멘트"}</S.FormHeading>
           <S.Form onSubmit={(event) => void handleSubmit(event)}>
-            {cards.length > 1 ? <S.CardField><S.FieldLabel htmlFor="trip-card-select">여행 카드</S.FieldLabel><S.CardSelector id="trip-card-select" value={selectedCard?.tripId == null ? "" : String(selectedCard.tripId)} onChange={(event) => setSelectedCardId(event.target.value)} disabled={isPending}>{cards.filter((card) => card.tripId != null).map((card) => <option key={card.tripId} value={card.tripId}>{card.title || `${card.cityName || card.regionName || card.countryName || "여행"} 기록`}</option>)}</S.CardSelector></S.CardField> : null}
+            {cards.length > 1 ? <S.CardField><S.FieldLabel htmlFor="trip-card-select">여행카드</S.FieldLabel><S.CardSelector id="trip-card-select" value={selectedCard?.tripId == null ? "" : String(selectedCard.tripId)} onChange={(event) => setSelectedCardId(event.target.value)} disabled={isPending}>{cards.filter((card) => card.tripId != null).map((card) => <option key={card.tripId} value={card.tripId}>{card.title || `${card.cityName || card.regionName || card.countryName || "여행"} 기록`}</option>)}</S.CardSelector></S.CardField> : null}
             <S.FieldLabel htmlFor="trip-card-photos">사진 선택</S.FieldLabel>
             <S.Gallery>
               {photos.slice(0, MAX_PHOTOS).map((photo) => (
-                <S.PhotoTile key={`${photo.file.name}-${photo.file.lastModified}`} type="button" onClick={() => fileInputRef.current?.click()} aria-label={`${photo.file.name} 선택됨`}>
+                <S.PhotoTile key={photo.url} type="button" onClick={() => fileInputRef.current?.click()} aria-label={`${photo.file.name} 선택됨`}>
                   <img src={photo.url} alt={photo.file.name} />
                   <S.PhotoCheck aria-hidden="true">✓</S.PhotoCheck>
                 </S.PhotoTile>
@@ -63,6 +63,7 @@ export function TripCardPhotoComposer({ cards }: Props) {
               multiple
               onChange={handlePhotoChange}
             />
+            {photos.length > 1 ? <p>사진마다 따로 남겨요. 올린 뒤 사진을 열어 코멘트를 적어주세요.</p> : <>
             <S.FieldLabel htmlFor="trip-card-comment">코멘트</S.FieldLabel>
             <S.TextareaField>
               <PartTripTextarea
@@ -74,11 +75,12 @@ export function TripCardPhotoComposer({ cards }: Props) {
               />
               <S.Counter>{comment.length} / 100</S.Counter>
             </S.TextareaField>
+            </>}
             {errorMessage ? (
               <S.ErrorMessage role="alert">{errorMessage}</S.ErrorMessage>
             ) : null}
             {successMessage ? <S.SuccessMessage role="status">{successMessage}</S.SuccessMessage> : null}
-            <PartTripButton type="submit" disabled={isPending || !selectedCard?.tripId || photos.length === 0}>{isPending ? "업로드 중" : "여행 카드에 담기"}</PartTripButton>
+            <PartTripButton type="submit" disabled={isPending || !selectedCard?.tripId || photos.length === 0}>{isPending ? "업로드 중" : "여행카드에 담기"}</PartTripButton>
           </S.Form>
         </S.CreateFormPanel>
       </S.CreateCardLayout>

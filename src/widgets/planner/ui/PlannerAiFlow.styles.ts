@@ -8,13 +8,14 @@ export const Page = styled.main`
 
 export const Header = styled.header`
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: stretch;
   gap: 1.25rem;
-  margin: 0 1.5rem 1.5rem;
+  margin: 0 0 1.5rem;
   h1 { margin: 0; font-size: 1.875rem; line-height: 2.375rem; }
   p { margin: 0.5rem 0 0; color: ${({ theme }) => theme.colors.text.muted}; font-size: 1rem; line-height: 1.375rem; }
-  @media (max-width: 53.75rem) { align-items: flex-start; flex-direction: column; }
+  ol { width: 100%; }
+  li { flex: 1; justify-content: center; }
 `
 
 export const Steps = styled.ol`
@@ -470,3 +471,82 @@ export const AccessibilityLink = styled.button`
   text-decoration: underline;
   text-underline-offset: 0.1875rem;
 `;
+
+export const FlowLayout = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+`
+
+export const TripSummary = styled(Summary)`
+  position: static;
+  max-height: none;
+  overflow: visible;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.125rem 1.5rem;
+  h2 { margin: 0; font-size: 1rem; }
+  dl { grid-template-columns: minmax(5rem, 0.6fr) minmax(10rem, 1fr) minmax(0, 1.5fr); gap: 1.25rem; }
+  dl > div { min-width: 0; border-left: 1px solid ${({ theme }) => theme.colors.border.subtle}; padding-left: 1.25rem; }
+  dd { font-size: 0.9375rem; line-height: 1.5; }
+  @media (max-width: 45rem) {
+    grid-template-columns: 1fr;
+    gap: 0.875rem;
+    padding: 1.125rem;
+    dl { grid-template-columns: 1fr 1fr; gap: 1rem; }
+    dl > div { border: 0; padding: 0; }
+    dl > div:last-child { grid-column: 1 / -1; }
+  }
+`
+
+export const QuestionCard = styled(Card)`
+  padding: 1.75rem;
+  h2 { margin: 1.25rem 0 0.5rem; font-size: 1.5rem; line-height: 1.5; }
+  h2:focus { outline: none; }
+  ${Options} { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  ${Option} { min-height: 3.875rem; font-size: 1rem; }
+  ${ButtonRow} { justify-content: space-between; border-top: 1px solid ${({ theme }) => theme.colors.border.subtle}; padding-top: 1.25rem; }
+  @media (max-width: 62rem) { ${Options} { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 42rem) {
+    padding: 1.125rem;
+    h2 { font-size: 1.25rem; }
+    ${Options} { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    ${Option} { min-height: 3.5rem; font-size: 0.875rem; }
+  }
+`
+
+export const QuestionProgress = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 0.875rem;
+  font-weight: 600;
+  progress { width: min(60%, 25rem); height: 0.5rem; border: 0; border-radius: 1rem; overflow: hidden; appearance: none; background: ${({ theme }) => theme.colors.background.muted}; }
+  progress::-webkit-progress-bar { background: ${({ theme }) => theme.colors.background.muted}; }
+  progress::-webkit-progress-value { background: ${({ theme }) => theme.colors.brand.primary}; border-radius: 1rem; }
+  progress::-moz-progress-bar { background: ${({ theme }) => theme.colors.brand.primary}; }
+`
+
+export const QuestionHint = styled.p`
+  margin: 0 0 1.25rem;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 0.9375rem;
+  line-height: 1.6;
+`
+
+export const QuestionFields = styled.fieldset`
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+`
+
+export const ReviewCopy = styled.p`
+  margin: 1.25rem 0 0;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 0.875rem;
+  line-height: 1.6;
+`

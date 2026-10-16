@@ -29,6 +29,8 @@ export function usePlannerListFlow() {
   }
 
   return {
+    refetch: plannersQuery.refetch,
+    isFetching: plannersQuery.isFetching,
     errorMessage,
     hasError: plannersQuery.isError,
     isLoading: plannersQuery.isLoading,

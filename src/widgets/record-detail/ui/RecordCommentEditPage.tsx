@@ -65,7 +65,7 @@ export function RecordCommentEditPage() {
             <S.LoadingBody><S.LoadingPhoto /><S.LoadingDetail /></S.LoadingBody>
           </S.LoadingLayout>
         ) : null}
-        {isError ? <S.ErrorMessage role="alert">기록을 불러오지 못했습니다.</S.ErrorMessage> : null}
+        {isError ? <S.ErrorMessage role="alert">기록을 불러오지 못했어요.</S.ErrorMessage> : null}
         {record ? (
           <S.CommentEditLayout>
             <S.CommentPhoto>
@@ -92,7 +92,7 @@ export function RecordCommentEditPage() {
         ) : null}
         {!isLoading && !isError && !record ? (
           <S.StateCard>
-            <p>기록을 찾을 수 없습니다.</p>
+            <p>기록을 찾을 수 없어요.</p>
             <button type="button" onClick={() => navigate({ to: paths.record })}>목록으로</button>
           </S.StateCard>
         ) : null}

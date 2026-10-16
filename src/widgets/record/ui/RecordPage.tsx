@@ -3,21 +3,21 @@ import { useNavigate } from '@tanstack/react-router'
 import { useMyTravelRecords } from '@/entities/trip-card'
 import { paths } from '@/shared/config'
 import { Button as PartTripButton } from '@/shared/ui/parttrip'
-import { formatCalendarDate, formatDate } from '@/shared/utils'
+import { formatCalendarDate, formatDateRange } from '@/shared/utils'
 import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './RecordPage.styles'
 
 export function RecordPage() {
   const navigate = useNavigate()
-  const { hasError, isLoading, trips } = useMyTravelRecords()
+  const { hasError, isLoading, trips, refetch, isFetching } = useMyTravelRecords()
   const [year, setYear] = useState('all')
   const now = new Date()
   const today = formatCalendarDate(now.getFullYear(), now.getMonth(), now.getDate())
   const records = trips.map((trip) => ({
     id: trip.tripId,
     title: trip.title || `${trip.cityName || trip.regionName || trip.countryName || '여행'} 여행`,
-    date: `${formatDate(trip.startDate)} – ${formatDate(trip.endDate)}`,
+    date: formatDateRange(trip.startDate, trip.endDate),
     year: trip.startDate?.slice(0, 4) || trip.createDate?.slice(0, 4) || '',
     photoCount: trip.photoCount ?? trip.images?.length ?? 0,
     active: Boolean(trip.startDate && trip.endDate && trip.startDate <= today && today <= trip.endDate),
@@ -37,10 +37,10 @@ export function RecordPage() {
           ))}
         </S.YearTabs>
         {isLoading ? <S.LoadingList aria-busy="true" aria-label="여행 기록 로딩 중"><S.LoadingRow /><S.LoadingRow /><S.LoadingRow /></S.LoadingList> : null}
-        {hasError ? <S.State role="alert">여행 기록을 불러오지 못했습니다.</S.State> : null}
+        {hasError ? <S.State role="alert">여행 기록을 불러오지 못했어요. <PartTripButton type="button" disabled={isFetching} onClick={() => void refetch()}>다시 시도</PartTripButton></S.State> : null}
         {!isLoading && !hasError ? (
           <>
-            {filteredRecords.length ? <S.RecordList>{filteredRecords.map((record) => <S.RecordRow key={record.id ?? record.title} type="button" onClick={() => record.id && navigate({ params: { recordId: String(record.id) }, to: '/record/$recordId' })}><S.RecordCopy><strong>{record.title}</strong><span>{record.date}</span><small>사진 {record.photoCount}장</small></S.RecordCopy>{record.active ? <S.RecordStatus>여행 중</S.RecordStatus> : <S.RowArrow aria-hidden="true">›</S.RowArrow>}</S.RecordRow>)}</S.RecordList> : <S.Empty><strong>아직 여행 기록이 없습니다.</strong><span>첫 여행의 순간을 남겨보세요.</span></S.Empty>}
+            {filteredRecords.length ? <S.RecordList>{filteredRecords.map((record) => <S.RecordRow key={record.id ?? record.title} type="button" onClick={() => record.id && navigate({ params: { recordId: String(record.id) }, to: '/record/$recordId' })}><S.RecordCopy><strong>{record.title}</strong><span>{record.date}</span><small>사진 {record.photoCount}장</small></S.RecordCopy>{record.active ? <S.RecordStatus>여행 중</S.RecordStatus> : <S.RowArrow aria-hidden="true">›</S.RowArrow>}</S.RecordRow>)}</S.RecordList> : <S.Empty><strong>아직 여행 기록이 없어요.</strong><span>첫 여행의 순간을 남겨보세요.</span></S.Empty>}
           </>
         ) : null}
       </S.Page>

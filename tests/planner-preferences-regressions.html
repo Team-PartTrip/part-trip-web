@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><meta charset="UTF-8"><title>일정 생성 편의 질문 회귀 검사</title>
-<body><button id="run">회귀 검사 실행</button><pre id="result">모든 API는 로컬 테스트 응답으로 대체됩니다.</pre><div id="root"></div>
+<style>pre { white-space:pre-wrap; overflow-wrap:anywhere; }</style><body><button id="run">회귀 검사 실행</button><pre id="result">모든 API는 로컬 테스트 응답으로 대체됩니다.</pre><div id="root"></div>
 <script type="module">
 import { createElement as h, useState } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -8,16 +8,17 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createRootRoute, createRouter, RouterProvider } from '@tanstack/react-router'
 import { ThemeProvider } from 'styled-components'
 import { PlannerCriteriaStep } from '/src/widgets/planner/ui/PlannerCriteriaStep.tsx'
+import * as S from '/src/widgets/planner/ui/PlannerAiFlow.styles.ts'
 import { apiClient } from '/src/shared/libs/api-client.ts'
 import { appTheme } from '/src/shared/theme/index.ts'
 import { GlobalStyle } from '/src/shared/ui/global-style/index.ts'
-if (location.hostname !== '127.0.0.1') throw new Error('127.0.0.1에서만 실행하세요.')
+if (!['localhost', '127.0.0.1'].includes(location.hostname)) throw new Error('127.0.0.1에서만 실행하세요.')
 const base = { preferredTransport: 'CAR', dailyScheduleCount: 4, canUseStairs: true, usesWheelchair: null, limitedWalking: null, avoidFoods: null }
 let pref = { ...base }, failSave = false, calls = []
 const featuredTypes = ['TRAVEL_TYPE', 'COMPANION', 'WALKING', 'DAILY_DENSITY', 'FOOD_TYPE', 'TASTE', 'LODGING_TYPE', 'MUST_INCLUDE', 'EXCLUDE']
 apiClient.get = async url => ({ data: url === '/profile/travel-preferences' ? pref : url === '/planners/blocks' ? [
   { type: 'DEPARTURE_PLACE', label: '어디로 가세요?', options: ['직접 지정'] },
-  ...featuredTypes.map(type => ({ type, label: type, options: ['기본 선택'] })),
+  ...featuredTypes.map(type => ({ type, label: type, multiple: type === 'FOOD_TYPE', options: type === 'TRAVEL_TYPE' ? ['자연', '힐링', '미식', '역사', '문화예술', '체험', '쇼핑', '사진', '축제', '종교·순례', '추억 여행'] : type === 'COMPANION' ? ['부부', '친구', '친목회', '동호회', '형제자매', '자녀·손주', '혼자'] : ['기본 선택', '다른 선택'] })),
   { type: 'PARTY_SIZE', label: '여행 인원', options: ['4명'] },
 ] : [] })
 apiClient.put = async (url, payload) => {
@@ -38,7 +39,7 @@ const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mu
 const draft = { cityName: '서울', regionCode: '11', regionName: '서울', startDate: '2099-01-01', endDate: '2099-01-02', blocks: [{ type: 'COMPANION', value: '혼자' }] }
 function View() {
   const [version, setVersion] = useState(0)
-  return h('div', null, h('button', { id: 'reopen', onClick: () => setVersion(v => v + 1) }, '다시 열기'), h('div', { id: 'screen', 'data-version': version }, h(PlannerCriteriaStep, { key: version, draft })))
+  return h('div', null, h('button', { id: 'reopen', onClick: () => setVersion(v => v + 1) }, '다시 열기'), h('div', { id: 'screen', 'data-version': version, style: { maxWidth: '960px', margin: '24px auto', padding: '0 16px' } }, h(S.Header, null, h('div', null, h('h1', null, '여행 기준을 선택해 주세요'), h('p', null, '나에게 맞는 여행 기준을 하나씩 선택해 주세요.')), h(S.Steps, null, ...['여행지·기간', '여행 기준', 'AI 일정', '초대'].map((label, i) => h(S.Step, { key: label, $active: i === 1 }, `${i+1} ${label}`)))), h(PlannerCriteriaStep, { key: version, draft })))
 }
 const route = createRootRoute({ component: View })
 createRoot(document.getElementById('root')).render(h(QueryClientProvider, { client }, h(ThemeProvider, { theme: appTheme }, h(GlobalStyle), h(RouterProvider, { router: createRouter({ routeTree: route }) }))))
@@ -47,70 +48,79 @@ const button = label => [...screen().querySelectorAll('button')].find(el => el.t
 const check = (value, message) => { if (!value) throw new Error(message) }
 const until = async fn => { const end = Date.now() + 5000; while (!fn()) { if (Date.now() > end) throw new Error('화면 갱신 시간 초과'); await new Promise(resolve => setTimeout(resolve, 20)) } }
 const selected = label => button(label)?.getAttribute('aria-pressed') === 'true'
+const steps = [...featuredTypes, 'mobility', 'foods', 'review']
+const current = () => screen().querySelector('[data-question]')?.dataset.question
+const go = async target => {
+  while (current() !== target) {
+    const before = current()
+    button(steps.indexOf(before) < steps.indexOf(target) ? '다음' : '이전').click()
+    await until(() => current() !== before)
+  }
+}
 const reset = async values => {
   pref = { ...base, ...values }; calls = []
   client.setQueryData(['user', 'travel-preferences'], pref)
-  const nextVersion = Number(screen().dataset.version) + 1
+  const version = Number(screen().dataset.version) + 1
   document.getElementById('reopen').click()
-  await until(() => Number(screen().dataset.version) === nextVersion && button('AI로 일정 만들기') && !button('AI로 일정 만들기').disabled && Boolean(button('괜찮아요')) === (pref.usesWheelchair == null && pref.limitedWalking == null) && Boolean(button('없어요')) === (pref.avoidFoods == null))
+  await until(() => Number(screen().dataset.version) === version && current() === 'TRAVEL_TYPE' && button('다음') && !button('다음').disabled)
+}
+const submit = async count => {
+  await go('review'); button('AI로 일정 만들기').click(); button('AI로 일정 만들기')?.click()
+  await until(() => calls.length === count && button('AI로 일정 만들기') && !button('AI로 일정 만들기').disabled)
 }
 document.getElementById('run').onclick = async () => {
-  document.getElementById('run').disabled = true
-  const draftKey = 'parttrip:planner-creation-draft', previous = sessionStorage.getItem(draftKey)
-  try {
-    await reset({})
-    check([...screen().querySelectorAll('h3')].filter(el => !el.closest('details')).map(el => el.textContent).join('|') === ['다니실 때 불편한 점이 있으세요?', '피하는 음식이 있으세요?', ...featuredTypes].join('|'), '앱과 기본 여행 기준 또는 질문 순서가 다름')
-    const more = screen().querySelector('details')
-    const summary = more.querySelector('summary')
-    check(!more.open && summary.innerText === '더 자세히 정하기 (2가지)', '추가 기준 기본 접힘 또는 개수 오류')
-    check([...more.querySelectorAll('h3')].map(el => el.textContent).join('|') === '어디로 가세요?|여행 인원', '추가 여행 기준 분류 오류')
-    summary.click(); check(more.open && summary.innerText === '간단히 보기', '펼치기 또는 문구 오류')
-    button('4명').click(); await until(() => selected('4명'))
-    summary.click(); check(!more.open, '접기 오류')
-    summary.click(); check(selected('4명'), '접은 후 선택값 유실')
-    button('4명').click(); await until(() => !selected('4명'))
-    summary.click()
-    button('휠체어를 써요').click(); button('오래 걷기 어려워요').click()
-    await until(() => selected('휠체어를 써요') && selected('오래 걷기 어려워요'))
-    button('괜찮아요').click(); await until(() => selected('괜찮아요'))
-    check(!selected('휠체어를 써요') && !selected('오래 걷기 어려워요'), '괜찮아요 배타 선택 오류')
-    button('계단이 어려워요').click(); await until(() => selected('계단이 어려워요'))
-    check(!selected('괜찮아요'), '다른 선택 후 괜찮아요 유지')
-    button('해산물').click(); button('유제품').click()
-    await until(() => selected('해산물') && selected('유제품'))
-    button('없어요').click(); await until(() => selected('없어요'))
-    check(!selected('해산물') && !selected('유제품'), '음식 없음 배타 선택 오류')
-    button('AI로 일정 만들기').click(); button('AI로 일정 만들기')?.click()
-    await until(() => button('AI로 일정 만들기') && !button('AI로 일정 만들기').disabled && calls.length === 2)
-    check(calls.map(c => c.type).join() === 'save,generate', '저장 순서 또는 중복 생성 오류')
-    check(JSON.stringify(calls[0].payload) === JSON.stringify({ preferredTransport: 'CAR', dailyScheduleCount: 4, canUseStairs: false, usesWheelchair: false, limitedWalking: false, avoidFoods: [] }), '저장값 오류')
-    check(!button('괜찮아요') && !button('없어요'), '저장 후 질문 유지')
-    const reopenedVersion = Number(screen().dataset.version) + 1
-    document.getElementById('reopen').click()
-    await until(() => Number(screen().dataset.version) === reopenedVersion && button('AI로 일정 만들기'))
-    check(!button('괜찮아요') && !button('없어요'), '다음 일정에서 재질문')
-    await reset({})
-    button('AI로 일정 만들기').click()
-    await until(() => calls.length === 1 && !button('AI로 일정 만들기')?.disabled)
-    check(calls[0].type === 'generate' && button('괜찮아요'), `미답변 저장 또는 재질문 누락: ${JSON.stringify(calls)}`)
-    await reset({}); failSave = true
-    button('해산물').click(); await until(() => selected('해산물'))
-    button('AI로 일정 만들기').click()
-    await until(() => calls.length === 2 && !button('AI로 일정 만들기')?.disabled)
-    check(calls.map(c => c.type).join() === 'save,generate' && button('없어요'), '저장 실패가 생성을 막거나 질문을 숨김')
-    check(!('usesWheelchair' in calls[0].payload), '미응답 이동 편의 전송')
-    failSave = false
-    await reset({ canUseStairs: false })
-    button('오래 걷기 어려워요').click(); await until(() => selected('오래 걷기 어려워요'))
-    button('AI로 일정 만들기').click()
-    await until(() => calls.length === 2 && button('AI로 일정 만들기') && !button('AI로 일정 만들기').disabled)
-    check(calls[0].payload.canUseStairs === false && pref.canUseStairs === false, '걷기 답변이 기존 계단 설정을 덮어씀')
-    await reset({ usesWheelchair: false, limitedWalking: false })
-    check(!button('괜찮아요') && button('없어요'), '답변한 이동 편의 재질문')
-    await reset({ avoidFoods: [] })
-    check(button('괜찮아요') && !button('없어요'), '답변한 음식 재질문')
-    document.getElementById('result').textContent = 'PASS: 앱 기본/추가 기준 분류·펼치기/접기·선택 유지·질문 순서·배타/복수 선택·저장값·저장 후 재진입·미답변 생략·저장 실패 후 생성·중복 클릭 방지'
-  } catch (error) { document.getElementById('result').textContent = `FAIL: ${error.message}` }
-  finally { if (previous === null) sessionStorage.removeItem(draftKey); else sessionStorage.setItem(draftKey, previous) }
+ document.getElementById('run').disabled = true
+ const draftKey = 'parttrip:planner-creation-draft', previous = sessionStorage.getItem(draftKey)
+ try {
+  await reset({})
+  check(screen().querySelectorAll('[role="group"]').length === 1, '한 번에 여러 질문 표시')
+  button('힐링').click(); await until(() => current() === 'COMPANION')
+  check(document.activeElement === screen().querySelector('[data-question] h2'), '자동 이동 후 제목 포커스 누락')
+  button('친구').click(); await until(() => current() === 'WALKING')
+  await go('TRAVEL_TYPE'); check(selected('힐링'), '이전 선택 유실')
+  button('힐링').click(); await until(() => current() === 'COMPANION')
+  await go('TRAVEL_TYPE'); check(selected('힐링'), '같은 항목 재선택으로 답변 삭제')
+  await go('COMPANION'); button('혼자').click(); await until(() => current() === 'WALKING')
+  await go('FOOD_TYPE'); button('기본 선택').click(); button('다른 선택').click()
+  await until(() => selected('기본 선택') && selected('다른 선택'))
+  check(current() === 'FOOD_TYPE', '복수 선택 중 자동 이동')
+  await go('review'); const more = screen().querySelector('details')
+  check(!more.open, '추가 기준 기본 펼침')
+  more.querySelector('summary').click(); button('4명').click(); await until(() => selected('4명'))
+  more.querySelector('summary').click(); more.querySelector('summary').click(); check(selected('4명'), '추가 조건 유실')
+  button('4명').click(); await until(() => !selected('4명'))
+  await go('mobility'); button('휠체어를 써요').click(); button('오래 걷기 어려워요').click()
+  await until(() => selected('휠체어를 써요') && selected('오래 걷기 어려워요'))
+  button('괜찮아요').click(); await until(() => selected('괜찮아요'))
+  check(!selected('휠체어를 써요') && !selected('오래 걷기 어려워요'), '괜찮아요 배타 선택 오류')
+  button('계단이 어려워요').click(); await until(() => selected('계단이 어려워요'))
+  await go('foods'); button('해산물').click(); button('유제품').click(); await until(() => selected('해산물') && selected('유제품'))
+  button('없어요').click(); await until(() => selected('없어요'))
+  check(!selected('해산물') && !selected('유제품'), '음식 없음 배타 선택 오류')
+  await submit(2)
+  check(calls.map(c=>c.type).join() === 'save,generate','저장 순서 또는 중복 제출')
+  check(JSON.stringify(calls[0].payload) === JSON.stringify({preferredTransport:'CAR',dailyScheduleCount:4,canUseStairs:false,usesWheelchair:false,limitedWalking:false,avoidFoods:[]}), '저장값 오류')
+  await go('mobility'); check(selected('계단이 어려워요'), '저장 후 이동 편의 유실')
+  await go('foods'); check(selected('없어요'), '저장 후 음식 설정 유실')
+  await reset({usesWheelchair:false,limitedWalking:false,canUseStairs:false,avoidFoods:[]})
+  await go('mobility'); check(selected('계단이 어려워요'), '저장된 계단 설정 미리 선택 누락')
+  await go('foods'); check(selected('없어요'), '저장된 음식 없음 미리 선택 누락')
+  await submit(1); check(calls[0].type === 'generate', '변경 없는 편의 저장 요청')
+  await reset({}); await submit(1); check(calls[0].type === 'generate','미응답 저장 요청')
+  await reset({}); failSave = true; await go('foods'); button('해산물').click(); await until(()=>selected('해산물'))
+  await submit(2); check(calls.map(c=>c.type).join() === 'save,generate','저장 실패가 생성을 막음')
+  check(!('usesWheelchair' in calls[0].payload), '미응답 이동 편의 전송')
+  failSave = false; await reset({canUseStairs:false}); await go('mobility'); button('오래 걷기 어려워요').click(); await until(()=>selected('오래 걷기 어려워요'))
+  await submit(2); check(calls[0].payload.canUseStairs === false && pref.canUseStairs === false,'기존 계단 설정 덮어씀')
+  await reset({usesWheelchair:false,limitedWalking:false,canUseStairs:true,avoidFoods:[]}); await go('mobility'); check(selected('괜찮아요'),'저장된 없음 미리 선택 누락')
+  await submit(1)
+  const previousBlocks=draft.blocks;draft.blocks=[]
+  await reset({});await go('review');button('AI로 일정 만들기').click();await until(()=>current()==='COMPANION' && screen().querySelector('[role=alert]'))
+  check(calls.length===0,'동행 미선택 상태에서 생성 요청')
+  button('혼자').click();await until(()=>current()==='WALKING');check(!screen().querySelector('[role=alert]'),'동행 선택 후 이전 오류 안내 잔존')
+  draft.blocks=previousBlocks
+  document.getElementById('result').textContent = 'PASS: 단일 질문·자동 이동·포커스·이전 선택 유지·복수 선택·추가 설정·저장값 미리 선택·변경 없는 저장 생략·미응답 생략·저장 실패 후 생성·중복 제출 방지'
+ } catch(error) { document.getElementById('result').textContent = 'FAIL: '+error.message }
+ finally { if(previous===null)sessionStorage.removeItem(draftKey);else sessionStorage.setItem(draftKey,previous);document.getElementById('run').disabled=false }
 }
 </script></body></html>

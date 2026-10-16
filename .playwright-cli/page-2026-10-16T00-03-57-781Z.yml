@@ -1,0 +1,40 @@
+- generic [active] [ref=f2e1]:
+  - button "회귀 검사 실행" [ref=f2e2]
+  - generic [ref=f2e3]: API는 로컬 응답으로 대체됩니다.
+  - generic [ref=f2e5]:
+    - link "본문 바로가기" [ref=f2e6] [cursor=pointer]:
+      - /url: "#main-content"
+    - complementary [ref=f2e7]:
+      - navigation "메인 메뉴" [ref=f2e9]:
+        - link "홈" [ref=f2e10] [cursor=pointer]:
+          - /url: /main
+        - link "플래너" [ref=f2e13] [cursor=pointer]:
+          - /url: /planner
+        - link "지도" [ref=f2e16] [cursor=pointer]:
+          - /url: /profile/map
+        - link "기록" [ref=f2e19] [cursor=pointer]:
+          - /url: /record
+        - link "알림" [ref=f2e22] [cursor=pointer]:
+          - /url: /notifications
+        - link "마이" [ref=f2e25] [cursor=pointer]:
+          - /url: /profile
+    - generic [ref=f2e28]:
+      - banner [ref=f2e29]:
+        - link "단디 홈" [ref=f2e30] [cursor=pointer]:
+          - /url: /main
+      - main [ref=f2e31]:
+        - main [ref=f2e32]:
+          - generic [ref=f2e33]:
+            - generic [ref=f2e34]: 여행을 준비해요
+            - heading "다음 여행이 아직 없어요" [level=1] [ref=f2e35]
+            - paragraph [ref=f2e36]: 국내 도시와 날짜를 정해 나만의 일정을 만들어 보세요.
+            - button "여행 플래너 시작" [ref=f2e37] [cursor=pointer]
+          - button "축제 · 이벤트 캘린더 여행지와 날짜가 아직 정해지지 않았어요. 여행을 정하면 축제 일정을 확인할 수 있어요." [disabled] [ref=f2e38]:
+            - generic [ref=f2e40]:
+              - strong [ref=f2e41]: 축제 · 이벤트 캘린더
+              - generic [ref=f2e42]: 여행지와 날짜가 아직 정해지지 않았어요. 여행을 정하면 축제 일정을 확인할 수 있어요.
+          - generic [ref=f2e43]:
+            - generic [ref=f2e44]:
+              - heading "가볼 만한 곳" [level=2] [ref=f2e45]
+              - button "새로고침" [ref=f2e46] [cursor=pointer]
+            - paragraph [ref=f2e51]: 여행지가 아직 정해지지 않았어요. 여행지를 정하면 가볼 만한 곳을 추천해 드릴게요.

@@ -4,6 +4,8 @@ import type { UseNavigateResult } from '@tanstack/react-router'
 import { resolveApiAssetUrl } from '@/shared/libs/api-client'
 import { Button as PartTripButton } from '@/shared/ui/parttrip'
 
+import { formatDateRange } from '@/shared/utils'
+
 import { paths } from '@/shared/config'
 import * as S from './TripCardsPage.styles'
 
@@ -28,11 +30,11 @@ export function TripCardListView({ card, imageUrl, navigate }: TripCardListViewP
           onClick={() => card.tripId && navigate({ params: { tripId: String(card.tripId) }, to: '/trip-cards/$tripId' })}
         >
           <S.TravelCardImage>
-            {imageUrl ? <img src={resolveApiAssetUrl(imageUrl) || imageUrl} alt="여행 카드 표지" /> : <span>이미지 없음</span>}
+            {imageUrl ? <img src={resolveApiAssetUrl(imageUrl) || imageUrl} alt="여행카드 표지" /> : <span>이미지 없음</span>}
           </S.TravelCardImage>
           <S.TravelCardInfo>
             <S.TravelCardTitle>
-              <span><strong>{(card.cityName || card.regionName || card.countryName || '여행').toUpperCase()}</strong><small>{[card.regionName || card.countryName, card.startDate, card.endDate].filter(Boolean).join(' · ') || '여행 일정 정보 없음'}</small></span>
+              <span><strong>{(card.cityName || card.regionName || card.countryName || '여행').toUpperCase()}</strong><small>{[card.regionName || card.countryName, formatDateRange(card.startDate, card.endDate)].filter(Boolean).join(' · ') || '여행 일정 정보 없음'}</small></span>
               <S.FavoriteBadge aria-label="즐겨찾기">★</S.FavoriteBadge>
             </S.TravelCardTitle>
             <S.MetricList>
@@ -43,8 +45,8 @@ export function TripCardListView({ card, imageUrl, navigate }: TripCardListViewP
             </S.MetricList>
           </S.TravelCardInfo>
         </S.TravelCard>
-      ) : <S.Empty>여행 카드가 없습니다.</S.Empty>}
-      <S.Pagination aria-label="여행 카드 페이지"><span className="active" /><span /><span /></S.Pagination>
+      ) : <S.Empty>여행카드가 없어요.</S.Empty>}
+      <S.Pagination aria-label="여행카드 페이지"><span className="active" /><span /><span /></S.Pagination>
       <PartTripButton type="button" onClick={() => navigate({ to: paths.tripCardCreate })}>사진 · 코멘트 추가</PartTripButton>
     </S.CarouselSection>
   )
@@ -73,7 +75,7 @@ export function TripCardDetailView({ detail, firstPhoto, firstPlace, navigate }:
             <S.AddPhoto><PartTripButton type="button" onClick={() => navigate({ to: paths.tripCardCreate })}>사진 추가하기</PartTripButton><small>갤러리에서 기록하고 싶은 사진 업로드</small></S.AddPhoto>
           </S.CapturedInfo>
         </>
-      ) : <S.Empty>여행 카드를 찾을 수 없습니다.</S.Empty>}
+      ) : <S.Empty>여행카드를 찾을 수 없어요.</S.Empty>}
     </S.DetailLayout>
   )
 }
@@ -100,7 +102,7 @@ export function TripCardDeleteView({ cards, handleDelete, navigate, selected, se
       </S.Toolbar>
       <S.DeleteLayout>
         <S.DeleteList>
-          <h2>여행 카드 {cards.length}개</h2>
+          <h2>여행카드 {cards.length}개</h2>
           {cards.map((card, index) => (
             <S.DeleteRow key={card.tripId ?? index} $selected={card.tripId != null && selected.includes(card.tripId)}>
               <input
@@ -115,17 +117,17 @@ export function TripCardDeleteView({ cards, handleDelete, navigate, selected, se
               />
               <span>IMG</span>
               <div>
-                <strong>{card.title || '여행 카드'}</strong>
-                <small>{card.startDate || '-'} – {card.endDate || '-'} · 사진 {card.photoCount ?? card.images?.length ?? 0}장</small>
+                <strong>{card.title || '여행카드'}</strong>
+                <small>{formatDateRange(card.startDate, card.endDate)} · 사진 {card.photoCount ?? card.images?.length ?? 0}장</small>
               </div>
             </S.DeleteRow>
           ))}
-          {cards.length === 0 ? <S.Empty>삭제할 여행 카드가 없습니다.</S.Empty> : null}
+          {cards.length === 0 ? <S.Empty>삭제할 여행카드가 없어요.</S.Empty> : null}
         </S.DeleteList>
         <S.DeletePanel>
           <h2>삭제 확인</h2>
-          <S.Warning><strong>! 삭제하면 되돌릴 수 없어요</strong><span>카드에 담긴 사진과 코멘트가 함께 삭제됩니다.</span></S.Warning>
-          <S.DeleteSummary><strong>선택한 카드 {selected.length}개</strong><span>{cards.filter((card) => card.tripId != null && selected.includes(card.tripId)).map((card) => card.title || '여행 카드').join(' · ') || '선택된 카드가 없습니다.'}</span><span>사진과 코멘트가 함께 삭제됩니다.</span></S.DeleteSummary>
+          <S.Warning><strong>! 삭제하면 되돌릴 수 없어요</strong><span>카드에 담긴 사진과 코멘트가 함께 삭제돼요.</span></S.Warning>
+          <S.DeleteSummary><strong>선택한 카드 {selected.length}개</strong><span>{cards.filter((card) => card.tripId != null && selected.includes(card.tripId)).map((card) => card.title || '여행카드').join(' · ') || '선택된 카드가 없어요.'}</span><span>사진과 코멘트가 함께 삭제돼요.</span></S.DeleteSummary>
           <S.DeleteActions>
             <S.DeleteButton type="button" disabled={selected.length === 0} onClick={handleDelete}>{selected.length}개 삭제하기</S.DeleteButton>
             <PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.tripCards })}>취소</PartTripButton>

@@ -4,6 +4,7 @@ import { Button as PartTripButton } from '@/shared/ui/parttrip'
 import { getPlannerMemberDisplayName } from '../model/member'
 import type { PlannerStep } from '../model/types'
 import * as S from './PlannerPage.styles'
+import { PlannerMemberAvatar } from './PlannerMemberAvatar'
 
 export function PlannerMemberAvatars({ plannerId }: { plannerId?: number }) {
   const { data: members = [] } = usePlannerMembersQuery(plannerId ?? 0, plannerId != null)
@@ -13,9 +14,7 @@ export function PlannerMemberAvatars({ plannerId }: { plannerId?: number }) {
   return (
     <S.PlanMemberAvatars aria-label={`${members.length}명 참여`}>
       {visibleMembers.map((member, index) => (
-        <S.Avatar key={member.userId ?? member.nickName ?? index}>
-          {getPlannerMemberDisplayName(member).slice(0, 1).toUpperCase()}
-        </S.Avatar>
+        <PlannerMemberAvatar key={member.userId ?? member.nickName ?? index} name={getPlannerMemberDisplayName(member)} imgUrl={member.imgUrl} />
       ))}
       {members.length > visibleMembers.length ? (
         <S.PlanMemberOverflow>+{members.length - visibleMembers.length}</S.PlanMemberOverflow>

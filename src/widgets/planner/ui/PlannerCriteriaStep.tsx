@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useBlocker, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   plannerQueryKeys,
@@ -12,12 +12,12 @@ import type { PlaceSearchResponseDto } from "@/entities/travel";
 import { useTravelPreferencesQuery, useUpdateTravelPreferencesMutation } from "@/entities/user";
 import { paths } from "@/shared/config";
 import { Button } from "@/shared/ui/parttrip";
-import { formatDateRange } from "@/shared/utils";
+import { formatDateRange, getErrorMessage } from "@/shared/utils";
 import { isPositiveSafeInteger } from "@/shared/utils/number";
 import { activatePlannerSession } from "../model/planner-session";
 import { writePlannerCreationDraft, type PlannerCreationDraft } from "../model/planner-creation";
 import { getPlannerTravelParty } from "../model/member-count";
-import { getPreferenceAnswers, togglePreference, type Mobility, type AvoidFood } from "../model/preference-answers";
+import { getPreferenceAnswers, mobilityOf, togglePreference, type Mobility, type AvoidFood } from "../model/preference-answers";
 import * as S from "./PlannerAiFlow.styles";
 import { PlaceSearchDialog } from "@/widgets/place-search";
 
@@ -69,13 +69,15 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
   const generateMutation = useGeneratePlannerMutation();
   const preferencesQuery = useTravelPreferencesQuery();
   const updatePreferences = useUpdateTravelPreferencesMutation();
-  const [mobility, setMobility] = useState<Mobility[] | null>(null);
-  const [foods, setFoods] = useState<AvoidFood[] | null>(null);
+  const [mobilityAnswer, setMobility] = useState<Mobility[] | null>(null);
+  const [foodsAnswer, setFoods] = useState<AvoidFood[] | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const submittingRef = useRef(false);
-  const askMobility = preferencesQuery.data != null &&
-    preferencesQuery.data.usesWheelchair == null && preferencesQuery.data.limitedWalking == null;
-  const askFoods = preferencesQuery.data != null && preferencesQuery.data.avoidFoods == null;
+  useBlocker({ shouldBlockFn: () => submittingRef.current, enableBeforeUnload: () => submittingRef.current });
+  const mobility = mobilityAnswer ?? mobilityOf(preferencesQuery.data);
+  const foods = foodsAnswer ?? preferencesQuery.data?.avoidFoods ?? null;
+  const askMobility = preferencesQuery.data != null;
+  const askFoods = preferencesQuery.data != null;
   const [selections, setSelections] = useState<SelectionMap>(() =>
     toSelectionMap(draft.blocks),
   );
@@ -93,13 +95,26 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
     }
     return values;
   }, [preferencesQuery.data?.home, selections]);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const questionRef = useRef<HTMLHeadingElement>(null);
   const availableBlocks = blocksQuery.data ?? [];
-  const priorityBlocks = availableBlocks.filter((block) =>
-    suggestedBlockTypes.includes(block.type ?? ""),
-  );
+  const priorityBlocks = suggestedBlockTypes.flatMap(type => availableBlocks.filter(block => block.type === type));
   const otherBlocks = availableBlocks.filter(
     (block) => !suggestedBlockTypes.includes(block.type ?? ""),
   );
+
+  const questions = [...priorityBlocks.map(block => block.type!), ...(askMobility ? ["mobility"] : []), ...(askFoods ? ["foods"] : []), "review"];
+  const currentIndex = Math.min(questionIndex, questions.length - 1);
+  const currentQuestion = questions[currentIndex];
+  const activeBlock = priorityBlocks.find(block => block.type === currentQuestion);
+  const isReview = currentQuestion === "review";
+  const questionTitle = currentQuestion === "TRAVEL_TYPE" ? "어떤 여행을 하고 싶으세요?"
+    : currentQuestion === "COMPANION" ? "누구와 함께 떠나세요?"
+    : currentQuestion === "mobility" ? "다니실 때 불편한 점이 있으세요?"
+    : currentQuestion === "foods" ? "피하는 음식이 있으세요?"
+    : isReview ? "선택한 여행 기준을 확인해 주세요" : activeBlock?.label || "여행 기준 선택";
+  const nextQuestion = () => setQuestionIndex(Math.min(currentIndex + 1, questions.length - 1));
+  useEffect(() => { questionRef.current?.focus(); }, [currentQuestion]);
 
   const setDepartureOption = (value: string) => {
     departureActionVersion.current += 1;
@@ -163,6 +178,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
   ) => {
     const type = block.type;
     if (!type) return;
+    setMessage("");
     if (type === "DEPARTURE_PLACE") {
       if (value === "직접 지정") {
         openPlaceSearch(trigger);
@@ -181,6 +197,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
         ? selected.includes(value)
           ? selected.filter((item) => item !== value)
           : [...selected, value]
+        : suggestedBlockTypes.includes(type) ? [value]
         : selected.includes(value)
           ? []
           : [value];
@@ -202,7 +219,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
       (home ? home.name : "선택되지 않음");
     return (
       <S.Block key={type} $departure={isDeparture}>
-        <h3>{block.label ?? type}</h3>
+        {type !== currentQuestion ? <h3>{block.label ?? type}</h3> : null}
         <S.Options role="group" aria-label={block.label ?? type}>
           {(block.options ?? []).map((value) => (
             <S.Option
@@ -222,9 +239,10 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
                   home &&
                   value === "집 근처"),
               )}
-              onClick={(event) =>
-                selectBlockOption(block, value, event.currentTarget)
-              }
+              onClick={(event) => {
+                selectBlockOption(block, value, event.currentTarget);
+                if (!block.multiple && suggestedBlockTypes.includes(type)) nextQuestion();
+              }}
             >
               {value}
             </S.Option>
@@ -272,6 +290,8 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
     setMessage("");
     const party = getPlannerTravelParty(blocks);
     if (!party) {
+      const companionIndex = questions.indexOf("COMPANION");
+      if (companionIndex >= 0) setQuestionIndex(companionIndex);
       setMessage("혼자 여행인지, 동행이 있는지 선택해주세요.");
       return;
     }
@@ -302,7 +322,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
     submittingRef.current = true;
     setSubmitting(true);
     try {
-      const answers = getPreferenceAnswers(preferencesQuery.data, mobility, foods);
+      const answers = getPreferenceAnswers(preferencesQuery.data, mobilityAnswer, foodsAnswer);
       if (answers) {
         // 편의 저장 실패가 일정 생성을 막지 않도록 한다.
         await updatePreferences.mutateAsync(answers).catch(() => {});
@@ -315,11 +335,10 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
         plannerQueryKeys.schedule(schedule.plannerId),
         schedule,
       );
+      submittingRef.current = false;
       void navigate({ to: paths.plannerProgress });
-    } catch {
-      setMessage(
-        "AI 일정을 만들지 못했어요. 도시와 날짜를 확인하고 다시 시도해주세요.",
-      );
+    } catch (error) {
+      setMessage(getErrorMessage(error, "AI 일정을 만들지 못했어요. 도시와 날짜를 확인하고 다시 시도해주세요."));
     } finally {
       submittingRef.current = false;
       setSubmitting(false);
@@ -327,85 +346,8 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
   };
 
   return (
-    <S.Grid>
-      <S.Card>
-        {blocksQuery.isLoading ? (
-          <p role="status">여행 기준을 불러오는 중이에요.</p>
-        ) : blocksQuery.isError ? (
-          <S.Error role="alert">
-            여행 기준을 불러오지 못했어요. 새로고침 후 다시 시도해주세요.
-          </S.Error>
-        ) : (
-          <>
-            <S.BlockList>
-              {askMobility ? <S.PreferenceQuestion>
-                <h3>다니실 때 불편한 점이 있으세요?</h3>
-                <p>AI가 장소를 고를 때 참고해요. 여행 편의 설정에서 언제든 바꿀 수 있어요.</p>
-                <S.Options role="group" aria-label="다니실 때 불편한 점이 있으세요?">
-                  {mobilityOptions.map(({ value, label }) => {
-                    const active = value === null ? mobility?.length === 0 : mobility?.includes(value) === true;
-                    return <S.Option key={label} type="button" $active={active} aria-pressed={active}
-                      disabled={submitting} onClick={() => setMobility(current => togglePreference(current, value))}>{label}</S.Option>;
-                  })}
-                </S.Options>
-              </S.PreferenceQuestion> : null}
-              {askFoods ? <S.PreferenceQuestion>
-                <h3>피하는 음식이 있으세요?</h3>
-                <p>AI가 맛집을 고를 때 빼요. 식당 종류만 참고해요. 알레르기가 있으면 식당에 꼭 확인하세요. 여행 편의 설정에서 언제든 바꿀 수 있어요.</p>
-                <S.Options role="group" aria-label="피하는 음식이 있으세요?">
-                  {foodOptions.map(({ value, label }) => {
-                    const active = value === null ? foods?.length === 0 : foods?.includes(value) === true;
-                    return <S.Option key={label} type="button" $active={active} aria-pressed={active}
-                      disabled={submitting} onClick={() => setFoods(current => togglePreference(current, value))}>{label}</S.Option>;
-                  })}
-                </S.Options>
-              </S.PreferenceQuestion> : null}
-              {priorityBlocks.map(renderBlock)}
-            </S.BlockList>
-            {otherBlocks.length ? (
-              <S.MoreBlocks>
-                <summary>
-                  <span>더 자세히 정하기 ({otherBlocks.length}가지)</span>
-                  <span>간단히 보기</span>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
-                </summary>
-                <S.BlockList>{otherBlocks.map(renderBlock)}</S.BlockList>
-              </S.MoreBlocks>
-            ) : null}
-            {message ? <S.Error role="alert">{message}</S.Error> : null}
-            <S.ButtonRow>
-              <Button
-                type="button"
-                $variant="secondary"
-                disabled={submitting}
-                onClick={() => void navigate({ to: paths.plannerDestination })}
-              >
-                이전
-              </Button>
-              <Button
-                type="button"
-                disabled={
-                  submitting ||
-                  blocksQuery.isLoading ||
-                  preferencesQuery.isLoading
-                }
-                onClick={() => void generate()}
-              >
-                {submitting
-                  ? "AI가 일정을 만드는 중…"
-                  : "AI로 일정 만들기"}
-              </Button>
-            </S.ButtonRow>
-            {submitting ? (
-              <p role="status" aria-live="polite">
-                선택한 여행지와 조건으로 일정을 만들고 있어요. 잠시
-                기다려주세요.
-              </p>
-            ) : null}
-          </>
-        )}
-      </S.Card>
-      <S.Summary>
+    <S.FlowLayout>
+      <S.TripSummary>
         <h2>선택한 여행</h2>
         <dl>
           <div>
@@ -425,7 +367,92 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
             </dd>
           </div>
         </dl>
-      </S.Summary>
+      </S.TripSummary>
+      <S.QuestionCard data-question={currentQuestion}>
+        {blocksQuery.isLoading || preferencesQuery.isLoading ? (
+          <p role="status">여행 기준을 불러오는 중이에요.</p>
+        ) : blocksQuery.isError ? (
+          <S.Error role="alert">
+            여행 기준을 불러오지 못했어요. 새로고침 후 다시 시도해주세요.
+          </S.Error>
+        ) : (
+          <>
+            <S.QuestionProgress aria-label={`여행 기준 ${currentIndex + 1} / ${questions.length}단계`}>
+              <span>{currentIndex + 1} / {questions.length}</span>
+              <progress aria-label="여행 기준 진행률" max={questions.length} value={currentIndex + 1} />
+            </S.QuestionProgress>
+            <h2 ref={questionRef} tabIndex={-1}>{questionTitle}</h2>
+            <S.QuestionHint>{isReview ? "필요한 추가 조건을 정하고 AI 일정을 만들어 보세요." : activeBlock && !activeBlock.multiple ? "하나를 선택하면 다음 질문으로 이동해요." : "여러 개 선택할 수 있어요. 선택을 마치면 다음을 눌러주세요."}</S.QuestionHint>
+            <S.QuestionFields disabled={submitting}>
+            <S.BlockList>
+              {currentQuestion === "mobility" ? <S.PreferenceQuestion>
+                <p>AI가 장소를 고를 때 참고해요. {mobilityOf(preferencesQuery.data) === null ? "다음 계획부터는 고른 대로 미리 채워둘게요." : "지난번에 고른 대로 채워뒀어요. 바꾸면 다음 계획에도 적용돼요."}</p>
+                <S.Options role="group" aria-label="다니실 때 불편한 점이 있으세요?">
+                  {mobilityOptions.map(({ value, label }) => {
+                    const active = value === null ? mobility?.length === 0 : mobility?.includes(value) === true;
+                    return <S.Option key={label} type="button" $active={active} aria-pressed={active}
+                      disabled={submitting} onClick={() => setMobility(current => togglePreference(current ?? mobilityOf(preferencesQuery.data), value))}>{label}</S.Option>;
+                  })}
+                </S.Options>
+              </S.PreferenceQuestion> : null}
+              {currentQuestion === "foods" ? <S.PreferenceQuestion>
+                <p>AI가 맛집을 고를 때 빼요. 식당 종류만 참고해요. 알레르기가 있으면 식당에 꼭 확인하세요. {preferencesQuery.data?.avoidFoods == null ? "다음 계획부터는 고른 대로 미리 채워둘게요." : "지난번에 고른 대로 채워뒀어요. 바꾸면 다음 계획에도 적용돼요."}</p>
+                <S.Options role="group" aria-label="피하는 음식이 있으세요?">
+                  {foodOptions.map(({ value, label }) => {
+                    const active = value === null ? foods?.length === 0 : foods?.includes(value) === true;
+                    return <S.Option key={label} type="button" $active={active} aria-pressed={active}
+                      disabled={submitting} onClick={() => setFoods(current => togglePreference(current ?? preferencesQuery.data?.avoidFoods ?? null, value))}>{label}</S.Option>;
+                  })}
+                </S.Options>
+              </S.PreferenceQuestion> : null}
+              {priorityBlocks.filter(block => block.type === currentQuestion).map(renderBlock)}
+            </S.BlockList>
+            {isReview && otherBlocks.length ? (
+              <S.MoreBlocks>
+                <summary>
+                  <span>더 자세히 정하기 ({otherBlocks.length}가지)</span>
+                  <span>간단히 보기</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                </summary>
+                <S.BlockList>{otherBlocks.map(renderBlock)}</S.BlockList>
+              </S.MoreBlocks>
+            ) : null}
+            </S.QuestionFields>
+            {isReview ? <S.ReviewCopy>선택한 기준은 위의 여행 요약에서 확인할 수 있어요. 이전으로 돌아가 수정할 수 있어요.</S.ReviewCopy> : null}
+            {message ? <S.Error role="alert">{message}</S.Error> : null}
+            <S.ButtonRow>
+              <Button
+                type="button"
+                $variant="secondary"
+                disabled={submitting}
+                onClick={() => currentIndex > 0 ? setQuestionIndex(currentIndex - 1) : void navigate({ to: paths.plannerDestination })}
+              >
+                이전
+              </Button>
+              <Button
+                type="button"
+                disabled={
+                  submitting ||
+                  blocksQuery.isLoading ||
+                  preferencesQuery.isLoading
+                }
+                onClick={() => isReview ? void generate() : nextQuestion()}
+              >
+                {submitting
+                  ? "AI가 일정을 만드는 중…"
+                  : isReview ? "AI로 일정 만들기" : "다음"}
+              </Button>
+            </S.ButtonRow>
+            {submitting ? (
+              <p role="status" aria-live="polite">
+                선택한 여행지와 조건으로 일정을 만들고 있어요. 잠시
+                기다려주세요.
+              </p>
+            ) : null}
+          </>
+        )}
+      </S.QuestionCard>
+
       <PlaceSearchDialog
         isOpen={searchOpen}
         returnFocusRef={searchReturnFocusRef}
@@ -433,6 +460,6 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
         onClose={() => setSearchOpen(false)}
         onSelect={selectPlace}
       />
-    </S.Grid>
+    </S.FlowLayout>
   );
 }

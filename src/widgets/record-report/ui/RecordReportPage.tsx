@@ -20,11 +20,11 @@ export function RecordReportPage() {
   return (
     <AppShell>
       <S.Page>
-        <S.Header><S.Title>여행 리포트</S.Title><S.Subtitle>이번 여행에서 남긴 기록을 요약합니다. · 보류 상태</S.Subtitle></S.Header>
+        <S.Header><S.Title>여행 리포트</S.Title><S.Subtitle>이번 여행에서 남긴 기록을 요약해요. · 보류 상태</S.Subtitle></S.Header>
         {isLoading ? <Skeleton aria-busy="true" aria-label="여행 리포트 로딩 중" $height="29.375rem" $radius="1rem" /> : null}
-        {hasError ? <S.Empty>여행 기록을 불러오지 못했습니다.</S.Empty> : null}
-        {!isLoading && !hasError && trip ? <><S.ReportStats><S.Stat><small>기록</small><strong>{trip.timeline?.length ?? places.length}</strong><span>여행 기록</span></S.Stat><S.Stat><small>사진</small><strong>{trip.photoCount ?? trip.images?.length ?? 0}</strong><span>사진과 메모</span></S.Stat><S.Stat><small>방문 장소</small><strong>{visitedPlaces}</strong><span>여행지</span></S.Stat></S.ReportStats>{photos.length ? <S.ReportPhotos>{photos.map((image, index) => <S.ReportPhoto key={`${image}-${index}`}><img src={image} alt={`${trip.title || '여행'} 사진 ${index + 1}`} /><strong>{places[index]?.placeName || '장소 정보 없음'}</strong><span>Day {places[index]?.dayNumber || index + 1}</span></S.ReportPhoto>)}</S.ReportPhotos> : <S.Empty>남겨진 사진이 없습니다.</S.Empty>}<S.ReportActions><span>리포트 생성 API는 준비 중입니다.</span></S.ReportActions></> : null}
-        {!isLoading && !hasError && !trip ? <S.Empty><strong>리포트를 만들 여행 기록이 없습니다.</strong><button type="button" onClick={() => navigate({ to: paths.record })}>기록으로 돌아가기</button></S.Empty> : null}
+        {hasError ? <S.Empty>여행 기록을 불러오지 못했어요.</S.Empty> : null}
+        {!isLoading && !hasError && trip ? <><S.ReportStats><S.Stat><small>기록</small><strong>{trip.timeline?.length ?? places.length}</strong><span>여행 기록</span></S.Stat><S.Stat><small>사진</small><strong>{trip.photoCount ?? trip.images?.length ?? 0}</strong><span>사진과 메모</span></S.Stat><S.Stat><small>방문 장소</small><strong>{visitedPlaces}</strong><span>여행지</span></S.Stat></S.ReportStats>{photos.length ? <S.ReportPhotos>{photos.map((image, index) => <S.ReportPhoto key={`${image}-${index}`}><img src={image} alt={`${trip.title || '여행'} 사진 ${index + 1}`} /><strong>{places[index]?.placeName || '장소 정보 없음'}</strong><span>Day {places[index]?.dayNumber || index + 1}</span></S.ReportPhoto>)}</S.ReportPhotos> : <S.Empty>남겨진 사진이 없어요.</S.Empty>}<S.ReportActions><span>리포트 생성 API는 준비 중이에요.</span></S.ReportActions></> : null}
+        {!isLoading && !hasError && !trip ? <S.Empty><strong>리포트를 만들 여행 기록이 없어요.</strong><button type="button" onClick={() => navigate({ to: paths.record })}>기록으로 돌아가기</button></S.Empty> : null}
       </S.Page>
     </AppShell>
   )

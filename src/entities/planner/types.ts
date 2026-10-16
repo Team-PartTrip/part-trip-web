@@ -68,6 +68,7 @@ export type PlannerDetailResponseDto = {
 }
 
 export type PlannerMemberResponseDto = {
+  imgUrl?: string | null
   invitationId?: number
   status?: string
   userId?: string

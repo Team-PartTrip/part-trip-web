@@ -35,6 +35,8 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   body {
+    word-break: keep-all;
+    overflow-wrap: anywhere;
     min-width: min(20rem, 100%);
     min-height: 100vh;
     margin: 0;

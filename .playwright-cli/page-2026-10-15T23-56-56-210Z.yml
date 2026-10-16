@@ -1,0 +1,6 @@
+- complementary [ref=e3]:
+  - generic [ref=e4]:
+    - link "단디 홈" [ref=e6] [cursor=pointer]:
+      - /url: /main
+      - generic [ref=e7]: dandi
+    - navigation "메인 메뉴"

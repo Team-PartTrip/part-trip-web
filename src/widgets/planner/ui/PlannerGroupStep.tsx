@@ -4,9 +4,10 @@ import { Button as PartTripButton } from '@/shared/ui/parttrip'
 
 import { getPlannerMemberDisplayName } from '../model/member'
 import * as S from './PlannerPage.styles'
+import { PlannerMemberAvatar } from './PlannerMemberAvatar'
 
 type Props = {
-  currentUserInitial: string
+  currentUserImageUrl?: string
   currentUserName: string
   isSaving: boolean
   isSolo: boolean
@@ -18,7 +19,7 @@ type Props = {
 }
 
 export function PlannerGroupStep({
-  currentUserInitial,
+  currentUserImageUrl,
   currentUserName,
   isSaving,
   isSolo,
@@ -64,13 +65,13 @@ export function PlannerGroupStep({
         <S.SectionTitle>함께할 사람</S.SectionTitle>
         <S.MemberList>
           <S.MemberRow>
-            <S.Avatar>{currentUserInitial.slice(0, 1)}</S.Avatar>
+            <PlannerMemberAvatar name={currentUserName} imgUrl={currentUserImageUrl} />
             <S.MemberDetails><strong>{currentUserName}</strong></S.MemberDetails>
             <S.MemberState>나</S.MemberState>
           </S.MemberRow>
           {members.map((member, index) => (
             <S.MemberRow key={`${member.userId ?? member.nickName}-${index}`}>
-              <S.Avatar>{getPlannerMemberDisplayName(member).slice(0, 1).toUpperCase()}</S.Avatar>
+              <PlannerMemberAvatar name={getPlannerMemberDisplayName(member)} imgUrl={member.imgUrl} />
               <S.MemberDetails><strong>{getPlannerMemberDisplayName(member)}</strong></S.MemberDetails>
               <S.MemberState>{member.role || '초대 대기'}</S.MemberState>
             </S.MemberRow>

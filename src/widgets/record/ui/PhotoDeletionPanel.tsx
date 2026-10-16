@@ -35,11 +35,11 @@ export function PhotoDeletionPanel({ photos, recordId, title }: { photos: Deleta
         setSelected((current) => current.filter((item) => item !== entryId))
       }
       setSelected([])
-      setSuccessMessage('선택한 사진을 삭제했습니다.')
+      setSuccessMessage('선택한 사진을 삭제했어요.')
     } catch {
       setErrorMessage(deletedCount > 0
-        ? `사진 ${deletedCount}장을 삭제했지만 나머지 사진은 삭제하지 못했습니다.`
-        : '사진을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.')
+        ? `사진 ${deletedCount}장을 삭제했지만 나머지 사진은 삭제하지 못했어요.`
+        : '사진을 삭제하지 못했어요. 잠시 후 다시 시도해주세요.')
     }
   }
 
@@ -75,11 +75,11 @@ export function PhotoDeletionPanel({ photos, recordId, title }: { photos: Deleta
           <h2>삭제 확인</h2>
           <S.Warning>
             <strong>! 삭제하면 되돌릴 수 없어요</strong>
-            <span>삭제한 사진 대신 기본 대체 이미지가 표시됩니다.</span>
+            <span>삭제한 사진 대신 기본 대체 이미지가 표시돼요.</span>
           </S.Warning>
           <S.DeleteSummary>
             <strong>선택한 사진 {selected.length}장</strong>
-            <span>여행 기간 중인 사진만 삭제할 수 있습니다.</span>
+            <span>여행 기간 중인 사진만 삭제할 수 있어요.</span>
           </S.DeleteSummary>
           <S.DeleteActions>
             <S.DeleteButton

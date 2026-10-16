@@ -1,4 +1,4 @@
-import { formatDate } from '@/shared/utils'
+import { formatDate, formatDateRange } from '@/shared/utils'
 import type { DomesticRegionVisit } from '../model/profile-insight'
 
 import * as S from './ProfileInsightPage.styles'
@@ -34,7 +34,7 @@ export function ProfileCountriesView({
         <S.SectionTitle>방문 도시</S.SectionTitle>
         <S.CityTabs aria-label="방문 도시">{cities.map((city) => <span key={city}>{city}</span>)}</S.CityTabs>
         <S.SectionTitle>여행 기록</S.SectionTitle>
-        <S.CountryRecordList>{activeRegion.trips.map((trip, index) => <S.CountryRecordRow key={trip.tripId ?? index} type="button" disabled={!trip.tripId} onClick={() => trip.tripId && onOpenRecord(trip.tripId)}><strong>{trip.title || `${trip.cityName || activeRegion.name} 여행`}</strong><span>{trip.startDate || '-'} – {trip.endDate || '-'}</span><b aria-hidden="true">›</b></S.CountryRecordRow>)}{activeRegion.trips.length === 0 ? <S.Empty>선택한 지역의 여행 기록이 없습니다.</S.Empty> : null}</S.CountryRecordList>
+        <S.CountryRecordList>{activeRegion.trips.map((trip, index) => <S.CountryRecordRow key={trip.tripId ?? index} type="button" disabled={!trip.tripId} onClick={() => trip.tripId && onOpenRecord(trip.tripId)}><strong>{trip.title || `${trip.cityName || activeRegion.name} 여행`}</strong><span>{formatDateRange(trip.startDate, trip.endDate)}</span><b aria-hidden="true">›</b></S.CountryRecordRow>)}{activeRegion.trips.length === 0 ? <S.Empty>선택한 지역의 여행 기록이 없습니다.</S.Empty> : null}</S.CountryRecordList>
       </S.CountryRecordsPanel>
     </S.CountryRecordsLayout>
   )

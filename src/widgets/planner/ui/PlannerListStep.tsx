@@ -30,8 +30,8 @@ export function PlannerListStep({
     <>
       <S.PlannerTabs aria-label="여행 계획 상태" role="tablist">
         {[
-          ['active', '진행 중'],
           ['planned', '예정'],
+          ['active', '여행 중'],
           ['completed', '완료'],
         ].map(([tab, label]) => (
           <button

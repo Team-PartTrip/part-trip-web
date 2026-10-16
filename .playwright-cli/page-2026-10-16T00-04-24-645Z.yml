@@ -1,0 +1,43 @@
+- generic [ref=f2e1]:
+  - button "회귀 검사 실행" [active] [ref=f2e2]
+  - generic [ref=f2e3]: "PASS: 여행 미설정, 빈 추천, 오류, 새로고침 재조회 및 복구, 캘린더와 아이콘"
+  - generic [ref=f2e5]:
+    - link "본문 바로가기" [ref=f2e6] [cursor=pointer]:
+      - /url: "#main-content"
+    - complementary [ref=f2e7]:
+      - generic [ref=f2e8]:
+        - link "단디 홈" [ref=f2e53] [cursor=pointer]:
+          - /url: /main
+          - generic [ref=f2e54]: Dandi
+        - navigation "메인 메뉴" [ref=f2e9]:
+          - link "홈" [ref=f2e10] [cursor=pointer]:
+            - /url: /main
+          - link "플래너" [ref=f2e13] [cursor=pointer]:
+            - /url: /planner
+          - link "지도" [ref=f2e16] [cursor=pointer]:
+            - /url: /profile/map
+          - link "기록" [ref=f2e19] [cursor=pointer]:
+            - /url: /record
+          - link "알림" [ref=f2e22] [cursor=pointer]:
+            - /url: /notifications
+          - link "마이" [ref=f2e25] [cursor=pointer]:
+            - /url: /profile
+    - main [ref=f2e31]:
+      - main [ref=f2e32]:
+        - generic [ref=f2e33]:
+          - generic [ref=f2e34]: 다가오는 여행
+          - strong [ref=f2e55]: "-"
+          - strong [ref=f2e56]: 대구 · 1박 2일
+          - generic [ref=f2e57]: 2099.01.01 – 01.02 · -명
+        - button "축제 · 이벤트 캘린더 대구광역시의 여행 기간 전후 일정" [ref=f2e58] [cursor=pointer]:
+          - generic [ref=f2e40]:
+            - strong [ref=f2e41]: 축제 · 이벤트 캘린더
+            - generic [ref=f2e42]: 대구광역시의 여행 기간 전후 일정
+          - generic [aria-hidden] [ref=f2e59]: ›
+        - generic [ref=f2e60]:
+          - generic [ref=f2e61]:
+            - heading "가볼 만한 곳" [level=2] [ref=f2e62]
+            - button "새로고침" [ref=f2e63] [cursor=pointer]
+          - article [ref=f2e68]:
+            - generic [ref=f2e73]: 테스트 추천 장소
+            - generic [ref=f2e74]: 명소 · 평점 4.5

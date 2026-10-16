@@ -57,6 +57,7 @@ export function formatDate(value: DateValue) {
 export function formatDateRange(startDate: DateValue, endDate: DateValue) {
   const start = formatDate(startDate)
   const end = formatDate(endDate)
+  if (startDate && startDate === endDate) return start
   return start.length >= 7 && end.length >= 7 && start.slice(0, 7) === end.slice(0, 7)
     ? `${start} – ${end.slice(5)}`
     : `${start} – ${end}`
@@ -72,7 +73,7 @@ export function formatTravelDateTime(value: DateValue) {
     dateStyle: 'medium',
     timeZone: 'Asia/Seoul',
     timeStyle: 'short',
-  }).format(date)
+  }).format(date).replace(/\bAM\b/g, '오전').replace(/\bPM\b/g, '오후')
 }
 
 export function getDateRangeDays(
@@ -92,7 +93,7 @@ export function getDateRangeDays(
 
 export function formatTripDuration(startDate: DateValue, endDate: DateValue) {
   const days = getDateRangeDays(startDate, endDate)
-  return days == null ? '' : `${Math.max(0, days - 1)}박 ${days}일`
+  return days == null ? '' : days === 1 ? '당일치기' : `${Math.max(0, days - 1)}박 ${days}일`
 }
 
 export function isInCurrentCalendarWeek(value: DateValue, today = new Date()) {

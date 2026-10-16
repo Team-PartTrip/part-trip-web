@@ -330,6 +330,8 @@ export const MemberRow = styled.div`
 `
 
 export const Avatar = styled.span`
+  overflow: hidden;
+  img { width: 100%; height: 100%; object-fit: cover; }
   display: inline-flex;
   width: 2.125rem;
   height: 2.125rem;
