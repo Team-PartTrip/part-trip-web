@@ -110,7 +110,13 @@ document.getElementById('run').onclick = async () => {
   await reset({}); failSave = true; await go('foods'); button('해산물').click(); await until(()=>selected('해산물'))
   await submit(2); check(calls.map(c=>c.type).join() === 'save,generate','저장 실패가 생성을 막음')
   check(!('usesWheelchair' in calls[0].payload), '미응답 이동 편의 전송')
-  failSave = false; await reset({canUseStairs:false}); await go('mobility'); button('오래 걷기 어려워요').click(); await until(()=>selected('오래 걷기 어려워요'))
+  failSave = false
+  await reset({canUseStairs:false,usesWheelchair:null,limitedWalking:null});await go('mobility')
+  check(selected('계단이 어려워요'),'계단만 저장된 경우 미리 선택 누락')
+  await submit(1);check(calls[0].type==='generate','계단만 저장된 값의 불필요한 저장');calls=[]
+  await go('mobility');button('괜찮아요').click();await until(()=>selected('괜찮아요'))
+  await submit(2);check(calls[0].payload.canUseStairs===true&&pref.canUseStairs===true,'괜찮아요 선택 시 계단 설정 해제 누락')
+  await reset({canUseStairs:false}); await go('mobility'); button('오래 걷기 어려워요').click(); await until(()=>selected('오래 걷기 어려워요'))
   await submit(2); check(calls[0].payload.canUseStairs === false && pref.canUseStairs === false,'기존 계단 설정 덮어씀')
   await reset({usesWheelchair:false,limitedWalking:false,canUseStairs:true,avoidFoods:[]}); await go('mobility'); check(selected('괜찮아요'),'저장된 없음 미리 선택 누락')
   await submit(1)

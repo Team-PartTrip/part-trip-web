@@ -9,7 +9,7 @@ export function togglePreference<T>(selected: T[] | null, value: T | null): T[] 
 }
 
 export function mobilityOf(preferences?: TravelPreferenceResponseDto): Mobility[] | null {
-  if (!preferences || (preferences.usesWheelchair == null && preferences.limitedWalking == null)) return null
+  if (!preferences || (preferences.usesWheelchair == null && preferences.limitedWalking == null && preferences.canUseStairs !== false)) return null
   const answers: Mobility[] = []
   if (preferences.usesWheelchair) answers.push('WHEELCHAIR')
   if (preferences.limitedWalking) answers.push('WALKING')
