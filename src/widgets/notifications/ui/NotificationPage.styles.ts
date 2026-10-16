@@ -286,3 +286,13 @@ export const SettingRow = styled.div`
   strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 1rem; font-weight: 700; line-height: 1.5rem; }
   span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.375rem; }
 `
+
+export const NotificationPreview = styled.span`
+  && { white-space: normal; }
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+  line-height: 1.5;
+`

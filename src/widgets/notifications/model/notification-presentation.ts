@@ -1,16 +1,15 @@
 import type { NotificationType } from '@/entities/notification'
 import { isInCurrentCalendarWeek } from '@/shared/utils'
 
-export type NotificationViewFilter = 'ALL' | 'SCHEDULE' | 'PHOTO' | 'GROUP'
+export type NotificationViewFilter = 'ALL' | 'PLANNER' | 'RECORD'
 
-export function matchesNotificationFilter(notification: { type?: string; category?: string }, filter: NotificationViewFilter) {
+export function matchesNotificationFilter(notification: { type?: string; category?: string; linkType?: string }, filter: NotificationViewFilter) {
   if (filter === 'ALL') return true
-  const category = notification.category?.toUpperCase()
   const type = notification.type?.toUpperCase() ?? ''
-  if (category === filter || type.includes(filter)) return true
-  if (filter === 'GROUP') return type === 'GROUP_INVITED' || type === 'GROUP_INVITE_ACCEPTED'
-  if (filter === 'PHOTO') return type === 'PHOTO_ORGANIZED'
-  return false
+  const category = notification.category?.toUpperCase()
+  const link = normalizeNotificationLinkType(notification.linkType)
+  const record = category === 'PHOTO' || category === 'RECORD' || link === 'TRIP_CARD' || link === 'REGION_MAP' || type === 'PHOTO_ORGANIZED' || type === 'TRIP_CARD_CREATED' || type.includes('REGION')
+  return filter === 'RECORD' ? record : !record
 }
 
 export function settingCopy(type?: NotificationType, category?: string) {
@@ -72,6 +71,8 @@ export function detailCopy(notification: { linkType?: string; title?: string; bo
 
 export function detailActionLabel(notification: { linkType?: string; linkId?: number }) {
   const linkType = normalizeNotificationLinkType(notification.linkType)
+  if (linkType === 'PLANNER' && notification.linkId != null) return '일정 보러가기'
+  if (linkType === 'REGION_MAP') return '지도 보러가기'
   if (linkType === 'TRIP_CARD' && notification.linkId != null) return '여행카드 보러가기'
   if (linkType === 'GROUP' && notification.linkId != null) return '그룹 보러가기'
   if (linkType === 'GROUP_INVITATION' && notification.linkId != null) return '초대 확인하기'

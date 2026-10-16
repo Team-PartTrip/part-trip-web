@@ -61,7 +61,7 @@ export function usePlannerGroupFlow() {
       const plannerId = joined.plannerId
       if (!isPositiveSafeInteger(plannerId)) throw new Error('plannerId is missing')
       activatePlanner(plannerId)
-      navigate({ to: paths.plannerProgress })
+      navigate({ to: '/planner/$plannerId', params: { plannerId: String(joined.plannerId) } })
     } catch {
       setErrorMessage('초대 링크로 여행에 참여하지 못했어요. 링크를 확인하고 다시 열어주세요.')
     }

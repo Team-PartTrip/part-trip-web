@@ -75,9 +75,13 @@ export function useNotificationDetail() {
       navigate({ params: { tripId: String(linkId) }, to: '/trip-cards/$tripId' })
       return
     }
-    if ((linkType === 'GROUP' || linkType === 'GROUP_INVITATION') && linkId != null) {
+    if (linkType === 'REGION_MAP') {
+      navigate({ to: paths.profileMap });
+      return;
+    }
+    if ((linkType === 'PLANNER' || linkType === 'GROUP' || linkType === 'GROUP_INVITATION') && linkId != null) {
       writeSessionValue(ACTIVE_PLANNER_ID_KEY, String(linkId))
-      navigate({ to: paths.plannerProgress })
+      navigate({ to: '/planner/$plannerId', params: { plannerId: String(linkId) } })
     }
   }
   return { actionError, detail, notificationsQuery, markReadMutation, handleNotificationAction, navigate }

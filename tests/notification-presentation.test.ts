@@ -6,7 +6,8 @@ const jiti = createTestJiti()
 const { getDetailState } = await jiti.import('./src/shared/utils/status.ts') as {
   getDetailState: (input: { hasData: boolean; isError: boolean; isLoading: boolean }) => string
 }
-const { detailActionLabel, detailCopy, sectionLabel } = await jiti.import('./src/widgets/notifications/model/notification-presentation.ts') as {
+const { detailActionLabel, detailCopy, sectionLabel, matchesNotificationFilter } = await jiti.import('./src/widgets/notifications/model/notification-presentation.ts') as {
+  matchesNotificationFilter: (notification: { type?: string; category?: string; linkType?: string }, filter: string) => boolean
   detailActionLabel: (notification: { linkType?: string; linkId?: number }) => string | undefined
   detailCopy: (notification: { linkType?: string; title?: string; body?: string }) => { body: string; title: string }
   sectionLabel: (
@@ -42,4 +43,18 @@ test('알림 상세는 API 실패와 찾을 수 없는 알림을 구분한다', 
   assert.equal(getDetailState({ hasData: false, isError: true, isLoading: false }), 'error')
   assert.equal(getDetailState({ hasData: false, isError: false, isLoading: false }), 'empty')
   assert.equal(getDetailState({ hasData: true, isError: true, isLoading: false }), 'ready')
+})
+
+test('일정과 국내 지도 알림에 이동 버튼이 있고 앱과 동일한 탭으로 분류한다', () => {
+  assert.equal(detailActionLabel({ linkType: 'PLANNER', linkId: 7 }), '일정 보러가기')
+  assert.equal(detailActionLabel({ linkType: 'PLANNER' }), undefined)
+  assert.equal(detailActionLabel({ linkType: 'REGION_MAP' }), '지도 보러가기')
+  for (const notification of [{ linkType: 'PLANNER' }, { category: 'SCHEDULE' }, { type: 'GROUP_INVITED' }]) {
+    assert.equal(matchesNotificationFilter(notification, 'PLANNER'), true)
+    assert.equal(matchesNotificationFilter(notification, 'RECORD'), false)
+  }
+  for (const notification of [{ linkType: 'REGION_MAP' }, { category: 'PHOTO' }, { type: 'TRIP_CARD_CREATED' }]) {
+    assert.equal(matchesNotificationFilter(notification, 'RECORD'), true)
+    assert.equal(matchesNotificationFilter(notification, 'PLANNER'), false)
+  }
 })

@@ -18,7 +18,7 @@ export function usePlannerListFlow() {
       return
     }
     activatePlannerSession(plannerId)
-    navigate({ to: paths.plannerProgress })
+    navigate({ to: '/planner/$plannerId', params: { plannerId: String(plannerId) } })
   }
 
   const handleStartNewPlanner = () => {

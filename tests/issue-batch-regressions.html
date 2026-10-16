@@ -64,7 +64,7 @@ const route=createRootRoute({component:View})
 const router=createRouter({routeTree:route})
 createRoot(document.getElementById('root')).render(h(QueryClientProvider,{client},h(ThemeProvider,{theme:appTheme},h(GlobalStyle),h(RouterProvider,{router}))))
 const screen=()=>document.getElementById('screen')
-const button=label=>[...screen().querySelectorAll('button')].find(el=>el.textContent.trim()===label)
+const button=label=>[...screen().querySelectorAll('button')].find(el=>el.textContent.trim()===label || label==='다음'&&el.textContent.trim()==='건너뛰기')
 const check=(value,message)=>{if(!value)throw new Error(message)}
 const until=async fn=>{const end=Date.now()+6000;while(!fn()){if(Date.now()>end)throw new Error('화면 갱신 시간 초과: '+screen()?.dataset.mode);await new Promise(r=>originalSetTimeout(r,20))}}
 const mode=async value=>{document.getElementById('mode-'+value).click();await until(()=>screen().dataset.mode===value)}
@@ -84,7 +84,7 @@ document.getElementById('run').onclick=async()=>{
   }
   await mode('festival');await until(()=>screen().textContent.includes('10.27 – 11.22'))
   check(!screen().querySelector('select'),'한 분류 필터가 표시됨')
-  await router.navigate({to:'/test-entry'});await mode('criteria');await until(()=>question()==='COMPANION' && button('다음'));await next()
+  await router.navigate({to:'/test-entry'});await mode('criteria');await until(()=>question()==='COMPANION' && button('다음'));await next();await next()
   check(button('휠체어를 써요').getAttribute('aria-pressed')==='true','저장된 휠체어 미리 선택 누락')
   await next()
   check(button('고기').getAttribute('aria-pressed')==='true','저장된 피하는 음식 미리 선택 누락')
@@ -110,7 +110,7 @@ document.getElementById('run').onclick=async()=>{
   await until(()=>button('경로 다시 불러오기'))
   check(pollReads===21,'경로 재조회 횟수 오류: '+pollReads)
   check(screen().textContent.includes('경로를 불러오지 못했어요.'),'계산 시간 초과 안내 누락')
-  await mode('criteria');await until(()=>question()==='COMPANION' && button('다음'));await review();generationResolve=undefined;button('AI로 일정 만들기').click();await until(()=>generationResolve);generationResolve({data:{plannerId:7,days:[]}});await until(()=>location.pathname==='/planner/progress');
+  await mode('criteria');await until(()=>question()==='COMPANION' && button('다음'));await review();generationResolve=undefined;button('AI로 일정 만들기').click();await until(()=>generationResolve);generationResolve({data:{plannerId:7,days:[]}});await until(()=>location.pathname==='/planner/7');
   document.getElementById('result').textContent='PASS: 목록 5종 재시도·보호자 양쪽 목록·축제 기간/필터·저장값 미리 선택·생성 중 이동 차단·서버 오류 안내·단일/복수 사진 코멘트·경로 20회 후 시간 초과·새로고침 확인·성공 후 이동'
  }catch(error){document.getElementById('result').textContent='FAIL: '+error.message}
  finally{if(prev===null)sessionStorage.removeItem(key);else sessionStorage.setItem(key,prev);if(prevDraft===null)sessionStorage.removeItem(draftKey);else sessionStorage.setItem(draftKey,prevDraft)}

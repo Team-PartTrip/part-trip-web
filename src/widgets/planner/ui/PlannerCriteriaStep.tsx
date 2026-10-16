@@ -11,7 +11,7 @@ import {
 import type { PlaceSearchResponseDto } from "@/entities/travel";
 import { useTravelPreferencesQuery, useUpdateTravelPreferencesMutation } from "@/entities/user";
 import { paths } from "@/shared/config";
-import { Button } from "@/shared/ui/parttrip";
+import { Button, Input } from "@/shared/ui/parttrip";
 import { formatDateRange, getErrorMessage } from "@/shared/utils";
 import { isPositiveSafeInteger } from "@/shared/utils/number";
 import { activatePlannerSession } from "../model/planner-session";
@@ -39,8 +39,9 @@ const foodOptions: Array<{ value: AvoidFood | null; label: string }> = [
 ];
 
 const suggestedBlockTypes = [
-  "TRAVEL_TYPE",
   "COMPANION",
+  "DEPARTURE_PLACE",
+  "TRAVEL_TYPE",
   "WALKING",
   "DAILY_DENSITY",
   "FOOD_TYPE",
@@ -58,7 +59,7 @@ function toSelectionMap(blocks: PlannerBlockDto[] = []): SelectionMap {
 
 function getBlockValues(selections: SelectionMap): PlannerBlockDto[] {
   return Object.entries(selections).flatMap(([type, values]) =>
-    values.map((value) => ({ type, value })),
+    values.map(value => value.trim()).filter(Boolean).map((value) => ({ type, value })),
   );
 }
 
@@ -97,7 +98,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
   }, [preferencesQuery.data?.home, selections]);
   const [questionIndex, setQuestionIndex] = useState(0);
   const questionRef = useRef<HTMLHeadingElement>(null);
-  const availableBlocks = blocksQuery.data ?? [];
+  const availableBlocks = (blocksQuery.data ?? []).some(block => block.type === 'DEPARTURE_PLACE') ? blocksQuery.data ?? [] : [...(blocksQuery.data ?? []), { type: 'DEPARTURE_PLACE', label: '어디에서 출발하세요?' }];
   const priorityBlocks = suggestedBlockTypes.flatMap(type => availableBlocks.filter(block => block.type === type));
   const otherBlocks = availableBlocks.filter(
     (block) => !suggestedBlockTypes.includes(block.type ?? ""),
@@ -108,6 +109,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
   const currentQuestion = questions[currentIndex];
   const activeBlock = priorityBlocks.find(block => block.type === currentQuestion);
   const isReview = currentQuestion === "review";
+  const hasAnswer = currentQuestion === 'mobility' ? mobility !== null : currentQuestion === 'foods' ? foods !== null : (selections[currentQuestion]?.length ?? 0) > 0 || (currentQuestion === 'DEPARTURE_PLACE' && Boolean(preferencesQuery.data?.home));
   const questionTitle = currentQuestion === "TRAVEL_TYPE" ? "어떤 여행을 하고 싶으세요?"
     : currentQuestion === "COMPANION" ? "누구와 함께 떠나세요?"
     : currentQuestion === "mobility" ? "다니실 때 불편한 점이 있으세요?"
@@ -145,7 +147,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
       ({ coords }) => {
         if (departureActionVersion.current !== actionVersion) return;
         setDeparturePoint({
-          name: "지금 있는 곳",
+          name: `선택한 출발지 (${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)})`,
           address: "",
           latitude: coords.latitude,
           longitude: coords.longitude,
@@ -217,11 +219,20 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
         ? home.name
         : selectedDeparture) ??
       (home ? home.name : "선택되지 않음");
+    if (type === 'MUST_INCLUDE' || type === 'EXCLUDE') return (
+      <S.Block key={type}>
+        <label htmlFor={`place-names-${type}`}>{block.label || (type === 'MUST_INCLUDE' ? '반드시 포함할 곳' : '제외할 곳')}</label>
+        <Input id={`place-names-${type}`} value={(selections[type] ?? []).join(',')} placeholder="장소 이름을 쉼표로 구분해 적어주세요" onChange={event => {
+          setSelections(current => ({ ...current, [type]: event.target.value ? event.target.value.split(',') : [] }));
+        }} />
+        <p>예: 경주월드, 불국사 · 안 골라도 괜찮아요.</p>
+      </S.Block>
+    );
     return (
       <S.Block key={type} $departure={isDeparture}>
         {type !== currentQuestion ? <h3>{block.label ?? type}</h3> : null}
         <S.Options role="group" aria-label={block.label ?? type}>
-          {(block.options ?? []).map((value) => (
+          {(isDeparture ? [] : block.options ?? []).map((value) => (
             <S.Option
               key={value}
               type="button"
@@ -241,7 +252,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
               )}
               onClick={(event) => {
                 selectBlockOption(block, value, event.currentTarget);
-                if (!block.multiple && suggestedBlockTypes.includes(type)) nextQuestion();
+                if (!block.multiple && suggestedBlockTypes.includes(type) && !isDeparture) nextQuestion();
               }}
             >
               {value}
@@ -336,7 +347,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
         schedule,
       );
       submittingRef.current = false;
-      void navigate({ to: paths.plannerProgress });
+      void navigate({ to: '/planner/$plannerId', params: { plannerId: String(schedule.plannerId) } });
     } catch (error) {
       setMessage(getErrorMessage(error, "AI 일정을 만들지 못했어요. 도시와 날짜를 확인하고 다시 시도해주세요."));
     } finally {
@@ -382,7 +393,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
               <progress aria-label="여행 기준 진행률" max={questions.length} value={currentIndex + 1} />
             </S.QuestionProgress>
             <h2 ref={questionRef} tabIndex={-1}>{questionTitle}</h2>
-            <S.QuestionHint>{isReview ? "필요한 추가 조건을 정하고 AI 일정을 만들어 보세요." : activeBlock && !activeBlock.multiple ? "하나를 선택하면 다음 질문으로 이동해요." : "여러 개 선택할 수 있어요. 선택을 마치면 다음을 눌러주세요."}</S.QuestionHint>
+            <S.QuestionHint>{currentQuestion !== 'COMPANION' && !isReview ? '안 골라도 괜찮아요. ' : ''}{isReview ? "필요한 추가 조건을 정하고 AI 일정을 만들어 보세요." : activeBlock && !activeBlock.multiple ? "하나를 선택하면 다음 질문으로 이동해요." : "여러 개 선택할 수 있어요. 선택을 마치면 다음을 눌러주세요."}</S.QuestionHint>
             <S.QuestionFields disabled={submitting}>
             <S.BlockList>
               {currentQuestion === "mobility" ? <S.PreferenceQuestion>
@@ -440,8 +451,9 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
               >
                 {submitting
                   ? "AI가 일정을 만드는 중…"
-                  : isReview ? "AI로 일정 만들기" : "다음"}
+                  : isReview ? "AI로 일정 만들기" : !hasAnswer && currentQuestion !== "COMPANION" ? "건너뛰기" : "다음"}
               </Button>
+              {!isReview ? <Button type="button" $variant="secondary" disabled={submitting || blocksQuery.isLoading || preferencesQuery.isLoading} onClick={() => setQuestionIndex(questions.indexOf('review'))}>나머지는 기본으로 만들기</Button> : null}
             </S.ButtonRow>
             {submitting ? (
               <p role="status" aria-live="polite">

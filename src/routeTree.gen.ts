@@ -21,6 +21,7 @@ import { Route as appAuthenticatedProfileIndexRouteImport } from './routes/(app)
 import { Route as appAuthenticatedRecordIndexRouteImport } from './routes/(app)/_authenticated/record/index'
 import { Route as appAuthenticatedTripCardsIndexRouteImport } from './routes/(app)/_authenticated/trip-cards/index'
 import { Route as appAuthenticatedNotificationsNotificationIdIndexRouteImport } from './routes/(app)/_authenticated/notifications/$notificationId/index'
+import { Route as appAuthenticatedPlannerPlannerIdIndexRouteImport } from './routes/(app)/_authenticated/planner/$plannerId/index'
 import { Route as appAuthenticatedPlannerDestinationIndexRouteImport } from './routes/(app)/_authenticated/planner/destination/index'
 import { Route as appAuthenticatedPlannerExploreIndexRouteImport } from './routes/(app)/_authenticated/planner/explore/index'
 import { Route as appAuthenticatedPlannerGroupIndexRouteImport } from './routes/(app)/_authenticated/planner/group/index'
@@ -112,6 +113,12 @@ const appAuthenticatedNotificationsNotificationIdIndexRoute =
   appAuthenticatedNotificationsNotificationIdIndexRouteImport.update({
     id: '/notifications/$notificationId/',
     path: '/notifications/$notificationId/',
+    getParentRoute: () => appAuthenticatedRouteRoute,
+  } as any)
+const appAuthenticatedPlannerPlannerIdIndexRoute =
+  appAuthenticatedPlannerPlannerIdIndexRouteImport.update({
+    id: '/planner/$plannerId/',
+    path: '/planner/$plannerId/',
     getParentRoute: () => appAuthenticatedRouteRoute,
   } as any)
 const appAuthenticatedPlannerDestinationIndexRoute =
@@ -283,6 +290,7 @@ export interface FileRoutesByFullPath {
   '/record/': typeof appAuthenticatedRecordIndexRoute
   '/trip-cards/': typeof appAuthenticatedTripCardsIndexRoute
   '/notifications/$notificationId/': typeof appAuthenticatedNotificationsNotificationIdIndexRoute
+  '/planner/$plannerId/': typeof appAuthenticatedPlannerPlannerIdIndexRoute
   '/planner/destination/': typeof appAuthenticatedPlannerDestinationIndexRoute
   '/planner/explore/': typeof appAuthenticatedPlannerExploreIndexRoute
   '/planner/group/': typeof appAuthenticatedPlannerGroupIndexRoute
@@ -322,6 +330,7 @@ export interface FileRoutesByTo {
   '/record': typeof appAuthenticatedRecordIndexRoute
   '/trip-cards': typeof appAuthenticatedTripCardsIndexRoute
   '/notifications/$notificationId': typeof appAuthenticatedNotificationsNotificationIdIndexRoute
+  '/planner/$plannerId': typeof appAuthenticatedPlannerPlannerIdIndexRoute
   '/planner/destination': typeof appAuthenticatedPlannerDestinationIndexRoute
   '/planner/explore': typeof appAuthenticatedPlannerExploreIndexRoute
   '/planner/group': typeof appAuthenticatedPlannerGroupIndexRoute
@@ -363,6 +372,7 @@ export interface FileRoutesById {
   '/(app)/_authenticated/record/': typeof appAuthenticatedRecordIndexRoute
   '/(app)/_authenticated/trip-cards/': typeof appAuthenticatedTripCardsIndexRoute
   '/(app)/_authenticated/notifications/$notificationId/': typeof appAuthenticatedNotificationsNotificationIdIndexRoute
+  '/(app)/_authenticated/planner/$plannerId/': typeof appAuthenticatedPlannerPlannerIdIndexRoute
   '/(app)/_authenticated/planner/destination/': typeof appAuthenticatedPlannerDestinationIndexRoute
   '/(app)/_authenticated/planner/explore/': typeof appAuthenticatedPlannerExploreIndexRoute
   '/(app)/_authenticated/planner/group/': typeof appAuthenticatedPlannerGroupIndexRoute
@@ -404,6 +414,7 @@ export interface FileRouteTypes {
     | '/record/'
     | '/trip-cards/'
     | '/notifications/$notificationId/'
+    | '/planner/$plannerId/'
     | '/planner/destination/'
     | '/planner/explore/'
     | '/planner/group/'
@@ -443,6 +454,7 @@ export interface FileRouteTypes {
     | '/record'
     | '/trip-cards'
     | '/notifications/$notificationId'
+    | '/planner/$plannerId'
     | '/planner/destination'
     | '/planner/explore'
     | '/planner/group'
@@ -483,6 +495,7 @@ export interface FileRouteTypes {
     | '/(app)/_authenticated/record/'
     | '/(app)/_authenticated/trip-cards/'
     | '/(app)/_authenticated/notifications/$notificationId/'
+    | '/(app)/_authenticated/planner/$plannerId/'
     | '/(app)/_authenticated/planner/destination/'
     | '/(app)/_authenticated/planner/explore/'
     | '/(app)/_authenticated/planner/group/'
@@ -604,6 +617,13 @@ declare module '@tanstack/react-router' {
       path: '/notifications/$notificationId'
       fullPath: '/notifications/$notificationId/'
       preLoaderRoute: typeof appAuthenticatedNotificationsNotificationIdIndexRouteImport
+      parentRoute: typeof appAuthenticatedRouteRoute
+    }
+    '/(app)/_authenticated/planner/$plannerId/': {
+      id: '/(app)/_authenticated/planner/$plannerId/'
+      path: '/planner/$plannerId'
+      fullPath: '/planner/$plannerId/'
+      preLoaderRoute: typeof appAuthenticatedPlannerPlannerIdIndexRouteImport
       parentRoute: typeof appAuthenticatedRouteRoute
     }
     '/(app)/_authenticated/planner/destination/': {
@@ -799,6 +819,7 @@ interface appAuthenticatedRouteRouteChildren {
   appAuthenticatedRecordIndexRoute: typeof appAuthenticatedRecordIndexRoute
   appAuthenticatedTripCardsIndexRoute: typeof appAuthenticatedTripCardsIndexRoute
   appAuthenticatedNotificationsNotificationIdIndexRoute: typeof appAuthenticatedNotificationsNotificationIdIndexRoute
+  appAuthenticatedPlannerPlannerIdIndexRoute: typeof appAuthenticatedPlannerPlannerIdIndexRoute
   appAuthenticatedPlannerDestinationIndexRoute: typeof appAuthenticatedPlannerDestinationIndexRoute
   appAuthenticatedPlannerExploreIndexRoute: typeof appAuthenticatedPlannerExploreIndexRoute
   appAuthenticatedPlannerGroupIndexRoute: typeof appAuthenticatedPlannerGroupIndexRoute
@@ -836,6 +857,8 @@ const appAuthenticatedRouteRouteChildren: appAuthenticatedRouteRouteChildren = {
   appAuthenticatedTripCardsIndexRoute: appAuthenticatedTripCardsIndexRoute,
   appAuthenticatedNotificationsNotificationIdIndexRoute:
     appAuthenticatedNotificationsNotificationIdIndexRoute,
+  appAuthenticatedPlannerPlannerIdIndexRoute:
+    appAuthenticatedPlannerPlannerIdIndexRoute,
   appAuthenticatedPlannerDestinationIndexRoute:
     appAuthenticatedPlannerDestinationIndexRoute,
   appAuthenticatedPlannerExploreIndexRoute:

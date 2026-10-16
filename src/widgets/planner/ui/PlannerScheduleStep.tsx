@@ -18,11 +18,13 @@ import { PlannerScheduleEditor } from "./PlannerScheduleEditor";
 
 export function PlannerScheduleStep({
   currentDraft,
+  plannerId: requestedPlannerId,
 }: {
   currentDraft?: PlannerCreationDraft;
+  plannerId?: number;
 }) {
   const navigate = useNavigate();
-  const plannerId = readSessionId(ACTIVE_PLANNER_ID_KEY);
+  const plannerId = requestedPlannerId ?? readSessionId(ACTIVE_PLANNER_ID_KEY);
   const scheduleQuery = usePlannerScheduleQuery(plannerId);
   const [timedOutPlannerId, setTimedOutPlannerId] = useState<number>();
   const routePolls = useRef({ plannerId, attempts: 0 });
@@ -68,7 +70,7 @@ export function PlannerScheduleStep({
   const [message, setMessage] = useState("");
   const [confirmed, setConfirmed] = useState(false);
   const [isEditingSchedule, setIsEditingSchedule] = useState(false);
-  const serverConfirmed = ["CONFIRMED", "TRAVELING", "COMPLETED"].includes(
+  const serverConfirmed = ["CONFIRMED", "TRAVELING", "COMPLETED", "DONE"].includes(
     normalizeStatus(detailQuery.data?.status),
   );
   const isConfirmed =
@@ -76,7 +78,7 @@ export function PlannerScheduleStep({
     serverConfirmed ||
     readSessionValue(`${PLANNER_CONFIRMED_KEY}:${plannerId}`) === "true";
   const canManageCurrentPlanner = canManagePlanner(detailQuery.data?.role);
-  const isSolo = currentDraft?.isSolo || detailQuery.data?.memberCount === 1;
+  const isSolo = detailQuery.data?.memberCount != null ? detailQuery.data.memberCount === 1 : currentDraft?.isSolo;
 
   const confirmSchedule = async () => {
     if (

@@ -179,7 +179,7 @@ export function MainPage() {
   const openTodaySchedule = () => {
     if (currentPlanner?.plannerId) {
       activatePlannerSession(currentPlanner.plannerId)
-      void navigate({ to: paths.plannerProgress })
+      void navigate({ to: '/planner/$plannerId', params: { plannerId: String(currentPlanner.plannerId) } })
       return
     }
     void navigate({ to: paths.planner })

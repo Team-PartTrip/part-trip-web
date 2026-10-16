@@ -15,9 +15,8 @@ import * as S from './NotificationPage.styles'
 
 const tabs: Array<{ label: string; value: NotificationViewFilter }> = [
   { label: '전체', value: 'ALL' },
-  { label: '일정', value: 'SCHEDULE' },
-  { label: '사진', value: 'PHOTO' },
-  { label: '그룹', value: 'GROUP' },
+  { label: '플래너', value: 'PLANNER' },
+  { label: '기록', value: 'RECORD' },
 ]
 
 export function NotificationListView({
@@ -70,6 +69,7 @@ export function NotificationListView({
               <S.StatusDot $read={isRead} />
               <S.NotificationCopy $read={isRead}>
                 <strong>{title}</strong>
+                {notification.body ? <S.NotificationPreview>{notification.body}</S.NotificationPreview> : null}
                 <span>{relativeTime(notification.createdAt)} · {isRead ? '읽음' : '읽지 않음'}</span>
               </S.NotificationCopy>
               <S.NotificationCategory $tone={categoryTone(notification.type)}>

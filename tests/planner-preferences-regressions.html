@@ -44,11 +44,11 @@ function View() {
 const route = createRootRoute({ component: View })
 createRoot(document.getElementById('root')).render(h(QueryClientProvider, { client }, h(ThemeProvider, { theme: appTheme }, h(GlobalStyle), h(RouterProvider, { router: createRouter({ routeTree: route }) }))))
 const screen = () => document.getElementById('screen')
-const button = label => [...screen().querySelectorAll('button')].find(el => el.textContent === label)
+const button = label => [...screen().querySelectorAll('button')].find(el => el.textContent === label || label === '다음' && el.textContent === '건너뛰기')
 const check = (value, message) => { if (!value) throw new Error(message) }
 const until = async fn => { const end = Date.now() + 5000; while (!fn()) { if (Date.now() > end) throw new Error('화면 갱신 시간 초과'); await new Promise(resolve => setTimeout(resolve, 20)) } }
 const selected = label => button(label)?.getAttribute('aria-pressed') === 'true'
-const steps = [...featuredTypes, 'mobility', 'foods', 'review']
+const steps = ['COMPANION', 'DEPARTURE_PLACE', 'TRAVEL_TYPE', ...featuredTypes.slice(2), 'mobility', 'foods', 'review']
 const current = () => screen().querySelector('[data-question]')?.dataset.question
 const go = async target => {
   while (current() !== target) {
@@ -62,7 +62,7 @@ const reset = async values => {
   client.setQueryData(['user', 'travel-preferences'], pref)
   const version = Number(screen().dataset.version) + 1
   document.getElementById('reopen').click()
-  await until(() => Number(screen().dataset.version) === version && current() === 'TRAVEL_TYPE' && button('다음') && !button('다음').disabled)
+  await until(() => Number(screen().dataset.version) === version && current() === 'COMPANION' && button('다음') && !button('다음').disabled)
 }
 const submit = async count => {
   await go('review'); button('AI로 일정 만들기').click(); button('AI로 일정 만들기')?.click()
@@ -74,13 +74,13 @@ document.getElementById('run').onclick = async () => {
  try {
   await reset({})
   check(screen().querySelectorAll('[role="group"]').length === 1, '한 번에 여러 질문 표시')
-  button('힐링').click(); await until(() => current() === 'COMPANION')
+  button('친구').click();await until(()=>current()==='DEPARTURE_PLACE')
   check(document.activeElement === screen().querySelector('[data-question] h2'), '자동 이동 후 제목 포커스 누락')
-  button('친구').click(); await until(() => current() === 'WALKING')
-  await go('TRAVEL_TYPE'); check(selected('힐링'), '이전 선택 유실')
-  button('힐링').click(); await until(() => current() === 'COMPANION')
-  await go('TRAVEL_TYPE'); check(selected('힐링'), '같은 항목 재선택으로 답변 삭제')
-  await go('COMPANION'); button('혼자').click(); await until(() => current() === 'WALKING')
+  await go('TRAVEL_TYPE');button('힐링').click();await until(()=>current()==='WALKING')
+  await go('TRAVEL_TYPE');check(selected('힐링'),'이전 선택 유실')
+  button('힐링').click();await until(()=>current()==='WALKING')
+  await go('TRAVEL_TYPE');check(selected('힐링'),'같은 항목 재선택으로 답변 삭제')
+  await go('COMPANION');button('혼자').click();await until(()=>current()==='DEPARTURE_PLACE')
   await go('FOOD_TYPE'); button('기본 선택').click(); button('다른 선택').click()
   await until(() => selected('기본 선택') && selected('다른 선택'))
   check(current() === 'FOOD_TYPE', '복수 선택 중 자동 이동')
@@ -123,7 +123,7 @@ document.getElementById('run').onclick = async () => {
   const previousBlocks=draft.blocks;draft.blocks=[]
   await reset({});await go('review');button('AI로 일정 만들기').click();await until(()=>current()==='COMPANION' && screen().querySelector('[role=alert]'))
   check(calls.length===0,'동행 미선택 상태에서 생성 요청')
-  button('혼자').click();await until(()=>current()==='WALKING');check(!screen().querySelector('[role=alert]'),'동행 선택 후 이전 오류 안내 잔존')
+  button('혼자').click();await until(()=>current()==='DEPARTURE_PLACE');check(!screen().querySelector('[role=alert]'),'동행 선택 후 이전 오류 안내 잔존')
   draft.blocks=previousBlocks
   document.getElementById('result').textContent = 'PASS: 단일 질문·자동 이동·포커스·이전 선택 유지·복수 선택·추가 설정·저장값 미리 선택·변경 없는 저장 생략·미응답 생략·저장 실패 후 생성·중복 제출 방지'
  } catch(error) { document.getElementById('result').textContent = 'FAIL: '+error.message }
