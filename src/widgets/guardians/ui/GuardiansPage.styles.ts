@@ -130,3 +130,34 @@ export const Message = styled.p<{ $error?: boolean }>`
   font-size: 0.875rem;
   line-height: 1.3125rem;
 `
+
+export const LocationMapFrame = styled.div`
+  position: relative;
+  overflow: hidden;
+  border: 1px solid ${({ theme }) => theme.colors.border.default};
+  border-radius: 0.75rem;
+  background: ${({ theme }) => theme.colors.background.default};
+`
+
+export const LocationMap = styled.div`
+  width: 100%;
+  height: 18rem;
+  position: relative;
+  z-index: 0;
+`
+
+export const LocationMapState = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: ${({ theme }) => theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 0.875rem;
+  text-align: center;
+`

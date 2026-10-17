@@ -9,7 +9,7 @@ export type KakaoMaps = {
   LatLng: new (latitude: number, longitude: number) => LatLng
   LatLngBounds: new () => Bounds
   Map: new (container: HTMLElement, options: { center: LatLng; level: number }) => MapView
-  Marker: new (options: { map: MapView; position: LatLng; title: string }) => MapItem
+  Marker: new (options: { map: MapView; position: LatLng; title: string }) => MapItem & { setPosition(position: LatLng): void }
   CustomOverlay: new (options: { map: MapView; position: LatLng; content: HTMLElement; yAnchor: number }) => MapItem
   services: {
     Status: { OK: string }

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { tourPlacesQueryOptions } from '@/entities/travel'
 import {
@@ -8,6 +8,9 @@ import {
 } from '@/entities/guardian'
 import type { GuardianLinkDto } from '@/entities/guardian/api'
 import { Button } from '@/shared/ui/parttrip'
+import { hasMapCoordinates } from '@/shared/libs/kakao-maps'
+import { relativeLocationTime } from '../model/location-time'
+import { SeniorLocationMap } from './SeniorLocationMap'
 import * as S from './GuardiansPage.styles'
 
 export function SeniorTravelPanel({
@@ -25,6 +28,11 @@ export function SeniorTravelPanel({
   const seniorSchedule = useSeniorScheduleQuery(senior.userId, selectedPlanner?.plannerId)
   const placesQuery = useQuery(tourPlacesQueryOptions('대한민국', selectedPlanner?.cityName, undefined, Boolean(selectedPlanner?.cityName)))
   const seniorLocation = useSeniorLocationQuery(senior.userId)
+  const [now, setNow] = useState(Date.now)
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 60_000)
+    return () => window.clearInterval(timer)
+  }, [])
   let locationContent: ReactNode
 
   if (seniorLocation.isLoading) {
@@ -36,9 +44,14 @@ export function SeniorTravelPanel({
     </>
   } else if (!seniorLocation.data) {
     locationContent = <S.Message>여행 중 앱을 열면 현재 위치가 여기에 표시돼요.</S.Message>
+  } else if (!hasMapCoordinates(seniorLocation.data)) {
+    locationContent = <S.Message $error>위치 좌표를 확인할 수 없어요. 다음 위치 전송을 기다려주세요.</S.Message>
   } else {
+    const recordedAt = new Date(seniorLocation.data.recordedAt)
+    const time = Number.isFinite(recordedAt.getTime()) ? dateTimeFormatter.format(recordedAt) : '시각 미상'
     locationContent = <>
-      <S.Message>마지막 확인 {dateTimeFormatter.format(new Date(seniorLocation.data.recordedAt))}</S.Message>
+      <S.Message>마지막 확인 {time} · {relativeLocationTime(seniorLocation.data.recordedAt, now)}</S.Message>
+      <SeniorLocationMap key={senior.userId} latitude={seniorLocation.data.latitude} longitude={seniorLocation.data.longitude} label={seniorLabel} />
       <S.MapLink
         href={`https://maps.google.com/?q=${seniorLocation.data.latitude},${seniorLocation.data.longitude}`}
         target="_blank"
@@ -92,9 +105,9 @@ export function SeniorTravelPanel({
   }
 
   return (
-    <S.Card>
+    <S.Card style={{ gridColumn: '1 / -1' }}>
       <h2>{seniorLabel}의 일정과 현재 위치</h2>
-      <p>여행 중 앱을 열면 최근 위치를 확인할 수 있어요. 위치는 12시간 후 삭제돼요.</p>
+      <p>여행 중에는 앱이 꺼져 있어도 20초쯤마다 위치가 갱신돼요. 위치는 12시간 후 삭제돼요.</p>
       <S.GuardianDetails>
         <section>
           <h3>현재 위치</h3>

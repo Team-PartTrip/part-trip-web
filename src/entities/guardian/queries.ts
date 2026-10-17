@@ -45,6 +45,6 @@ export function useSeniorLocationQuery(seniorUserId?: string) {
     queryKey: guardianQueryKeys.seniorLocation(seniorUserId ?? ''),
     queryFn: () => getSeniorLocation(seniorUserId!),
     enabled: Boolean(seniorUserId),
-    refetchInterval: seniorUserId ? 60_000 : false,
+    refetchInterval: seniorUserId ? 10_000 : false,
   })
 }
