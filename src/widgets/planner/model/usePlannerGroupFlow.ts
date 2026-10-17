@@ -5,13 +5,13 @@ import {
   useCreatePlannerMutation,
   useJoinPlannerMutation,
   usePlannerDetailQuery,
-  usePlannerMembersQuery,
   useRemovePlannerMemberMutation,
 } from '@/entities/planner'
 import { PLANNER_GROUP_SETTINGS_KEY, paths } from '@/shared/config'
 import { writeSessionValue } from '@/shared/libs/session-storage'
 import { isPositiveSafeInteger } from '@/shared/utils'
 import { isValidPlannerMemberCount } from './member-count'
+import { usePlannerLiveMembers, isPlannerFinished } from './usePlannerLiveMembers'
 import { usePlannerState } from './usePlannerState'
 import { canManagePlanner as hasPlannerManagementRole } from './planner-role'
 
@@ -20,11 +20,11 @@ export function usePlannerGroupFlow() {
   const state = usePlannerState()
   const { activePlannerId, activatePlanner, autoJoinInviteCodeRef, errorMessage, inviteCodeFromUrlRef, isSolo, memberCount, setErrorMessage, setIsSolo, setMemberCount } = state
   const detailQuery = usePlannerDetailQuery(activePlannerId)
-  const membersQuery = usePlannerMembersQuery(activePlannerId)
+  const membersQuery = usePlannerLiveMembers(activePlannerId, detailQuery.data)
   const createPlannerMutation = useCreatePlannerMutation()
   const joinPlannerMutation = useJoinPlannerMutation()
   const removePlannerMemberMutation = useRemovePlannerMemberMutation()
-  const canManagePlanner = isPositiveSafeInteger(activePlannerId) && hasPlannerManagementRole(detailQuery.data?.role)
+  const canManagePlanner = isPositiveSafeInteger(activePlannerId) && hasPlannerManagementRole(detailQuery.data?.role) && !isPlannerFinished(detailQuery.data?.status)
 
   const saveGroupSettings = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()

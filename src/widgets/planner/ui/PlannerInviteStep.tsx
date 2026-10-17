@@ -8,6 +8,10 @@ import { formatDateRange, normalizeStatus } from "@/shared/utils";
 import { clearPlannerCreationDraft, type PlannerCreationDraft } from "../model/planner-creation";
 import * as S from "./PlannerAiFlow.styles";
 
+import { usePlannerLiveMembers, isPlannerFinished } from '../model/usePlannerLiveMembers';
+import { canManagePlanner } from '../model/planner-role';
+import { PlannerMemberManagement } from './PlannerMemberManagement';
+
 export function PlannerInviteStep({
   currentDraft,
 }: {
@@ -16,6 +20,8 @@ export function PlannerInviteStep({
   const navigate = useNavigate();
   const plannerId = readSessionId(ACTIVE_PLANNER_ID_KEY);
   const detailQuery = usePlannerDetailQuery(plannerId);
+  const membersQuery = usePlannerLiveMembers(plannerId, detailQuery.data);
+  const canInvite = canManagePlanner(detailQuery.data?.role) && !isPlannerFinished(detailQuery.data?.status);
   const [inviteFeedback, setInviteFeedback] = useState("");
   const isConfirmed =
     ["CONFIRMED", "TRAVELING", "COMPLETED"].includes(
@@ -24,6 +30,7 @@ export function PlannerInviteStep({
 
   const copyInviteLink = async () => {
     const link = detailQuery.data?.inviteLink;
+    if (!canInvite) return;
     if (!link) {
       setInviteFeedback("서버에서 초대 링크를 불러오지 못했어요.");
       return;
@@ -44,7 +51,7 @@ export function PlannerInviteStep({
           링크를 카카오톡이나 문자로 보내 가족을 초대할 수 있어요. 혼자 여행이면
           초대를 건너뛰어도 됩니다.
         </p>
-        {detailQuery.isLoading ? (
+        {!canInvite ? <p>현재는 초대 링크를 사용할 수 없어요.</p> : detailQuery.isLoading ? (
           <p role="status">초대 링크를 불러오는 중이에요.</p>
         ) : (
           <S.LinkBox>
@@ -63,6 +70,7 @@ export function PlannerInviteStep({
             </Button>
           </S.LinkBox>
         )}
+        <PlannerMemberManagement plannerId={plannerId} detail={detailQuery.data} members={membersQuery.data ?? []} />
         {inviteFeedback ? <p role="status">{inviteFeedback}</p> : null}
         <S.ButtonRow>
           <Button

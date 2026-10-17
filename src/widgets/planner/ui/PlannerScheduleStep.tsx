@@ -16,6 +16,9 @@ import { canManagePlanner } from "../model/planner-role";
 import * as S from "./PlannerAiFlow.styles";
 import { PlannerScheduleEditor } from "./PlannerScheduleEditor";
 
+import { usePlannerLiveMembers, isPlannerFinished } from '../model/usePlannerLiveMembers';
+import { PlannerMemberManagement } from './PlannerMemberManagement';
+
 export function PlannerScheduleStep({
   currentDraft,
   plannerId: requestedPlannerId,
@@ -66,6 +69,8 @@ export function PlannerScheduleStep({
     : undefined, [scheduleQuery.data, timedOutPlannerId, plannerId]);
 
   const detailQuery = usePlannerDetailQuery(plannerId);
+  const membersQuery = usePlannerLiveMembers(plannerId, detailQuery.data);
+  const finished = isPlannerFinished(detailQuery.data?.status);
   const confirmMutation = useConfirmPlannerMutation();
   const [message, setMessage] = useState("");
   const [confirmed, setConfirmed] = useState(false);
@@ -135,7 +140,7 @@ export function PlannerScheduleStep({
     );
   } else {
     let action: ReactNode = null;
-    if (isConfirmed && canManageCurrentPlanner && !isSolo) {
+    if (isConfirmed && canManageCurrentPlanner && !isSolo && !finished) {
       action = (
         <Button
           type="button"
@@ -187,6 +192,7 @@ export function PlannerScheduleStep({
           setTimedOutPlannerId(undefined);
           void refetch();
         }}>경로 다시 불러오기</Button> : null}
+        <PlannerMemberManagement plannerId={plannerId} detail={detailQuery.data} members={membersQuery.data ?? []} />
         {message ? <S.Error role="alert">{message}</S.Error> : null}
         {isEditingSchedule ? <p role="status">일정 편집을 저장하거나 취소한 뒤 확정해주세요.</p> : null}
         {action ? <S.ButtonRow>{action}</S.ButtonRow> : null}

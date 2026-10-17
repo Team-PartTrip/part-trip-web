@@ -164,6 +164,8 @@ export type PlannerFinalResponseDto = {
 }
 
 export type PlannerSchedulePlaceDto = {
+  description?: string | null
+  typeLabel?: string | null
   tourPlaceId?: number
   name?: string
   category?: string

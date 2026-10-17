@@ -22,6 +22,8 @@ import { getPreferenceAnswers, mobilityOf, togglePreference, type Mobility, type
 import * as S from "./PlannerAiFlow.styles";
 import { PlaceSearchDialog } from "@/widgets/place-search";
 
+import { tripBlockOptions, tripBlocks } from "../model/trip-blocks";
+
 type SelectionMap = Record<string, string[]>;
 
 const mobilityOptions: Array<{ value: Mobility | null; label: string }> = [
@@ -43,7 +45,6 @@ const suggestedBlockTypes = [
   "COMPANION",
   "DEPARTURE_PLACE",
   "TRAVEL_TYPE",
-  "WALKING",
   "DAILY_DENSITY",
   "FOOD_TYPE",
   "TASTE",
@@ -92,15 +93,16 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
   const departureActionVersion = useRef(0);
   const [message, setMessage] = useState("");
   const blocks = useMemo(() => {
-    const values = getBlockValues(selections);
+    const values = tripBlocks(getBlockValues(selections), draft, mobility);
     if (!selections.DEPARTURE_PLACE?.length && preferencesQuery.data?.home) {
       return [...values, { type: "DEPARTURE_PLACE", value: "집 근처" }];
     }
     return values;
-  }, [preferencesQuery.data?.home, selections]);
+  }, [draft, mobility, preferencesQuery.data?.home, selections]);
   const [questionIndex, setQuestionIndex] = useState(0);
   const questionRef = useRef<HTMLHeadingElement>(null);
-  const availableBlocks = (blocksQuery.data ?? []).some(block => block.type === 'DEPARTURE_PLACE') ? blocksQuery.data ?? [] : [...(blocksQuery.data ?? []), { type: 'DEPARTURE_PLACE', label: '어디에서 출발하세요?' }];
+  const serverBlocks = (blocksQuery.data ?? []).filter(block => block.type !== 'WALKING').map(block => ({ ...block, options: tripBlockOptions(block, draft) }));
+  const availableBlocks: PlannerBlockResponseDto[] = serverBlocks.some(block => block.type === 'DEPARTURE_PLACE') ? serverBlocks : [...serverBlocks, { type: 'DEPARTURE_PLACE', label: '어디에서 출발하세요?' }];
   const priorityBlocks = suggestedBlockTypes.flatMap(type => availableBlocks.filter(block => block.type === type));
   const otherBlocks = availableBlocks.filter(
     (block) => !suggestedBlockTypes.includes(block.type ?? ""),
@@ -111,7 +113,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
   const currentQuestion = questions[currentIndex];
   const activeBlock = priorityBlocks.find(block => block.type === currentQuestion);
   const isReview = currentQuestion === "review";
-  const hasAnswer = currentQuestion === 'mobility' ? mobility !== null : currentQuestion === 'foods' ? foods !== null : (selections[currentQuestion]?.length ?? 0) > 0 || (currentQuestion === 'DEPARTURE_PLACE' && Boolean(preferencesQuery.data?.home));
+  const hasAnswer = currentQuestion === 'mobility' ? mobility !== null : currentQuestion === 'foods' ? foods !== null : blocks.some(block => block.type === currentQuestion) || (currentQuestion === 'DEPARTURE_PLACE' && Boolean(preferencesQuery.data?.home));
   const questionTitle = currentQuestion === "TRAVEL_TYPE" ? "어떤 여행을 하고 싶으세요?"
     : currentQuestion === "COMPANION" ? "누구와 함께 떠나세요?"
     : currentQuestion === "mobility" ? "다니실 때 불편한 점이 있으세요?"
@@ -250,14 +252,14 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
               key={value}
               type="button"
               $active={Boolean(
-                selections[type]?.includes(value) ||
+                blocks.some(block => block.type === type && block.value === value) ||
                 (isDeparture &&
                   !selectedDeparture &&
                   home &&
                   value === "집 근처"),
               )}
               aria-pressed={Boolean(
-                selections[type]?.includes(value) ||
+                blocks.some(block => block.type === type && block.value === value) ||
                 (isDeparture &&
                   !selectedDeparture &&
                   home &&

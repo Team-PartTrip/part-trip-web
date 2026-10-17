@@ -550,3 +550,34 @@ export const ReviewCopy = styled.p`
   font-size: 0.875rem;
   line-height: 1.6;
 `
+
+export const PlaceDetails = styled.details`
+  min-width: 0;
+  border-top: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  summary {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    gap: 0.875rem;
+    padding: 0.875rem 0;
+    cursor: pointer;
+    list-style: none;
+    &::-webkit-details-marker { display: none; }
+    &:focus-visible { outline: 2px solid #1565c0; outline-offset: 2px; }
+    > b { display: grid; width: 2.25rem; height: 2.25rem; place-items: center; border-radius: 50%; background: #e3f2fd; color: #1565c0; }
+    > span { display: grid; min-width: 0; gap: 0.25rem; }
+    strong { color: #173650; }
+    small { color: #546e7a; }
+    .place-preview { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    > span::after { content: '장소 정보 보기'; color: #1565c0; font-size: 0.875rem; }
+  }
+  &[open] summary > span::after { content: '장소 정보 접기'; }
+  .place-details-body {
+    display: grid; gap: 0.75rem; min-width: 0; padding: 0 0 1rem 3.125rem;
+    overflow-wrap: anywhere;
+    img { max-width: 100%; width: 24rem; max-height: 15rem; object-fit: cover; border-radius: 0.75rem; }
+    dl { margin: 0; display: grid; gap: 0.5rem; }
+    dt { font-weight: 700; }
+    dd { margin: 0.25rem 0 0; }
+    a { color: #1565c0; }
+  }
+`

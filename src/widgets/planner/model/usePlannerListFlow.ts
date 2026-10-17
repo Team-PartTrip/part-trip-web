@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 
 import { useMyPlannersQuery } from '@/entities/planner'
-import { paths } from '@/shared/config'
+import { PLANNER_GROUP_SETTINGS_KEY, paths } from '@/shared/config'
+import { removeSessionValue } from '@/shared/libs/session-storage'
 import { clearPlannerCreationDraft } from './planner-creation'
 import { activatePlannerSession, clearPlannerSession } from './planner-session'
 import { isPositiveSafeInteger } from '@/shared/utils'
@@ -24,6 +25,7 @@ export function usePlannerListFlow() {
   const handleStartNewPlanner = () => {
     clearPlannerSession()
     clearPlannerCreationDraft()
+    removeSessionValue(PLANNER_GROUP_SETTINGS_KEY)
     setErrorMessage('')
     navigate({ to: paths.plannerDestination })
   }

@@ -45,15 +45,17 @@ export function usePlannerDetailQuery(plannerId: number, enabled = true) {
   return useQuery(plannerDetailQueryOptions(plannerId, enabled))
 }
 
-export const plannerMembersQueryOptions = (plannerId: number, enabled = true) =>
+export const plannerMembersQueryOptions = (plannerId: number, enabled = true, poll = false) =>
   queryOptions({
+    refetchInterval: poll ? 5000 : false,
+    retry: (count, error) => ![400, 403, 404].includes((error as { response?: { status?: number } }).response?.status ?? 0) && count < 2,
     queryKey: plannerQueryKeys.members(plannerId),
     queryFn: () => getPlannerMembers(plannerId),
     enabled: enabled && isPositiveSafeInteger(plannerId),
   })
 
-export function usePlannerMembersQuery(plannerId: number, enabled = true) {
-  return useQuery(plannerMembersQueryOptions(plannerId, enabled))
+export function usePlannerMembersQuery(plannerId: number, enabled = true, poll = false) {
+  return useQuery(plannerMembersQueryOptions(plannerId, enabled, poll))
 }
 
 export const plannerScheduleQueryOptions = (plannerId: number, enabled = true) =>

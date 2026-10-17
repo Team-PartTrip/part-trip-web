@@ -23,8 +23,7 @@ import {
 } from '../model/schedule-edit'
 import { PlannerPlacePicker, type Position } from './PlannerPlacePicker'
 import { PlannerScheduleAttribution, PlannerScheduleDepartureIcon, PlannerScheduleRouteFallback, PlannerScheduleRouteLine } from './PlannerScheduleRoute'
-import { PlannerPlaceAccessibility } from './PlannerPlaceAccessibility'
-import { RestroomNote } from './RestroomNote'
+import { PlannerSchedulePlaceCard } from './PlannerSchedulePlaceCard'
 import * as S from './PlannerAiFlow.styles'
 
 function serialized(days: EditableScheduleDay[]) {
@@ -201,9 +200,9 @@ export function PlannerScheduleEditor({
               longitude={place?.longitude ?? apiPlace?.longitude}
               origin={routeOrigin}
             /> : null}
-            <S.SchedulePlace>
+            {!draft ? <PlannerSchedulePlaceCard index={slotIndex} confirmed={isConfirmed} place={{ ...apiPlace, ...place, name: placeName, tourPlaceId: placeId, description: place?.description ?? apiPlace?.description, address: place?.address ?? apiPlace?.address }} /> : <S.SchedulePlace>
               <b aria-hidden="true">{slotIndex + 1}</b>
-              <div style={{ minWidth: 0 }}><strong>{placeName}</strong>{isConfirmed && !draft && placeId ? <RestroomNote tourPlaceId={placeId} /> : null}{place?.address || apiPlace?.address ? <small>{place?.address || apiPlace?.address}</small> : null}{placeId && !draft ? <PlannerPlaceAccessibility tourPlaceId={placeId} /> : null}</div>
+              <div style={{ minWidth: 0 }}><strong>{placeName}</strong><small>{place?.typeLabel ?? place?.categoryLabel ?? place?.category ?? apiPlace?.category}</small><small>{place?.description || place?.address || apiPlace?.description || apiPlace?.address}</small></div>
               {draft ? <S.SlotTools>
                 <Button type="button" $variant="secondary" aria-label={`${placeName} 위로 이동`} disabled={slotIndex === 0 || saveMutation.isPending}
                   onClick={() => moveSlot(dayIndex, slotIndex, -1)}>위로</Button>
@@ -220,7 +219,7 @@ export function PlannerScheduleEditor({
                   closePicker()
                 }}>삭제</Button>
               </S.SlotTools> : null}
-            </S.SchedulePlace>
+            </S.SchedulePlace>}
             {picker?.dayIndex === dayIndex && picker.slotIndex === slotIndex && draft ? <PlannerPlacePicker
               key={`${picker.dayIndex}-${picker.slotIndex}`}
               canEdit={canEdit}

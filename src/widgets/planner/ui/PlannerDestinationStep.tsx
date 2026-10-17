@@ -3,13 +3,15 @@ import { useNavigate } from '@tanstack/react-router'
 import { useMyPlannersQuery } from '@/entities/planner'
 import { DOMESTIC_CITIES, DOMESTIC_CITY_SUGGESTIONS, getDomesticCities } from '@/entities/region-map/domestic-cities'
 import type { DomesticCityOption } from '@/entities/region-map/domestic-cities'
-import { paths } from '@/shared/config'
+import { PLANNER_GROUP_SETTINGS_KEY, paths } from '@/shared/config'
 import { Button, Input } from '@/shared/ui/parttrip'
 import { DatePicker } from '@/shared/ui/date-picker/DatePicker'
 import { formatCalendarDate, formatDateRange } from '@/shared/utils'
 import type { PlannerCreationDraft } from '../model/planner-creation'
 import { writePlannerCreationDraft } from '../model/planner-creation'
 import { isValidPlannerDateRange, overlapsExistingTrip } from '../model/planner-date'
+import { readSessionValue } from '@/shared/libs/session-storage'
+import { parsePlannerGroupSettings } from '../model/storage'
 import * as S from './PlannerAiFlow.styles'
 
 function maxEndDateFor(startDate?: string) {
@@ -58,7 +60,9 @@ export function PlannerDestinationStep({ initialDraft }: { initialDraft?: Planne
     }
     if (existingTripConflict) return setMessage('선택한 기간에 다른 여행이 있어요. 날짜를 바꿔주세요.')
 
-    writePlannerCreationDraft({ cityName: cityKeyword, regionCode: selectedCity.regionCode, regionName: selectedCity.regionName, startDate, endDate, blocks: [] })
+    const savedGroup = readSessionValue(PLANNER_GROUP_SETTINGS_KEY)
+    const party = initialDraft?.isSolo != null ? { isSolo: initialDraft.isSolo, memberCount: initialDraft.memberCount } : savedGroup ? parsePlannerGroupSettings(savedGroup) : {}
+    writePlannerCreationDraft({ ...party, cityName: cityKeyword, regionCode: selectedCity.regionCode, regionName: selectedCity.regionName, startDate, endDate, blocks: [] })
     void navigate({ to: paths.plannerExplore })
   }
 
@@ -91,6 +95,7 @@ export function PlannerDestinationStep({ initialDraft }: { initialDraft?: Planne
           </S.Field>
           <S.Field>
             <span>여행 기간</span>
+            <p role="status">{startDate && !endDate ? '돌아오는 날을 눌러주세요. 당일치기면 같은 날을 한 번 더 눌러요.' : '가는 날과 돌아오는 날을 차례로 눌러주세요. 당일치기는 같은 날을 두 번 눌러요.'}</p>
             <S.DateGrid>
               <div><label htmlFor="planner-start-date">출발일</label><DatePicker id="planner-start-date" label="출발일" min={today} value={startDate} onChange={handleStartDateChange} /></div>
               <div><label htmlFor="planner-end-date">도착일</label><DatePicker id="planner-end-date" label="도착일" min={startDate && startDate > today ? startDate : today} max={maxEndDate} value={endDate} onChange={setEndDate} /></div>
