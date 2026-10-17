@@ -8,7 +8,7 @@ export default async function verifyIssues(page, origin = 'http://localhost:5173
   let preferences = { usesWheelchair: null, limitedWalking: null, canUseStairs: null }
   const draft = { cityName: '경주', regionName: '경북', regionCode: '47', startDate: '2099-01-01', endDate: '2099-01-02', blocks: [] }
   const blocks = [{ type: 'COMPANION', label: '동행', options: ['혼자', '친구', '가족'] }, { type: 'WALKING', label: '걷기 부담', options: ['많이 걷기'] }, { type: 'LODGING_TYPE', label: '숙박 유형', options: ['호텔', '펜션', '숙박 없음'] }]
-  const places = [{ tourPlaceId: 1, name: '경주 국수집', typeLabel: '국수 전문점', categoryLabel: '맛집', description: '직접 뽑은 면으로 만드는 국수예요.', address: '경북 경주시 시험길 1', rating: 4.5, imageUrl: origin + '/src/shared/assets/dandi-app-logo.png', latitude: 35.79, longitude: 129.33 }, { tourPlaceId: 2, name: '경주 카페', typeLabel: null, description: null, categoryLabel: '카페', address: '경북 경주시 시험길 2' }]
+  const places = [{ tourPlaceId: 1, name: '경주 국수집', typeLabel: '국수 전문점', categoryLabel: '맛집', description: '직접 뽑은 면으로 만드는 국수예요.', address: '경북 경주시 시험길 1', rating: 4.5, imageUrl: origin + '/favicon.png', latitude: 35.79, longitude: 129.33 }, { tourPlaceId: 2, name: '경주 카페', typeLabel: null, description: null, categoryLabel: '카페', address: '경북 경주시 시험길 2' }]
   await page.route('**/*', async route => {
     const req = route.request(), path = new URL(req.url()).pathname.replace(/^\/api/, '')
     if (!['fetch', 'xhr'].includes(req.resourceType()) || !/^\/(profile|main|planners|notifications|guardians)(\/|$)/.test(path)) return route.continue()
