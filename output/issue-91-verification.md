@@ -19,3 +19,11 @@
 - 빈 위치, SDK 오류 후 링크 유지, 실제 SDK 재시도, 375px 가로 넘침을 검사합니다.
 - 앱 데이터 API는 모의 응답이며 계정 데이터·실제 사용자 위치를 쓰거나 바꾸지 않았습니다. 실제 iPhone의 백그라운드 전송 → 서버 → 보호자 계정까지의 종단 검증은 수행하지 않았습니다.
 - 기본 작업 폴더의 이전 캡처 5개는 기존 사용자 작업으로 보존했습니다.
+
+## 운영 배포 후 재검증
+
+- 구현 커밋 `47b27c0fa37c24836ec205711db1ba37e3b8742a` (기존 개인정보처리방침 수정 커밋 `ad41a76` 보존).
+- 배포 성공: https://github.com/Team-PartTrip/part-trip-web/actions/runs/39050798501
+- `https://dandi-trip.me` 운영 코드에서도 위 브라우저 확인 항목 10개 모두 통과했습니다. SDK와 지도 타일은 실제 카카오 서비스를 사용하고 가족·위치 API는 시험 응답을 사용했습니다.
+- 현재 서버 OpenAPI에서도 `GET /api/guardians/seniors/{seniorUserId}/location`과 LocationResponse의 latitude·longitude·recordedAt 필드를 확인했습니다.
+- 화면: `output/playwright/issue-91-desktop.png`, `output/playwright/issue-91-mobile.png`.
