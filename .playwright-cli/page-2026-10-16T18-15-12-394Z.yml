@@ -1,0 +1,10 @@
+- generic [active] [ref=e1]:
+  - button "회귀 검사 실행" [ref=e2]
+  - generic [ref=e3]: SDK 모의 객체 검사입니다. 실제 지도 타일·외부 주소 API의 검증이 아닙니다.
+  - generic [ref=e5]:
+    - button "기준 다시 열기" [ref=e6]
+    - generic [ref=e8]:
+      - region "방문 장소 지도" [ref=e9]
+      - alert [ref=e10]:
+        - text: 카카오 지도를 불러오지 못했어요. 연결과 지도 API 설정을 확인해주세요.
+        - button "지도 다시 불러오기" [ref=e11] [cursor=pointer]
