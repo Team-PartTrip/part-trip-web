@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import styled from 'styled-components'
+import { LandingHeader } from '@/widgets/landing'
 
 export const Route = createFileRoute('/(public)/privacy/')({ component: PrivacyPage })
 
@@ -17,25 +18,21 @@ const sections = [
   ['changes', '방침 변경'],
 ] as const
 
-const Page = styled.main`
-  min-height: 100dvh;
-  padding: 3rem 1.5rem 5rem;
-  background: ${({ theme }) => theme.colors.background.subtle};
+const CIRCLED = '①②③④⑤⑥⑦⑧⑨⑩⑪'
 
-  @media (max-width: 40rem) {
-    padding: 1rem 0.75rem 2.5rem;
-  }
+const Page = styled.div`
+  min-height: 100dvh;
+  background: ${({ theme }) => theme.colors.background.default};
+  font-size: 1.0625rem;
+  word-break: keep-all;
 `
 
 const Article = styled.article`
-  width: min(100%, 60rem);
+  width: min(100% - 2.5rem, 50rem);
   margin: 0 auto;
-  border: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
-  border-radius: 1rem;
-  padding: clamp(1.75rem, 6vw, 4.5rem);
-  background: ${({ theme }) => theme.colors.background.default};
+  padding: 4.5rem 0 7rem;
   color: ${({ theme }) => theme.colors.text.default};
-  line-height: 1.75;
+  line-height: 1.8;
 
   h1,
   h2,
@@ -46,15 +43,17 @@ const Article = styled.article`
 
   h1 {
     margin: 0;
-    font-size: clamp(1.875rem, 5vw, 2.625rem);
-    letter-spacing: -0.03em;
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    font-weight: 800;
+    letter-spacing: -0.035em;
   }
 
   h2 {
     margin: 0 0 1.25rem;
-    font-size: clamp(1.25rem, 3vw, 1.5rem);
-    letter-spacing: -0.02em;
-    scroll-margin-top: 1.5rem;
+    font-size: clamp(1.5rem, 3.2vw, 1.875rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    scroll-margin-top: 5.5rem;
   }
 
   h3 {
@@ -88,27 +87,31 @@ const Article = styled.article`
   }
 
   .effective-date {
-    display: inline-block;
-    margin-top: 0.875rem;
-    color: ${({ theme }) => theme.colors.text.muted};
-    font-size: 0.875rem;
+    display: block;
+    margin-top: 2rem;
+    border: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
+    border-radius: 0.875rem;
+    padding: 0.875rem 1.125rem;
+    color: ${({ theme }) => theme.colors.text.default};
+    font-size: 1rem;
+    font-weight: 600;
   }
 
   .contents {
-    margin-top: 2.25rem;
-    border-block: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
-    padding: 1.25rem 0;
+    margin-top: 1.5rem;
   }
 
   .contents h2 {
-    margin-bottom: 0.75rem;
-    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: ${({ theme }) => theme.colors.text.default};
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: 0;
   }
 
   .contents ul {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.375rem 1.25rem;
+    gap: 0.125rem;
     max-width: none;
     margin: 0;
     padding: 0;
@@ -121,26 +124,26 @@ const Article = styled.article`
 
   .contents a {
     display: inline-flex;
-    min-height: 2.5rem;
+    min-height: 2.25rem;
     align-items: center;
-    font-size: 0.875rem;
+    color: ${({ theme }) => theme.colors.text.default};
+    font-size: 1rem;
+    text-decoration: underline;
+  }
+
+  .contents a:hover {
+    color: ${({ theme }) => theme.colors.brand.primary};
   }
 
   .section {
-    border-bottom: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
-    padding: 2.25rem 0;
-  }
-
-  .section:last-child {
-    border-bottom: 0;
-    padding-bottom: 0;
+    padding-top: 4.5rem;
   }
 
   .table-scroll {
     overflow-x: auto;
     margin: 1.25rem 0;
-    border: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
-    border-radius: 0.75rem;
+    border-radius: 1rem;
+    background: ${({ theme }) => theme.colors.background.soft};
     scrollbar-color: ${({ theme }) => theme.colors.border.default} transparent;
     scrollbar-width: thin;
   }
@@ -167,7 +170,7 @@ const Article = styled.article`
   }
 
   thead th {
-    background: ${({ theme }) => theme.colors.background.soft};
+    background: ${({ theme }) => theme.colors.background.muted};
     color: ${({ theme }) => theme.colors.text.strong};
     font-weight: 700;
     white-space: nowrap;
@@ -189,20 +192,10 @@ const Article = styled.article`
   }
 
   @media (max-width: 40rem) {
-    border-radius: 0.75rem;
-    padding: 1.75rem 1.125rem 2.25rem;
-
-    .contents ul {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.125rem 0.75rem;
-    }
-
-    .contents a {
-      font-size: 0.8125rem;
-    }
+    padding: 2.5rem 0 5rem;
 
     .section {
-      padding: 1.75rem 0;
+      padding-top: 3.5rem;
     }
 
     table {
@@ -214,6 +207,8 @@ const Article = styled.article`
 function PrivacyPage() {
   return (
     <Page>
+      <LandingHeader />
+      <main>
       <Article>
         <header>
           <h1>개인정보처리방침</h1>
@@ -224,13 +219,13 @@ function PrivacyPage() {
           <h2>이 문서에서 찾기</h2>
           <ul>
             {sections.map(([id, title], index) => (
-              <li key={id}><a href={`#${id}`}>{index + 1}. {title}</a></li>
+              <li key={id}><a href={`#${id}`}>{CIRCLED[index]} {title}</a></li>
             ))}
           </ul>
         </nav>
 
         <section className="section" aria-labelledby="collection">
-          <h2 id="collection">1. 수집하는 개인정보</h2>
+          <h2 id="collection">① 수집하는 개인정보</h2>
           <p>단디는 서비스에 꼭 필요한 정보만 모읍니다. 비밀번호 · 전화번호 · 주민등록번호는 받지 않습니다.</p>
           <div className="table-scroll" role="region" aria-label="수집하는 개인정보 표" tabIndex={0}>
             <table>
@@ -248,11 +243,11 @@ function PrivacyPage() {
               </tbody>
             </table>
           </div>
-          <p>실시간 위치와 사진 촬영 위치는 아래 “3. 위치정보”에서 따로 설명합니다.</p>
+          <p>실시간 위치와 사진 촬영 위치는 아래 <a href="#location">③ 위치정보</a>에서 따로 설명합니다.</p>
         </section>
 
         <section className="section" aria-labelledby="purpose">
-          <h2 id="purpose">2. 이용 목적</h2>
+          <h2 id="purpose">② 이용 목적</h2>
           <p>모은 정보는 아래 목적에만 씁니다. 목적이 바뀔 때는 미리 알리고 다시 동의를 받습니다.</p>
           <ul>
             <li><strong>회원 관리</strong>: 본인 확인, 로그인 유지, 부정 이용 방지</li>
@@ -265,7 +260,7 @@ function PrivacyPage() {
         </section>
 
         <section className="section" aria-labelledby="location">
-          <h2 id="location">3. 위치정보</h2>
+          <h2 id="location">③ 위치정보</h2>
           <p>단디는 두 가지 위치를 다룹니다. 둘 다 이용자가 켜거나 올릴 때만 모입니다.</p>
           <div className="table-scroll" role="region" aria-label="위치정보 처리 기준 표" tabIndex={0}>
             <table>
@@ -283,7 +278,7 @@ function PrivacyPage() {
         </section>
 
         <section className="section" aria-labelledby="retention">
-          <h2 id="retention">4. 보유 기간과 파기</h2>
+          <h2 id="retention">④ 보유 기간과 파기</h2>
           <p>회원 탈퇴하면 개인정보를 지체 없이 파기합니다. 법에서 따로 보관을 정한 경우만 그 기간 동안 따로 보관합니다.</p>
           <div className="table-scroll" role="region" aria-label="개인정보 보유 기간 표" tabIndex={0}>
             <table>
@@ -300,7 +295,7 @@ function PrivacyPage() {
         </section>
 
         <section className="section" aria-labelledby="sharing">
-          <h2 id="sharing">5. 제3자 제공</h2>
+          <h2 id="sharing">⑤ 제3자 제공</h2>
           <p>단디는 개인정보를 팔거나 다른 회사에 넘기지 않습니다. 다만 이용자가 직접 연결하거나 초대한 사람에게는 아래 정보가 보입니다.</p>
           <ul>
             <li><strong>보호자</strong>: 연결한 부모님의 여행 일정, 위치 공유를 켜 둔 동안의 현재 위치</li>
@@ -310,7 +305,7 @@ function PrivacyPage() {
         </section>
 
         <section className="section" aria-labelledby="transfer">
-          <h2 id="transfer">6. 처리 위탁과 국외 이전</h2>
+          <h2 id="transfer">⑥ 처리 위탁과 국외 이전</h2>
           <p>서비스를 운영하려고 아래 업체에 일부 업무를 맡깁니다. 회원 데이터가 저장되는 곳은 일본(도쿄)입니다.</p>
           <div className="table-scroll" role="region" aria-label="처리 위탁 및 국외 이전 표" tabIndex={0}>
             <table>
@@ -327,11 +322,11 @@ function PrivacyPage() {
               </tbody>
             </table>
           </div>
-          <p>국외로 보내는 정보는 서비스를 쓰는 동안 암호화된 통신(HTTPS)으로 전달되고, 각 업체의 보관 기간은 위 4번과 같습니다. 국외 이전을 원하지 않으면 가입하지 않거나 탈퇴할 수 있지만, 이 경우 서비스를 쓸 수 없습니다.</p>
+          <p>국외로 보내는 정보는 서비스를 쓰는 동안 암호화된 통신(HTTPS)으로 전달되고, 각 업체의 보관 기간은 위 <a href="#retention">④ 보유 기간과 파기</a>와 같습니다. 국외 이전을 원하지 않으면 가입하지 않거나 탈퇴할 수 있지만, 이 경우 서비스를 쓸 수 없습니다.</p>
         </section>
 
         <section className="section" aria-labelledby="rights">
-          <h2 id="rights">7. 이용자의 권리와 행사 방법</h2>
+          <h2 id="rights">⑦ 이용자의 권리와 행사 방법</h2>
           <p>이용자는 언제든 자기 개인정보를 보고, 고치고, 지우고, 처리를 멈추라고 요청할 수 있습니다.</p>
           <ul>
             <li><strong>앱에서 바로</strong>: 프로필 수정, 사진 · 여행카드 삭제, 보호자 연결 끊기, 위치 공유 끄기, 회원 탈퇴(마이 → 회원 탈퇴)</li>
@@ -342,7 +337,7 @@ function PrivacyPage() {
         </section>
 
         <section className="section" aria-labelledby="security">
-          <h2 id="security">8. 안전성 확보 조치</h2>
+          <h2 id="security">⑧ 안전성 확보 조치</h2>
           <ul>
             <li>앱과 서버 사이의 모든 통신은 HTTPS로 암호화합니다.</li>
             <li>비밀번호를 받지 않고, 로그인은 구글 · 카카오 인증과 만료 시간이 있는 토큰으로만 합니다.</li>
@@ -352,12 +347,12 @@ function PrivacyPage() {
         </section>
 
         <section className="section" aria-labelledby="children">
-          <h2 id="children">9. 만 14세 미만 아동</h2>
+          <h2 id="children">⑨ 만 14세 미만 아동</h2>
           <p>단디는 만 14세 미만 아동의 가입을 받지 않습니다.</p>
         </section>
 
         <section className="section" aria-labelledby="contact">
-          <h2 id="contact">10. 개인정보 보호책임자</h2>
+          <h2 id="contact">⑩ 개인정보 보호책임자</h2>
           <p>개인정보 관련 문의 · 불만 · 피해 구제는 아래로 연락해 주세요.</p>
           <ul className="contact-list">
             <li>책임자: 이준현, 팀장</li>
@@ -371,10 +366,11 @@ function PrivacyPage() {
         </section>
 
         <section className="section" aria-labelledby="changes">
-          <h2 id="changes">11. 방침 변경</h2>
+          <h2 id="changes">⑪ 방침 변경</h2>
           <p>이 방침은 2026년 10월 19일부터 적용합니다. 내용이 바뀌면 시행 7일 전(이용자에게 불리한 변경은 30일 전)에 앱과 웹에 알립니다.</p>
         </section>
       </Article>
+      </main>
     </Page>
   )
 }
