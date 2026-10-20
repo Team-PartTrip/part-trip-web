@@ -11,7 +11,7 @@ type Props = { cards: TravelRecordDto[] };
 
 export function useTripCardPhotoComposer({ cards }: Props) {
   const search = useSearch({ strict: false }) as { cardId?: string };
-  const [selectedCardId, setSelectedCardId] = useState(search.cardId ?? "");
+  const [selectedCardId, setSelectedCardId] = useState(search.cardId ?? (cards[0]?.tripId == null ? "" : String(cards[0].tripId)));
   const [photos, setPhotos] = useState<PhotoDraft[]>([]);
   const [comment, setComment] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -21,7 +21,7 @@ export function useTripCardPhotoComposer({ cards }: Props) {
   const photosRef = useRef<PhotoDraft[]>([]);
   const isUploadingRef = useRef(false);
   const createEntryMutation = useCreateTravelCardEntryMutation();
-  const selectedCard = cards.find((card) => String(card.tripId) === selectedCardId) ?? cards[0];
+  const selectedCard = cards.find((card) => String(card.tripId) === selectedCardId);
   const tripEnded = isTripEnded(selectedCard?.endDate);
 
   useEffect(

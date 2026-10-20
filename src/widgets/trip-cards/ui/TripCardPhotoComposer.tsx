@@ -43,7 +43,8 @@ export function TripCardPhotoComposer({ cards }: Props) {
         <S.CreateFormPanel>
           <S.FormHeading>{selectedCard ? `${selectedCard.title || `${selectedCard.cityName || selectedCard.regionName || selectedCard.countryName || "여행"} 여행`} · ${formatDate(selectedCard.startDate || "")} 시작` : "사진 · 코멘트"}</S.FormHeading>
           <S.Form onSubmit={(event) => void handleSubmit(event)}>
-            {cards.length > 1 ? <S.CardField><S.FieldLabel htmlFor="trip-card-select">여행카드</S.FieldLabel><S.CardSelector id="trip-card-select" value={selectedCard?.tripId == null ? "" : String(selectedCard.tripId)} onChange={(event) => setSelectedCardId(event.target.value)} disabled={isPending}>{cards.filter((card) => card.tripId != null).map((card) => <option key={card.tripId} value={card.tripId}>{card.title || `${card.cityName || card.regionName || card.countryName || "여행"} 기록`}</option>)}</S.CardSelector></S.CardField> : null}
+            {cards.length > 0 ? <S.CardField><S.FieldLabel htmlFor="trip-card-select">여행카드</S.FieldLabel><S.CardSelector id="trip-card-select" value={selectedCard?.tripId == null ? "" : String(selectedCard.tripId)} onChange={(event) => setSelectedCardId(event.target.value)} disabled={isPending}><option value="" disabled>여행카드를 선택해주세요</option>{cards.filter((card) => card.tripId != null).map((card) => <option key={card.tripId} value={card.tripId}>{card.title || `${card.cityName || card.regionName || card.countryName || "여행"} 기록`}</option>)}</S.CardSelector></S.CardField> : null}
+            {!selectedCard && cards.length > 0 ? <p role="alert">선택한 여행카드를 찾을 수 없어요. 사진을 올릴 여행카드를 다시 선택해주세요.</p> : null}
             <S.FieldLabel htmlFor="trip-card-photos">사진 선택</S.FieldLabel>
             {tripEnded ? <p role="status">{TRIP_ENDED_NOTICE}</p> : null}
             <S.Gallery>
