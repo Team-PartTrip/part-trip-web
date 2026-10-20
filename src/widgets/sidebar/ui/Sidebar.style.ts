@@ -12,6 +12,7 @@ export const SidebarWrapper = styled.aside`
 
   @media (max-width: 47.9375rem) {
     position: fixed;
+    top: auto;
     right: 0;
     bottom: 0;
     left: 0;

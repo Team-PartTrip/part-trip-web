@@ -1,5 +1,12 @@
 // Isolated app API fixtures; no account writes. Run with playwright-cli run-code.
 export default async function verifyIssues(page, origin = 'http://localhost:5173') {
+  const goToReview = async () => {
+    for (let step = 0; step < 20; step++) {
+      if (await page.getByRole('button', { name: 'AI로 일정 만들기', exact: true }).count()) return
+      await page.getByRole('button', { name: /^(다음|건너뛰기)$/ }).click()
+    }
+    throw new Error('확인 단계에 도달하지 못했습니다')
+  }
   const checks = [], writes = [], polls = [], errors = []
   const check = (ok, label) => { if (!ok) throw Error(label); checks.push(label) }
   page.on('pageerror', error => errors.push(error.message))
@@ -37,14 +44,14 @@ export default async function verifyIssues(page, origin = 'http://localhost:5173
   await page.getByRole('button', { name: '다음', exact: true }).click(); await page.getByRole('button', { name: '건너뛰기', exact: true }).click()
   await page.getByRole('button', { name: '숙박 없음', exact: true }).waitFor()
   check(await page.getByRole('button', { name: '숙박 없음', exact: true }).getAttribute('aria-pressed') === 'true' && await page.getByRole('button', { name: '호텔', exact: true }).count() === 0, '#88 당일치기 숙박 없음만 표시·미리 선택 / WALKING 질문 없음')
-  await page.getByRole('button', { name: '나머지는 기본으로 만들기', exact: true }).click(); await page.getByRole('button', { name: 'AI로 일정 만들기', exact: true }).click(); await page.getByText('검사용 생성 중단', { exact: true }).waitFor()
+  await goToReview(); await page.getByRole('button', { name: 'AI로 일정 만들기', exact: true }).click(); await page.getByText('검사용 생성 중단', { exact: true }).waitFor()
   check(!writes.at(-1).body.blocks.some(block => block.type === 'WALKING'), '#88 이동 편의 미응답이면 WALKING 전송 안 함')
   preferences = { usesWheelchair: true, limitedWalking: false, canUseStairs: false }
   await criteria({ isSolo: false })
   check(await page.getByRole('button', { name: '혼자', exact: true }).count() === 0, '#88 같이 여행에서 혼자 제외')
   await page.getByRole('button', { name: '친구', exact: true }).click(); await page.getByRole('button', { name: '건너뛰기', exact: true }).click(); await page.getByRole('button', { name: '호텔', exact: true }).waitFor()
   check(await page.getByRole('button', { name: '숙박 없음', exact: true }).count() === 0, '#88 숙박 여행에서 숙박 없음 제외')
-  await page.getByRole('button', { name: '나머지는 기본으로 만들기', exact: true }).click(); await page.getByRole('button', { name: 'AI로 일정 만들기', exact: true }).click(); await page.getByText('검사용 생성 중단', { exact: true }).waitFor()
+  await goToReview(); await page.getByRole('button', { name: 'AI로 일정 만들기', exact: true }).click(); await page.getByText('검사용 생성 중단', { exact: true }).waitFor()
   check(writes.at(-1).body.blocks.some(block => block.type === 'WALKING' && block.value === '걷기 최소화'), '#88 휠체어 답으로 WALKING 걷기 최소화 전송')
   await page.evaluate(() => sessionStorage.removeItem('parttrip:planner-creation-draft'))
   await page.goto(origin + '/planner/destination'); await page.getByText('가는 날과 돌아오는 날을 차례로 눌러주세요. 당일치기는 같은 날을 두 번 눌러요.', { exact: true }).waitFor()

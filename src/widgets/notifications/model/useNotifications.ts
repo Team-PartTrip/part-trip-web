@@ -36,9 +36,9 @@ function useReadNotification() {
 }
 
 export function useNotificationList() {
-  const navigate = useNavigate()
   const data = useNotificationData()
-  const { actionError, setActionError, handleMarkRead } = useReadNotification()
+  const { actionError, setActionError, markReadMutation, handleMarkRead } = useReadNotification()
+  const [selectedNotification, setSelectedNotification] = useState<NotificationResponseDto | null>(null)
   const [activeTab, setActiveTab] = useState<NotificationViewFilter>('ALL')
   const markAllMutation = useMarkAllNotificationsAsReadMutation()
   const notifications = data.notifications.filter((notification) => matchesNotificationFilter(notification, activeTab))
@@ -46,8 +46,10 @@ export function useNotificationList() {
     || notifications.some((notification) => notification.read !== true && notification.notificationId != null)
   const handleNotificationClick = async (notification: NotificationResponseDto) => {
     if (notification.notificationId == null) return
+    setActionError('')
+    markReadMutation.reset()
+    setSelectedNotification(notification)
     if (notification.read !== true) await handleMarkRead(notification.notificationId)
-    navigate({ params: { notificationId: String(notification.notificationId) }, to: '/notifications/$notificationId' })
   }
   const handleMarkAll = async () => {
     try {
@@ -57,15 +59,15 @@ export function useNotificationList() {
       setActionError('알림을 모두 읽음 처리하지 못했어요.')
     }
   }
-  return { notificationsQuery: data.notificationsQuery, unreadCount: data.unreadCount, notifications, activeTab, setActiveTab, actionError, hasUnread, markAllMutation, handleMarkAll, handleNotificationClick }
+  return { selectedNotification, setSelectedNotification, markReadMutation, notificationsQuery: data.notificationsQuery, unreadCount: data.unreadCount, notifications, activeTab, setActiveTab, actionError, hasUnread, markAllMutation, handleMarkAll, handleNotificationClick }
 }
 
-export function useNotificationDetail() {
+export function useNotificationDetail(selectedNotification?: NotificationResponseDto) {
   const navigate = useNavigate()
   const { notificationId = '' } = useParams({ strict: false })
   const { notifications, notificationsQuery } = useNotificationData()
   const { actionError, markReadMutation, handleMarkRead } = useReadNotification()
-  const detail = notifications.find((notification) => String(notification.notificationId) === notificationId)
+  const detail = notifications.find((notification) => String(notification.notificationId) === (selectedNotification ? String(selectedNotification.notificationId) : notificationId)) ?? selectedNotification
   const handleNotificationAction = async () => {
     if (!detail) return
     await handleMarkRead(detail.notificationId)

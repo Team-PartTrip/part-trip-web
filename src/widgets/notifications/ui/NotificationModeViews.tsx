@@ -85,22 +85,22 @@ export function NotificationListView({
 
 export function NotificationDetailView({
   actionLabel,
+  backLabel = '알림 목록으로',
   content,
   detail,
   isError,
   isLoading,
   isMarkReadPending,
-  isMarkReadSuccess,
   onAction,
   onBack,
 }: {
   actionLabel?: string
+  backLabel?: string
   content?: { body: string; title: string }
   detail?: NotificationResponseDto
   isError: boolean
   isLoading: boolean
   isMarkReadPending: boolean
-  isMarkReadSuccess: boolean
   onAction: () => void
   onBack: () => void
 }) {
@@ -110,8 +110,8 @@ export function NotificationDetailView({
     isLoading,
   })
   if (state === 'loading') return <S.LoadingDetail aria-busy="true" aria-label="알림 상세 로딩 중" />
-  if (state === 'error') return <S.Detail><p role="alert">알림을 불러오지 못했어요.</p><S.ActionRow><PartTripButton type="button" $variant="secondary" onClick={onBack}>알림 목록으로</PartTripButton></S.ActionRow></S.Detail>
-  if (state === 'empty' || !detail || !content) return <S.Detail><p role="status">알림을 찾을 수 없어요.</p><S.ActionRow><PartTripButton type="button" $variant="secondary" onClick={onBack}>알림 목록으로</PartTripButton></S.ActionRow></S.Detail>
+  if (state === 'error') return <S.Detail><p role="alert">알림을 불러오지 못했어요.</p><S.ActionRow><PartTripButton type="button" $variant="secondary" onClick={onBack}>{backLabel}</PartTripButton></S.ActionRow></S.Detail>
+  if (state === 'empty' || !detail || !content) return <S.Detail><p role="status">알림을 찾을 수 없어요.</p><S.ActionRow><PartTripButton type="button" $variant="secondary" onClick={onBack}>{backLabel}</PartTripButton></S.ActionRow></S.Detail>
 
-  return <S.Detail><S.DetailCategory $tone={categoryTone(detail.type)}>{settingCopy(detail.type, detail.category)[0]}</S.DetailCategory><h2>{content.title}</h2><p>{content.body}</p><S.DetailMeta>{detailTimestamp(detail.createdAt)}</S.DetailMeta>{detail.read === true || isMarkReadSuccess ? <S.ReadState>✓ 읽음 처리</S.ReadState> : null}<S.DetailMeta>이 알림은 열람 시 자동으로 읽음 처리돼요.</S.DetailMeta><S.DetailMeta>목록에서 [모두 읽음]으로 일괄 처리할 수도 있어요.</S.DetailMeta><S.ActionRow>{actionLabel ? <PartTripButton type="button" disabled={isMarkReadPending} onClick={onAction}>{actionLabel}</PartTripButton> : null}<PartTripButton type="button" $variant="secondary" onClick={onBack}>알림 목록으로</PartTripButton></S.ActionRow></S.Detail>
+  return <S.Detail><S.DetailCategory $tone={categoryTone(detail.type)}>{settingCopy(detail.type, detail.category)[0]}</S.DetailCategory><h2>{content.title}</h2><p>{content.body}</p><S.DetailMeta>{detailTimestamp(detail.createdAt)}</S.DetailMeta><S.DetailMeta>이 알림은 열람 시 자동으로 읽음 처리돼요.</S.DetailMeta><S.DetailMeta>목록에서 [모두 읽음]으로 일괄 처리할 수도 있어요.</S.DetailMeta><S.ActionRow>{actionLabel ? <PartTripButton type="button" disabled={isMarkReadPending} onClick={onAction}>{actionLabel}</PartTripButton> : null}<PartTripButton type="button" $variant="secondary" onClick={onBack}>{backLabel}</PartTripButton></S.ActionRow></S.Detail>
 }

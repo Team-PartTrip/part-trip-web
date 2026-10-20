@@ -88,9 +88,6 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
               <S.SettingsGroup aria-labelledby="app-settings-title">
                 <h2 id="app-settings-title">앱 설정</h2>
                 <S.SettingsList>
-                  <S.SettingsRow to={paths.notificationSettings}>
-                    <span><strong>알림 안내</strong><small>받을 수 있는 여행 알림 종류를 확인해요</small></span><b>확인</b>
-                  </S.SettingsRow>
                   <S.SettingsRow to={paths.profileAccessibility}>
                     <span><strong>접근성 설정</strong><small>휴대폰 글자 크기 · 고대비 설정</small></span><b>확인</b>
                   </S.SettingsRow>

@@ -7,6 +7,7 @@ import { Button as PartTripButton } from '@/shared/ui/parttrip'
 import { formatDateRange } from '@/shared/utils'
 
 import { paths } from '@/shared/config'
+import { isTripEnded, TRIP_ENDED_NOTICE } from '../model/photo-composer-state'
 import * as S from './TripCardsPage.styles'
 
 type TripCard = TravelRecordDto
@@ -71,7 +72,9 @@ export function TripCardDetailView({ detail, firstPhoto, firstPlace, navigate }:
           <S.CapturedInfo>
             <S.CapturedPanel><h2>촬영된 이미지</h2><S.CapturedImage>{firstPhoto?.imageUrl ? <img src={resolveApiAssetUrl(firstPhoto.imageUrl) || firstPhoto.imageUrl} alt="여행 사진" /> : <span>촬영된 이미지</span>}</S.CapturedImage><small>{firstPhoto?.takenAt || firstPhoto?.date || detail.startDate || '촬영일 정보 없음'}</small></S.CapturedPanel>
             <S.CapturedPanel><h2>사진에 포함된 위치 정보</h2><strong>{firstPlace?.placeName || '위치 정보 없음'}</strong><small>{[firstPlace?.address, firstPlace?.rating == null ? '' : `★ ${firstPlace.rating}`].filter(Boolean).join(' | ') || '위치 정보 없음'}</small></S.CapturedPanel>
-            <S.AddPhoto><PartTripButton type="button" onClick={() => navigate({ to: paths.tripCardCreate })}>사진 추가하기</PartTripButton><small>갤러리에서 기록하고 싶은 사진 업로드</small></S.AddPhoto>
+            <S.AddPhoto>{isTripEnded(detail.endDate)
+              ? <p role="status">{TRIP_ENDED_NOTICE}</p>
+              : <><PartTripButton type="button" onClick={() => navigate({ to: paths.tripCardCreate, search: { cardId: String(detail.tripId) } })}>사진 추가하기</PartTripButton><small>갤러리에서 기록하고 싶은 사진 업로드</small></>}</S.AddPhoto>
           </S.CapturedInfo>
         </>
       ) : <S.Empty>여행카드를 찾을 수 없어요.</S.Empty>}

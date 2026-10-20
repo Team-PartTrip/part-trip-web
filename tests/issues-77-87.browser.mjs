@@ -1,6 +1,13 @@
 // Run against a separate browser: pass this function to playwright-cli run-code.
 // API calls are intercepted; this test does not modify a real account.
 export default async function verifyIssueFollowups(page, origin = 'http://localhost:5173') {
+  const goToReview = async () => {
+    for (let step = 0; step < 20; step++) {
+      if (await page.getByRole('button', { name: 'AI로 일정 만들기', exact: true }).count()) return
+      await page.getByRole('button', { name: /^(다음|건너뛰기)$/ }).click()
+    }
+    throw new Error('확인 단계에 도달하지 못했습니다')
+  }
  await page.unroute('**/*');
  const results=[];const writes=[];const errors=[];
  page.on('pageerror',e=>errors.push(e.message));
@@ -40,13 +47,13 @@ export default async function verifyIssueFollowups(page, origin = 'http://localh
  await page.goto(origin+'/planner/destination');await page.getByRole('heading',{name:'국내 도시 · 기간'}).waitFor();check(true,'#77 도시 · 기간 제목');
  await page.goto(origin+'/planner/explore');await page.getByRole('button',{name:'혼자',exact:true}).waitFor();await page.getByRole('button',{name:'혼자',exact:true}).click();await page.getByRole('button',{name:'다른 곳 찾기',exact:true}).waitFor();check(await page.getByRole('button',{name:'우리 집으로'}).count()===0,'#86 집 미등록 계정도 출발지 질문 표시');check(await page.getByRole('button',{name:'건너뛰기',exact:true}).count()===1,'#78 선택하지 않은 질문 건너뛰기');
  await page.getByRole('button',{name:'다른 곳 찾기',exact:true}).click();await page.getByRole('textbox',{name:'장소 검색'}).fill('경주역');await page.getByRole('button',{name:'경주역 경북 경주시'}).click();await page.getByRole('dialog').waitFor({state:'hidden'});
- await page.getByRole('button',{name:'나머지는 기본으로 만들기',exact:true}).click();await page.getByRole('button',{name:'AI로 일정 만들기',exact:true}).click();await page.getByText('검증용 생성 중단',{exact:true}).waitFor();check(generated?.departure?.name==='경주역'||JSON.stringify(generated).includes('경주역'),'#78 동행 선택 후 확인·생성 바로 이동 / #86 출발지 전달');
+ await goToReview();await page.getByRole('button',{name:'AI로 일정 만들기',exact:true}).click();await page.getByText('검증용 생성 중단',{exact:true}).waitFor();check(generated?.departure?.name==='경주역'||JSON.stringify(generated).includes('경주역'),'#78 동행 선택 후 확인·생성 바로 이동 / #86 출발지 전달');
  // Edit optional place names and verify actual request payload.
  await page.getByRole('button',{name:'이전',exact:true}).click(); // foods
  for(let i=0;i<3;i++)await page.getByRole('button',{name:'이전',exact:true}).click(); // include
  await page.locator('#place-names-MUST_INCLUDE').waitFor();await page.locator('#place-names-MUST_INCLUDE').fill(' 경주월드, 불국사 ');
  await page.getByRole('button',{name:'다음',exact:true}).click();await page.locator('#place-names-EXCLUDE').fill('첨성대');
- await page.getByRole('button',{name:'나머지는 기본으로 만들기',exact:true}).click();await page.getByRole('button',{name:'AI로 일정 만들기',exact:true}).click();await page.getByText('검증용 생성 중단',{exact:true}).waitFor();
+ await goToReview();await page.getByRole('button',{name:'AI로 일정 만들기',exact:true}).click();await page.getByText('검증용 생성 중단',{exact:true}).waitFor();
  check(generated.blocks.filter(b=>b.type==='MUST_INCLUDE').map(b=>b.value).join(',')==='경주월드,불국사'&&!JSON.stringify(generated.blocks).includes('식당'),'#82 실제 장소 이름만 포함·제외 요청');
  // Public test coordinate; app API stays mocked, Kakao SDK/geocoder use the real service.
  await page.context().grantPermissions(['geolocation'], { origin });
@@ -55,7 +62,7 @@ export default async function verifyIssueFollowups(page, origin = 'http://localh
  await page.getByRole('button',{name:'지금 있는 곳',exact:true}).click();
  await page.waitForFunction(()=>[...document.querySelectorAll('p[aria-live="polite"] strong')].some(el=>el.textContent.includes('경주')));
  const resolvedAddress=await page.locator('p[aria-live="polite"] strong').textContent();
- await page.getByRole('button',{name:'나머지는 기본으로 만들기',exact:true}).click();await page.getByRole('button',{name:'AI로 일정 만들기',exact:true}).click();await page.getByText('검증용 생성 중단',{exact:true}).waitFor();
+ await goToReview();await page.getByRole('button',{name:'AI로 일정 만들기',exact:true}).click();await page.getByText('검증용 생성 중단',{exact:true}).waitFor();
  check(generated?.departurePoint?.placeName===resolvedAddress&&generated.departurePoint.latitude===35.79&&generated.departurePoint.longitude===129.33,'#86 실제 카카오 주소 변환 결과와 좌표를 생성 요청에 전달');
  await page.goto(origin+'/trip-cards');await page.getByRole('button',{name:/경주/}).first().waitFor();const cardSize=await page.getByRole('button',{name:/경주/}).first().boundingBox();check(cardSize.width>300&&cardSize.height>300,'#81 카드 크기 복구');check(await page.getByText('함께한 사람',{exact:true}).count()===0&&await page.getByLabel('여행카드 페이지').count()===0,'#81 미지원 통계·고정 페이지 점 제거');
  await page.goto(origin+'/record/8');await page.getByRole('heading',{name:'아직 남긴 사진이 없어요'}).waitFor();check(await page.getByRole('img',{name:/기록 사진/}).count()===0&&await page.getByRole('button',{name:'위치 수정'}).count()===0,'#80 사진 없는 상세에 시안 사진·수정 버튼 없음');

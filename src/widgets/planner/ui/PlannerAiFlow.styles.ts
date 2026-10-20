@@ -507,7 +507,7 @@ export const QuestionCard = styled(Card)`
   h2:focus { outline: none; }
   ${Options} { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
   ${Option} { min-height: 3.875rem; font-size: 1rem; }
-  ${ButtonRow} { justify-content: space-between; border-top: 1px solid ${({ theme }) => theme.colors.border.subtle}; padding-top: 1.25rem; }
+  ${ButtonRow} { justify-content: flex-end; border-top: 1px solid ${({ theme }) => theme.colors.border.subtle}; padding-top: 1.25rem; }
   @media (max-width: 62rem) { ${Options} { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   @media (max-width: 42rem) {
     padding: 1.125rem;

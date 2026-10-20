@@ -1,6 +1,4 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { tourPlacesQueryOptions } from '@/entities/travel'
 import {
   useSeniorLocationQuery,
   useSeniorPlannersQuery,
@@ -26,7 +24,6 @@ export function SeniorTravelPanel({
   const seniorPlanners = useSeniorPlannersQuery(senior.userId)
   const selectedPlanner = seniorPlanners.data?.find((planner) => planner.plannerId === selectedPlannerId) ?? seniorPlanners.data?.[0]
   const seniorSchedule = useSeniorScheduleQuery(senior.userId, selectedPlanner?.plannerId)
-  const placesQuery = useQuery(tourPlacesQueryOptions('대한민국', selectedPlanner?.cityName, undefined, Boolean(selectedPlanner?.cityName)))
   const seniorLocation = useSeniorLocationQuery(senior.userId)
   const [now, setNow] = useState(Date.now)
   useEffect(() => {
@@ -81,7 +78,7 @@ export function SeniorTravelPanel({
         {days.map((day, index) => (
           <li key={day.date ?? index}>
             <strong>{day.date || `${index + 1}일차`}</strong>
-            <span>{(day.slots ?? []).map((slot) => placesQuery.data?.find((place) => place.tourPlaceId === slot.tourPlaceId)?.placeName || (slot.tourPlaceId ? `장소 ${slot.tourPlaceId}` : '')).filter(Boolean).join(' · ') || '등록된 장소가 없어요.'}</span>
+            <span>{(day.slots ?? []).flatMap((slot, slotIndex) => slot.place ? [slot.place.name?.trim() || `장소 ${slot.place.tourPlaceId ?? slot.tourPlaceId ?? slotIndex + 1}`] : []).join(' · ') || '등록된 장소가 없어요.'}</span>
           </li>
         ))}
         {!days.length ? <S.Message>등록된 일정이 없어요.</S.Message> : null}

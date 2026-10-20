@@ -10,6 +10,7 @@ import { AppShell } from '@/widgets/app-shell'
 
 import { formatDday, getTravelStatusCopy, hasTravelPlan } from '../model/dday'
 import { getMainQueryPresentation } from '../model/main-query-presentation'
+import { heroImageOf } from '../model/hero-image'
 import { pickRecommendations, readRecommendations, saveRecommendations } from '../model/recommendations'
 import * as S from './MainPage.styles'
 import { TodaySchedule } from './TodaySchedule'
@@ -88,12 +89,18 @@ export function RecommendationCards({
   </S.Recommendations>
 }
 
+function MainHeroPhoto({ imageUrl }: { imageUrl: string }) {
+  const [failed, setFailed] = useState(false)
+  return failed ? null : <S.HeroPhoto aria-hidden="true"><img src={imageUrl} alt="" onError={() => setFailed(true)} /></S.HeroPhoto>
+}
+
 function MainHero({
   plan,
   destination,
   dateRange,
   today,
-  todayStops,
+  hasTodayPlaces,
+  imageUrl,
   onStartPlanner,
   onOpenTodaySchedule,
 }: {
@@ -101,7 +108,8 @@ function MainHero({
   destination: string
   dateRange: string
   today: string
-  todayStops: string[]
+  hasTodayPlaces: boolean
+  imageUrl?: string
   onStartPlanner: () => void
   onOpenTodaySchedule: () => void
 }) {
@@ -118,14 +126,10 @@ function MainHero({
   if (plan?.status === 'DURING') {
     return (
       <S.Hero>
+        {imageUrl ? <MainHeroPhoto key={imageUrl} imageUrl={imageUrl} /> : null}
         <S.HeroLabel>오늘 일정 · {today.replace(/-/g, '.')}</S.HeroLabel>
         <S.HeroTitle>{destination} 여행</S.HeroTitle>
-        {todayStops.length ? (
-          <S.TodayRoute aria-label={`오늘 일정 순서: ${todayStops.join(', ')}`}>
-            {todayStops.map((stop, index) => <span key={`${stop}-${index}`}>{index ? <i aria-hidden="true">→</i> : null}{stop}</span>)}
-          </S.TodayRoute>
-        ) : <S.HeroCopy>오늘 확정된 일정이 없어요.</S.HeroCopy>}
-        {todayStops.length ? <S.HeroMeta>확정된 일정 · 오늘 {todayStops.length}곳</S.HeroMeta> : null}
+        {!hasTodayPlaces ? <S.HeroCopy>오늘 확정된 일정이 없어요.</S.HeroCopy> : null}
         <S.HeroAction type="button" onClick={onOpenTodaySchedule}>오늘 일정 보기</S.HeroAction>
       </S.Hero>
     )
@@ -133,6 +137,7 @@ function MainHero({
   if (plan && hasTravelPlan(plan)) {
     return (
       <S.Hero>
+        {imageUrl ? <MainHeroPhoto key={imageUrl} imageUrl={imageUrl} /> : null}
         <S.HeroLabel>{getTravelStatusCopy(plan.status)}</S.HeroLabel>
         {plan.status === 'BEFORE' || plan.dday === 'D-Day' ? <S.Dday>{formatDday(plan.dday)}</S.Dday> : null}
         <S.Destination>{destination} · {formatTripDuration(plan.startDate, plan.endDate) || '여행 기간 미설정'}</S.Destination>
@@ -164,7 +169,6 @@ export function MainPage() {
     && (!plan?.cityName || !planner.cityName || planner.cityName.trim() === plan.cityName.trim()),
   )
   const todaySlots = isDuring ? plan.todaySchedule ?? [] : []
-  const todayStops = todaySlots.flatMap((slot) => slot.place?.name?.trim() ? [slot.place.name.trim()] : [])
   const destination = plan?.cityName || plan?.regionName || '여행지'
   const dateRange = plan ? formatDateRange(plan.startDate, plan.endDate) : '여행 정보가 없습니다.'
   const presentation = getMainQueryPresentation({
@@ -205,7 +209,8 @@ export function MainPage() {
             destination={destination}
             dateRange={dateRange}
             today={today}
-            todayStops={todayStops}
+            hasTodayPlaces={todaySlots.some((slot) => slot.place != null)}
+            imageUrl={hasActivePlan ? heroImageOf(data.tourPlaces) : undefined}
             onStartPlanner={() => void navigate({ to: paths.plannerDestination })}
             onOpenTodaySchedule={openTodaySchedule}
           />

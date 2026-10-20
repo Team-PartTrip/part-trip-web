@@ -280,7 +280,7 @@ export const DetailHeading = styled.header`
 export const Composer = styled.section`
   display: block;
   width: 100%;
-  height: 35rem;
+  min-height: 35rem;
   box-sizing: border-box;
   border: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
   border-radius: 1rem;
@@ -341,9 +341,12 @@ export const CardSelector = styled.select`
 
 export const Gallery = styled.div`
   display: flex;
+  flex-shrink: 0;
+  overflow-x: auto;
   gap: 0.625rem;
   width: 100%;
-  height: 5.625rem;
+  min-height: 5.625rem;
+  overflow-y: hidden;
   margin-top: 0.375rem;
 `;
 
@@ -362,6 +365,7 @@ export const PhotoTile = styled.button`
   color: ${({ theme }) => theme.colors.text.muted};
   cursor: pointer;
   font-size: 0.75rem;
+  &:disabled { cursor: not-allowed; opacity: 0.5; }
   img { display: block; width: 100%; height: 100%; object-fit: cover; }
 `;
 
@@ -407,6 +411,7 @@ export const Counter = styled.span`
 `;
 
 export const ErrorMessage = styled.p`
+  overflow-wrap: anywhere;
   margin: 0.75rem 0 0;
   color: ${({ theme }) => theme.colors.status.error};
   font-size: 0.8125rem;

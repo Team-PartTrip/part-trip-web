@@ -29,13 +29,6 @@ export const Title = styled.h1`
   line-height: 2.375rem;
 `
 
-export const Subtitle = styled.p`
-  margin: 0.375rem 0 0;
-  color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 0.9375rem;
-  line-height: 1.375rem;
-`
-
 export const ReadAll = styled.button`
   width: 7rem;
   height: 3rem;
@@ -214,6 +207,25 @@ export const Detail = styled.section`
   > div:last-child > button { width: 10.625rem; height: 3rem; }
 `
 
+export const DetailDialog = styled.dialog`
+  width: min(36rem, calc(100% - 2rem));
+  max-width: none;
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 0;
+  border-radius: 1rem;
+  padding: 0;
+  background: ${({ theme }) => theme.colors.background.default};
+  &::backdrop { background: rgb(15 23 42 / 48%); }
+  ${Detail} { border: 0; box-shadow: none; }
+  @media (max-width: 47.9375rem) {
+    ${Detail} { padding: 1.25rem; }
+    ${Detail} > div:last-child { flex-direction: column; }
+    ${Detail} > div:last-child > button { width: 100%; }
+  }
+`
+
 export const DetailCategory = styled.span<{ $tone: 'primary' | 'accent' | 'success' }>`
   display: inline-flex;
   width: 5rem;
@@ -236,21 +248,6 @@ export const DetailMeta = styled.p`
   line-height: 0.9375rem;
 `
 
-export const ReadState = styled.div`
-  display: flex;
-  width: 100%;
-  height: 2.75rem;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  border-radius: 0.75rem;
-  padding: 0.75rem;
-  background: ${({ theme }) => theme.colors.background.muted};
-  color: ${({ theme }) => theme.colors.brand.primary};
-  font-size: 0.8125rem;
-  font-weight: 600;
-`
-
 export const LoadingDetail = styled(Skeleton)`
   width: min(100%, 53.75rem);
   height: 22.5rem;
@@ -262,29 +259,6 @@ export const ActionRow = styled.div`
   flex-wrap: wrap;
   gap: 0.75rem;
   margin-top: 0;
-`
-
-export const SettingsCard = styled.section`
-  border-radius: 1.25rem;
-  padding: 0.75rem 1.5rem 1rem;
-  background: ${({ theme }) => theme.colors.background.default};
-  box-shadow: ${({ theme }) => theme.shadows.subtle};
-
-  @media (max-width: 47.9375rem) {
-    border-radius: 0;
-    padding: 0.5rem 1rem 1rem;
-  }
-`
-
-export const SettingRow = styled.div`
-  display: flex;
-  min-height: 5.25rem;
-  align-items: center;
-  border-bottom: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
-
-  > div { display: flex; flex-direction: column; gap: 0.375rem; }
-  strong { color: ${({ theme }) => theme.colors.text.strong}; font-size: 1rem; font-weight: 700; line-height: 1.5rem; }
-  span { color: ${({ theme }) => theme.colors.text.muted}; font-size: 0.875rem; line-height: 1.375rem; }
 `
 
 export const NotificationPreview = styled.span`

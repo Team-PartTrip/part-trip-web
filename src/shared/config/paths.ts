@@ -17,7 +17,6 @@ export const paths = {
   profileCountries: '/profile/countries',
   profileAchievements: '/profile/achievements',
   notifications: '/notifications',
-  notificationSettings: '/settings/notifications',
   tripCards: '/trip-cards',
   tripCardCreate: '/trip-cards/new',
   record: '/record',

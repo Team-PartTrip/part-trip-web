@@ -32,7 +32,7 @@ const screen=()=>document.getElementById('screen'),button=label=>[...screen().qu
 const check=(ok,msg)=>{if(!ok)throw Error(msg)}
 const until=async fn=>{const limit=Date.now()+6000;while(!fn()){if(Date.now()>limit)throw Error('갱신 시간 초과');await new Promise(r=>setTimeout(r,20))}}
 const departure=async()=>{const before=Number(screen().dataset.version);document.getElementById('criteria').click();await until(()=>Number(screen().dataset.version)>before&&button('혼자'));button('혼자').click();await until(()=>button('지금 있는 곳'))}
-const review=async()=>{button('나머지는 기본으로 만들기').click();await until(()=>button('AI로 일정 만들기'))}
+const review=async()=>{for(let step=0;step<20;step++){if(button('AI로 일정 만들기'))return;const next=button('다음')||button('건너뛰기');check(next,'다음 단계 버튼 없음');const before=screen().textContent;next.click();await until(()=>screen().textContent!==before)}throw Error('확인 단계에 도달하지 못했습니다')}
 const setInput=(el,value)=>{Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(el,value);el.dispatchEvent(new Event('input',{bubbles:true}))}
 document.getElementById('run').onclick=async()=>{try{
  await until(()=>button('지도 다시 불러오기'));failSdk=false;button('지도 다시 불러오기').click();await until(()=>screen().querySelectorAll('.record-map-pin').length===2)

@@ -68,12 +68,7 @@ export const TopbarSpacer = styled.div`
 
 export const MobileLogoLink = styled(Link)`
   display: none;
-
-  img {
-    display: block;
-    width: 7rem;
-    height: auto;
-  }
+  color: ${({ theme }) => theme.colors.brand.strong};
 
   @media (max-width: 47.9375rem) {
     display: inline-flex;

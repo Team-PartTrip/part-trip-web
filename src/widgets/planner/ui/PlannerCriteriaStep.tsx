@@ -473,7 +473,6 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
                   ? "AI가 일정을 만드는 중…"
                   : isReview ? "AI로 일정 만들기" : !hasAnswer && currentQuestion !== "COMPANION" ? "건너뛰기" : "다음"}
               </Button>
-              {!isReview ? <Button type="button" $variant="secondary" disabled={submitting || blocksQuery.isLoading || preferencesQuery.isLoading} onClick={() => setQuestionIndex(questions.indexOf('review'))}>나머지는 기본으로 만들기</Button> : null}
             </S.ButtonRow>
             {submitting ? (
               <p role="status" aria-live="polite">

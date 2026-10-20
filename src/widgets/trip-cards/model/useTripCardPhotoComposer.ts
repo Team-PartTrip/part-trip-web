@@ -3,7 +3,7 @@ import { useSearch } from "@tanstack/react-router";
 import { useCreateTravelCardEntryMutation } from "@/entities/trip-card";
 import type { TravelRecordDto } from "@/entities/trip-card";
 import { getErrorMessage, isPositiveSafeInteger } from "@/shared/utils";
-import { clearCommentIfUnchanged, removeUploadedPhoto, tryStartPhotoBatch, type PhotoDraft } from "./photo-composer-state";
+import { clearCommentIfUnchanged, isTripEnded, selectSupportedPhotos, TRIP_ENDED_NOTICE, removeUploadedPhoto, tryStartPhotoBatch, type PhotoDraft } from "./photo-composer-state";
 
 export const MAX_PHOTOS = 4;
 
@@ -22,6 +22,7 @@ export function useTripCardPhotoComposer({ cards }: Props) {
   const isUploadingRef = useRef(false);
   const createEntryMutation = useCreateTravelCardEntryMutation();
   const selectedCard = cards.find((card) => String(card.tripId) === selectedCardId) ?? cards[0];
+  const tripEnded = isTripEnded(selectedCard?.endDate);
 
   useEffect(
     () => () => photosRef.current.forEach(({ url }) => URL.revokeObjectURL(url)),
@@ -33,9 +34,14 @@ export function useTripCardPhotoComposer({ cards }: Props) {
   }, [photos]);
 
   const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (isTripEnded(selectedCard?.endDate)) {
+      setErrorMessage(TRIP_ENDED_NOTICE);
+      event.target.value = "";
+      return;
+    }
     const remaining = Math.max(0, MAX_PHOTOS - photos.length);
-    const incomingPhotos = Array.from(event.target.files ?? [])
-      .filter((file) => file.type.startsWith("image/"))
+    const { accepted, message } = selectSupportedPhotos(Array.from(event.target.files ?? []));
+    const incomingPhotos = accepted
       .map((file) => ({ file, url: URL.createObjectURL(file) }))
       .sort((a, b) => a.file.lastModified - b.file.lastModified);
     const nextPhotos = incomingPhotos.slice(0, remaining);
@@ -44,13 +50,10 @@ export function useTripCardPhotoComposer({ cards }: Props) {
     setPhotos(photosRef.current);
     if (photosRef.current.length > 1) setComment("");
     setSuccessMessage("");
-    setErrorMessage(
-      nextPhotos.length === 0
-        ? remaining === 0
-          ? `사진은 최대 ${MAX_PHOTOS}장까지 선택할 수 있어요.`
-          : "이미지 파일을 하나 이상 선택해주세요."
-        : "",
-    );
+    const limitMessage = incomingPhotos.length > remaining || remaining === 0
+      ? `사진은 최대 ${MAX_PHOTOS}장까지 선택할 수 있어요.` : "";
+    setErrorMessage([message, limitMessage].filter(Boolean).join(" ")
+      || (nextPhotos.length === 0 ? "이미지 파일을 하나 이상 선택해주세요." : ""));
     event.target.value = "";
   };
 
@@ -59,6 +62,10 @@ export function useTripCardPhotoComposer({ cards }: Props) {
     const cardId = Number(selectedCard?.tripId);
     if (!isPositiveSafeInteger(cardId)) {
       setErrorMessage("사진을 추가할 여행카드를 선택해주세요.");
+      return;
+    }
+    if (isTripEnded(selectedCard?.endDate)) {
+      setErrorMessage(TRIP_ENDED_NOTICE);
       return;
     }
     if (photos.length === 0) {
@@ -118,5 +125,6 @@ export function useTripCardPhotoComposer({ cards }: Props) {
     setComment,
     setSelectedCardId,
     successMessage,
+    tripEnded,
   };
 }
