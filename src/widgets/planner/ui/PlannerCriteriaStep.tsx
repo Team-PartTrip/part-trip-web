@@ -314,6 +314,10 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
   const generate = async () => {
     if (submittingRef.current || locatingDeparture) return;
     setMessage("");
+    if (!preferencesQuery.data || preferencesQuery.isError) {
+      setMessage('여행 편의 설정을 불러오지 못했어요. 다시 불러온 뒤 일정을 만들어주세요.');
+      return;
+    }
     const party = getPlannerTravelParty(blocks);
     if (!party) {
       const companionIndex = questions.indexOf("COMPANION");
@@ -355,8 +359,12 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
     try {
       const answers = getPreferenceAnswers(preferencesQuery.data, mobilityAnswer, foodsAnswer);
       if (answers) {
-        // 편의 저장 실패가 일정 생성을 막지 않도록 한다.
-        await updatePreferences.mutateAsync(answers).catch(() => {});
+        try {
+          await updatePreferences.mutateAsync(answers);
+        } catch {
+          setMessage('여행 편의 조건을 저장하지 못했어요. 선택은 유지돼요. 다시 시도해주세요.');
+          return;
+        }
       }
       const schedule = await generateMutation.mutateAsync(payload);
       if (!isPositiveSafeInteger(schedule.plannerId))
@@ -408,6 +416,10 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
           </S.Error>
         ) : (
           <>
+            {preferencesQuery.isError ? <S.Error role="alert">
+              여행 편의 설정을 불러오지 못했어요. 선택한 조건은 유지돼요.
+              <Button type="button" disabled={preferencesQuery.isFetching} onClick={() => void preferencesQuery.refetch()}>편의 설정 다시 불러오기</Button>
+            </S.Error> : null}
             <S.QuestionProgress aria-label={`여행 기준 ${currentIndex + 1} / ${questions.length}단계`}>
               <span>{currentIndex + 1} / {questions.length}</span>
               <progress aria-label="여행 기준 진행률" max={questions.length} value={currentIndex + 1} />

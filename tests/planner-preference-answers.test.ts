@@ -5,7 +5,8 @@ import { getPreferenceAnswers, mobilityOf, togglePreference } from '../src/widge
 const pref = { preferredTransport: 'CAR', dailyScheduleCount: 4, canUseStairs: false } as const
 
 test('미응답과 바꾸지 않은 편의 답변은 저장하지 않는다', () => {
-  assert.equal(getPreferenceAnswers(undefined, [], []), undefined)
+  assert.throws(() => getPreferenceAnswers(undefined, [], []), /먼저 불러와/)
+  assert.throws(() => getPreferenceAnswers(undefined, ['WHEELCHAIR'], ['SEAFOOD']), /먼저 불러와/)
   assert.equal(getPreferenceAnswers(pref, null, null), undefined)
   assert.equal(getPreferenceAnswers({ ...pref, canUseStairs: true, usesWheelchair: false, limitedWalking: false, avoidFoods: [] }, [], []), undefined)
   assert.deepEqual(getPreferenceAnswers({ ...pref, usesWheelchair: true }, [], ['MEAT']), { ...pref, usesWheelchair: false, limitedWalking: false, avoidFoods: ['MEAT'] })

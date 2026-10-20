@@ -22,7 +22,7 @@ export function getPreferenceAnswers(
   mobility: Mobility[] | null,
   foods: AvoidFood[] | null,
 ): TravelPreferenceRequestDto | undefined {
-  if (!preferences) return
+  if (!preferences) throw new Error('여행 편의 설정을 먼저 불러와주세요.')
   const answers: Partial<TravelPreferenceRequestDto> = {}
   if (mobility !== null) {
     const previous = mobilityOf(preferences)
