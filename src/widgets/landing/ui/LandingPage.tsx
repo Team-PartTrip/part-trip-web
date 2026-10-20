@@ -11,12 +11,12 @@ import { Reveal } from './Reveal'
 const careLines = [
   { icon: WalkIcon, title: '오래 걷기 힘들면', body: '많이 걷지 않아도 되는 곳을 가까운 순서로 이어요.' },
   { icon: WheelchairIcon, title: '휠체어를 쓰면', body: '계단과 비탈이 적고 편의 시설 정보가 있는 곳을 먼저 골라요.' },
-  { icon: RestroomIcon, title: '화장실이 걱정되면', body: '가는 곳마다 장애인 화장실이 있는지 미리 알려 드려요.' },
+  { icon: RestroomIcon, title: '화장실이 걱정되면', body: '화장실 정보가 있는 곳은 미리 알려 드려요.' },
   { icon: RouteIcon, title: '길이 헷갈리면', body: '몇 번 버스를 타고 몇 분 걷는지 보여 주고, 카카오맵 길 안내로 이어 드려요.' },
 ]
 
 const trustItems = [
-  { icon: ClockIcon, title: '위치는 12시간만', body: '여행 중, 공유에 동의한 동안만 보내고 12시간이 지나면 지워요.' },
+  { icon: ClockIcon, title: '위치는 12시간만', body: '여행 중 앱에서 공유를 켠 동안만 보내고, 12시간이 지나면 지워요.' },
   { icon: DatabaseIcon, title: '믿을 수 있는 정보로', body: '한국관광공사, 구글 장소 정보, 카카오 지도를 바탕으로 일정을 짜요.' },
   { icon: DocumentIcon, title: '방침은 모두 공개', body: '어떤 정보를 왜 받는지 개인정보처리방침에 적어 두었어요.' },
 ]
@@ -43,13 +43,13 @@ export function LandingPage() {
       <main>
         <S.Hero aria-labelledby="landing-title">
           <Reveal>
-            <S.Eyebrow>부모님 여행, 이제 단디로</S.Eyebrow>
+            <S.Eyebrow>시니어를 위한 여행 플래너</S.Eyebrow>
           </Reveal>
           <Reveal delay={120}>
             <S.HeroTitle id="landing-title">
-              걷기 편한 길로
+              덜 걷고 덜 헤매는
               <br />
-              가족과 함께 짜는 여행
+              내 걸음에 맞춘 여행
             </S.HeroTitle>
           </Reveal>
           <Reveal delay={240}>
@@ -77,7 +77,7 @@ export function LandingPage() {
               </S.FloatChip>
               <S.FloatChip $side="left" $top="58%" aria-hidden="true">
                 <S.ChipDot $tone="orange" />
-                걷기 최소화로 짰어요
+                걸어서 9분
               </S.FloatChip>
             </S.HeroStage>
           </Reveal>
@@ -111,12 +111,12 @@ export function LandingPage() {
             <Reveal>
               <S.StepLabel>2단계</S.StepLabel>
               <S.StoryTitle id="landing-step2">
-                10초쯤 지나면
+                잠깐 기다리면
                 <br />
                 하루 일정이 나와요
               </S.StoryTitle>
               <S.StoryBody>
-                가까운 곳끼리 이어서 짜고, 장소 사이를 무엇을 타고 몇 분 가는지도 함께 보여 드려요. 마음에 안 드는 곳은 바꿀 수 있어요.
+                되도록 가까운 곳끼리 이어서 짜고, 장소 사이를 무엇을 타고 몇 분 가는지도 함께 보여 드려요. 마음에 안 드는 곳은 바꿀 수 있어요.
               </S.StoryBody>
             </Reveal>
           </S.StoryText>
@@ -139,7 +139,7 @@ export function LandingPage() {
                 같이 볼 수 있어요
               </S.StoryTitle>
               <S.StoryBody>
-                자녀를 보호자로 연결하면 여행 일정과, 위치 공유를 켜 둔 동안의 현재 위치를 볼 수 있어요. 같이 가는 일행은 링크 하나로 같은 일정에 들어와요.
+                자녀를 보호자로 연결하면 여행 일정과, 앱에서 위치 공유를 켜 둔 동안의 현재 위치를 볼 수 있어요. 같이 가는 일행은 링크 하나로 같은 일정에 들어와요.
               </S.StoryBody>
             </Reveal>
           </S.StoryText>
@@ -159,6 +159,42 @@ export function LandingPage() {
                 <S.MockRow>
                   <strong>대구 가을 나들이</strong>
                   <span>11.10 ~ 11.11 · 계획 확정</span>
+                </S.MockRow>
+              </S.Phone>
+            </S.Backdrop>
+          </Reveal>
+        </S.Story>
+
+        <S.Story $reverse aria-labelledby="landing-step4">
+          <S.StoryText>
+            <Reveal>
+              <S.StepLabel>4단계</S.StepLabel>
+              <S.StoryTitle id="landing-step4">
+                다녀온 곳은
+                <br />
+                사진과 함께 남아요
+              </S.StoryTitle>
+              <S.StoryBody>
+                여행 중에 찍은 사진을 여행카드에 담으면 찍은 곳이 지도에 남아요. 다녀온 시 · 도는 따로 모아서 볼 수 있어요.
+              </S.StoryBody>
+            </Reveal>
+          </S.StoryText>
+          <Reveal delay={150}>
+            <S.Backdrop $tone="orange">
+              <S.Phone $drawn aria-label="여행카드 예시: 대구 가을 나들이, 사진 3장">
+                <S.MockTitle>대구 가을 나들이</S.MockTitle>
+                <S.MockLabel>남긴 사진</S.MockLabel>
+                <S.MockCard>
+                  <S.MockMap aria-hidden="true">
+                    <span />
+                  </S.MockMap>
+                  <strong>사진 3장</strong>
+                  <S.MockButton>찍은 곳 지도에서 보기</S.MockButton>
+                </S.MockCard>
+                <S.MockLabel>다녀온 곳</S.MockLabel>
+                <S.MockRow>
+                  <strong>방문한 시 · 도 1곳</strong>
+                  <span>대구</span>
                 </S.MockRow>
               </S.Phone>
             </S.Backdrop>
@@ -209,7 +245,7 @@ export function LandingPage() {
             <S.ClosingTitle id="landing-closing">
               다음 여행은
               <br />
-              단디와 함께 짜 보세요
+              단디와 함께 떠나 보세요
             </S.ClosingTitle>
           </Reveal>
           <Reveal delay={150}>
