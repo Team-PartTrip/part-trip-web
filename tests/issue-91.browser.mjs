@@ -35,7 +35,7 @@ export default async function verifyGuardianMap(page, origin = 'http://localhost
       return marker
     } })
   })
-  await page.getByRole('button', { name: '일정 보기', exact: true }).nth(1).click()
+  await page.getByRole('button', { name: '선택하기', exact: true }).nth(1).click()
   const map = page.getByRole('region', { name: '가족 둘의 현재 위치 지도' })
   await map.waitFor(); await page.waitForFunction(() => window.__guardianMapProbe.maps.length === 1)
   await page.getByText(/마지막 확인 .*방금 전/).waitFor()

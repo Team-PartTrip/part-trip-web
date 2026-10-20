@@ -123,8 +123,10 @@ export function GuardiansPage() {
       <S.Person key={link.linkId ?? link.userId}>
         <span>{labelFor(link)}</span>
         <S.PersonActions>
-          <Button type="button" $variant="secondary" aria-pressed={link.userId === selectedSenior?.userId}
-            onClick={() => setSelectedSeniorUserId(link.userId ?? '')}>일정 보기</Button>
+          {seniors.data.length > 1 ? (
+            <Button type="button" $variant="secondary" aria-pressed={link.userId === selectedSenior?.userId}
+              onClick={() => setSelectedSeniorUserId(link.userId ?? '')}>선택하기</Button>
+          ) : null}
           <Button type="button" $variant="secondary" onClick={() => void unlink(link)}>연결 끊기</Button>
         </S.PersonActions>
       </S.Person>
