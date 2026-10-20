@@ -68,3 +68,26 @@ test('브라우저 기본 저장소는 localStorage를 사용한다', () => {
     }
   }
 })
+
+test('토큰 갱신은 세션을 유지하고 로그인과 로그아웃은 세션을 바꾼다', async () => {
+  const { AUTH_SESSION_KEY, getAuthSessionVersion, startAuthSession } = await import('../src/shared/libs/token-storage.ts')
+  const previousStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
+  const storage = createStorage()
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: storage })
+  try {
+    startAuthSession({ accessToken: 'A', refreshToken: 'refresh-A' })
+    const first = getAuthSessionVersion()
+    saveAuthTokens({ accessToken: 'A-next', refreshToken: 'refresh-A-next' })
+    assert.equal(getAuthSessionVersion(), first)
+    startAuthSession({ accessToken: 'B', refreshToken: 'refresh-B' })
+    assert.notEqual(getAuthSessionVersion(), first)
+    const second = getAuthSessionVersion()
+    clearAuthTokens()
+    assert.notEqual(getAuthSessionVersion(), second)
+    assert.equal(storage.getItem(AUTH_SESSION_KEY), null)
+  } finally {
+    clearAuthTokens()
+    if (previousStorage) Object.defineProperty(globalThis, 'localStorage', previousStorage)
+    else Reflect.deleteProperty(globalThis, 'localStorage')
+  }
+})

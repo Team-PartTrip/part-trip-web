@@ -61,7 +61,7 @@ function isAuthRequest(url?: string) {
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean
-  _sessionVersion?: number
+  _sessionVersion?: string
 }
 
 // 보호 API 요청에만 저장된 accessToken을 자동 첨부
@@ -87,7 +87,7 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
-let refreshRequest: { sessionVersion: number; refreshToken: string; promise: Promise<AuthTokens> } | null = null
+let refreshRequest: { sessionVersion: string; refreshToken: string; promise: Promise<AuthTokens> } | null = null
 
 function getRefreshUrl() {
   const baseURL = apiClient.defaults.baseURL ?? ''
@@ -109,7 +109,7 @@ function expireSession() {
   notifyAuthExpired()
 }
 
-async function requestNewTokens(refreshToken: string, sessionVersion: number) {
+async function requestNewTokens(refreshToken: string, sessionVersion: string) {
   if (!refreshRequest || refreshRequest.sessionVersion !== sessionVersion || refreshRequest.refreshToken !== refreshToken) {
     const promise = axios
       .post<AuthTokens>(
@@ -133,7 +133,13 @@ async function requestNewTokens(refreshToken: string, sessionVersion: number) {
 }
 
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const request = response.config as RetryableRequestConfig
+    if (request._sessionVersion !== getAuthSessionVersion()) {
+      throw new axios.CanceledError('종료된 세션의 응답입니다.')
+    }
+    return response
+  },
   async (error: unknown) => {
     if (
       axios.isAxiosError(error) &&

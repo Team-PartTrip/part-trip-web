@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 
-import { kakaoLogin, saveAuthTokens } from '@/entities/session/api'
+import { kakaoLogin, startAuthSession } from '@/entities/session/api'
 import { dandiAppLogoUrl } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import { clearKakaoAuthRequest, getKakaoAuthRequest, getKakaoRedirectUri } from '@/shared/libs/kakao-auth'
@@ -53,7 +53,7 @@ function KakaoCallbackRoute() {
     })
       .then((tokens) => {
         if (!active) return
-        saveAuthTokens(tokens)
+        startAuthSession(tokens)
         void navigate({ href: redirect ?? paths.main, replace: true })
       })
       .catch((error: unknown) => {

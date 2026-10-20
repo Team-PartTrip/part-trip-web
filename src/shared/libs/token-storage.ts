@@ -1,5 +1,6 @@
 export const ACCESS_TOKEN_KEY = 'accessToken'
 export const REFRESH_TOKEN_KEY = 'refreshToken'
+export const AUTH_SESSION_KEY = 'parttrip:auth-session'
 
 export type AuthTokens = {
   accessToken: string
@@ -11,7 +12,7 @@ type TokenStorage = Pick<Storage, 'getItem' | 'removeItem' | 'setItem'>
 let sessionVersion = 0
 
 export function getAuthSessionVersion() {
-  return sessionVersion
+  return `${sessionVersion}:${getStorage().getItem(AUTH_SESSION_KEY) ?? ''}`
 }
 
 function getStorage(storage?: TokenStorage) {
@@ -28,7 +29,14 @@ export function saveAuthTokens(tokens: AuthTokens, storage?: TokenStorage) {
   const target = getStorage(storage)
   target.setItem(ACCESS_TOKEN_KEY, accessToken)
   target.setItem(REFRESH_TOKEN_KEY, refreshToken)
+  if (!target.getItem(AUTH_SESSION_KEY)) target.setItem(AUTH_SESSION_KEY, crypto.randomUUID())
   return { accessToken, refreshToken }
+}
+
+export function startAuthSession(tokens: AuthTokens) {
+  const saved = saveAuthTokens(tokens)
+  getStorage().setItem(AUTH_SESSION_KEY, crypto.randomUUID())
+  return saved
 }
 
 export function getAccessToken(storage?: TokenStorage) {
@@ -44,4 +52,5 @@ export function clearAuthTokens(storage?: TokenStorage) {
   const target = getStorage(storage)
   target.removeItem(ACCESS_TOKEN_KEY)
   target.removeItem(REFRESH_TOKEN_KEY)
+  target.removeItem(AUTH_SESSION_KEY)
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { googleLogin, saveAuthTokens } from '@/entities/session/api'
+import { googleLogin, startAuthSession } from '@/entities/session/api'
 import { dandiAppLogoUrl } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import { getErrorMessage, getSafeRedirect } from '@/shared/utils'
@@ -19,7 +19,7 @@ export function SocialAuthForm({ redirect }: Props) {
   const handleGoogleLogin = async (idToken: string) => {
     try {
       setIsGoogleSubmitting(true)
-      saveAuthTokens(await googleLogin({ idToken }))
+      startAuthSession(await googleLogin({ idToken }))
       void navigate({ href: safeRedirect ?? paths.main, replace: true })
     } catch (error) {
       setMessage(getErrorMessage(error))

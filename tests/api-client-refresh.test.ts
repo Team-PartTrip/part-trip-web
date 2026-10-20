@@ -420,3 +420,50 @@ test('같은 세션의 동시 401 요청은 한 번의 refresh를 공유한다',
     else Reflect.deleteProperty(globalThis, 'localStorage')
   }
 })
+
+for (const status of [200, 401]) {
+  test(`다른 탭의 계정 변경 후 도착한 ${status} 응답은 취소하고 재시도하지 않는다`, async () => {
+    const previousStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
+    const previousAxiosAdapter = axios.defaults.adapter
+    const previousApiAdapter = apiClient.defaults.adapter
+    const storage = createStorage()
+    const { AUTH_SESSION_KEY } = await import('../src/shared/libs/token-storage.ts')
+    let finish: () => void = () => { throw new Error('request has not started') }
+    let started: () => void = () => {}
+    const waiting = new Promise<void>(resolve => { started = resolve })
+    let requests = 0
+    let refreshes = 0
+    Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: storage })
+    saveAuthTokens({ accessToken: 'account-A', refreshToken: 'refresh-A' })
+    axios.defaults.adapter = async () => { refreshes += 1; throw new Error('unexpected refresh') }
+    apiClient.defaults.adapter = async config => {
+      requests += 1
+      started()
+      return new Promise((resolve, reject) => {
+        finish = () => {
+          const response = { config, data: {}, headers: {}, status, statusText: String(status) }
+          if (status === 401) reject(new AxiosError('Unauthorized', AxiosError.ERR_BAD_REQUEST, config, undefined, response))
+          else resolve(response)
+        }
+      })
+    }
+    try {
+      const rejected = assert.rejects(apiClient.put('/profile/travel-preferences', { avoidFoods: ['MEAT'] }), axios.isCancel)
+      await waiting
+      storage.setItem('accessToken', 'account-B')
+      storage.setItem('refreshToken', 'refresh-B')
+      storage.setItem(AUTH_SESSION_KEY, 'other-tab-session')
+      finish()
+      await rejected
+      assert.equal(requests, 1)
+      assert.equal(refreshes, 0)
+      assert.equal(storage.getItem('accessToken'), 'account-B')
+    } finally {
+      clearAuthTokens()
+      axios.defaults.adapter = previousAxiosAdapter
+      apiClient.defaults.adapter = previousApiAdapter
+      if (previousStorage) Object.defineProperty(globalThis, 'localStorage', previousStorage)
+      else Reflect.deleteProperty(globalThis, 'localStorage')
+    }
+  })
+}
