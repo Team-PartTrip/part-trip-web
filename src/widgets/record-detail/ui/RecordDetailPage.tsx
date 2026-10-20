@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 're
 import { useNavigate, useParams } from '@tanstack/react-router'
 import { useTravelRecordQuery, useUpdateTravelCardEntryMetadataMutation } from '@/entities/trip-card'
 import { paths } from '@/shared/config'
-import { formatDate, formatTravelDateTime, getDetailState, getErrorMessage } from '@/shared/utils'
+import { formatDate, formatTravelDateTime, toTravelDateTimeInput, getDetailState, getErrorMessage } from '@/shared/utils'
 import { shareKakaoCardNews } from '@/shared/libs/kakao-share'
 import { PlaceSearchDialog } from '@/widgets/place-search'
 import type { PlaceSearchResponseDto } from '@/entities/travel'
@@ -11,10 +11,12 @@ import { isTripEnded, TRIP_ENDED_NOTICE } from '@/widgets/trip-cards/model/photo
 
 import * as S from './RecordDetailPage.styles'
 
-function toLocalDateTime(value?: string) {
-  if (!value) return ''
-  const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? '' : new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16)
+function RecordPhoto({ src, alt }: { src: string; alt: string }) {
+  const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading')
+  return <>
+    {state !== 'ready' ? <S.PhotoState role="status">{state === 'loading' ? '사진을 불러오는 중이에요.' : '사진을 불러오지 못했어요. 잠시 후 다시 열어주세요.'}</S.PhotoState> : null}
+    <img width={696} height={560} src={src} alt={alt} onLoad={() => setState('ready')} onError={() => setState('error')} style={{ visibility: state === 'ready' ? 'visible' : 'hidden' }} />
+  </>
 }
 
 export function RecordDetailPage() {
@@ -65,7 +67,12 @@ export function RecordDetailPage() {
       ? entry.locationSource != null && entry.locationSource !== 'MANUAL'
       : entry.takenAtSource != null && entry.takenAtSource !== 'MANUAL') return
     const data = new FormData(event.currentTarget)
-    const payload = { takenAt: new Date(String(data.get('takenAt'))).toISOString() }
+    const takenAt = String(data.get('takenAt') ?? '')
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(takenAt) || Number.isNaN(Date.parse(`${takenAt}+09:00`))) {
+      setMetadataError('올바른 촬영 시각을 입력해주세요.')
+      return
+    }
+    const payload = { takenAt: `${takenAt}:00` }
     try {
       await metadataMutation.mutateAsync({ cardId, entryId, payload })
       setMetadataError('')
@@ -146,9 +153,8 @@ export function RecordDetailPage() {
         {recordState === 'ready' && record && hasRecordPhotos ? (
           <S.DetailBody>
             <S.RecordPhoto>
-              <img
-                width={696}
-                height={560}
+              <RecordPhoto
+                key={recordImages[currentPhotoIndex]}
                 src={recordImages[currentPhotoIndex]}
                 alt={`${record.cityName || record.regionName || record.countryName || '여행'} 기록 사진`}
               />
@@ -170,7 +176,7 @@ export function RecordDetailPage() {
               {metadataError ? <S.ErrorMessage role="alert">{metadataError}</S.ErrorMessage> : null}
               <PlaceSearchDialog isOpen={metadataMode === 'location'} returnFocusRef={locationButtonRef} title="사진 위치 찾기" onClose={() => setMetadataEditor(null)} onSelect={place => void saveLocation(place)} />
               {metadataMode === 'time' && metadataEditor ? <S.MetadataForm key={`${metadataEditor.cardId}-${metadataEditor.entryId}`} onSubmit={(event) => void handleMetadataSubmit(metadataEditor.cardId, metadataEditor.entryId, 'time', event)}>
-                <label>촬영 시각<input name="takenAt" type="datetime-local" required defaultValue={toLocalDateTime(selectedEntry?.takenAt)} /></label>
+                <label>촬영 시각<input name="takenAt" type="datetime-local" required defaultValue={toTravelDateTimeInput(selectedEntry?.takenAt)} /></label>
                 <div><button type="button" onClick={() => setMetadataEditor(null)}>취소</button><button type="submit" disabled={metadataMutation.isPending}>{metadataMutation.isPending ? '저장 중' : '저장'}</button></div>
               </S.MetadataForm> : null}
             </S.RecordDetailCard>

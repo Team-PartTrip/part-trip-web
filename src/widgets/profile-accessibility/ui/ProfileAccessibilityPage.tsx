@@ -36,7 +36,7 @@ export function ProfileAccessibilityPage() {
               고대비 {settings.highContrast ? '켜짐' : '꺼짐'}
             </S.Toggle>
           </section>
-          <p>고대비는 글자 7:1, 주요 테두리 3:1 이상을 목표로 색상을 조정합니다. 브라우저 확대 기능도 사용할 수 있어요.</p>
+          <p>고대비를 켜면 글자와 버튼이 배경에서 더 또렷하게 보여요. 브라우저 확대 기능으로 화면을 크게 볼 수도 있어요.</p>
         </S.Card>
       </S.Page>
     </AppShell>

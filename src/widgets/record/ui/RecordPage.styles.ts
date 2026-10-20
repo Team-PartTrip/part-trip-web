@@ -103,6 +103,7 @@ export const RecordRow = styled.button`
 `
 
 export const RecordCopy = styled.span`
+  flex: 1;
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -147,4 +148,20 @@ export const Empty = styled.div`
   color: ${({ theme }) => theme.colors.text.muted};
   text-align: center;
   strong { color: ${({ theme }) => theme.colors.text.strong}; }
+`
+
+export const RecordPhoto = styled.span`
+  display: grid;
+  width: 8rem;
+  height: 7rem;
+  flex: 0 0 8rem;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background: ${({ theme }) => theme.colors.background.muted};
+  color: ${({ theme }) => theme.colors.text.muted};
+  text-align: center;
+  font-size: 0.875rem;
+  img { width: 100%; height: 100%; object-fit: cover; }
+  @media (max-width: 30rem) { width: 5rem; height: 6rem; flex-basis: 5rem; }
 `

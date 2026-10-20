@@ -43,10 +43,11 @@ export function plannerMatchesTab(
   return tab === 'active' ? traveling : !traveling
 }
 
-export function plannerStatusLabel(status?: string, endDate?: string, today = koreaToday()) {
+export function plannerStatusLabel(status?: string, endDate?: string, today = koreaToday(), startDate?: string) {
   const value = normalizeStatus(status)
 
-  if (isCompletedStatus(status) || (isValidDateOnly(endDate) && endDate < today)) return '완료'
+  if (isCompletedStatus(status) || (isValidDateOnly(endDate) && endDate < today)) return '여행 완료'
+  if (isValidDateOnly(startDate) && startDate <= today) return '여행 중'
   if (value === 'VOTING' || value.includes('투표')) return '일정 만드는 중'
   if (value === 'TRAVELING' || value.includes('여행 중')) return '여행 중'
   if (value === 'CONFIRMED' || value.includes('확정')) return '계획 확정'

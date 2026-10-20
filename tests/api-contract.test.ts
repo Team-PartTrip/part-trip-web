@@ -89,7 +89,7 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
   assert.match(locationApi, /apiClient\.put\(paths\.currentLocation, payload\)/)
   assert.match(locationReporting, /const geolocation = navigator\.geolocation/)
   assert.match(locationReporting, /geolocation\.getCurrentPosition/)
-  assert.match(locationReporter, /trip\.data\?\.status !== 'DURING'/)
+  assert.match(locationReporter, /trip\.data\?\.status === 'DURING'/)
   assert.match(calendar, /useFestivalMonthQuery\(plan\?\.regionName \? '대한민국' : undefined, viewYear, viewMonthIndex \+ 1\)/)
   assert.match(travelQueries, /getNextPageParam: \(lastPage\) => lastPage\.cursor \|\| undefined/)
   assert.doesNotMatch(travel, /mock-data|requestWithMockFallback|mockTourPlaces|mockCountries/)

@@ -109,7 +109,7 @@ document.getElementById('run').onclick = async () => {
       check(!next() && screen().textContent.includes('오늘 일정을 모두 다녀왔어요.'), '모든 장소 방문 후 다음 장소가 남음')
       const beforeReopen = accessibilityRequests().length
       document.getElementById('confirmed').click()
-      await until(() => screen().textContent.includes('확정된 일정입니다.') && screen().textContent.includes('화장실 · 장애인 전용 화장실 있음'))
+      await until(() => !screen().textContent.includes('확정된 일정입니다.') && screen().textContent.includes('화장실 · 장애인 전용 화장실 있음'))
       check(accessibilityRequests().length === beforeReopen, '확정 화면에서 같은 장소를 다시 요청함')
       client.removeQueries({ queryKey: ['travel', 'tour-place-accessibility'] })
       const beforeEditing = accessibilityRequests().length

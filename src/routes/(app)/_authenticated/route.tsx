@@ -47,8 +47,7 @@ function AuthenticatedLayout() {
 
   return <ThemeProvider theme={highContrast ? highContrastTheme : appTheme}>
     <div>
-      <LocationReporter />
-      <Outlet />
+      <LocationReporter><Outlet /></LocationReporter>
     </div>
   </ThemeProvider>
 }

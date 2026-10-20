@@ -12,10 +12,9 @@ import * as S from './TripCardsPage.styles'
 export function TripCardsPage() {
   const navigate = useNavigate()
   const { trips: cards, hasError, isLoading, refetch, isFetching } = useMyTravelRecords()
-  const card = cards[0]
   return (
     <TripCardsPageFrame onRetry={() => void refetch()} isRetrying={isFetching} title="여행카드" isLoading={isLoading} hasError={hasError}>
-      <TripCardListView card={card} imageUrl={card?.images?.[0]} navigate={navigate} />
+      <TripCardListView cards={cards} navigate={navigate} />
     </TripCardsPageFrame>
   )
 }

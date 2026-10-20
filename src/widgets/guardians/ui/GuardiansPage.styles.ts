@@ -3,6 +3,7 @@ import styled from 'styled-components'
 export const Page = styled.main`
   width: min(100%, 75rem);
   margin: 1.5rem auto 4rem;
+  > section { margin-bottom: 1.5rem; }
   color: ${({ theme }) => theme.colors.text.strong};
 `
 

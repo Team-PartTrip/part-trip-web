@@ -6,6 +6,7 @@ export type ProfileUpdateRequestDto = {
 }
 
 export type ProfileResponseDto = {
+  email?: string | null
   imgUrl?: string | null
   nickName: string
   userId: string

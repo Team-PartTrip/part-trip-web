@@ -1,10 +1,10 @@
-import type { Dispatch, SetStateAction } from 'react'
+import { useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import type { TravelCardTimelineItemDto, TravelRecordDto } from '@/entities/trip-card'
 import type { UseNavigateResult } from '@tanstack/react-router'
 import { resolveApiAssetUrl } from '@/shared/libs/api-client'
 import { Button as PartTripButton } from '@/shared/ui/parttrip'
 
-import { formatDateRange } from '@/shared/utils'
+import { formatDateRange, formatTripDuration, getErrorMessage } from '@/shared/utils'
 
 import { paths } from '@/shared/config'
 import { isTripEnded, TRIP_ENDED_NOTICE } from '../model/photo-composer-state'
@@ -16,40 +16,59 @@ type SetSelected = Dispatch<SetStateAction<number[]>>
 type TimelineItem = TravelCardTimelineItemDto
 type TripCardDetail = TravelRecordDto
 
-type TripCardListViewProps = {
-  card?: TripCard
-  imageUrl?: string
-  navigate: Navigate
-}
-
-export function TripCardListView({ card, imageUrl, navigate }: TripCardListViewProps) {
-  return (
-    <S.CarouselSection>
-      {card ? (
-        <S.TravelCard
-          type="button"
-          onClick={() => card.tripId && navigate({ params: { tripId: String(card.tripId) }, to: '/trip-cards/$tripId' })}
-        >
-          <S.TravelCardImage>
-            {imageUrl ? <img src={resolveApiAssetUrl(imageUrl) || imageUrl} alt="여행카드 표지" /> : <span>이미지 없음</span>}
-          </S.TravelCardImage>
-          <S.TravelCardInfo>
-            <S.TravelCardTitle>
-              <span><strong>{(card.cityName || card.regionName || card.countryName || '여행').toUpperCase()}</strong><small>{[card.regionName || card.countryName, formatDateRange(card.startDate, card.endDate)].filter(Boolean).join(' · ') || '여행 일정 정보 없음'}</small></span>
-              <S.FavoriteBadge aria-label="즐겨찾기">★</S.FavoriteBadge>
-            </S.TravelCardTitle>
-            <S.MetricList>
-
-              <span><small>방문 장소</small><strong>{card.places ? `${card.places.length}곳` : '정보 없음'}</strong></span>
-              <span><small>남긴 사진</small><strong>{card.photoCount ?? card.images?.length ?? 0}장</strong></span>
-
-            </S.MetricList>
-          </S.TravelCardInfo>
-        </S.TravelCard>
-      ) : <S.Empty>여행카드가 없어요.</S.Empty>}
-      <S.AddButton type="button" onClick={() => navigate({ to: paths.tripCardCreate })}>사진 · 코멘트 추가</S.AddButton>
-    </S.CarouselSection>
-  )
+export function TripCardListView({ cards, navigate }: { cards: TripCard[]; navigate: Navigate }) {
+  const track = useRef<HTMLDivElement>(null)
+  const [active, setActive] = useState(0)
+  const [message, setMessage] = useState('')
+  const selected = cards[Math.min(active, Math.max(0, cards.length - 1))]
+  const share = async () => {
+    if (!selected) return
+    const text = [selected.title || '여행카드', selected.cityName || selected.regionName, formatDateRange(selected.startDate, selected.endDate), `사진 ${selected.photoCount ?? selected.images?.length ?? 0}장`].filter(Boolean).join(' · ')
+    try {
+      if (navigator.share) await navigator.share({ title: selected.title || '여행카드', text })
+      else { await navigator.clipboard.writeText(text); setMessage('여행카드 내용을 복사했어요. 가족에게 보내주세요.') }
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') return
+      setMessage(getErrorMessage(error, '공유하지 못했어요. 잠시 후 다시 시도해주세요.'))
+    }
+  }
+  const go = (index: number) => {
+    const element = track.current
+    if (element) element.scrollTo({ left: element.clientWidth * index, behavior: 'smooth' })
+  }
+  return <S.CarouselSection>
+    {cards.length ? <>
+      <S.CardTrack ref={track} aria-label="여행카드 목록" onScroll={event => {
+        const element = event.currentTarget
+        setActive(Math.round(element.scrollLeft / element.clientWidth))
+      }}>
+        {cards.map((card, index) => <S.CardSlide key={card.tripId ?? index} role="group" aria-label={`${index + 1} / ${cards.length}`}>
+          <S.TravelCard type="button" onClick={() => card.tripId && navigate({ params: { tripId: String(card.tripId) }, to: '/trip-cards/$tripId' })}>
+            <S.TravelCardImage>{card.images?.[0] ? <img src={resolveApiAssetUrl(card.images[0]) || card.images[0]} alt="" onError={event => { event.currentTarget.hidden = true }} /> : null}</S.TravelCardImage>
+            <S.TravelCardInfo>
+              <S.TravelCardTitle><span><strong>{card.title || `${card.cityName || card.regionName || '여행'} 여행`}</strong><small>{[card.cityName || card.regionName, formatDateRange(card.startDate, card.endDate)].filter(Boolean).join(' · ')}</small></span></S.TravelCardTitle>
+              <S.MetricList>
+                <span><small>여행 기간</small><strong>{formatTripDuration(card.startDate, card.endDate) || '기간 미설정'}</strong></span>
+                <span><small>남긴 사진</small><strong>{card.photoCount ?? card.images?.length ?? 0}장</strong></span>
+              </S.MetricList>
+            </S.TravelCardInfo>
+          </S.TravelCard>
+        </S.CardSlide>)}
+      </S.CardTrack>
+      <S.CarouselControls aria-label="여행카드 넘기기">
+        <PartTripButton type="button" $variant="secondary" disabled={active <= 0} onClick={() => go(active - 1)}>이전</PartTripButton>
+        <span aria-live="polite">{Math.min(active + 1, cards.length)} / {cards.length}</span>
+        <PartTripButton type="button" $variant="secondary" disabled={active >= cards.length - 1} onClick={() => go(active + 1)}>다음</PartTripButton>
+      </S.CarouselControls>
+      <S.CardDots aria-label="여행카드 선택">{cards.map((card, index) => <button key={card.tripId ?? index} type="button" aria-label={`${index + 1}번째 여행카드`} aria-current={active === index ? 'true' : undefined} onClick={() => go(index)} />)}</S.CardDots>
+      <S.CarouselControls>
+        <PartTripButton type="button" onClick={() => void share()}>여행카드 공유하기</PartTripButton>
+        <PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: '/trip-cards/delete' })}>관리 · 삭제</PartTripButton>
+      </S.CarouselControls>
+    </> : <S.Empty>여행카드가 없어요.</S.Empty>}
+    {message ? <p role="status">{message}</p> : null}
+    <S.AddButton type="button" onClick={() => navigate({ to: paths.tripCardCreate })}>사진 · 코멘트 추가</S.AddButton>
+  </S.CarouselSection>
 }
 
 type TripCardDetailViewProps = {

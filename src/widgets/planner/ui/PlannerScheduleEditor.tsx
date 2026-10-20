@@ -80,7 +80,7 @@ export function PlannerScheduleEditor({
   ) ?? false
   const canEdit = canManage && !isConfirmed
   let editorStatus = '리더만 일정을 수정할 수 있어요.'
-  if (isConfirmed) editorStatus = '확정된 일정입니다.'
+  if (isConfirmed) editorStatus = ''
   if (canEdit) editorStatus = '날짜 안에서 순서를 바꾸고 장소를 추가·삭제할 수 있어요.'
 
   const openPicker = (position: Position) => {
@@ -158,7 +158,7 @@ export function PlannerScheduleEditor({
 
   return <>
     <S.EditorHeading>
-      <div><p>{editorStatus}</p></div>
+      <div>{editorStatus ? <p>{editorStatus}</p> : null}</div>
       {editorActions}
     </S.EditorHeading>
     {hasDailyQuotaReached ? <S.RouteNotice role="status">오늘 이동 경로 조회 한도를 다 써서 경로를 못 불러왔어요.</S.RouteNotice> : null}

@@ -80,7 +80,7 @@ export default async function verifyIssues(page, origin = 'http://localhost:5173
     denied = 0; await page.goto(origin + '/planner/7'); await page.getByText('새참여자', { exact: true }).waitFor(); const before = await page.evaluate(() => JSON.parse(sessionStorage.getItem('test:alerts') ?? '[]').length); denied = code
     await page.waitForURL(origin + '/planner', { timeout: 6500 }); check((await page.evaluate(() => JSON.parse(sessionStorage.getItem('test:alerts') ?? '[]'))).slice(before).filter(text => text === '이 플래너에서 나가졌어요').length === 1, `#90 ${code} 응답 시 알림 1회·목록 이동`)
   }
-  denied = 0; status = 'DONE'; await page.goto(origin + '/planner/7'); await page.getByText('확정된 일정입니다.', { exact: true }).waitFor(); const before = polls.length; await page.waitForTimeout(5300)
+  denied = 0; status = 'DONE'; await page.goto(origin + '/planner/7'); await page.getByText('확정된 일정', { exact: true }).waitFor(); const before = polls.length; await page.waitForTimeout(5300)
   check(polls.length === before && await page.getByRole('button', { name: '내보내기', exact: true }).count() === 0 && await page.getByRole('button', { name: '초대 단계로', exact: true }).count() === 0, '#90 DONE 멤버 주기 갱신·내보내기·초대 중지')
   await page.goto(origin + '/planner/invite'); await page.getByText('현재는 초대 링크를 사용할 수 없어요.', { exact: true }).waitFor(); check(await page.getByRole('button', { name: '링크 복사', exact: true }).count() === 0, '#90 DONE 초대 URL 직접 접근해도 링크 숨김')
   count = 1; status = 'DRAFT'; await page.goto(origin + '/planner/7'); await page.getByRole('button', { name: '일정 편집', exact: true }).waitFor(); const soloPolls = polls.length; await page.waitForTimeout(5300); check(polls.length === soloPolls, '#90 혼자 여행 멤버 주기 갱신 없음')

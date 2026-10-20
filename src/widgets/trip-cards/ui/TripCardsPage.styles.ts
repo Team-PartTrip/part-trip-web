@@ -109,6 +109,7 @@ export const AddButton = styled(Button)`
 `
 
 export const TravelCard = styled.button`
+  position: relative;
   display: block;
   width: min(100%, 26.25rem);
   overflow: hidden;
@@ -122,8 +123,10 @@ export const TravelCard = styled.button`
 `
 
 export const TravelCardImage = styled.div`
+  position: absolute;
+  inset: 0;
   display: grid;
-  height: 13.75rem;
+  height: 100%;
   place-items: center;
   box-sizing: border-box;
   border: 0.0625rem solid #dceaf7;
@@ -135,9 +138,11 @@ export const TravelCardImage = styled.div`
 `
 
 export const TravelCardInfo = styled.div`
-  min-height: 18.9375rem;
-  padding: 1.75rem;
-  background: ${({ theme }) => theme.colors.brand.primary};
+  position: relative;
+  box-sizing: border-box;
+  min-height: 30rem;
+  padding: 14rem 1.75rem 1.75rem;
+  background: linear-gradient(180deg, rgb(0 0 0 / 10%), rgb(0 0 0 / 85%) 55%);
   color: ${({ theme }) => theme.colors.text.inverse};
 `
 
@@ -149,18 +154,6 @@ export const TravelCardTitle = styled.div`
   > span { display: flex; min-width: 0; flex-direction: column; gap: 0.25rem; }
   strong { font-size: 1.875rem; line-height: 2.375rem; }
   small { font-size: 0.6875rem; line-height: 0.9375rem; }
-`
-
-export const FavoriteBadge = styled.span`
-  display: grid;
-  width: 3.25rem;
-  height: 3.25rem;
-  flex: 0 0 3.25rem;
-  place-items: center;
-  border-radius: 1.375rem;
-  background: ${({ theme }) => theme.colors.brand.accent};
-  color: ${({ theme }) => theme.colors.text.inverse};
-  font-size: 1.25rem;
 `
 
 export const MetricList = styled.div`
@@ -589,3 +582,31 @@ export const DeleteButton = styled.button`
     opacity: 0.5;
   }
 `;
+
+export const CardTrack = styled.div`
+  display: flex;
+  width: min(100%, 26.25rem);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+`
+export const CardSlide = styled.div`
+  flex: 0 0 100%;
+  min-width: 0;
+  scroll-snap-align: start;
+`
+export const CarouselControls = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+`
+export const CardDots = styled.nav`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  button { width: 2.75rem; height: 2.75rem; border: 0; padding: 0; background: transparent; cursor: pointer; }
+  button::after { content: ''; display: block; width: 0.625rem; height: 0.625rem; margin: auto; border-radius: 50%; background: ${({ theme }) => theme.colors.text.muted}; }
+  button[aria-current]::after { background: ${({ theme }) => theme.colors.brand.primary}; }
+`

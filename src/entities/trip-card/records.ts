@@ -64,7 +64,7 @@ function toTravelRecord(card?: TravelCardListItemDto, detail?: TravelCardDetailD
         placeSub: item.address,
       })) : undefined,
     startDate: detail?.startDate ?? card?.startDate,
-    title: destination ? `${destination} 여행` : undefined,
+    title: card?.title || (destination ? `${destination} 여행` : undefined),
     tripId: card?.cardId ?? detail?.cardId,
     timeline,
   }
@@ -73,6 +73,7 @@ function toTravelRecord(card?: TravelCardListItemDto, detail?: TravelCardDetailD
 export async function getTravelRecord(tripId: number, summary?: TravelRecordDto): Promise<TravelRecordDto> {
   const cachedCard: TravelCardListItemDto | undefined = summary ? {
     cardId: summary.tripId,
+    title: summary.title,
     cityName: summary.cityName,
     regionCode: summary.regionCode,
     regionName: summary.regionName,

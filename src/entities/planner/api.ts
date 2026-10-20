@@ -51,7 +51,7 @@ const PLANNER_API_PATHS = {
   invitation: (invitationId: number, action: 'accept' | 'reject') => `/planners/invitations/${invitationId}/${action}`,
   cancelInvitation: (plannerId: number, invitationId: number) => `/planners/${plannerId}/invitations/${invitationId}`,
   members: (plannerId: number) => `/planners/${plannerId}/members`,
-  member: (plannerId: number, memberUserId: string) => `/planners/${plannerId}/members/${memberUserId}`,
+  member: (plannerId: number, memberUserId: string) => `/planners/${plannerId}/members/${encodeURIComponent(memberUserId)}`,
   confirm: (plannerId: number) => `/planners/${plannerId}/confirm`,
   schedule: (plannerId: number) => `/planners/${plannerId}/schedule`,
   scheduleCandidates: (plannerId: number) => `/planners/${plannerId}/schedule/candidates`,
@@ -115,6 +115,10 @@ export async function cancelPlannerInvitation(plannerId: number, invitationId: n
 
 export async function removePlannerMember(plannerId: number, memberUserId: string): Promise<void> {
   await apiClient.delete(PLANNER_API_PATHS.member(plannerId, memberUserId))
+}
+
+export async function deletePlanner(plannerId: number): Promise<void> {
+  await apiClient.delete(PLANNER_API_PATHS.detail(plannerId))
 }
 
 export async function getPlannerSchedule(plannerId: number): Promise<PlannerScheduleResponseDto> {

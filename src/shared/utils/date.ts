@@ -66,7 +66,7 @@ export function formatDateRange(startDate: DateValue, endDate: DateValue) {
 export function formatTravelDateTime(value: DateValue) {
   if (!value) return '-'
   const normalized = value.trim()
-  const date = new Date(/(?:Z|[+-]\d{2}:?\d{2})$/i.test(normalized) ? normalized : `${normalized}Z`)
+  const date = new Date(/(?:Z|[+-]\d{2}:?\d{2})$/i.test(normalized) ? normalized : `${normalized}+09:00`)
   if (Number.isNaN(date.getTime())) return normalized.replace('T', ' ')
 
   return new Intl.DateTimeFormat('ko-KR', {
@@ -74,6 +74,14 @@ export function formatTravelDateTime(value: DateValue) {
     timeZone: 'Asia/Seoul',
     timeStyle: 'short',
   }).format(date).replace(/\bAM\b/g, '오전').replace(/\bPM\b/g, '오후')
+}
+
+export function toTravelDateTimeInput(value: DateValue) {
+  if (!value) return ''
+  if (!/(?:Z|[+-]\d{2}:?\d{2})$/i.test(value)) return value.slice(0, 16)
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return new Date(date.getTime() + 9 * 60 * 60_000).toISOString().slice(0, 16)
 }
 
 export function getDateRangeDays(

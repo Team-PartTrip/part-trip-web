@@ -64,7 +64,7 @@ export function ProfilePage({ editMode = false }: ProfilePageProps = {}) {
                 <S.AccountCopy>
                   <strong>{name}</strong>
                   <span>여행 편의 설정과 가족 연결을 관리해요</span>
-                  <small>@{profile.id}</small>
+                  {profile.email ? <small>{profile.email}</small> : null}
                 </S.AccountCopy>
                 <S.ProfileActions>
                   <PartTripButton as={Link} to={paths.profileEdit} $variant="secondary">프로필 수정</PartTripButton>

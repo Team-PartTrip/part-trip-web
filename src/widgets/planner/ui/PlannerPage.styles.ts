@@ -428,3 +428,17 @@ export const Empty = styled.div`
   font-size: 0.875rem;
   text-align: center;
 `
+
+export const JoinForm = styled.form`
+  margin-bottom: 1.5rem;
+  label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+  > div { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  input { flex: 1 1 12rem; min-width: 0; }
+`
+
+export const PlanActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-block: 1rem;
+`

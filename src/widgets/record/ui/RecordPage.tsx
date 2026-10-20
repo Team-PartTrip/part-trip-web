@@ -8,6 +8,13 @@ import { AppShell } from '@/widgets/app-shell'
 
 import * as S from './RecordPage.styles'
 
+function RecordCover({ image, title }: { image?: string; title: string }) {
+  const [failed, setFailed] = useState(false)
+  return <S.RecordPhoto>{image && !failed
+    ? <img src={image} alt={`${title} 대표 사진`} loading="lazy" onError={() => setFailed(true)} />
+    : <span>{image ? '사진을 불러오지 못했어요' : '아직 사진이 없어요'}</span>}</S.RecordPhoto>
+}
+
 export function RecordPage() {
   const navigate = useNavigate()
   const { hasError, isLoading, trips, refetch, isFetching } = useMyTravelRecords()
@@ -16,6 +23,8 @@ export function RecordPage() {
   const today = formatCalendarDate(now.getFullYear(), now.getMonth(), now.getDate())
   const records = trips.map((trip) => ({
     id: trip.tripId,
+    image: trip.images?.[0],
+    region: trip.cityName || trip.regionName || trip.countryName,
     title: trip.title || `${trip.cityName || trip.regionName || trip.countryName || '여행'} 여행`,
     date: formatDateRange(trip.startDate, trip.endDate),
     year: trip.startDate?.slice(0, 4) || trip.createDate?.slice(0, 4) || '',
@@ -40,7 +49,13 @@ export function RecordPage() {
         {hasError ? <S.State role="alert">여행 기록을 불러오지 못했어요. <PartTripButton type="button" disabled={isFetching} onClick={() => void refetch()}>다시 시도</PartTripButton></S.State> : null}
         {!isLoading && !hasError ? (
           <>
-            {filteredRecords.length ? <S.RecordList>{filteredRecords.map((record) => <S.RecordRow key={record.id ?? record.title} type="button" onClick={() => record.id && navigate({ params: { recordId: String(record.id) }, to: '/record/$recordId' })}><S.RecordCopy><strong>{record.title}</strong><span>{record.date}</span><small>사진 {record.photoCount}장</small></S.RecordCopy>{record.active ? <S.RecordStatus>여행 중</S.RecordStatus> : <S.RowArrow aria-hidden="true">›</S.RowArrow>}</S.RecordRow>)}</S.RecordList> : <S.Empty><strong>아직 여행 기록이 없어요.</strong><span>첫 여행의 순간을 남겨보세요.</span></S.Empty>}
+            {filteredRecords.length ? <S.RecordList>{filteredRecords.map((record) => (
+              <S.RecordRow key={record.id ?? record.title} type="button" onClick={() => record.id && navigate({ params: { recordId: String(record.id) }, to: '/record/$recordId' })}>
+                <RecordCover key={record.image} image={record.image} title={record.title} />
+                <S.RecordCopy><strong>{record.title}</strong><span>{record.region}</span><span>{record.date}</span><small>사진 {record.photoCount}장</small></S.RecordCopy>
+                {record.active ? <S.RecordStatus>여행 중</S.RecordStatus> : <S.RowArrow aria-hidden="true">›</S.RowArrow>}
+              </S.RecordRow>
+            ))}</S.RecordList> : <S.Empty><strong>아직 여행 기록이 없어요.</strong><span>첫 여행의 순간을 남겨보세요.</span></S.Empty>}
           </>
         ) : null}
       </S.Page>

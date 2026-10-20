@@ -9,7 +9,7 @@ import {
 } from '@/entities/planner'
 import { PLANNER_GROUP_SETTINGS_KEY, paths } from '@/shared/config'
 import { writeSessionValue } from '@/shared/libs/session-storage'
-import { isPositiveSafeInteger } from '@/shared/utils'
+import { getErrorMessage, isPositiveSafeInteger } from '@/shared/utils'
 import { isValidPlannerMemberCount } from './member-count'
 import { usePlannerLiveMembers, isPlannerFinished } from './usePlannerLiveMembers'
 import { usePlannerState } from './usePlannerState'
@@ -62,8 +62,8 @@ export function usePlannerGroupFlow() {
       if (!isPositiveSafeInteger(plannerId)) throw new Error('plannerId is missing')
       activatePlanner(plannerId)
       navigate({ to: '/planner/$plannerId', params: { plannerId: String(joined.plannerId) } })
-    } catch {
-      setErrorMessage('초대 링크로 여행에 참여하지 못했어요. 링크를 확인하고 다시 열어주세요.')
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error))
     }
   }, [activatePlanner, inviteCodeFromUrlRef, joinPlannerMutation, navigate, setErrorMessage])
 
@@ -82,8 +82,8 @@ export function usePlannerGroupFlow() {
     try {
       setErrorMessage('')
       await removePlannerMemberMutation.mutateAsync({ memberUserId: memberUserId.trim(), plannerId: activePlannerId })
-    } catch {
-      setErrorMessage('멤버를 내보내지 못했습니다.')
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error))
     }
   }
 

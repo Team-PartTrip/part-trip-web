@@ -1,6 +1,7 @@
 import { apiClient } from '../../shared/libs/api-client.ts'
 
 export type TravelCardListItemDto = {
+  title?: string
   cardId?: number
   cityName?: string
   regionCode?: string

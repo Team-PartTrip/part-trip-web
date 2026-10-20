@@ -15,11 +15,11 @@ export function matchesNotificationFilter(notification: { type?: string; categor
 export function settingCopy(type?: NotificationType, category?: string) {
   if (category === 'SCHEDULE') return ['일정', '여행 시작과 오늘 일정 알림']
   if (category === 'PHOTO') return ['사진', '여행 사진 관련 알림']
-  if (category === 'GROUP') return ['그룹', '여행 그룹 초대와 연결 알림']
+  if (category === 'GROUP') return ['플래너', '여행 그룹 초대와 연결 알림']
   if (type === 'VOTE_PARTICIPATED' || type === 'VOTE_DEADLINE' || type === 'VOTE_REMINDER') return ['지난 알림', '기존 여행 투표 알림']
   if (type === 'PHOTO_ORGANIZED') return ['사진', '여행 사진 관련 알림']
   if (type === 'TRIP_CARD_CREATED') return ['기록', '여행 기록 알림']
-  if (type === 'GROUP_INVITED' || type === 'GROUP_INVITE_ACCEPTED') return ['그룹', '여행 그룹 초대와 연결 알림']
+  if (type === 'GROUP_INVITED' || type === 'GROUP_INVITE_ACCEPTED') return ['플래너', '여행 그룹 초대와 연결 알림']
   return ['알림', '여행 소식']
 }
 
@@ -105,4 +105,15 @@ export function sectionLabel(
   const thisWeek = isInCurrentCalendarWeek(notification.createdAt) && !notificationIsToday
   const previousThisWeek = previous && isInCurrentCalendarWeek(previous.createdAt) && !isToday(previous.createdAt)
   return thisWeek && !previousThisWeek ? '이번 주' : undefined
+}
+
+export function uniqueNotifications<T extends { notificationId?: number }>(notifications: T[]): T[] {
+  const seen = new Set<number>()
+  return notifications.filter(notification => {
+    const id = notification.notificationId
+    if (id == null) return true
+    if (seen.has(id)) return false
+    seen.add(id)
+    return true
+  })
 }

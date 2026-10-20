@@ -33,9 +33,9 @@ export function PlannerGroupManagementPanel({
                   <PlannerMemberAvatar name={getPlannerMemberDisplayName(member)} imgUrl={member.imgUrl} />
                   <S.MemberDetails>
                     <strong>{getPlannerMemberDisplayName(member)}</strong>
-                    <span>{memberStatus || '상태 확인 중'}</span>
+                    <span>{member.role?.toUpperCase() === 'OWNER' ? '그룹장' : isPendingMember ? '초대 대기 중' : '멤버'}</span>
                   </S.MemberDetails>
-                  {canManagePlanner && !isPendingMember && member.userId ? (
+                  {canManagePlanner && member.role?.toUpperCase() !== 'OWNER' && !isPendingMember && member.userId ? (
                     <S.SmallActionButton
                       type="button"
                       disabled={isManagingMembers}

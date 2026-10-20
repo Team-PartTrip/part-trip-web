@@ -9,6 +9,7 @@ import {
 import type { GuardianInviteDto, GuardianLinkDto } from '@/entities/guardian/api'
 import { sanitizeGuardianInviteCode } from '@/entities/guardian/invite-code'
 import { Button, Input } from '@/shared/ui/parttrip'
+import { useLocationSharing } from '@/widgets/location-reporter/context'
 import { AppShell } from '@/widgets/app-shell'
 import { SeniorTravelPanel } from './SeniorTravelPanel'
 import * as S from './GuardiansPage.styles'
@@ -25,6 +26,7 @@ function labelFor(link: GuardianLinkDto) {
 }
 
 export function GuardiansPage() {
+  const sharing = useLocationSharing()
   const guardians = useGuardianLinksQuery()
   const seniors = useLinkedSeniorsQuery()
   const inviteMutation = useCreateGuardianInviteMutation()
@@ -142,6 +144,13 @@ export function GuardiansPage() {
           <h1>가족 연결</h1>
           <p>가족과 여행 일정을 공유하고, 필요할 때 현재 위치를 확인할 수 있어요.</p>
         </S.Header>
+        <S.Card>
+          <h2>이 기기의 위치 공유</h2>
+          <p>직접 켜면 여행 중에 이 브라우저의 위치를 연결된 보호자에게 보내요. 여행자 본인의 기기에서만 켜주세요. 브라우저를 다시 열면 꺼져 있어요.</p>
+          <Button type="button" aria-pressed={sharing.enabled} disabled={!sharing.available && !sharing.enabled} onClick={sharing.toggle}>{sharing.enabled ? '위치 공유 끄기' : '위치 공유 켜기'}</Button>
+          <p role="status" aria-live="polite">{!sharing.enabled ? sharing.available ? '위치 공유가 꺼져 있어요.' : '여행 중이고 보호자가 연결되어 있을 때 켤 수 있어요. 지금은 위치를 보내지 않아요.' : !sharing.available ? '여행 중이고 보호자가 연결되어 있을 때만 위치를 보내요.' : sharing.state === 'shared' ? '이 기기의 위치를 공유 중이에요. 마지막 위치는 12시간 후 삭제돼요.' : sharing.state === 'denied' ? '위치 권한이 꺼져 있어요. 브라우저 설정에서 허용해주세요.' : sharing.state === 'unavailable' ? '이 기기에서 위치를 확인할 수 없어요.' : sharing.state === 'failed' ? '위치를 보내지 못했어요. 연결을 확인해주세요.' : '이 기기의 위치를 확인하고 있어요.'}</p>
+          {sharing.enabled && sharing.available && ['denied', 'unavailable', 'failed'].includes(sharing.state ?? '') ? <Button type="button" $variant="secondary" onClick={sharing.retry}>위치 공유 다시 시도</Button> : null}
+        </S.Card>
         <S.Grid>
           <S.Card>
             <h2>가족에게 연결 코드 보내기</h2>

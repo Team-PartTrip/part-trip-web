@@ -17,6 +17,7 @@ export const LoadingBody = styled.div`
   gap: 1.5rem;
   margin: 0 1.5rem;
   grid-template-columns: minmax(0, 43.5rem) 27rem;
+  @media (max-width: 56.25rem) { grid-template-columns: 1fr; }
 `
 
 export const LoadingPhoto = styled(Skeleton)`
@@ -226,4 +227,14 @@ export const StateCard = styled.div`
   h1, p { margin: 0; }
   h1 { color: var(--pt-text-strong); font-size: 1.5rem; }
   button { margin-top: 0.625rem; border: 0; border-radius: 0.625rem; padding: 0.75rem 1.125rem; background: var(--pt-brand-primary); color: var(--pt-text-inverse); cursor: pointer; }
+`
+
+export const PhotoState = styled.div`
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  padding: 1.5rem;
+  color: ${({ theme }) => theme.colors.text.strong};
+  text-align: center;
 `

@@ -63,7 +63,7 @@ export function PlannerListStep({
                       <span>{formatDateRange(planner.startDate, planner.endDate)}</span>
                       <S.PlanStatusRow>
                         <S.PlanStatus $state={plannerStatusKey(planner.status, planner.endDate)}>
-                          {plannerStatusLabel(planner.status, planner.endDate)}
+                          {plannerStatusLabel(planner.status, planner.endDate, undefined, planner.startDate)}
                         </S.PlanStatus>
                         <S.PlanParticipation>
                           {planner.joinedMemberCount ?? 0}/{planner.memberCount ?? 0}명 참여

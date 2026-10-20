@@ -4,12 +4,12 @@ const fallbackErrorMessage = '요청 처리 중 오류가 발생했습니다.'
 
 function getResponseMessage(data: unknown) {
   if (typeof data === 'string') {
-    return data
+    return /<[^>]+>/.test(data) ? null : data
   }
 
   if (data && typeof data === 'object' && 'message' in data) {
     const message = data.message
-    return typeof message === 'string' ? message : null
+    return typeof message === 'string' && !/<[^>]+>/.test(message) ? message : null
   }
 
   return null

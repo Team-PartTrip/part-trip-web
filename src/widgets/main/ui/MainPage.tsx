@@ -97,6 +97,7 @@ function MainHeroPhoto({ imageUrl }: { imageUrl: string }) {
 function MainHero({
   plan,
   destination,
+  title,
   dateRange,
   today,
   hasTodayPlaces,
@@ -106,6 +107,7 @@ function MainHero({
 }: {
   plan?: DdayResponseDto
   destination: string
+  title?: string
   dateRange: string
   today: string
   hasTodayPlaces: boolean
@@ -128,7 +130,7 @@ function MainHero({
       <S.Hero>
         {imageUrl ? <MainHeroPhoto key={imageUrl} imageUrl={imageUrl} /> : null}
         <S.HeroLabel>오늘 일정 · {today.replace(/-/g, '.')}</S.HeroLabel>
-        <S.HeroTitle>{destination} 여행</S.HeroTitle>
+        <S.HeroTitle>{title || `${destination} 여행`}</S.HeroTitle>
         {!hasTodayPlaces ? <S.HeroCopy>오늘 확정된 일정이 없어요.</S.HeroCopy> : null}
         <S.HeroAction type="button" onClick={onOpenTodaySchedule}>오늘 일정 보기</S.HeroAction>
       </S.Hero>
@@ -140,7 +142,7 @@ function MainHero({
         {imageUrl ? <MainHeroPhoto key={imageUrl} imageUrl={imageUrl} /> : null}
         <S.HeroLabel>{getTravelStatusCopy(plan.status)}</S.HeroLabel>
         {plan.status === 'BEFORE' || plan.dday === 'D-Day' ? <S.Dday>{formatDday(plan.dday)}</S.Dday> : null}
-        <S.Destination>{destination} · {formatTripDuration(plan.startDate, plan.endDate) || '여행 기간 미설정'}</S.Destination>
+        <S.Destination>{title || `${destination} 여행`} · {formatTripDuration(plan.startDate, plan.endDate) || '여행 기간 미설정'}</S.Destination>
         <S.HeroMeta>{dateRange}</S.HeroMeta>
       </S.Hero>
     )
@@ -159,11 +161,11 @@ export function MainPage() {
   const isDuring = plan?.status === 'DURING'
   const date = new Date()
   const today = formatCalendarDate(date.getFullYear(), date.getMonth(), date.getDate())
-  const { data: planners = [] } = useMyPlannersQuery(isDuring)
+  const { data: planners = [] } = useMyPlannersQuery(hasPlan)
   const currentPlanner = planners.find((planner) =>
-    isDuring
+    hasPlan
     && Boolean(planner.plannerId && plan?.startDate && plan.endDate)
-    && ['CONFIRMED', 'TRAVELING'].includes(normalizeStatus(planner.status))
+    && ['CONFIRMED', 'TRAVELING', 'DONE', 'COMPLETED'].includes(normalizeStatus(planner.status))
     && planner.startDate === plan?.startDate
     && planner.endDate === plan?.endDate
     && (!plan?.cityName || !planner.cityName || planner.cityName.trim() === plan.cityName.trim()),
@@ -207,6 +209,7 @@ export function MainPage() {
           <MainHero
             plan={plan}
             destination={destination}
+            title={plan?.title || currentPlanner?.title}
             dateRange={dateRange}
             today={today}
             hasTodayPlaces={todaySlots.some((slot) => slot.place != null)}

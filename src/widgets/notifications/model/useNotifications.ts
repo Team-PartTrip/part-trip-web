@@ -9,12 +9,12 @@ import {
 } from '@/entities/notification'
 import { ACTIVE_PLANNER_ID_KEY, paths } from '@/shared/config'
 import { writeSessionValue } from '@/shared/libs/session-storage'
-import { matchesNotificationFilter, normalizeNotificationLinkType, type NotificationViewFilter } from './notification-presentation'
+import { uniqueNotifications, matchesNotificationFilter, normalizeNotificationLinkType, type NotificationViewFilter } from './notification-presentation'
 
 function useNotificationData() {
   const notificationsQuery = useNotificationsQuery('ALL')
   const unreadCountQuery = useUnreadNotificationCountQuery()
-  const fetched = notificationsQuery.data?.pages.flatMap((page) => page.items ?? []) ?? []
+  const fetched = uniqueNotifications(notificationsQuery.data?.pages.flatMap((page) => page.items ?? []) ?? [])
   const unreadCount = unreadCountQuery.data?.unreadCount
   const notifications = unreadCount === 0 ? fetched.map((notification) => ({ ...notification, read: true })) : fetched
   return { notificationsQuery, notifications, unreadCount }

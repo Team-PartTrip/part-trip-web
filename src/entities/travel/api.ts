@@ -6,6 +6,7 @@ import type { PlannerScheduleSlotDto } from '../planner/types'
 export type TripPhase = 'NO_TRIP' | 'BEFORE' | 'DURING' | 'ENDED'
 
 export type DdayResponseDto = {
+  title?: string | null
   regionName?: string | null
   cityName?: string | null
   headcount?: number | null
