@@ -23,6 +23,7 @@ export function TripCardPhotoComposer({ cards }: Props) {
     handleSubmit,
     isPending,
     photos,
+    removePhoto,
     selectedCard,
     setComment,
     setSelectedCardId,
@@ -49,9 +50,9 @@ export function TripCardPhotoComposer({ cards }: Props) {
             {tripEnded ? <p role="status">{TRIP_ENDED_NOTICE}</p> : null}
             <S.Gallery>
               {photos.slice(0, MAX_PHOTOS).map((photo) => (
-                <S.PhotoTile key={photo.url} type="button" disabled={tripEnded} onClick={() => fileInputRef.current?.click()} aria-label={`${photo.file.name} 선택됨`}>
+                <S.PhotoTile key={photo.url} type="button" disabled={tripEnded || isPending} onClick={() => removePhoto(photo)} aria-label={`${photo.file.name} 선택 해제`}>
                   <img src={photo.url} alt={photo.file.name} />
-                  <S.PhotoCheck aria-hidden="true">✓</S.PhotoCheck>
+                  <S.PhotoCheck aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m3 3 6 6M9 3l-6 6" /></svg></S.PhotoCheck>
                 </S.PhotoTile>
               ))}
               {Array.from({ length: Math.max(0, MAX_PHOTOS - photos.length) }, (_, index) => (
@@ -59,6 +60,7 @@ export function TripCardPhotoComposer({ cards }: Props) {
                 </S.PhotoTile>
               ))}
             </S.Gallery>
+            {photos.length > 0 ? <p>사진을 누르면 선택을 해제할 수 있어요.</p> : null}
             <S.FileInput
               ref={fileInputRef}
               id="trip-card-photos"

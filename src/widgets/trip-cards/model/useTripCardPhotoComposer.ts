@@ -11,7 +11,7 @@ type Props = { cards: TravelRecordDto[] };
 
 export function useTripCardPhotoComposer({ cards }: Props) {
   const search = useSearch({ strict: false }) as { cardId?: string };
-  const [selectedCardId, setSelectedCardId] = useState(search.cardId ?? (cards[0]?.tripId == null ? "" : String(cards[0].tripId)));
+  const [selectedCardId, setSelectedCardId] = useState(String(search.cardId ?? cards[0]?.tripId ?? ""));
   const [photos, setPhotos] = useState<PhotoDraft[]>([]);
   const [comment, setComment] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -113,6 +113,15 @@ export function useTripCardPhotoComposer({ cards }: Props) {
     }
   };
 
+  const removePhoto = (photo: PhotoDraft) => {
+    if (isUploadingRef.current) return;
+    photosRef.current = removeUploadedPhoto(photosRef.current, photo);
+    setPhotos(photosRef.current);
+    URL.revokeObjectURL(photo.url);
+    setErrorMessage("");
+    setSuccessMessage(`${photo.file.name} 선택을 해제했어요.`);
+  };
+
   return {
     comment,
     errorMessage,
@@ -121,6 +130,7 @@ export function useTripCardPhotoComposer({ cards }: Props) {
     handleSubmit,
     isPending: isUploading || createEntryMutation.isPending,
     photos,
+    removePhoto,
     selectedCard,
     setComment,
     setSelectedCardId,

@@ -33,7 +33,8 @@ export default async function verifyPhotoTarget(page, origin = 'http://127.0.0.1
     await page.getByText('1장의 사진을 여행카드에 추가했어요.', { exact: true }).waitFor()
     check(writes.at(-1) === '/travel-cards/2/entries', 'explicit reselection must choose the right target')
     await page.goto(origin + '/trip-cards/new?cardId=1')
-    await page.getByLabel('여행카드', { exact: true }).selectOption('1')
+    await page.getByRole('heading', { name: '선택한 여행 · 2099.01.01 시작', exact: true }).waitFor()
+    check(await page.getByLabel('여행카드', { exact: true }).inputValue() === '1', 'numeric URL ID must select its card without fallback')
     await page.locator('input[type=file]').setInputFiles(image)
     const writeCount = writes.length
     removed = true
