@@ -4,7 +4,6 @@ import type {
   CreatePlannerRequestDto,
   GeneratePlannerRequestDto,
   JoinPlannerRequestDto,
-  InvitePlannerMembersRequestDto,
   PlannerBlockResponseDto,
   PlannerConfirmResponseDto,
   PlannerCreateResponseDto,
@@ -12,13 +11,10 @@ import type {
   PlannerInvitationResponseDto,
   PlannerJoinResponseDto,
   PlannerFinalResponseDto,
-  PlannerInviteResponseDto,
   PlannerListResponseDto,
   PlannerMemberResponseDto,
   PlannerScheduleResponseDto,
   PlannerScheduleCandidateDto,
-  PlannerTravelPlanResponseDto,
-  SavePlannerTravelPlanRequestDto,
   SavePlannerScheduleRequestDto,
 } from './types'
 
@@ -26,7 +22,6 @@ export type {
   CreatePlannerRequestDto,
   GeneratePlannerRequestDto,
   JoinPlannerRequestDto,
-  InvitePlannerMembersRequestDto,
   PlannerBlockDto,
   PlannerBlockResponseDto,
   PlannerConfirmResponseDto,
@@ -35,7 +30,6 @@ export type {
   PlannerInvitationResponseDto,
   PlannerJoinResponseDto,
   PlannerFinalResponseDto,
-  PlannerInviteResponseDto,
   PlannerListResponseDto,
   PlannerMemberResponseDto,
   PlannerScheduleResponseDto,
@@ -45,8 +39,6 @@ export type {
   PlannerScheduleCandidateDto,
   PlannerCityRequestDto,
   PlannerCityResponseDto,
-  PlannerTravelPlanResponseDto,
-  SavePlannerTravelPlanRequestDto,
   SavePlannerScheduleRequestDto,
 } from './types'
 
@@ -63,7 +55,6 @@ const PLANNER_API_PATHS = {
   confirm: (plannerId: number) => `/planners/${plannerId}/confirm`,
   schedule: (plannerId: number) => `/planners/${plannerId}/schedule`,
   scheduleCandidates: (plannerId: number) => `/planners/${plannerId}/schedule/candidates`,
-  travelPlan: (plannerId: number) => `/planners/${plannerId}/travel-plan`,
   confirmedPlaces: (plannerId: number) => `/planners/${plannerId}/confirmed-places`,
   join: '/planners/join',
 } as const
@@ -85,21 +76,6 @@ export async function getMyPlanners(): Promise<PlannerListResponseDto[]> {
 
 export async function createPlanner(payload: CreatePlannerRequestDto): Promise<PlannerCreateResponseDto> {
   const { data } = await apiClient.post<PlannerCreateResponseDto>(PLANNER_API_PATHS.base, payload)
-  return data
-}
-
-export async function savePlannerTravelPlan(plannerId: number, payload: SavePlannerTravelPlanRequestDto): Promise<PlannerTravelPlanResponseDto> {
-  const { data } = await apiClient.put<PlannerTravelPlanResponseDto>(PLANNER_API_PATHS.travelPlan(plannerId), payload)
-  return data
-}
-
-export async function updatePlanner(plannerId: number, payload: SavePlannerTravelPlanRequestDto): Promise<PlannerTravelPlanResponseDto> {
-  const { data } = await apiClient.patch<PlannerTravelPlanResponseDto>(PLANNER_API_PATHS.detail(plannerId), payload)
-  return data
-}
-
-export async function invitePlannerMembers(plannerId: number, payload: InvitePlannerMembersRequestDto): Promise<PlannerInviteResponseDto> {
-  const { data } = await apiClient.post<PlannerInviteResponseDto>(PLANNER_API_PATHS.members(plannerId), payload)
   return data
 }
 

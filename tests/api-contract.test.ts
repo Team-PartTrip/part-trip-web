@@ -75,7 +75,6 @@ test('최신 명세의 경로·method·request body를 사용한다', () => {
   assert.match(plannerPage, /PlannerAiFlow step="schedule"/)
   assert.match(plannerPage, /PlannerAiFlow step="invite"/)
   assert.doesNotMatch(planner, /\/votes|\/ballot/i)
-  assert.match(planner, /travelPlan: \(plannerId: number\) => `\/planners\/\$\{plannerId\}\/travel-plan`/)
   assert.doesNotMatch(plannerMutations, /Vote|Ballot|Candidate/)
   assert.match(scheduleEditor, /usePlannerScheduleCandidatesQuery/)
   assert.match(scheduleEditor, /useMoreTourPlacesQuery/)

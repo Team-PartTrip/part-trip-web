@@ -118,39 +118,6 @@ export type PlannerConfirmResponseDto = {
   tripCardId?: number
 }
 
-export type SavePlannerTravelPlanRequestDto = {
-  regionCode: string
-  cityName: string
-  startDate: string
-  endDate: string
-  memberCount?: number
-  isSolo?: boolean
-  cities?: PlannerCityRequestDto[]
-}
-
-export type PlannerTravelPlanResponseDto = {
-  plannerId?: number
-  planId?: number
-  title?: string
-  memberCount?: number
-  isSolo?: boolean
-  regionCode?: string
-  regionName?: string
-  cityName?: string
-  startDate?: string
-  endDate?: string
-}
-
-export type InvitePlannerMembersRequestDto = {
-  userIds: string[]
-}
-
-export type PlannerInviteResponseDto = {
-  inviteLink?: string
-  invitedCount?: number
-  invitations?: PlannerInvitationResponseDto[]
-}
-
 export type PlannerFinalResponseDto = {
   plannerId?: number
   title?: string
