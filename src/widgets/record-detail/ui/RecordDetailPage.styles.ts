@@ -192,7 +192,9 @@ export const CommentPhoto = styled.section`
 
 export const CommentForm = styled.form`
   display: flex;
-  width: 42.625rem;
+  width: 100%;
+  max-width: 42.625rem;
+  min-width: 0;
   height: 25rem;
   box-sizing: border-box;
   flex-direction: column;

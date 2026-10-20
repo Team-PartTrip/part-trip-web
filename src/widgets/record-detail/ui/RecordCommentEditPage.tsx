@@ -1,5 +1,5 @@
-import { useEffect, useState, type FormEvent } from 'react'
-import { useNavigate, useParams, useSearch } from '@tanstack/react-router'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useBlocker, useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import { useTravelRecordQuery, useUpdateTravelCardEntryCommentMutation } from '@/entities/trip-card'
 import { paths } from '@/shared/config'
 import { formatDate, getErrorMessage } from '@/shared/utils'
@@ -14,6 +14,7 @@ export function RecordCommentEditPage() {
   const { data: record, isError, isLoading } = useTravelRecordQuery(Number(recordId))
   const [content, setContent] = useState<string>()
   const [message, setMessage] = useState('')
+  const saved = useRef(false)
   const updateMutation = useUpdateTravelCardEntryCommentMutation()
   const editableEntry = search.entryId != null
     ? record?.timeline?.find((item) => String(item.entryId) === search.entryId && item.imageUrl)
@@ -22,8 +23,14 @@ export function RecordCommentEditPage() {
   const placeTitle = record?.places?.[0]?.placeName || record?.title || '여행 기록'
   const photoDate = editableEntry?.takenAt || editableEntry?.date || record?.startDate
   const isSaveDisabled = updateMutation.isPending || editableEntry?.entryId == null
+  const changed = content != null && content !== (editableEntry?.comment ?? '')
+  useBlocker({
+    shouldBlockFn: () => !saved.current && (updateMutation.isPending || (changed && !window.confirm('저장하지 않은 코멘트가 있어요. 이 화면을 나갈까요?'))),
+    enableBeforeUnload: () => !saved.current && (changed || updateMutation.isPending),
+  })
 
   useEffect(() => {
+    saved.current = false
     // The route can change entries without unmounting this editor.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setContent(undefined)
@@ -32,6 +39,7 @@ export function RecordCommentEditPage() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (updateMutation.isPending) return
     if (!record?.tripId || editableEntry?.entryId == null || !contentValue.trim()) {
       setMessage('수정할 사진 코멘트를 확인해주세요.')
       return
@@ -43,7 +51,8 @@ export function RecordCommentEditPage() {
         entryId: editableEntry.entryId,
         payload: { comment: contentValue.trim() },
       })
-      navigate({ params: { recordId: String(record.tripId) }, to: '/record/$recordId' })
+      saved.current = true
+      void navigate({ params: { recordId: String(record.tripId) }, to: '/record/$recordId' })
     } catch (error) {
       setMessage(getErrorMessage(error))
     }
@@ -78,7 +87,7 @@ export function RecordCommentEditPage() {
                 onChange={(event) => setContent(event.target.value)}
                 placeholder="이 사진에 대해 짧게 남겨보세요."
                 maxLength={100}
-                disabled={editableEntry?.entryId == null}
+                disabled={editableEntry?.entryId == null || updateMutation.isPending}
               />
               <p>{contentValue.length} / 100</p>
               <button type="submit" disabled={isSaveDisabled}>
