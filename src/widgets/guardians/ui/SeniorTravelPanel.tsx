@@ -104,7 +104,7 @@ export function SeniorTravelPanel({
   return (
     <S.Card style={{ gridColumn: '1 / -1' }}>
       <h2>{seniorLabel}의 일정과 현재 위치</h2>
-      <p>여행 중에는 앱이 꺼져 있어도 20초쯤마다 위치가 갱신돼요. 위치는 12시간 후 삭제돼요.</p>
+      <p>웹에서는 여행 중 화면을 열어 둔 동안 약 90초마다 위치를 보내요. 다른 탭으로 이동하거나 화면을 닫으면 전송이 멈춰요. 마지막 위치는 새 갱신 없이 12시간이 지나면 삭제돼요.</p>
       <S.GuardianDetails>
         <section>
           <h3>현재 위치</h3>

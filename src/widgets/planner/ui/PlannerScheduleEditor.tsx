@@ -1,5 +1,6 @@
 import { Fragment, useMemo, useState, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useBlocker } from '@tanstack/react-router'
 import {
   type PlannerScheduleSlotDto,
   useSavePlannerScheduleMutation,
@@ -56,6 +57,10 @@ export function PlannerScheduleEditor({
   const days = draft ?? copyScheduleDays(schedule.days)
   const original = useMemo(() => copyScheduleDays(schedule.days), [schedule.days])
   const changed = draft != null && serialized(draft) !== serialized(original)
+  useBlocker({
+    shouldBlockFn: () => saveMutation.isPending || (changed && !window.confirm('저장하지 않은 일정이 있어요. 이 화면을 나갈까요?')),
+    enableBeforeUnload: changed || saveMutation.isPending,
+  })
   const resolveSlotPlace = (slot: PlannerScheduleSlotDto) => {
     const placeId = slot.tourPlaceId ?? slot.place?.tourPlaceId
     const apiPlace = placesQuery.data?.find((item) => item.tourPlaceId === placeId)

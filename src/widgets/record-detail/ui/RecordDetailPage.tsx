@@ -7,6 +7,7 @@ import { shareKakaoCardNews } from '@/shared/libs/kakao-share'
 import { PlaceSearchDialog } from '@/widgets/place-search'
 import type { PlaceSearchResponseDto } from '@/entities/travel'
 import { AppShell } from '@/widgets/app-shell'
+import { isTripEnded, TRIP_ENDED_NOTICE } from '@/widgets/trip-cards/model/photo-composer-state'
 
 import * as S from './RecordDetailPage.styles'
 
@@ -26,6 +27,7 @@ export function RecordDetailPage() {
     isLoading,
   })
   const placeTitle = record?.places?.[0]?.placeName || record?.title || '여행 기록'
+  const tripEnded = isTripEnded(record?.endDate)
   const recordImages = record?.images?.filter((image): image is string => Boolean(image)) ?? []
   const [photoIndex, setPhotoIndex] = useState(0)
   const [shareError, setShareError] = useState('')
@@ -119,10 +121,11 @@ export function RecordDetailPage() {
               <h1>촬영 기록 상세</h1>
               {record && hasRecordPhotos ? <p>사진 {currentPhotoIndex + 1} / {recordImages.length}</p> : null}
             </div>
-            {record?.tripId != null ? <div>{hasRecordPhotos ? <button type="button" onClick={handleKakaoShare}>카카오로 공유</button> : null}<button type="button" onClick={() => navigate({ search: { cardId: String(record.tripId) }, to: paths.recordWrite })}>사진 추가</button></div> : null}
+            {record?.tripId != null ? <div>{hasRecordPhotos ? <button type="button" onClick={handleKakaoShare}>카카오로 공유</button> : null}{!tripEnded ? <button type="button" onClick={() => navigate({ search: { cardId: String(record.tripId) }, to: paths.recordWrite })}>사진 추가</button> : null}</div> : null}
           </S.TopBar>
         ) : null}
         {shareError ? <S.ErrorMessage role="alert">{shareError}</S.ErrorMessage> : null}
+        {recordState === 'ready' && tripEnded ? <p role="status">{TRIP_ENDED_NOTICE}</p> : null}
         {recordState === 'error' ? (
           <S.StateCard role="alert">
             <h1>여행 기록을 불러오지 못했어요.</h1>
@@ -137,8 +140,8 @@ export function RecordDetailPage() {
           </S.LoadingLayout>
         ) : null}
         {recordState === 'ready' && record && !hasRecordPhotos ? <S.StateCard>
-          <h2>아직 남긴 사진이 없어요</h2><p>여행의 순간을 사진으로 남겨보세요.</p>
-          <button type="button" onClick={() => navigate({ to: paths.recordWrite, search: { cardId: String(record.tripId) } })}>사진 추가하기</button>
+          <h2>아직 남긴 사진이 없어요</h2>{!tripEnded ? <><p>여행의 순간을 사진으로 남겨보세요.</p>
+          <button type="button" onClick={() => navigate({ to: paths.recordWrite, search: { cardId: String(record.tripId) } })}>사진 추가하기</button></> : null}
         </S.StateCard> : null}
         {recordState === 'ready' && record && hasRecordPhotos ? (
           <S.DetailBody>

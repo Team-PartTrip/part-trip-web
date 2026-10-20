@@ -43,8 +43,8 @@ function toTravelRecord(card?: TravelCardListItemDto, detail?: TravelCardDetailD
   const destination = card?.cityName || card?.regionName
   const images = timeline.map((item) => item.imageUrl).filter((url): url is string => Boolean(url))
   const coverImage = resolveApiAssetUrl(card?.coverImageUrl) ?? card?.coverImageUrl
-  let recordImages = images
-  if (!recordImages.length) recordImages = coverImage ? [coverImage] : []
+  const hasTimeline = detail?.timeline != null
+  const recordImages = hasTimeline ? images : coverImage ? [coverImage] : []
 
   return {
     cityName: card?.cityName,
@@ -53,7 +53,7 @@ function toTravelRecord(card?: TravelCardListItemDto, detail?: TravelCardDetailD
     regionName: card?.regionName,
     endDate: detail?.endDate ?? card?.endDate,
     images: recordImages,
-    photoCount: card?.photoCount ?? images.length,
+    photoCount: hasTimeline ? images.length : card?.photoCount ?? images.length,
     places: detail ? timeline
       .filter((item) => item.type === 'PLACE')
       .map((item, index) => ({
@@ -91,9 +91,7 @@ export async function getTravelRecord(tripId: number, summary?: TravelRecordDto)
     ? cardsResult.value.find((item) => item.cardId === tripId)
     : undefined)
   const record = toTravelRecord(card, detailResult.value)
-  return summary
-    ? { ...summary, ...record, images: record.timeline?.some((item) => item.imageUrl) ? record.images : summary.images ?? record.images }
-    : record
+  return { ...summary, ...record }
 }
 
 export async function getTravelRecords(): Promise<TravelRecordDto[]> {

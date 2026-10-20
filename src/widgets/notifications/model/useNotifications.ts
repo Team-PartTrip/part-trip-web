@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
 import {
   useMarkAllNotificationsAsReadMutation,
@@ -68,6 +68,12 @@ export function useNotificationDetail(selectedNotification?: NotificationRespons
   const { notifications, notificationsQuery } = useNotificationData()
   const { actionError, markReadMutation, handleMarkRead } = useReadNotification()
   const detail = notifications.find((notification) => String(notification.notificationId) === (selectedNotification ? String(selectedNotification.notificationId) : notificationId)) ?? selectedNotification
+  const { fetchNextPage, hasNextPage, isFetching, isError } = notificationsQuery
+  const needsMorePages = !selectedNotification && Boolean(notificationId) && !detail && Boolean(hasNextPage) && !isError
+  useEffect(() => {
+    if (needsMorePages && !isFetching) void fetchNextPage()
+  }, [needsMorePages, isFetching, fetchNextPage])
+  const isDetailLoading = notificationsQuery.isLoading || needsMorePages
   const handleNotificationAction = async () => {
     if (!detail) return
     await handleMarkRead(detail.notificationId)
@@ -86,5 +92,5 @@ export function useNotificationDetail(selectedNotification?: NotificationRespons
       navigate({ to: '/planner/$plannerId', params: { plannerId: String(linkId) } })
     }
   }
-  return { actionError, detail, notificationsQuery, markReadMutation, handleNotificationAction, navigate }
+  return { actionError, detail, isDetailLoading, notificationsQuery, markReadMutation, handleNotificationAction, navigate }
 }

@@ -8,6 +8,12 @@ export type AuthTokens = {
 
 type TokenStorage = Pick<Storage, 'getItem' | 'removeItem' | 'setItem'>
 
+let sessionVersion = 0
+
+export function getAuthSessionVersion() {
+  return sessionVersion
+}
+
 function getStorage(storage?: TokenStorage) {
   if (storage) return storage
   if (typeof window !== 'undefined') return window.localStorage
@@ -34,6 +40,7 @@ export function getRefreshToken(storage?: TokenStorage) {
 }
 
 export function clearAuthTokens(storage?: TokenStorage) {
+  sessionVersion += 1
   const target = getStorage(storage)
   target.removeItem(ACCESS_TOKEN_KEY)
   target.removeItem(REFRESH_TOKEN_KEY)

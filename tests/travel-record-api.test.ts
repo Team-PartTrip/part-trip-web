@@ -17,6 +17,8 @@ const { getTravelRecord, getTravelRecords } = await jiti.import('./src/entities/
     tripId?: number
     images?: string[]
     places?: unknown[]
+    photoCount?: number
+    cityName?: string
   }>
   getTravelRecords: () => Promise<Array<{ places?: unknown[] }>>
 }
@@ -103,5 +105,26 @@ test('기록 요약 캐시는 상세 조회에 재사용되어 목록 API를 다
     await queryClient.fetchQuery(travelRecordQueryOptions(17))
     assert.deepEqual(requests, ['GET /travel-cards/17'])
     queryClient.clear()
+  })
+})
+
+test('빈 상세 timeline은 삭제 전 요약 캐시의 사진과 개수를 되살리지 않는다', async () => {
+  await withApiAdapter(async (config) => ({
+    config, data: { cardId: 17, timeline: [] }, headers: {}, status: 200, statusText: 'OK',
+  }), async () => {
+    const record = await getTravelRecord(17, { tripId: 17, cityName: '부산', images: ['/deleted.jpg'], photoCount: 1 })
+    assert.deepEqual(record.images, [])
+    assert.equal(record.photoCount, 0)
+    assert.equal(record.cityName, '부산')
+  })
+})
+
+test('상세 사진 목록이 있으면 요약 캐시 개수 대신 실제 사진 수를 사용한다', async () => {
+  await withApiAdapter(async (config) => ({
+    config, data: { cardId: 17, timeline: [{ entryId: 8, imageUrl: '/kept.jpg', type: 'PHOTO' }] }, headers: {}, status: 200, statusText: 'OK',
+  }), async () => {
+    const record = await getTravelRecord(17, { tripId: 17, images: ['/old.jpg'], photoCount: 4 })
+    assert.deepEqual(record.images, ['/kept.jpg'])
+    assert.equal(record.photoCount, 1)
   })
 })

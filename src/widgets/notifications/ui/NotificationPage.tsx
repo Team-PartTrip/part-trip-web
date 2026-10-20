@@ -24,14 +24,14 @@ export function NotificationPage() {
 }
 
 export function NotificationDetailPage() {
-  const { actionError, detail, handleNotificationAction, markReadMutation, navigate, notificationsQuery } = useNotificationDetail()
+  const { actionError, detail, isDetailLoading, handleNotificationAction, markReadMutation, navigate, notificationsQuery } = useNotificationDetail()
   const actionLabel = detail ? detailActionLabel(detail) : undefined
   const content = detail ? detailCopy(detail) : undefined
   return <AppShell>
     <S.Page>
       <S.Header><div><S.Title>알림 상세</S.Title></div></S.Header>
       {actionError ? <S.ErrorMessage role="alert">{actionError}</S.ErrorMessage> : null}
-      <NotificationDetailView actionLabel={actionLabel} content={content} detail={detail} isError={notificationsQuery.isError} isLoading={notificationsQuery.isLoading} isMarkReadPending={markReadMutation.isPending} onAction={() => void handleNotificationAction()} onBack={() => navigate({ to: paths.notifications })} />
+      <NotificationDetailView actionLabel={actionLabel} content={content} detail={detail} isError={notificationsQuery.isError} isLoading={isDetailLoading} isMarkReadPending={markReadMutation.isPending} onAction={() => void handleNotificationAction()} onBack={() => navigate({ to: paths.notifications })} />
     </S.Page>
   </AppShell>
 }
