@@ -91,3 +91,22 @@ test('토큰 갱신은 세션을 유지하고 로그인과 로그아웃은 세�
     else Reflect.deleteProperty(globalThis, 'localStorage')
   }
 })
+
+test('세션 키가 없는 기존 로그인도 첫 토큰 갱신 중에는 같은 세션을 유지한다', async () => {
+  const { AUTH_SESSION_KEY, getAuthSessionVersion } = await import('../src/shared/libs/token-storage.ts')
+  const previousStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
+  const storage = createStorage()
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: storage })
+  storage.setItem(ACCESS_TOKEN_KEY, 'legacy-access')
+  storage.setItem(REFRESH_TOKEN_KEY, 'legacy-refresh')
+  try {
+    const initial = getAuthSessionVersion()
+    assert.ok(storage.getItem(AUTH_SESSION_KEY))
+    saveAuthTokens({ accessToken: 'refreshed', refreshToken: 'rotated-refresh' })
+    assert.equal(getAuthSessionVersion(), initial)
+  } finally {
+    clearAuthTokens()
+    if (previousStorage) Object.defineProperty(globalThis, 'localStorage', previousStorage)
+    else Reflect.deleteProperty(globalThis, 'localStorage')
+  }
+})

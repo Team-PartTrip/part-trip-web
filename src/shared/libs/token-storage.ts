@@ -12,7 +12,13 @@ type TokenStorage = Pick<Storage, 'getItem' | 'removeItem' | 'setItem'>
 let sessionVersion = 0
 
 export function getAuthSessionVersion() {
-  return `${sessionVersion}:${getStorage().getItem(AUTH_SESSION_KEY) ?? ''}`
+  const storage = getStorage()
+  let sharedVersion = storage.getItem(AUTH_SESSION_KEY)
+  if (!sharedVersion && storage.getItem(ACCESS_TOKEN_KEY)) {
+    sharedVersion = crypto.randomUUID()
+    storage.setItem(AUTH_SESSION_KEY, sharedVersion)
+  }
+  return `${sessionVersion}:${sharedVersion ?? ''}`
 }
 
 function getStorage(storage?: TokenStorage) {
