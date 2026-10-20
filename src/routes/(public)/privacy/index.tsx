@@ -243,7 +243,7 @@ function PrivacyPage() {
               </tbody>
             </table>
           </div>
-          <p>실시간 위치와 사진 촬영 위치는 아래 “3. 위치정보”에서 따로 설명합니다.</p>
+          <p>실시간 위치와 사진 촬영 위치는 아래 <a href="#location">③ 위치정보</a>에서 따로 설명합니다.</p>
         </section>
 
         <section className="section" aria-labelledby="purpose">
@@ -322,7 +322,7 @@ function PrivacyPage() {
               </tbody>
             </table>
           </div>
-          <p>국외로 보내는 정보는 서비스를 쓰는 동안 암호화된 통신(HTTPS)으로 전달되고, 각 업체의 보관 기간은 위 4번과 같습니다. 국외 이전을 원하지 않으면 가입하지 않거나 탈퇴할 수 있지만, 이 경우 서비스를 쓸 수 없습니다.</p>
+          <p>국외로 보내는 정보는 서비스를 쓰는 동안 암호화된 통신(HTTPS)으로 전달되고, 각 업체의 보관 기간은 위 <a href="#retention">④ 보유 기간과 파기</a>와 같습니다. 국외 이전을 원하지 않으면 가입하지 않거나 탈퇴할 수 있지만, 이 경우 서비스를 쓸 수 없습니다.</p>
         </section>
 
         <section className="section" aria-labelledby="rights">
