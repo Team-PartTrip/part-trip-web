@@ -35,6 +35,7 @@ export type MoreTourPlacesResponseDto = {
 }
 
 export type AccessibilityResponseDto = {
+  status?: 'FOUND' | 'NOT_FOUND' | 'UNAVAILABLE'
   matched?: boolean
   items?: Array<{ key?: string; label?: string; text?: string }>
 }

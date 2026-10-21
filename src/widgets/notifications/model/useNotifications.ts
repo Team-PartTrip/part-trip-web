@@ -79,6 +79,10 @@ export function useNotificationDetail(selectedNotification?: NotificationRespons
     await handleMarkRead(detail.notificationId)
     const linkType = normalizeNotificationLinkType(detail.linkType)
     const linkId = detail.linkId
+    if (linkType === 'GUARDIAN_LINK') {
+      navigate({ to: paths.profileGuardians })
+      return
+    }
     if (linkType === 'TRIP_CARD' && linkId != null) {
       navigate({ params: { tripId: String(linkId) }, to: '/trip-cards/$tripId' })
       return

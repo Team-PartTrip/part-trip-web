@@ -25,6 +25,7 @@ import {
 import { PlannerPlacePicker, type Position } from './PlannerPlacePicker'
 import { PlannerScheduleAttribution, PlannerScheduleDepartureIcon, PlannerScheduleRouteFallback, PlannerScheduleRouteLine } from './PlannerScheduleRoute'
 import { PlannerSchedulePlaceCard } from './PlannerSchedulePlaceCard'
+import { PlannerPlaceAccessibility } from './PlannerPlaceAccessibility'
 import * as S from './PlannerAiFlow.styles'
 
 function serialized(days: EditableScheduleDay[]) {
@@ -207,7 +208,7 @@ export function PlannerScheduleEditor({
             /> : null}
             {!draft ? <PlannerSchedulePlaceCard index={slotIndex} confirmed={isConfirmed} place={{ ...apiPlace, ...place, name: placeName, tourPlaceId: placeId, description: place?.description ?? apiPlace?.description, address: place?.address ?? apiPlace?.address }} /> : <S.SchedulePlace>
               <b aria-hidden="true">{slotIndex + 1}</b>
-              <div style={{ minWidth: 0 }}><strong>{placeName}</strong><small>{place?.typeLabel ?? place?.categoryLabel ?? place?.category ?? apiPlace?.category}</small><small>{place?.description || place?.address || apiPlace?.description || apiPlace?.address}</small></div>
+              <div style={{ minWidth: 0 }}><strong>{placeName}</strong><small>{place?.typeLabel ?? place?.categoryLabel ?? place?.category ?? apiPlace?.category}</small><small>{place?.description || place?.address || apiPlace?.description || apiPlace?.address}</small>{placeId ? <PlannerPlaceAccessibility key={placeId} tourPlaceId={placeId} collapsible /> : null}</div>
               {draft ? <S.SlotTools>
                 <Button type="button" $variant="secondary" aria-label={`${placeName} 위로 이동`} disabled={slotIndex === 0 || saveMutation.isPending}
                   onClick={() => moveSlot(dayIndex, slotIndex, -1)}>위로</Button>

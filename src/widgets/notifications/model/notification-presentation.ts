@@ -13,6 +13,7 @@ export function matchesNotificationFilter(notification: { type?: string; categor
 }
 
 export function settingCopy(type?: NotificationType, category?: string) {
+  if (type === 'GUARDIAN_LINKED') return ['보호자', '보호자 연결 알림']
   if (category === 'SCHEDULE') return ['일정', '여행 시작과 오늘 일정 알림']
   if (category === 'PHOTO') return ['사진', '여행 사진 관련 알림']
   if (category === 'GROUP') return ['플래너', '여행 그룹 초대와 연결 알림']
@@ -25,7 +26,7 @@ export function settingCopy(type?: NotificationType, category?: string) {
 
 export function categoryTone(type?: NotificationType) {
   if (type === 'PHOTO_ORGANIZED') return 'accent' as const
-  if (type === 'GROUP_INVITED' || type === 'GROUP_INVITE_ACCEPTED') return 'success' as const
+  if (type === 'GROUP_INVITED' || type === 'GROUP_INVITE_ACCEPTED' || type === 'GUARDIAN_LINKED') return 'success' as const
   return 'primary' as const
 }
 
@@ -59,7 +60,9 @@ export function normalizeNotificationLinkType(linkType?: string) {
 export function detailCopy(notification: { linkType?: string; title?: string; body?: string }) {
   const linkType = normalizeNotificationLinkType(notification.linkType)
   let fallback: [string, string]
-  if (linkType === 'TRIP_CARD') {
+  if (linkType === 'GUARDIAN_LINK') {
+    fallback = ['보호자가 연결됐어요', '가족 연결 화면에서 연결된 보호자를 확인하세요.']
+  } else if (linkType === 'TRIP_CARD') {
     fallback = ['여행카드가 만들어졌어요', '여행의 기록을 카드로 확인해보세요.']
   } else if (linkType === 'GROUP' || linkType === 'GROUP_INVITATION') {
     fallback = ['여행 그룹 소식이 있어요', '여행 그룹의 새로운 소식을 확인하세요.']
@@ -71,6 +74,7 @@ export function detailCopy(notification: { linkType?: string; title?: string; bo
 
 export function detailActionLabel(notification: { linkType?: string; linkId?: number }) {
   const linkType = normalizeNotificationLinkType(notification.linkType)
+  if (linkType === 'GUARDIAN_LINK') return '보호자 연결 보러가기'
   if (linkType === 'PLANNER' && notification.linkId != null) return '일정 보러가기'
   if (linkType === 'REGION_MAP') return '지도 보러가기'
   if (linkType === 'TRIP_CARD' && notification.linkId != null) return '여행카드 보러가기'

@@ -6,7 +6,9 @@ const jiti = createTestJiti()
 const { getDetailState } = await jiti.import('./src/shared/utils/status.ts') as {
   getDetailState: (input: { hasData: boolean; isError: boolean; isLoading: boolean }) => string
 }
-const { detailActionLabel, detailCopy, sectionLabel, matchesNotificationFilter } = await jiti.import('./src/widgets/notifications/model/notification-presentation.ts') as {
+const { detailActionLabel, detailCopy, sectionLabel, matchesNotificationFilter, settingCopy, categoryTone } = await jiti.import('./src/widgets/notifications/model/notification-presentation.ts') as {
+  settingCopy: (type?: string, category?: string) => string[]
+  categoryTone: (type?: string) => string
   matchesNotificationFilter: (notification: { type?: string; category?: string; linkType?: string }, filter: string) => boolean
   detailActionLabel: (notification: { linkType?: string; linkId?: number }) => string | undefined
   detailCopy: (notification: { linkType?: string; title?: string; body?: string }) => { body: string; title: string }
@@ -17,6 +19,19 @@ const { detailActionLabel, detailCopy, sectionLabel, matchesNotificationFilter }
     firstUnreadTodayIndex: number,
   ) => string | undefined
 }
+
+test('보호자 연결 알림은 서버 문구를 유지하고 보호자 이름과 이동 동작을 제공한다', () => {
+  assert.deepEqual(settingCopy('GUARDIAN_LINKED', 'GROUP'), ['보호자', '보호자 연결 알림'])
+  assert.equal(categoryTone('GUARDIAN_LINKED'), 'success')
+  assert.equal(detailActionLabel({ linkType: ' guardian_link ', linkId: 11 }), '보호자 연결 보러가기')
+  assert.equal(detailActionLabel({ linkType: 'GUARDIAN_LINK' }), '보호자 연결 보러가기')
+  assert.deepEqual(detailCopy({ linkType: 'GUARDIAN_LINK', title: '가족 연결', body: '홍길동님이 보호자로 연결됐어요.' }), {
+    title: '가족 연결', body: '홍길동님이 보호자로 연결됐어요.',
+  })
+  assert.deepEqual(detailCopy({ linkType: 'GUARDIAN_LINK' }), {
+    title: '보호자가 연결됐어요', body: '가족 연결 화면에서 연결된 보호자를 확인하세요.',
+  })
+})
 
 test('알림 목록은 미리 계산한 첫 미확인 위치에만 오늘 구분을 표시한다', () => {
   const now = new Date()

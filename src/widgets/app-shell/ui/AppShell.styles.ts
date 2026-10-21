@@ -27,6 +27,7 @@ export const SkipLink = styled.a`
 `
 
 export const Content = styled.div`
+  margin-left: 14.5rem;
   display: flex;
   align-self: flex-start;
   min-width: 0;
@@ -34,6 +35,7 @@ export const Content = styled.div`
   flex-direction: column;
 
   @media (max-width: 47.9375rem) {
+    margin-left: 0;
     padding-bottom: 4rem;
   }
 `

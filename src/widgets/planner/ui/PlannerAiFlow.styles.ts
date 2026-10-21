@@ -277,6 +277,7 @@ export const SchedulePlace = styled.div`
   column-gap: 0.875rem;
   border-top: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
   padding: 0.875rem 0;
+  details > summary { min-height: 2.75rem; padding-block: 0.75rem; color: ${({ theme }) => theme.colors.brand.primary}; cursor: pointer; }
 
   > b {
     display: grid;
@@ -458,20 +459,6 @@ export const LinkBox = styled.div`
   @media (max-width: 35rem) { grid-template-columns: 1fr; }
 `
 
-export const AccessibilityLink = styled.button`
-  display: inline-flex;
-  min-height: 2.75rem;
-  align-items: center;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: ${({ theme }) => theme.colors.brand.primary};
-  cursor: pointer;
-  font-size: 0.875rem;
-  text-decoration: underline;
-  text-underline-offset: 0.1875rem;
-`;
-
 export const FlowLayout = styled.div`
   display: flex;
   flex-direction: column;
@@ -568,9 +555,9 @@ export const PlaceDetails = styled.details`
     strong { color: #173650; }
     small { color: #546e7a; }
     .place-preview { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-    > span::after { content: '장소 정보 보기'; color: #1565c0; font-size: 0.875rem; }
+    > span::after { content: '장소·편의 시설 정보 보기'; color: #1565c0; font-size: 0.875rem; }
   }
-  &[open] summary > span::after { content: '장소 정보 접기'; }
+  &[open] summary > span::after { content: '장소·편의 시설 정보 접기'; }
   .place-details-body {
     display: grid; gap: 0.75rem; min-width: 0; padding: 0 0 1rem 3.125rem;
     overflow-wrap: anywhere;

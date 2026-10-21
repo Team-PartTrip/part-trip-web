@@ -1,11 +1,13 @@
 import styled from 'styled-components'
 
 export const SidebarWrapper = styled.aside`
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
   z-index: 10;
   width: 14.5rem;
   height: 100dvh;
+  overflow-y: auto;
   flex: 0 0 14.5rem;
   border-right: 0.0625rem solid ${({ theme }) => theme.colors.border.soft};
   background: ${({ theme }) => theme.colors.background.default};
