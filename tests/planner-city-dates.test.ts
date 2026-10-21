@@ -22,3 +22,17 @@ test('planner date range blocks overlapping active trips but permits adjacent an
   assert.equal(overlapsExistingTrip([trip], '2026-10-04', '2026-10-05'), false)
   assert.equal(overlapsExistingTrip([{ ...trip, status: 'ENDED' }], '2026-10-02', '2026-10-02'), false)
 })
+
+
+test('calendar blocks every occupied day including trip boundaries and ranges crossing a trip', () => {
+  const trips = [{ startDate: '2026-10-24', endDate: '2026-10-26', status: 'CONFIRMED' }]
+  for (const date of ['2026-10-24', '2026-10-25', '2026-10-26']) {
+    assert.equal(overlapsExistingTrip(trips, date, date), true)
+  }
+  for (const date of ['2026-10-23', '2026-10-27']) {
+    assert.equal(overlapsExistingTrip(trips, date, date), false)
+  }
+  assert.equal(overlapsExistingTrip(trips, '2026-10-23', '2026-10-27'), true)
+  assert.equal(overlapsExistingTrip(trips, '2026-10-27', '2026-10-28'), false)
+  assert.equal(overlapsExistingTrip([{ ...trips[0], status: 'COMPLETED' }], '2026-10-24', '2026-10-26'), false)
+})

@@ -8,6 +8,7 @@ type DatePickerProps = {
   value: string
   min?: string
   max?: string
+  isDateDisabled?: (date: string) => boolean
   onChange: (value: string) => void
 }
 
@@ -15,7 +16,7 @@ function CalendarIcon() {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3" /><path d="M7 3v4M17 3v4M3 11h18M8 15h2M14 15h2" /></svg>
 }
 
-export function DatePicker({ id, label, value, min, max, onChange }: DatePickerProps) {
+export function DatePicker({ id, label, value, min, max, isDateDisabled, onChange }: DatePickerProps) {
   const panelId = useId()
   const headingId = useId()
   const trigger = useRef<HTMLButtonElement>(null)
@@ -24,7 +25,7 @@ export function DatePicker({ id, label, value, min, max, onChange }: DatePickerP
   const [month, setMonth] = useState(() => new Date())
   const now = new Date()
   const today = formatCalendarDate(now.getFullYear(), now.getMonth(), now.getDate())
-  const allowed = (date: string) => (!min || date >= min) && (!max || date <= max)
+  const allowed = (date: string) => (!min || date >= min) && (!max || date <= max) && !isDateDisabled?.(date)
   const days = getMonthCalendarDays(month.getFullYear(), month.getMonth())
   const dateFor = (day: number) => formatCalendarDate(month.getFullYear(), month.getMonth(), day)
   const firstAvailable = days.find((day) => day && allowed(dateFor(day)))
@@ -62,6 +63,7 @@ export function DatePicker({ id, label, value, min, max, onChange }: DatePickerP
   }
 
   const select = (date: string) => {
+    if (date && !allowed(date)) return
     onChange(date)
     close()
   }
@@ -81,7 +83,14 @@ export function DatePicker({ id, label, value, min, max, onChange }: DatePickerP
     let nextDate = formatCalendarDate(next.getFullYear(), next.getMonth(), next.getDate())
     if (min && nextDate < min) nextDate = min
     if (max && nextDate > max) nextDate = max
+    const direction = nextDate < date ? -1 : 1
     const target = new Date(`${nextDate}T12:00:00`)
+    const targetMonth = target.getMonth()
+    while (!allowed(nextDate)) {
+      target.setDate(target.getDate() + direction)
+      if (target.getMonth() !== targetMonth) return
+      nextDate = formatCalendarDate(target.getFullYear(), target.getMonth(), target.getDate())
+    }
     setMonth(new Date(target.getFullYear(), target.getMonth(), 1))
     requestAnimationFrame(() => panel.current?.querySelector<HTMLButtonElement>(`[data-date="${nextDate}"]`)?.focus())
   }

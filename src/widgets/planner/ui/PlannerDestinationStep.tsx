@@ -42,10 +42,13 @@ export function PlannerDestinationStep({ initialDraft }: { initialDraft?: Planne
     ? overlapsExistingTrip(plannersQuery.data, startDate, endDate)
     : false
 
+  const isTripDateDisabled = (date: string, rangeStart = date) =>
+    plannersQuery.isPending || plannersQuery.isError || overlapsExistingTrip(plannersQuery.data ?? [], rangeStart, date)
+
   const handleStartDateChange = (nextStartDate: string) => {
     setStartDate(nextStartDate)
     const lastAllowedDate = maxEndDateFor(nextStartDate)
-    if (endDate && (endDate < nextStartDate || (lastAllowedDate && endDate > lastAllowedDate))) setEndDate('')
+    if (endDate && (endDate < nextStartDate || (lastAllowedDate && endDate > lastAllowedDate) || isTripDateDisabled(endDate, nextStartDate || endDate))) setEndDate('')
   }
 
   const goToCriteria = (event: FormEvent<HTMLFormElement>) => {
@@ -97,8 +100,8 @@ export function PlannerDestinationStep({ initialDraft }: { initialDraft?: Planne
             <span>여행 기간</span>
             <p role="status">{startDate && !endDate ? '돌아오는 날을 눌러주세요. 당일치기면 같은 날을 한 번 더 눌러요.' : '가는 날과 돌아오는 날을 차례로 눌러주세요. 당일치기는 같은 날을 두 번 눌러요.'}</p>
             <S.DateGrid>
-              <div><label htmlFor="planner-start-date">출발일</label><DatePicker id="planner-start-date" label="출발일" min={today} value={startDate} onChange={handleStartDateChange} /></div>
-              <div><label htmlFor="planner-end-date">도착일</label><DatePicker id="planner-end-date" label="도착일" min={startDate && startDate > today ? startDate : today} max={maxEndDate} value={endDate} onChange={setEndDate} /></div>
+              <div><label htmlFor="planner-start-date">출발일</label><DatePicker id="planner-start-date" label="출발일" min={today} isDateDisabled={isTripDateDisabled} value={startDate} onChange={handleStartDateChange} /></div>
+              <div><label htmlFor="planner-end-date">도착일</label><DatePicker id="planner-end-date" label="도착일" min={startDate && startDate > today ? startDate : today} max={maxEndDate} isDateDisabled={(date) => isTripDateDisabled(date, startDate || date)} value={endDate} onChange={setEndDate} /></div>
             </S.DateGrid>
             <small>이미 다른 여행이 있는 날짜는 선택할 수 없어요. 날짜는 필수예요.</small>
           </S.Field>
