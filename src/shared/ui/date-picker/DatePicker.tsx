@@ -85,11 +85,10 @@ export function DatePicker({ id, label, value, min, max, isDateDisabled, onChang
     if (max && nextDate > max) nextDate = max
     const direction = nextDate < date ? -1 : 1
     const target = new Date(`${nextDate}T12:00:00`)
-    const targetMonth = target.getMonth()
     while (!allowed(nextDate)) {
       target.setDate(target.getDate() + direction)
-      if (target.getMonth() !== targetMonth) return
       nextDate = formatCalendarDate(target.getFullYear(), target.getMonth(), target.getDate())
+      if ((min && nextDate < min) || (max && nextDate > max)) return
     }
     setMonth(new Date(target.getFullYear(), target.getMonth(), 1))
     requestAnimationFrame(() => panel.current?.querySelector<HTMLButtonElement>(`[data-date="${nextDate}"]`)?.focus())
