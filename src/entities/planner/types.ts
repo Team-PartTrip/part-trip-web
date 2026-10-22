@@ -188,6 +188,7 @@ export type PlannerScheduleDayDto = {
 }
 
 export type PlannerScheduleResponseDto = {
+  warnings?: Array<{ tourPlaceId: number; message: string }>
   plannerId?: number
   title?: string
   cityName?: string
@@ -219,6 +220,14 @@ export type PlannerBlockResponseDto = {
 export type PlannerBlockDto = {
   type: string
   value: string
+  placeName?: string | null
+  latitude?: number | null
+  longitude?: number | null
+}
+
+export type PlannerSurveyResponseDto = {
+  plannerId: number
+  blocks: PlannerBlockDto[]
 }
 
 export type GeneratePlannerRequestDto = {

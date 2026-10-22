@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { tripBlockOptions, tripBlocks } from '../src/widgets/planner/model/trip-blocks.ts'
+import { supportedPlannerBlocks, tripBlockOptions, tripBlocks } from '../src/widgets/planner/model/trip-blocks.ts'
 
 const draft = { cityName: '경주', regionName: '경북', regionCode: '47', startDate: '2099-01-01', endDate: '2099-01-02' }
 const companion = { type: 'COMPANION', options: ['혼자', '친구', '가족'] }
@@ -19,8 +19,37 @@ test('당일치기는 숙박 없음으로 고정하고 숙박 여행은 숙박 �
   assert.deepEqual(tripBlocks([{ type: 'LODGING_TYPE', value: '호텔' }], day, null), [{ type: 'LODGING_TYPE', value: '숙박 없음' }])
   assert.deepEqual(tripBlocks([{ type: 'LODGING_TYPE', value: '숙박 없음' }], draft, null), [])
 })
-test('걷기 부담은 이동 편의 답만 따르고 미응답이면 기존 WALKING도 제거', () => {
-  assert.deepEqual(tripBlocks([{ type: 'WALKING', value: '많이 걷기' }], draft, null), [])
-  for (const mobility of [[], ['STAIRS']] as const) assert.equal(tripBlocks([], draft, [...mobility]).at(-1)?.value, '조금 걷기')
-  for (const mobility of [['WHEELCHAIR'], ['WALKING'], ['STAIRS', 'WALKING']] as const) assert.equal(tripBlocks([], draft, [...mobility]).at(-1)?.value, '걷기 최소화')
+test('분 단위 걷기 선택을 유지하고 휠체어나 계단 답변으로 걷기 시간을 덮어쓰지 않는다', () => {
+  const walking = [{ type: 'WALKING', value: '10분 이내' }]
+  assert.deepEqual(tripBlocks(walking, draft, ['WALKING']), walking)
+  for (const mobility of [[], ['STAIRS'], ['WHEELCHAIR']] as const) assert.deepEqual(tripBlocks([], draft, [...mobility]), [])
+  assert.deepEqual(tripBlocks([], draft, ['WALKING']), [{ type: 'WALKING', value: '30분 이내' }])
+})
+
+test('서버에서 없어진 기준과 잘못된 선택값을 제외하고 단일·복수 선택을 검증한다', () => {
+  const definitions = [
+    { type: 'WALKING', multiple: false, options: ['10분 이내', '30분 이내', '1시간 이상'] },
+    { type: 'TRAVEL_TYPE', multiple: true, options: ['미식', '휴양'] },
+    { type: 'MUST_INCLUDE', multiple: true },
+    { type: 'DAILY_DENSITY', options: ['직접 지정'] },
+  ]
+  assert.deepEqual(supportedPlannerBlocks([
+    { type: 'BUDGET', value: '저렴하게' },
+    { type: 'WALKING', value: '많이 걷기' },
+    { type: 'WALKING', value: ' 10분 이내 ' },
+    { type: 'WALKING', value: '30분 이내' },
+    { type: 'TRAVEL_TYPE', value: '미식' },
+    { type: 'TRAVEL_TYPE', value: '미식' },
+    { type: 'TRAVEL_TYPE', value: '휴양' },
+    { type: 'MUST_INCLUDE', value: ' 불국사 ' },
+    { type: 'MUST_INCLUDE', value: ' ' },
+    { type: 'DAILY_DENSITY', value: '하루 3곳' },
+  ], definitions), [
+    { type: 'WALKING', value: '10분 이내' },
+    { type: 'TRAVEL_TYPE', value: '미식' },
+    { type: 'TRAVEL_TYPE', value: '휴양' },
+    { type: 'MUST_INCLUDE', value: '불국사' },
+    { type: 'DAILY_DENSITY', value: '하루 3곳' },
+  ])
+  assert.deepEqual(supportedPlannerBlocks([{ type: 'WALKING', value: '10분 이내' }], []), [])
 })

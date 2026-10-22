@@ -23,8 +23,8 @@ export type TravelCardTimelineItemDto = {
   placeName?: string
   rating?: number
   takenAt?: string
-  locationSource?: 'EXIF' | 'MANUAL' | null
-  takenAtSource?: 'EXIF' | 'MANUAL' | null
+  locationSource?: 'EXIF' | 'CAMERA' | 'MANUAL' | null
+  takenAtSource?: 'EXIF' | 'CAMERA' | 'MANUAL' | null
   type?: 'PLACE' | 'PHOTO' | 'NO_INFO_PHOTO'
 }
 
@@ -47,8 +47,8 @@ export type TravelCardEntryResponseDto = {
   latitude?: number
   longitude?: number
   placeName?: string
-  locationSource?: 'EXIF' | 'MANUAL' | null
-  takenAtSource?: 'EXIF' | 'MANUAL' | null
+  locationSource?: 'EXIF' | 'CAMERA' | 'MANUAL' | null
+  takenAtSource?: 'EXIF' | 'CAMERA' | 'MANUAL' | null
 }
 
 export type TravelCardEntryCommentRequestDto = {
@@ -56,6 +56,7 @@ export type TravelCardEntryCommentRequestDto = {
 }
 
 export type TravelCardEntryMetadataRequestDto = {
+  fromCamera?: boolean
   latitude?: number
   longitude?: number
   placeName?: string

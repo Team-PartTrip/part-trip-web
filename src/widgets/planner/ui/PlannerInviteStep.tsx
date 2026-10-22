@@ -8,7 +8,8 @@ import { formatDateRange, normalizeStatus } from "@/shared/utils";
 import { clearPlannerCreationDraft, type PlannerCreationDraft } from "../model/planner-creation";
 import * as S from "./PlannerAiFlow.styles";
 
-import { usePlannerLiveMembers, isPlannerFinished } from '../model/usePlannerLiveMembers';
+import { usePlannerLiveMembers } from '../model/usePlannerLiveMembers';
+import { plannerMatchesTab } from '../model/status';
 import { canManagePlanner } from '../model/planner-role';
 import { PlannerMemberManagement } from './PlannerMemberManagement';
 
@@ -21,7 +22,7 @@ export function PlannerInviteStep({
   const plannerId = readSessionId(ACTIVE_PLANNER_ID_KEY);
   const detailQuery = usePlannerDetailQuery(plannerId);
   const membersQuery = usePlannerLiveMembers(plannerId, detailQuery.data);
-  const canInvite = canManagePlanner(detailQuery.data?.role) && !isPlannerFinished(detailQuery.data?.status);
+  const canInvite = canManagePlanner(detailQuery.data?.role) && plannerMatchesTab(detailQuery.data?.status, detailQuery.data?.startDate, detailQuery.data?.endDate, 'planned');
   const [inviteFeedback, setInviteFeedback] = useState("");
   const isConfirmed =
     ["CONFIRMED", "TRAVELING", "COMPLETED"].includes(
@@ -51,6 +52,7 @@ export function PlannerInviteStep({
           링크를 카카오톡이나 문자로 보내 가족을 초대할 수 있어요. 혼자 여행이면
           초대를 건너뛰어도 됩니다.
         </p>
+        <p>초대 링크로는 여행 시작 전날까지만 참여할 수 있어요.</p>
         {!canInvite ? <p>현재는 초대 링크를 사용할 수 없어요.</p> : detailQuery.isLoading ? (
           <p role="status">초대 링크를 불러오는 중이에요.</p>
         ) : (

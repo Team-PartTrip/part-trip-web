@@ -14,11 +14,15 @@ import {
   rejectPlannerInvitation,
   removePlannerMember,
   savePlannerSchedule,
+  regeneratePlanner,
   type CreatePlannerRequestDto,
   type GeneratePlannerRequestDto,
   type JoinPlannerRequestDto,
   type SavePlannerScheduleRequestDto,
 } from './api'
+import type { PlannerScheduleResponseDto } from './types'
+import { tripCardQueryKeys } from '../trip-card/query-keys'
+import { travelQueryKeys } from '../travel/query-keys'
 import { plannerQueryKeys } from './query-keys'
 
 type QueryKey = readonly unknown[]
@@ -42,15 +46,32 @@ export function useCreatePlannerMutation() {
 }
 
 export function useGeneratePlannerMutation() {
-  return usePlannerMutation((payload: GeneratePlannerRequestDto) => generatePlanner(payload), (schedule) => [
-    plannerQueryKeys.list(),
-    ...(schedule.plannerId ? [plannerQueryKeys.detail(schedule.plannerId), plannerQueryKeys.schedule(schedule.plannerId)] : []),
-  ])
+  return useGeneratedScheduleMutation((payload: GeneratePlannerRequestDto) => generatePlanner(payload))
+}
+
+function useGeneratedScheduleMutation<T>(mutationFn: MutationFunction<PlannerScheduleResponseDto, T>) {
+  const client = useQueryClient()
+  return useMutation({ mutationFn, onSuccess: async schedule => {
+    if (schedule.plannerId) {
+      await client.cancelQueries({ queryKey: plannerQueryKeys.schedule(schedule.plannerId) })
+      client.setQueryData(plannerQueryKeys.schedule(schedule.plannerId), schedule)
+      // GET schedule returns an empty warnings list; keep generation warnings through route polling.
+      client.setQueryData(plannerQueryKeys.warnings(schedule.plannerId), schedule.warnings ?? [])
+      await client.invalidateQueries({ queryKey: plannerQueryKeys.detail(schedule.plannerId) })
+    }
+    await client.invalidateQueries({ queryKey: plannerQueryKeys.list() })
+  } })
+}
+
+export function useRegeneratePlannerMutation() {
+  return useGeneratedScheduleMutation((plannerId: number) => regeneratePlanner(plannerId))
 }
 
 export function useJoinPlannerMutation() {
   return usePlannerMutation((payload: JoinPlannerRequestDto) => joinPlanner(payload), (planner) => [
     plannerQueryKeys.list(),
+    tripCardQueryKeys.all,
+    travelQueryKeys.dday(),
     ...(planner.plannerId ? [plannerQueryKeys.detail(planner.plannerId), plannerQueryKeys.members(planner.plannerId)] : []),
   ])
 }
@@ -58,14 +79,20 @@ export function useJoinPlannerMutation() {
 export function useConfirmPlannerMutation() {
   return usePlannerMutation((plannerId: number) => confirmPlanner(plannerId), (_result, plannerId) => [
     plannerQueryKeys.list(),
+    tripCardQueryKeys.all,
+    travelQueryKeys.dday(),
     plannerQueryKeys.detail(plannerId),
     plannerQueryKeys.schedule(plannerId),
   ])
 }
 
 export function useSavePlannerScheduleMutation() {
+  const client = useQueryClient()
   return usePlannerMutation(({ plannerId, payload }: { plannerId: number; payload: SavePlannerScheduleRequestDto }) =>
-    savePlannerSchedule(plannerId, payload),
+    savePlannerSchedule(plannerId, payload).then(schedule => {
+      client.setQueryData(plannerQueryKeys.warnings(plannerId), [])
+      return schedule
+    }),
   (_schedule, { plannerId }) => [plannerQueryKeys.schedule(plannerId)],
   )
 }
@@ -73,6 +100,8 @@ export function useSavePlannerScheduleMutation() {
 export function useAcceptPlannerInvitationMutation() {
   return usePlannerMutation((invitationId: number) => acceptPlannerInvitation(invitationId), (invitation) => [
     plannerQueryKeys.invitations(),
+    tripCardQueryKeys.all,
+    travelQueryKeys.dday(),
     plannerQueryKeys.list(),
     ...(invitation.plannerId ? [plannerQueryKeys.detail(invitation.plannerId), plannerQueryKeys.members(invitation.plannerId)] : []),
   ])
@@ -105,6 +134,8 @@ export function useRemovePlannerMemberMutation() {
       removePlannerMember(plannerId, memberUserId),
     (_result, { plannerId }) => [
       plannerQueryKeys.list(),
+      tripCardQueryKeys.all,
+      travelQueryKeys.dday(),
       plannerQueryKeys.detail(plannerId),
       plannerQueryKeys.members(plannerId),
     ],

@@ -39,6 +39,7 @@ export function PlannerScheduleEditor({
   canManage,
   isConfirmed,
   onEditingChange,
+  onSaved,
 }: {
   plannerId: number
   cityName?: string
@@ -46,6 +47,7 @@ export function PlannerScheduleEditor({
   canManage: boolean
   isConfirmed: boolean
   onEditingChange: (editing: boolean) => void
+  onSaved?: () => void
 }) {
   const saveMutation = useSavePlannerScheduleMutation()
   const placesQuery = useQuery(tourPlacesQueryOptions('대한민국', cityName, undefined, Boolean(cityName)))
@@ -98,6 +100,7 @@ export function PlannerScheduleEditor({
       setFeedback('')
       setFeedbackError(false)
       await saveMutation.mutateAsync({ plannerId, payload: toSaveScheduleRequest(draft) })
+      onSaved?.()
       setDraft(undefined)
       onEditingChange(false)
       setPicker(undefined)

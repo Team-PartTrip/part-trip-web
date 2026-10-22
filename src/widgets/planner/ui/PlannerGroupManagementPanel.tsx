@@ -40,7 +40,7 @@ export function PlannerGroupManagementPanel({
                       type="button"
                       disabled={isManagingMembers}
                       onClick={() => {
-                        if (window.confirm('이 멤버를 내보낼까요?')) void onRemoveMember(member.userId)
+                        if (window.confirm('이 멤버를 내보내면 해당 멤버의 여행카드와 사진·장소 기록이 함께 삭제돼요. 내보낼까요?')) void onRemoveMember(member.userId)
                       }}
                     >
                       내보내기

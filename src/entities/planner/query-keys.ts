@@ -1,6 +1,8 @@
 export const plannerQueryKeys = {
   all: ['planners'] as const,
   blocks: () => [...plannerQueryKeys.all, 'blocks'] as const,
+  survey: (plannerId: number) => [...plannerQueryKeys.all, 'survey', plannerId] as const,
+  warnings: (plannerId: number) => [...plannerQueryKeys.all, 'warnings', plannerId] as const,
   invitations: () => [...plannerQueryKeys.all, 'invitations'] as const,
   list: () => [...plannerQueryKeys.all, 'list'] as const,
   detail: (plannerId: number) => [...plannerQueryKeys.all, 'detail', plannerId] as const,

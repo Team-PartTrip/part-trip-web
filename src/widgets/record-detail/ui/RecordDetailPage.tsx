@@ -168,6 +168,7 @@ export function RecordDetailPage() {
             <S.RecordDetailCard>
               <h1>{placeTitle}</h1>
               <p>{selectedEntrySummary}</p>
+              {selectedEntry?.locationSource === 'CAMERA' || selectedEntry?.takenAtSource === 'CAMERA' ? <p>카메라로 기록한 위치와 촬영 시각은 수정할 수 없어요.</p> : null}
               <S.CommentHeading>사진 코멘트</S.CommentHeading>
               <S.RecordDescription>{selectedEntry?.comment || '이 사진에 대한 메모를 남겨보세요'}</S.RecordDescription>
               <S.RecordAction type="button" disabled={selectedEntry?.entryId == null} onClick={() => navigate({ params: { recordId }, search: selectedEntry?.entryId != null ? { entryId: String(selectedEntry.entryId) } : undefined, to: '/record/$recordId/edit' })}>{selectedEntry?.comment ? '수정' : '작성'}</S.RecordAction>

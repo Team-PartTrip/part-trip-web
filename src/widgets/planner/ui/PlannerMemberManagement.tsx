@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { deletePlanner, removePlannerMember, plannerQueryKeys, useRemovePlannerMemberMutation, type PlannerDetailResponseDto, type PlannerMemberResponseDto } from '@/entities/planner'
 import { travelQueryKeys } from '@/entities/travel'
+import { tripCardQueryKeys } from '@/entities/trip-card'
 import { useUserProfileQuery } from '@/entities/user'
 import { paths } from '@/shared/config'
 import { Button } from '@/shared/ui/parttrip'
@@ -35,6 +36,7 @@ export function PlannerMemberManagement({ plannerId, detail, members }: { planne
       await Promise.all([
         client.invalidateQueries({ queryKey: plannerQueryKeys.list() }),
         client.invalidateQueries({ queryKey: travelQueryKeys.dday() }),
+        client.invalidateQueries({ queryKey: tripCardQueryKeys.all }),
       ])
     },
     onError: reason => setError(getErrorMessage(reason)),
@@ -47,7 +49,7 @@ export function PlannerMemberManagement({ plannerId, detail, members }: { planne
       try { await remove.mutateAsync({ plannerId, memberUserId: userId }) } catch (reason) { setError(getErrorMessage(reason)) }
     }} />
     {owner || canLeave ? <S.PlanActions><Button type="button" $variant="secondary" disabled={exit.isPending || remove.isPending} onClick={() => {
-      if (!window.confirm(owner ? '플래너와 함께하는 사람의 일정이 삭제돼요. 여행카드 기록은 남아요. 삭제할까요?' : '이 플래너에서 나갈까요? 다시 참여하려면 초대가 필요해요.')) return
+      if (!window.confirm(owner ? '플래너와 함께하는 사람의 일정이 삭제돼요. 여행카드 기록은 남아요. 삭제할까요?' : '이 플래너에서 나가면 내 여행카드와 사진·장소 기록이 함께 삭제돼요. 다시 참여해도 기록은 복구되지 않아요. 나갈까요?')) return
       setError('')
       exit.mutate()
     }}>{exit.isPending ? '처리 중…' : owner ? '플래너 삭제' : '플래너 나가기'}</Button></S.PlanActions> : null}

@@ -9,6 +9,7 @@ import {
   getPlannerMembers,
   getPlannerSchedule,
   getPlannerScheduleCandidates,
+  getPlannerSurvey,
 } from './api'
 import { isPositiveSafeInteger } from '@/shared/utils'
 import { plannerQueryKeys } from './query-keys'
@@ -25,6 +26,23 @@ export const plannerBlocksQueryOptions = (enabled = true) =>
 
 export function usePlannerBlocksQuery(enabled = true) {
   return useQuery(plannerBlocksQueryOptions(enabled))
+}
+
+export function usePlannerSurveyQuery(plannerId: number, enabled = true) {
+  return useQuery({
+    queryKey: plannerQueryKeys.survey(plannerId),
+    queryFn: () => getPlannerSurvey(plannerId),
+    enabled: enabled && isPositiveSafeInteger(plannerId),
+    retry: false,
+  })
+}
+
+export function usePlannerWarningsQuery(plannerId: number) {
+  return useQuery({
+    queryKey: plannerQueryKeys.warnings(plannerId),
+    queryFn: (): NonNullable<import('./types').PlannerScheduleResponseDto['warnings']> => [],
+    enabled: false,
+  })
 }
 
 export const plannerInvitationsQueryOptions = (enabled = true) =>

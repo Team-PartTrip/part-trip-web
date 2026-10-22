@@ -35,7 +35,7 @@ export function TravelPreferencesPage() {
   const [canUseStairsOverride, setCanUseStairsOverride] = useState<boolean>()
   const [avoidFoodsOverride, setAvoidFoodsOverride] = useState<TravelPreferenceRequestDto['avoidFoods']>()
   const [usesWheelchairOverride, setUsesWheelchairOverride] = useState<TravelPreferenceRequestDto['usesWheelchair']>()
-  const [limitedWalkingOverride, setLimitedWalkingOverride] = useState<TravelPreferenceRequestDto['limitedWalking']>()
+  const [walkingMinutesOverride, setWalkingMinutesOverride] = useState<10 | 30 | 60>()
   const [feedback, setFeedback] = useState('')
   const [hasError, setHasError] = useState(false)
   const preferredTransport = preferredTransportOverride ?? data?.preferredTransport ?? 'PUBLIC_TRANSIT'
@@ -43,7 +43,7 @@ export function TravelPreferencesPage() {
   const canUseStairs = canUseStairsOverride ?? data?.canUseStairs ?? true
   const avoidFoods = avoidFoodsOverride !== undefined ? avoidFoodsOverride : data?.avoidFoods
   const usesWheelchair = usesWheelchairOverride !== undefined ? usesWheelchairOverride : data?.usesWheelchair
-  const limitedWalking = limitedWalkingOverride !== undefined ? limitedWalkingOverride : data?.limitedWalking
+  const walkingMinutes = walkingMinutesOverride ?? data?.maxWalkingMinutes ?? (data?.limitedWalking === true ? 30 : data?.limitedWalking === false ? 60 : undefined)
   const isHomeMutationPending = updateHome.isPending || deleteHome.isPending
 
   const selectHome = async (place: PlaceSearchResponseDto) => {
@@ -82,13 +82,13 @@ export function TravelPreferencesPage() {
         preferredTransport, dailyScheduleCount, canUseStairs,
         avoidFoods: avoidFoodsOverride,
         usesWheelchair: usesWheelchairOverride,
-        limitedWalking: limitedWalkingOverride,
+        maxWalkingMinutes: walkingMinutesOverride,
       })
       setPreferredTransportOverride(saved.preferredTransport ?? preferredTransport)
       setCanUseStairsOverride(saved.canUseStairs ?? canUseStairs)
       setAvoidFoodsOverride(undefined)
       setUsesWheelchairOverride(undefined)
-      setLimitedWalkingOverride(undefined)
+      setWalkingMinutesOverride(undefined)
       setFeedback('여행 편의 설정을 저장했어요.')
     } catch {
       setHasError(true)
@@ -101,7 +101,7 @@ export function TravelPreferencesPage() {
       <S.Page>
         <S.Header>
           <h1>여행 편의 설정</h1>
-          <p>여행 일정 추천에 사용할 기본 조건을 정해주세요. 일정별로 고른 조건이 있으면 그 조건을 우선 적용해요.</p>
+          <p>여행 일정 추천에 사용할 기본 조건을 정해주세요. 걷기 시간은 일정별 조건과 기본 설정 중 더 짧은 시간을 반영해요.</p>
         </S.Header>
         {isLoading ? <p role="status">설정을 불러오는 중이에요.</p> : isError ? (
           <p role="alert">설정을 불러오지 못했어요. <button type="button" onClick={() => void refetch()}>다시 시도</button></p>
@@ -156,11 +156,11 @@ export function TravelPreferencesPage() {
               </S.Options>
             </S.Row>
             <S.Row>
-              <S.Copy><legend>오래 걸어도 괜찮으세요?</legend><p>오래 걷는 일정이 어려운지 알려주세요.</p></S.Copy>
-              <S.Options role="group" aria-label="오래 걸어도 괜찮으세요?">
-                {[{ value: false, label: '괜찮아요' }, { value: true, label: '어려워요' }].map((option) => (
-                  <S.Option key={option.label} type="button" disabled={updatePreferences.isPending} $active={limitedWalking === option.value}
-                    aria-pressed={limitedWalking === option.value} onClick={() => setLimitedWalkingOverride(option.value)}>
+              <S.Copy><legend>한 번에 얼마나 걸을 수 있으세요?</legend><p>편하게 걸을 수 있는 시간을 알려주세요.</p></S.Copy>
+              <S.Options role="group" aria-label="한 번에 걸을 수 있는 시간">
+                {([{ value: 10, label: '10분 이내' }, { value: 30, label: '30분 이내' }, { value: 60, label: '1시간 이상' }] as const).map((option) => (
+                  <S.Option key={option.label} type="button" disabled={updatePreferences.isPending} $active={walkingMinutes === option.value}
+                    aria-pressed={walkingMinutes === option.value} onClick={() => setWalkingMinutesOverride(option.value)}>
                     {option.label}
                   </S.Option>
                 ))}

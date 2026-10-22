@@ -9,6 +9,7 @@ import {
 import type { GuardianInviteDto, GuardianLinkDto } from '@/entities/guardian/api'
 import { sanitizeGuardianInviteCode } from '@/entities/guardian/invite-code'
 import { Button, Input } from '@/shared/ui/parttrip'
+import { getErrorMessage } from '@/shared/utils'
 import { useLocationSharing } from '@/widgets/location-reporter/context'
 import { AppShell } from '@/widgets/app-shell'
 import { SeniorTravelPanel } from './SeniorTravelPanel'
@@ -40,13 +41,14 @@ export function GuardiansPage() {
   const selectedSenior = seniors.data?.find((link) => link.userId === selectedSeniorUserId) ?? seniors.data?.[0]
 
   const createInvite = async () => {
+    if (inviteMutation.isPending || unlinkMutation.isPending || (guardians.data?.length ?? 0) >= 5) return
     setMessage('')
     setHasError(false)
     try {
       setInvite(await inviteMutation.mutateAsync())
-    } catch {
+    } catch (error) {
       setHasError(true)
-      setMessage('초대 코드를 만들지 못했어요. 잠시 후 다시 시도해주세요.')
+      setMessage(getErrorMessage(error, '초대 코드를 만들지 못했어요. 잠시 후 다시 시도해주세요.'))
     }
   }
 
@@ -75,16 +77,18 @@ export function GuardiansPage() {
       await acceptMutation.mutateAsync(code.trim())
       setCode('')
       setMessage('가족 계정과 연결했어요.')
-    } catch {
+    } catch (error) {
       setHasError(true)
-      setMessage('코드를 확인하지 못했어요. 만료되었거나 이미 사용된 코드일 수 있어요.')
+      setMessage(getErrorMessage(error, '코드를 확인하지 못했어요. 만료되었거나 이미 사용된 코드일 수 있어요.'))
     }
   }
 
   const unlink = async (link: GuardianLinkDto) => {
+    if (unlinkMutation.isPending || inviteMutation.isPending) return
     if (!link.linkId || !window.confirm(`${labelFor(link)} 연결을 끊을까요?`)) return
     try {
       await unlinkMutation.mutateAsync(link.linkId)
+      setInvite(undefined)
       setMessage('가족 연결을 끊었어요.')
       setHasError(false)
     } catch {
@@ -156,7 +160,8 @@ export function GuardiansPage() {
             <h2>가족에게 연결 코드 보내기</h2>
             <p>코드는 한 번만 사용할 수 있고 24시간 후 만료돼요.</p>
             {invite ? <><S.Code aria-label={`초대 코드 ${invite.code}`}>{invite.code}</S.Code><Button type="button" $variant="secondary" onClick={() => void copyInviteCode()}>초대 코드 복사</Button><S.Message>만료 시간: {expiryLabel}</S.Message></> : null}
-            <Button type="button" disabled={inviteMutation.isPending} onClick={() => void createInvite()}>
+            <p>보호자는 최대 5명까지 연결할 수 있어요. 새 코드를 만들면 이전 코드는 사용할 수 없고, 연결을 끊어도 미사용 코드는 만료돼요.</p>
+            <Button type="button" disabled={inviteMutation.isPending || unlinkMutation.isPending || (guardians.data?.length ?? 0) >= 5} onClick={() => void createInvite()}>
               {inviteButtonLabel}
             </Button>
           </S.Card>

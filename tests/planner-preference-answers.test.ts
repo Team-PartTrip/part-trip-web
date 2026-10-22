@@ -4,6 +4,13 @@ import { getPreferenceAnswers, mobilityOf, togglePreference } from '../src/widge
 
 const pref = { preferredTransport: 'CAR', dailyScheduleCount: 4, canUseStairs: false } as const
 
+test('휠체어·계단 답변만 바꾸면 저장된 걷기 10분 설정을 30분으로 바꾸지 않는다', () => {
+  const saved = { ...pref, usesWheelchair: false, limitedWalking: true, maxWalkingMinutes: 10 as const }
+  assert.equal(getPreferenceAnswers(saved, ['WHEELCHAIR', 'WALKING'], null)?.maxWalkingMinutes, 10)
+  assert.equal(getPreferenceAnswers(saved, [], null)?.maxWalkingMinutes, undefined)
+  assert.equal(getPreferenceAnswers(saved, [], null)?.limitedWalking, false)
+})
+
 test('미응답과 바꾸지 않은 편의 답변은 저장하지 않는다', () => {
   assert.throws(() => getPreferenceAnswers(undefined, [], []), /먼저 불러와/)
   assert.throws(() => getPreferenceAnswers(undefined, ['WHEELCHAIR'], ['SEAFOOD']), /먼저 불러와/)

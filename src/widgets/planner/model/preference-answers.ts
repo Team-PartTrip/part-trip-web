@@ -30,6 +30,9 @@ export function getPreferenceAnswers(
     if (changed) {
       answers.usesWheelchair = mobility.includes('WHEELCHAIR')
       answers.limitedWalking = mobility.includes('WALKING')
+      if (answers.limitedWalking === preferences.limitedWalking && preferences.maxWalkingMinutes != null) {
+        answers.maxWalkingMinutes = preferences.maxWalkingMinutes
+      }
       if (answers.usesWheelchair || mobility.includes('STAIRS')) answers.canUseStairs = false
       else if (previous?.includes('STAIRS')) answers.canUseStairs = true
     }

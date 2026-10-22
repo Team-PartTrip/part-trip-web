@@ -19,6 +19,7 @@ export type TravelPreferenceRequestDto = {
   avoidFoods?: ('SEAFOOD' | 'SPICY' | 'HARD' | 'MEAT' | 'DAIRY')[] | null
   usesWheelchair?: boolean | null
   limitedWalking?: boolean | null
+  maxWalkingMinutes?: 10 | 30 | 60 | null
 }
 
 export type TravelPreferenceResponseDto = Partial<TravelPreferenceRequestDto> & {

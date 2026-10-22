@@ -8,10 +8,9 @@ import {
   type PlannerBlockDto,
   type PlannerBlockResponseDto,
 } from "@/entities/planner";
-import type { PlaceSearchResponseDto } from "@/entities/travel";
+import { getPlaceAddress, type PlaceSearchResponseDto } from "@/entities/travel";
 import { useTravelPreferencesQuery, useUpdateTravelPreferencesMutation } from "@/entities/user";
 import { paths } from "@/shared/config";
-import { addressForCoordinates } from '@/shared/libs/kakao-maps';
 import { Button, Input } from "@/shared/ui/parttrip";
 import { formatDateRange, getErrorMessage } from "@/shared/utils";
 import { isPositiveSafeInteger } from "@/shared/utils/number";
@@ -22,7 +21,7 @@ import { getPreferenceAnswers, mobilityOf, togglePreference, type Mobility, type
 import * as S from "./PlannerAiFlow.styles";
 import { PlaceSearchDialog } from "@/widgets/place-search";
 
-import { tripBlockOptions, tripBlocks } from "../model/trip-blocks";
+import { supportedPlannerBlocks, tripBlockOptions, tripBlocks } from "../model/trip-blocks";
 
 type SelectionMap = Record<string, string[]>;
 
@@ -46,6 +45,7 @@ const suggestedBlockTypes = [
   "DEPARTURE_PLACE",
   "TRAVEL_TYPE",
   "DAILY_DENSITY",
+  "WALKING",
   "FOOD_TYPE",
   "TASTE",
   "LODGING_TYPE",
@@ -93,16 +93,15 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
   const departureActionVersion = useRef(0);
   const [message, setMessage] = useState("");
   const blocks = useMemo(() => {
-    const values = tripBlocks(getBlockValues(selections), draft, mobility);
+    const values = supportedPlannerBlocks(tripBlocks(getBlockValues(selections), draft, mobility), blocksQuery.data ?? []);
     if (!selections.DEPARTURE_PLACE?.length && preferencesQuery.data?.home) {
       return [...values, { type: "DEPARTURE_PLACE", value: "집 근처" }];
     }
     return values;
-  }, [draft, mobility, preferencesQuery.data?.home, selections]);
+  }, [blocksQuery.data, draft, mobility, preferencesQuery.data?.home, selections]);
   const [questionIndex, setQuestionIndex] = useState(0);
   const questionRef = useRef<HTMLHeadingElement>(null);
-  const serverBlocks = (blocksQuery.data ?? []).filter(block => block.type !== 'WALKING').map(block => ({ ...block, options: tripBlockOptions(block, draft) }));
-  const availableBlocks: PlannerBlockResponseDto[] = serverBlocks.some(block => block.type === 'DEPARTURE_PLACE') ? serverBlocks : [...serverBlocks, { type: 'DEPARTURE_PLACE', label: '어디에서 출발하세요?' }];
+  const availableBlocks = (blocksQuery.data ?? []).map(block => ({ ...block, options: tripBlockOptions(block, draft) }));
   const priorityBlocks = suggestedBlockTypes.flatMap(type => availableBlocks.filter(block => block.type === type));
   const otherBlocks = availableBlocks.filter(
     (block) => !suggestedBlockTypes.includes(block.type ?? ""),
@@ -157,7 +156,9 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
       async ({ coords }) => {
         if (departureActionVersion.current !== actionVersion) return;
         try {
-          const point = await addressForCoordinates(coords.latitude, coords.longitude);
+          const { address } = await getPlaceAddress(coords.latitude, coords.longitude);
+          if (!address?.trim()) throw new Error('현재 위치의 주소를 확인하지 못했어요. 다른 곳 찾기를 이용해주세요.');
+          const point = { name: address, address, latitude: coords.latitude, longitude: coords.longitude };
           if (departureActionVersion.current !== actionVersion) return;
           setDeparturePoint(point);
           setSelections(current => ({ ...current, DEPARTURE_PLACE: ['직접 지정'] }));
@@ -316,6 +317,10 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
     setMessage("");
     if (!preferencesQuery.data || preferencesQuery.isError) {
       setMessage('여행 편의 설정을 불러오지 못했어요. 다시 불러온 뒤 일정을 만들어주세요.');
+      return;
+    }
+    if (!blocksQuery.data?.length || blocksQuery.isError) {
+      setMessage('여행 기준을 불러온 뒤 다시 시도해주세요.');
       return;
     }
     const party = getPlannerTravelParty(blocks);

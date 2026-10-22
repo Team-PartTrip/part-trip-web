@@ -135,3 +135,8 @@ export async function searchPlaces(keyword: string): Promise<PlaceSearchResponse
   const { data } = await apiClient.get<PlaceSearchResponseDto[]>('/places/search', { params: { q: keyword.trim() } })
   return data
 }
+
+export async function getPlaceAddress(latitude: number, longitude: number): Promise<{ address: string | null }> {
+  const { data } = await apiClient.get<{ address: string | null }>('/places/address', { params: { latitude, longitude } })
+  return data
+}

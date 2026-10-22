@@ -16,6 +16,7 @@ import type {
   PlannerScheduleResponseDto,
   PlannerScheduleCandidateDto,
   SavePlannerScheduleRequestDto,
+  PlannerSurveyResponseDto,
 } from './types'
 
 export type {
@@ -123,6 +124,16 @@ export async function deletePlanner(plannerId: number): Promise<void> {
 
 export async function getPlannerSchedule(plannerId: number): Promise<PlannerScheduleResponseDto> {
   const { data } = await apiClient.get<PlannerScheduleResponseDto>(PLANNER_API_PATHS.schedule(plannerId))
+  return data
+}
+
+export async function getPlannerSurvey(plannerId: number): Promise<PlannerSurveyResponseDto> {
+  const { data } = await apiClient.get<PlannerSurveyResponseDto>(`/planners/${plannerId}/survey`)
+  return data
+}
+
+export async function regeneratePlanner(plannerId: number): Promise<PlannerScheduleResponseDto> {
+  const { data } = await apiClient.post<PlannerScheduleResponseDto>(`/planners/${plannerId}/regenerate`)
   return data
 }
 
