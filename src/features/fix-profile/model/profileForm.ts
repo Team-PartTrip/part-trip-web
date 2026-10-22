@@ -13,6 +13,17 @@ export function getNicknameError(nickname: string) {
   return null
 }
 
+export function pickProfileImgUrl(input: {
+  uploadedUrl?: string
+  avatarPreview: string
+  avatarUrl?: string
+  imgUrl?: string
+}) {
+  if (input.uploadedUrl) return input.uploadedUrl
+  if (!input.avatarPreview) return undefined
+  return input.avatarPreview === (input.avatarUrl ?? '') ? input.imgUrl : input.avatarPreview
+}
+
 export function isSupportedProfileImageType(type: string) {
   return supportedProfileImageTypes.has(type)
 }

@@ -4,11 +4,13 @@ import { useNavigate } from '@tanstack/react-router'
 import { type UserProfile, useUpdateProfileMutation, useUploadProfileImageMutation } from '@/entities/user'
 import { paths } from '@/shared/config'
 import { useLockBodyScroll } from '@/shared/hooks'
+import { getErrorMessage } from '@/shared/utils'
 
 import {
   getNicknameError,
   isProfileImageSizeAllowed,
   isSupportedProfileImageType,
+  pickProfileImgUrl,
 } from './profileForm'
 
 type ProfileFormValues = {
@@ -99,12 +101,17 @@ export function useProfileForm(profile: UserProfile) {
         ? await uploadProfileImageMutation.mutateAsync(selectedPhoto)
         : undefined
       await updateProfileMutation.mutateAsync({
-        imgUrl: selectedPhoto ? uploadedUrl : avatarPreview || undefined,
+        imgUrl: pickProfileImgUrl({
+          uploadedUrl,
+          avatarPreview,
+          avatarUrl: profile.avatarUrl,
+          imgUrl: profile.imgUrl,
+        }),
         nickName: values.name.trim(),
       })
       navigate({ to: paths.profile, replace: true })
-    } catch {
-      setErrorMessage('프로필을 저장하지 못했습니다. 다시 시도해주세요.')
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error, '프로필을 저장하지 못했습니다. 다시 시도해주세요.'))
     }
   }
 
