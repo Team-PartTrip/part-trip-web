@@ -550,6 +550,46 @@ export const ClosingTitle = styled.h2`
   letter-spacing: -0.035em;
 `
 
+export const QrDock = styled(Link)`
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 20;
+  display: grid;
+  justify-items: center;
+  gap: 0.375rem;
+  border: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
+  border-radius: 1rem;
+  padding: 0.625rem 0.625rem 0.5rem;
+  background: ${({ theme }) => theme.colors.background.default};
+  box-shadow: 0 0.5rem 1.5rem rgba(13, 74, 132, 0.18);
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-decoration: none;
+
+  img {
+    display: block;
+    width: 6.5rem;
+    height: 6.5rem;
+  }
+
+  ${mobile} {
+    right: 0.75rem;
+    bottom: 0.75rem;
+    padding: 0.5rem 0.5rem 0.375rem;
+    font-size: 0.75rem;
+
+    img {
+      width: 4.5rem;
+      height: 4.5rem;
+    }
+  }
+
+  ${focusRing};
+`
+
 export const Footer = styled.footer`
   display: flex;
   width: min(100% - 2rem, 72rem);
@@ -557,11 +597,15 @@ export const Footer = styled.footer`
   justify-content: space-between;
   gap: 1rem;
   border-top: 0.0625rem solid ${({ theme }) => theme.colors.border.subtle};
-  padding-block: 1.5rem 2.5rem;
+  padding-block: 1.5rem 11.5rem;
   color: ${({ theme }) => theme.colors.text.muted};
   font-size: 1rem;
 
   a {
     color: inherit;
+  }
+
+  ${mobile} {
+    padding-block: 1.5rem 8.5rem;
   }
 `

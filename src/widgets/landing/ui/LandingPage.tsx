@@ -3,6 +3,7 @@ import { dandiAppLogoUrl } from '@/shared/assets'
 import { paths } from '@/shared/config'
 import { DandiWordmark } from '@/shared/ui/dandi-wordmark/DandiWordmark'
 import blocksShotUrl from '../assets/app-blocks.jpg'
+import portfolioQrUrl from '../assets/portfolio-qr.jpg'
 import scheduleShotUrl from '../assets/app-schedule.jpg'
 import { ClockIcon, DatabaseIcon, DocumentIcon, RestroomIcon, RouteIcon, WalkIcon, WheelchairIcon } from './LandingIcons'
 import * as S from './LandingPage.styles'
@@ -258,6 +259,11 @@ export function LandingPage() {
         <span>단디 · 우공이산</span>
         <Link to={paths.privacy}>개인정보처리방침</Link>
       </S.Footer>
+
+      <S.QrDock to="/portfolio" aria-label="단디 포트폴리오 보기">
+        <img src={portfolioQrUrl} alt="포트폴리오로 연결되는 QR 코드" width={357} height={357} />
+        <span>포트폴리오 보기</span>
+      </S.QrDock>
     </S.Page>
   )
 }
