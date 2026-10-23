@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as appAuthenticatedRouteRouteImport } from './routes/(app)/_authenticated/route'
 import { Route as homeIndexRouteImport } from './routes/(home)/index'
 import { Route as publicLoginIndexRouteImport } from './routes/(public)/login/index'
+import { Route as publicPortfolioIndexRouteImport } from './routes/(public)/portfolio/index'
 import { Route as publicPrivacyIndexRouteImport } from './routes/(public)/privacy/index'
 import { Route as publicSignUpIndexRouteImport } from './routes/(public)/sign-up/index'
 import { Route as appAuthenticatedMainIndexRouteImport } from './routes/(app)/_authenticated/main/index'
@@ -61,6 +62,11 @@ const homeIndexRoute = homeIndexRouteImport.update({
 const publicLoginIndexRoute = publicLoginIndexRouteImport.update({
   id: '/(public)/login/',
   path: '/login/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const publicPortfolioIndexRoute = publicPortfolioIndexRouteImport.update({
+  id: '/(public)/portfolio/',
+  path: '/portfolio/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const publicPrivacyIndexRoute = publicPrivacyIndexRouteImport.update({
@@ -281,6 +287,7 @@ const appAuthenticatedRecordRecordIdEditIndexRoute =
 export interface FileRoutesByFullPath {
   '/': typeof homeIndexRoute
   '/login/': typeof publicLoginIndexRoute
+  '/portfolio/': typeof publicPortfolioIndexRoute
   '/privacy/': typeof publicPrivacyIndexRoute
   '/sign-up/': typeof publicSignUpIndexRoute
   '/main/': typeof appAuthenticatedMainIndexRoute
@@ -321,6 +328,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof homeIndexRoute
   '/login': typeof publicLoginIndexRoute
+  '/portfolio': typeof publicPortfolioIndexRoute
   '/privacy': typeof publicPrivacyIndexRoute
   '/sign-up': typeof publicSignUpIndexRoute
   '/main': typeof appAuthenticatedMainIndexRoute
@@ -363,6 +371,7 @@ export interface FileRoutesById {
   '/(app)/_authenticated': typeof appAuthenticatedRouteRouteWithChildren
   '/(home)/': typeof homeIndexRoute
   '/(public)/login/': typeof publicLoginIndexRoute
+  '/(public)/portfolio/': typeof publicPortfolioIndexRoute
   '/(public)/privacy/': typeof publicPrivacyIndexRoute
   '/(public)/sign-up/': typeof publicSignUpIndexRoute
   '/(app)/_authenticated/main/': typeof appAuthenticatedMainIndexRoute
@@ -405,6 +414,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login/'
+    | '/portfolio/'
     | '/privacy/'
     | '/sign-up/'
     | '/main/'
@@ -445,6 +455,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/portfolio'
     | '/privacy'
     | '/sign-up'
     | '/main'
@@ -486,6 +497,7 @@ export interface FileRouteTypes {
     | '/(app)/_authenticated'
     | '/(home)/'
     | '/(public)/login/'
+    | '/(public)/portfolio/'
     | '/(public)/privacy/'
     | '/(public)/sign-up/'
     | '/(app)/_authenticated/main/'
@@ -528,6 +540,7 @@ export interface RootRouteChildren {
   appAuthenticatedRouteRoute: typeof appAuthenticatedRouteRouteWithChildren
   homeIndexRoute: typeof homeIndexRoute
   publicLoginIndexRoute: typeof publicLoginIndexRoute
+  publicPortfolioIndexRoute: typeof publicPortfolioIndexRoute
   publicPrivacyIndexRoute: typeof publicPrivacyIndexRoute
   publicSignUpIndexRoute: typeof publicSignUpIndexRoute
   publicAuthKakaoCallbackIndexRoute: typeof publicAuthKakaoCallbackIndexRoute
@@ -554,6 +567,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login/'
       preLoaderRoute: typeof publicLoginIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(public)/portfolio/': {
+      id: '/(public)/portfolio/'
+      path: '/portfolio'
+      fullPath: '/portfolio/'
+      preLoaderRoute: typeof publicPortfolioIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(public)/privacy/': {
@@ -916,6 +936,7 @@ const rootRouteChildren: RootRouteChildren = {
   appAuthenticatedRouteRoute: appAuthenticatedRouteRouteWithChildren,
   homeIndexRoute: homeIndexRoute,
   publicLoginIndexRoute: publicLoginIndexRoute,
+  publicPortfolioIndexRoute: publicPortfolioIndexRoute,
   publicPrivacyIndexRoute: publicPrivacyIndexRoute,
   publicSignUpIndexRoute: publicSignUpIndexRoute,
   publicAuthKakaoCallbackIndexRoute: publicAuthKakaoCallbackIndexRoute,
