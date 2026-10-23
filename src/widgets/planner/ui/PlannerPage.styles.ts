@@ -299,6 +299,10 @@ export const SectionTitle = styled.h2`
   line-height: 1.375rem;
 `
 
+export const MemberHeading = styled.h2`
+  letter-spacing: 0.03em;
+`
+
 export const Stepper = styled.div`
   display: flex;
   min-height: 2.875rem;

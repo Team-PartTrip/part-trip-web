@@ -27,6 +27,7 @@ export function supportedPlannerBlocks(blocks: PlannerBlockDto[], definitions: P
   return blocks.flatMap(block => {
     const definition = definitions.find(item => item.type === block.type)
     const value = block.value.trim()
+    if (block.type === 'DAILY_DENSITY' && value === '직접 지정') return []
     const freeText = ['MUST_INCLUDE', 'EXCLUDE', 'DEPARTURE_PLACE'].includes(block.type)
     const numericDensity = block.type === 'DAILY_DENSITY' && /^(?:[1-6]|하루 [1-6]곳)$/.test(value)
     if (!definition || !value || (!freeText && !numericDensity && !definition.options?.includes(value))) return []

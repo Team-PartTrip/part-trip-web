@@ -42,7 +42,7 @@ export function PlannerMemberManagement({ plannerId, detail, members }: { planne
     onError: reason => setError(getErrorMessage(reason)),
   })
   return <>
-    <h2>함께하는 사람 {members.length}명</h2>
+    <S.MemberHeading>함께하는 사람 {members.length}명</S.MemberHeading>
     <PlannerGroupManagementPanel otherMembers={members} canManagePlanner={owner && !isPlannerFinished(detail?.status) && !exit.isPending} isManagingMembers={remove.isPending || exit.isPending} onRemoveMember={async userId => {
       if (!userId || userId === profile?.id) return
       setError('')

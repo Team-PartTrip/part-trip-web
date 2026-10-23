@@ -12,6 +12,8 @@ import {
 function createStorage() {
   const values = new Map<string, string>()
   return {
+    get length() { return values.size },
+    key: (index: number) => [...values.keys()][index] ?? null,
     getItem: (key: string) => values.get(key) ?? null,
     removeItem: (key: string) => values.delete(key),
     setItem: (key: string, value: string) => values.set(key, value),
@@ -24,6 +26,47 @@ test('access token과 refresh token을 함께 저장한다', () => {
 
   assert.equal(storage.getItem(ACCESS_TOKEN_KEY), 'access')
   assert.equal(getRefreshToken(storage), 'refresh')
+})
+
+test('로그아웃과 새 로그인은 사용자 초안을 지우고 토큰 갱신은 유지한다', async () => {
+  const { startAuthSession } = await import('../src/shared/libs/token-storage.ts')
+  const previousWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
+  const localStorage = createStorage()
+  const sessionStorage = createStorage()
+  Object.defineProperty(globalThis, 'window', { configurable: true, value: { localStorage, sessionStorage } })
+  const keys = ['parttrip:planner-creation-draft', 'parttrip:active-planner-id', 'parttrip:planner-group-settings', 'parttrip:planner-confirmed:7', 'parttrip:profile-selected-country']
+  const seed = () => keys.forEach(key => sessionStorage.setItem(key, 'old-account'))
+  try {
+    startAuthSession({ accessToken: 'A', refreshToken: 'refresh-A' })
+    seed()
+    sessionStorage.setItem('unrelated', 'keep')
+    saveAuthTokens({ accessToken: 'A-refreshed', refreshToken: 'refresh-A-next' })
+    keys.forEach(key => assert.equal(sessionStorage.getItem(key), 'old-account'))
+    clearAuthTokens()
+    keys.forEach(key => assert.equal(sessionStorage.getItem(key), null))
+    seed()
+    startAuthSession({ accessToken: 'B', refreshToken: 'refresh-B' })
+    keys.forEach(key => assert.equal(sessionStorage.getItem(key), null))
+    assert.equal(sessionStorage.getItem('unrelated'), 'keep')
+  } finally {
+    clearAuthTokens()
+    if (previousWindow) Object.defineProperty(globalThis, 'window', previousWindow)
+    else Reflect.deleteProperty(globalThis, 'window')
+  }
+})
+
+test('sessionStorage 접근이 차단돼도 로그인과 로그아웃은 동작한다', async () => {
+  const { startAuthSession } = await import('../src/shared/libs/token-storage.ts')
+  const previousWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
+  const localStorage = createStorage()
+  Object.defineProperty(globalThis, 'window', { configurable: true, value: { localStorage, get sessionStorage() { throw new Error('storage blocked') } } })
+  try {
+    assert.doesNotThrow(() => startAuthSession({ accessToken: 'A', refreshToken: 'refresh-A' }))
+    assert.doesNotThrow(() => clearAuthTokens())
+  } finally {
+    if (previousWindow) Object.defineProperty(globalThis, 'window', previousWindow)
+    else Reflect.deleteProperty(globalThis, 'window')
+  }
 })
 
 test('로그아웃 시 두 토큰을 모두 제거한다', () => {

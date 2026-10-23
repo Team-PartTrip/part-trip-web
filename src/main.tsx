@@ -7,6 +7,7 @@ import { ThemeProvider } from 'styled-components'
 import { routeTree } from './routeTree.gen'
 import { AUTH_EXPIRED_EVENT } from '@/shared/libs/auth-expiration'
 import { ACCESS_TOKEN_KEY, AUTH_SESSION_KEY, REFRESH_TOKEN_KEY } from '@/shared/libs/token-storage'
+import { clearUserSessionStorage } from '@/shared/libs/session-storage'
 import { shouldRetryQuery } from '@/shared/libs/query-retry'
 import { GlobalStyle } from '@/shared/ui/global-style'
 import { appTheme } from '@/shared/theme'
@@ -26,6 +27,7 @@ window.addEventListener('storage', (event) => {
     || ((event.key === ACCESS_TOKEN_KEY || event.key === REFRESH_TOKEN_KEY) && event.newValue === null)
   )) {
     // 계정이 바뀌면 이전 계정의 캐시와 편집 상태도 함께 폐기한다.
+    clearUserSessionStorage()
     queryClient.clear()
     void router.navigate({ replace: true, to: '/login', ignoreBlocker: true })
   }

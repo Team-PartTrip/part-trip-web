@@ -1,4 +1,17 @@
-import { isPositiveSafeInteger } from '@/shared/utils/number'
+import { isPositiveSafeInteger } from '../utils/number.ts'
+
+export function clearUserSessionStorage() {
+  if (typeof window === 'undefined') return
+  try {
+    const storage = window.sessionStorage
+    for (let index = storage.length - 1; index >= 0; index -= 1) {
+      const key = storage.key(index)
+      if (key?.startsWith('parttrip:')) storage.removeItem(key)
+    }
+  } catch {
+    // Restricted browsers may deny sessionStorage access.
+  }
+}
 
 export function readSessionValue(key: string) {
   if (typeof window === 'undefined') return null

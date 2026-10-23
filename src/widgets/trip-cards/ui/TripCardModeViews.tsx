@@ -102,6 +102,7 @@ export function TripCardDetailView({ detail, firstPhoto, firstPlace, navigate }:
 }
 
 type TripCardDeleteViewProps = {
+  isDeleting: boolean
   cards: TripCard[]
   handleDelete: () => void
   navigate: Navigate
@@ -109,7 +110,7 @@ type TripCardDeleteViewProps = {
   setSelected: SetSelected
 }
 
-export function TripCardDeleteView({ cards, handleDelete, navigate, selected, setSelected }: TripCardDeleteViewProps) {
+export function TripCardDeleteView({ cards, handleDelete, isDeleting, navigate, selected, setSelected }: TripCardDeleteViewProps) {
   const allCardIds = cards.flatMap((card) => card.tripId == null ? [] : [card.tripId])
 
   return (
@@ -117,8 +118,8 @@ export function TripCardDeleteView({ cards, handleDelete, navigate, selected, se
       <S.Toolbar>
         <strong>{selected.length}개 선택됨</strong>
         <div>
-          <button type="button" onClick={() => setSelected(allCardIds)}>전체 선택</button>
-          <button type="button" onClick={() => setSelected([])}>선택 해제</button>
+          <button type="button" disabled={isDeleting} onClick={() => setSelected(allCardIds)}>전체 선택</button>
+          <button type="button" disabled={isDeleting} onClick={() => setSelected([])}>선택 해제</button>
         </div>
       </S.Toolbar>
       <S.DeleteLayout>
@@ -129,7 +130,7 @@ export function TripCardDeleteView({ cards, handleDelete, navigate, selected, se
               <input
                 type="checkbox"
                 checked={card.tripId != null && selected.includes(card.tripId)}
-                disabled={card.tripId == null}
+                disabled={isDeleting || card.tripId == null}
                 onChange={() => {
                   const tripId = card.tripId
                   if (tripId == null) return
@@ -150,8 +151,8 @@ export function TripCardDeleteView({ cards, handleDelete, navigate, selected, se
           <S.Warning><strong>! 삭제하면 되돌릴 수 없어요</strong><span>카드에 담긴 사진과 코멘트가 함께 삭제돼요.</span></S.Warning>
           <S.DeleteSummary><strong>선택한 카드 {selected.length}개</strong><span>{cards.filter((card) => card.tripId != null && selected.includes(card.tripId)).map((card) => card.title || '여행카드').join(' · ') || '선택된 카드가 없어요.'}</span><span>사진과 코멘트가 함께 삭제돼요.</span></S.DeleteSummary>
           <S.DeleteActions>
-            <S.DeleteButton type="button" disabled={selected.length === 0} onClick={handleDelete}>{selected.length}개 삭제하기</S.DeleteButton>
-            <PartTripButton type="button" $variant="secondary" onClick={() => navigate({ to: paths.tripCards })}>취소</PartTripButton>
+            <S.DeleteButton type="button" disabled={isDeleting || selected.length === 0} onClick={handleDelete}>{isDeleting ? '삭제 중…' : `${selected.length}개 삭제하기`}</S.DeleteButton>
+            <PartTripButton type="button" $variant="secondary" disabled={isDeleting} onClick={() => navigate({ to: paths.tripCards })}>취소</PartTripButton>
           </S.DeleteActions>
         </S.DeletePanel>
       </S.DeleteLayout>

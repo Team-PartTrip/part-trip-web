@@ -43,10 +43,10 @@ export function TripCardCreatePage() {
 }
 
 export function TripCardDeletePage() {
-  const { cards, handleDelete, hasError, isLoading, message, navigate, selected, setSelected, refetch, isFetching } = useTripCardDeleteFlow()
+  const { cards, handleDelete, hasError, isLoading, isDeleting, message, navigate, selected, setSelected, refetch, isFetching } = useTripCardDeleteFlow()
   return (
     <TripCardsPageFrame onRetry={() => void refetch()} isRetrying={isFetching} title="여행카드 삭제" subtitle="삭제할 여행카드를 선택하세요. 여러 개를 한 번에 지울 수 있어요." wide isLoading={isLoading} hasError={hasError} message={message}>
-      <TripCardDeleteView cards={cards} handleDelete={handleDelete} navigate={navigate} selected={selected} setSelected={setSelected} />
+      <TripCardDeleteView cards={cards} handleDelete={handleDelete} isDeleting={isDeleting} navigate={navigate} selected={selected} setSelected={setSelected} />
     </TripCardsPageFrame>
   )
 }

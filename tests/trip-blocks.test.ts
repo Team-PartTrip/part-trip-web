@@ -53,3 +53,13 @@ test('서버에서 없어진 기준과 잘못된 선택값을 제외하고 단�
   ])
   assert.deepEqual(supportedPlannerBlocks([{ type: 'WALKING', value: '10분 이내' }], []), [])
 })
+
+test('일정 밀도 직접 지정은 유효한 방문 수만 전송한다', () => {
+  const definitions = [{ type: 'DAILY_DENSITY', options: ['하루 1~2곳', '하루 3~4곳', '직접 지정'] }]
+  for (const value of ['직접 지정', '', '0', '7', '1.5', '-1']) {
+    assert.deepEqual(supportedPlannerBlocks([{ type: 'DAILY_DENSITY', value }], definitions), [])
+  }
+  for (const value of ['1', '6', '하루 3곳', '하루 1~2곳']) {
+    assert.deepEqual(supportedPlannerBlocks([{ type: 'DAILY_DENSITY', value }], definitions), [{ type: 'DAILY_DENSITY', value }])
+  }
+})

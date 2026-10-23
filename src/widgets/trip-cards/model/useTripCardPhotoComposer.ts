@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { useSearch } from "@tanstack/react-router";
+import { useBlocker, useSearch } from "@tanstack/react-router";
 import { useCreateTravelCardEntryMutation } from "@/entities/trip-card";
 import type { TravelRecordDto } from "@/entities/trip-card";
 import { getErrorMessage, isPositiveSafeInteger } from "@/shared/utils";
@@ -23,6 +23,10 @@ export function useTripCardPhotoComposer({ cards }: Props) {
   const createEntryMutation = useCreateTravelCardEntryMutation();
   const selectedCard = cards.find((card) => String(card.tripId) === selectedCardId);
   const tripEnded = isTripEnded(selectedCard?.endDate);
+  useBlocker({
+    shouldBlockFn: () => isUploadingRef.current || ((photosRef.current.length > 0 || Boolean(comment.trim())) && !window.confirm('저장하지 않은 사진이나 코멘트가 있어요. 이 화면을 나갈까요?')),
+    enableBeforeUnload: () => isUploadingRef.current || photosRef.current.length > 0 || Boolean(comment.trim()),
+  });
 
   useEffect(
     () => () => photosRef.current.forEach(({ url }) => URL.revokeObjectURL(url)),

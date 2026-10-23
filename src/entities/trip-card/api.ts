@@ -73,7 +73,6 @@ const TRAVEL_CARD_API_PATHS = {
   entries: (cardId: number) => `/travel-cards/${cardId}/entries`,
   entry: (cardId: number, entryId: number) => `/travel-cards/${cardId}/entries/${entryId}`,
   entryMetadata: (cardId: number, entryId: number) => `/travel-cards/${cardId}/entries/${entryId}/metadata`,
-  place: (cardId: number, placeId: number) => `/travel-cards/${cardId}/places/${placeId}`,
 } as const
 
 export async function listTravelCards(): Promise<TravelCardListItemDto[]> {
@@ -101,10 +100,6 @@ export async function deleteTravelCards(payload: TravelCardDeleteRequestDto): Pr
 
 export async function deleteTravelCardEntry(cardId: number, entryId: number): Promise<void> {
   await apiClient.delete(TRAVEL_CARD_API_PATHS.entry(cardId, entryId))
-}
-
-export async function deleteTravelCardPlace(cardId: number, placeId: number): Promise<void> {
-  await apiClient.delete(TRAVEL_CARD_API_PATHS.place(cardId, placeId))
 }
 
 export async function updateTravelCardEntryComment(

@@ -1,3 +1,5 @@
+import { clearUserSessionStorage } from './session-storage.ts'
+
 export const ACCESS_TOKEN_KEY = 'accessToken'
 export const REFRESH_TOKEN_KEY = 'refreshToken'
 export const AUTH_SESSION_KEY = 'parttrip:auth-session'
@@ -41,6 +43,7 @@ export function saveAuthTokens(tokens: AuthTokens, storage?: TokenStorage) {
 
 export function startAuthSession(tokens: AuthTokens) {
   const saved = saveAuthTokens(tokens)
+  clearUserSessionStorage()
   getStorage().setItem(AUTH_SESSION_KEY, crypto.randomUUID())
   return saved
 }
@@ -59,4 +62,5 @@ export function clearAuthTokens(storage?: TokenStorage) {
   target.removeItem(ACCESS_TOKEN_KEY)
   target.removeItem(REFRESH_TOKEN_KEY)
   target.removeItem(AUTH_SESSION_KEY)
+  clearUserSessionStorage()
 }

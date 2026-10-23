@@ -84,6 +84,12 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
   const [selections, setSelections] = useState<SelectionMap>(() =>
     toSelectionMap(draft.blocks),
   );
+  const [customDensity, setCustomDensity] = useState(() =>
+    (draft.blocks ?? []).some(block => block.type === "DAILY_DENSITY" && /^(?:직접 지정|[1-6]|하루 [1-6]곳)$/.test(block.value)),
+  );
+  const densityInputRef = useRef<HTMLInputElement>(null);
+  const densityValue = selections.DAILY_DENSITY?.[0] ?? "";
+  const invalidCustomDensity = customDensity && !/^(?:[1-6]|하루 [1-6]곳)$/.test(densityValue);
   const [departurePoint, setDeparturePoint] =
     useState<PlaceSearchResponseDto | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -119,7 +125,22 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
     : currentQuestion === "foods" ? "피하는 음식이 있으세요?"
     : isReview ? "선택한 여행 기준을 확인해 주세요" : activeBlock?.label || "여행 기준 선택";
   const nextQuestion = () => setQuestionIndex(Math.min(currentIndex + 1, questions.length - 1));
+  const handleNextQuestion = () => {
+    if (currentQuestion === "DAILY_DENSITY" && invalidCustomDensity) {
+      setMessage("하루에 방문할 곳을 1~6 사이의 정수로 입력해주세요.");
+      densityInputRef.current?.focus();
+      return;
+    }
+    if (currentQuestion === "COMPANION" && !hasAnswer) {
+      setMessage("혼자 여행인지, 동행이 있는지 선택해주세요.");
+      return;
+    }
+    nextQuestion();
+  };
   useEffect(() => { questionRef.current?.focus(); }, [currentQuestion]);
+  useEffect(() => {
+    if (customDensity && currentQuestion === "DAILY_DENSITY") densityInputRef.current?.focus();
+  }, [customDensity, currentQuestion]);
 
   const setDepartureOption = (value: string) => {
     departureActionVersion.current += 1;
@@ -196,6 +217,13 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
     const type = block.type;
     if (!type) return;
     setMessage("");
+    if (type === "DAILY_DENSITY") {
+      setCustomDensity(value === "직접 지정");
+      if (value === "직접 지정") {
+        if (!customDensity) setSelections(current => ({ ...current, DAILY_DENSITY: [] }));
+        return;
+      }
+    }
     if (type === "DEPARTURE_PLACE") {
       if (value === "직접 지정") {
         openPlaceSearch(trigger);
@@ -253,6 +281,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
               key={value}
               type="button"
               $active={Boolean(
+                (type === "DAILY_DENSITY" && value === "직접 지정" && customDensity) ||
                 blocks.some(block => block.type === type && block.value === value) ||
                 (isDeparture &&
                   !selectedDeparture &&
@@ -260,6 +289,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
                   value === "집 근처"),
               )}
               aria-pressed={Boolean(
+                (type === "DAILY_DENSITY" && value === "직접 지정" && customDensity) ||
                 blocks.some(block => block.type === type && block.value === value) ||
                 (isDeparture &&
                   !selectedDeparture &&
@@ -268,13 +298,36 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
               )}
               onClick={(event) => {
                 selectBlockOption(block, value, event.currentTarget);
-                if (!block.multiple && suggestedBlockTypes.includes(type) && !isDeparture) nextQuestion();
+                if (!block.multiple && suggestedBlockTypes.includes(type) && !isDeparture && !(type === "DAILY_DENSITY" && value === "직접 지정")) nextQuestion();
               }}
             >
               {value}
             </S.Option>
           ))}
         </S.Options>
+        {type === "DAILY_DENSITY" && customDensity ? (
+          <S.Field>
+            <label htmlFor="daily-density">하루에 방문할 곳 수</label>
+            <Input
+              ref={densityInputRef}
+              id="daily-density"
+              type="number"
+              min={1}
+              max={6}
+              step={1}
+              inputMode="numeric"
+              value={densityValue.replace(/^하루 ([1-6])곳$/, "$1").replace("직접 지정", "")}
+              aria-describedby="daily-density-help"
+              aria-invalid={Boolean(message && invalidCustomDensity)}
+              disabled={submitting}
+              onChange={event => {
+                setMessage("");
+                setSelections(current => ({ ...current, DAILY_DENSITY: [event.target.value] }));
+              }}
+            />
+            <p id="daily-density-help">하루에 방문할 곳을 1~6곳 사이로 입력해주세요.</p>
+          </S.Field>
+        ) : null}
         {isDeparture ? (
           <S.DepartureTools>
             <p aria-live="polite">출발지: <strong>{departureLabel}</strong></p>
@@ -315,6 +368,12 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
   const generate = async () => {
     if (submittingRef.current || locatingDeparture) return;
     setMessage("");
+    if (invalidCustomDensity) {
+      const densityIndex = questions.indexOf("DAILY_DENSITY");
+      if (densityIndex >= 0) setQuestionIndex(densityIndex);
+      setMessage("하루에 방문할 곳을 1~6 사이의 정수로 입력해주세요.");
+      return;
+    }
     if (!preferencesQuery.data || preferencesQuery.isError) {
       setMessage('여행 편의 설정을 불러오지 못했어요. 다시 불러온 뒤 일정을 만들어주세요.');
       return;
@@ -430,7 +489,7 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
               <progress aria-label="여행 기준 진행률" max={questions.length} value={currentIndex + 1} />
             </S.QuestionProgress>
             <h2 ref={questionRef} tabIndex={-1}>{questionTitle}</h2>
-            <S.QuestionHint>{currentQuestion !== 'COMPANION' && !isReview ? '안 골라도 괜찮아요. ' : ''}{isReview ? "필요한 추가 조건을 정하고 AI 일정을 만들어 보세요." : activeBlock && !activeBlock.multiple ? "하나를 선택하면 다음 질문으로 이동해요." : "여러 개 선택할 수 있어요. 선택을 마치면 다음을 눌러주세요."}</S.QuestionHint>
+            <S.QuestionHint>{currentQuestion !== 'COMPANION' && !isReview ? '안 골라도 괜찮아요. ' : ''}{isReview ? "필요한 추가 조건을 정하고 AI 일정을 만들어 보세요." : currentQuestion === "DAILY_DENSITY" ? "직접 지정은 방문할 곳 수를 입력한 뒤 다음을 눌러주세요." : activeBlock && !activeBlock.multiple ? "하나를 선택하면 다음 질문으로 이동해요." : "여러 개 선택할 수 있어요. 선택을 마치면 다음을 눌러주세요."}</S.QuestionHint>
             <S.QuestionFields disabled={submitting}>
             <S.BlockList>
               {currentQuestion === "mobility" ? <S.PreferenceQuestion>
@@ -484,11 +543,11 @@ export function PlannerCriteriaStep({ draft }: { draft: PlannerCreationDraft }) 
                   blocksQuery.isLoading ||
                   preferencesQuery.isLoading
                 }
-                onClick={() => isReview ? void generate() : nextQuestion()}
+                onClick={() => isReview ? void generate() : handleNextQuestion()}
               >
                 {submitting
                   ? "AI가 일정을 만드는 중…"
-                  : isReview ? "AI로 일정 만들기" : !hasAnswer && currentQuestion !== "COMPANION" ? "건너뛰기" : "다음"}
+                  : isReview ? "AI로 일정 만들기" : !hasAnswer && currentQuestion !== "COMPANION" && !(currentQuestion === "DAILY_DENSITY" && customDensity) ? "건너뛰기" : "다음"}
               </Button>
             </S.ButtonRow>
             {submitting ? (

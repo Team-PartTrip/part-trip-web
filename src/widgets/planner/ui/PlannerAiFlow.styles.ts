@@ -327,7 +327,7 @@ export const RouteLine = styled.div`
   summary:focus-visible, a:focus-visible { outline: 0.125rem solid ${({ theme }) => theme.colors.brand.primary}; outline-offset: 0.125rem; }
   ol { display: grid; gap: 0.25rem; margin: 0.25rem 0 0; padding-left: 1.125rem; }
   li { line-height: 1.375rem; overflow-wrap: anywhere; }
-  a { display: inline-flex; min-height: 2.75rem; align-items: center; color: ${({ theme }) => theme.colors.brand.strong}; font-weight: 600; text-underline-offset: 0.15em; }
+  a { display: inline-flex; min-height: 2.75rem; align-items: center; gap: 0.375rem; color: ${({ theme }) => theme.colors.brand.strong}; font-weight: 600; text-underline-offset: 0.15em; }
   a:hover { color: ${({ theme }) => theme.colors.brand.primary}; }
 `
 

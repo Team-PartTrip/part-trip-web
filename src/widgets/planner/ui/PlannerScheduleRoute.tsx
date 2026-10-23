@@ -30,6 +30,14 @@ function RouteModeIcon({ mode }: { mode?: PlannerScheduleRouteDto['transportMode
   </svg>
 }
 
+function KakaoMapIcon() {
+  return <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="1" y="1" width="22" height="22" rx="6" fill="#FEE500" />
+    <path d="M12 4.5c-3.3 0-6 2.5-6 5.8 0 4.1 6 9.2 6 9.2s6-5.1 6-9.2c0-3.3-2.7-5.8-6-5.8Z" fill="#292725" />
+    <circle cx="12" cy="10.3" r="1.8" fill="#FEE500" />
+  </svg>
+}
+
 const stepTypeLabels: Record<string, string> = {
   BUS: '버스',
   SUBWAY: '지하철',
@@ -121,7 +129,7 @@ export function PlannerScheduleRouteFallback({
       <S.RouteSummary>
         <strong>대중교통</strong>
         <span>{message}</span>
-        {kakaoMapUrl ? <a href={kakaoMapUrl} target="_blank" rel="noopener noreferrer">카카오맵에서 길 찾기</a> : null}
+        {kakaoMapUrl ? <a href={kakaoMapUrl} target="_blank" rel="noopener noreferrer"><KakaoMapIcon />카카오맵에서 길 찾기</a> : null}
       </S.RouteSummary>
     </div>
   </S.RouteLine>
